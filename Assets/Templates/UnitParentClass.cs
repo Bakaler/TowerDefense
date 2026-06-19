@@ -4,19 +4,16 @@ using UnityEngine;
 
 public class UnitParentClass : MonoBehaviour
 {
-
-    // Game Logic   
+    // Game Logic
     public float damageReductionBaseModifier = 0.995f;
     public bool isAlive = false;
     public int decayTimer = 50;
-
 
     // Life
     public float lifeMax = 0;
     public float lifeCurrent = 0;
     public float lifeRegen = 0;
     public float lifeRegenMulitplier = 1;
-
     public float lifeRegenDelay = 0;
 
     // Shield
@@ -25,7 +22,6 @@ public class UnitParentClass : MonoBehaviour
     public float shieldCurrent = 0;
     public float shieldRegen = 0;
     public float shieldRegenMulitplier = 1;
-
     public float shieldRegenDelay = 0;
 
     // Energy
@@ -33,7 +29,6 @@ public class UnitParentClass : MonoBehaviour
     public float energyCurrent = 0;
     public float energyRegen = 0;
     public float energyRegenMulitplier = 1;
-
     public float energyRegenDelay = 0;
     public float energyArmor = 0;
 
@@ -42,7 +37,6 @@ public class UnitParentClass : MonoBehaviour
     public float speedMin = 0;
     public float speedCurrent = 0;
     public float speedCurrentMulitplier = 1;
-
 
     // Abilities
     public List<AbilityParentClass> abilities = new List<AbilityParentClass>();
@@ -82,19 +76,10 @@ public class UnitParentClass : MonoBehaviour
     public int poisonDefense = 0;
     public int pureDefense = 0;
 
-
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
+    protected virtual void Update()
     {
         HandleDeath();
     }
-
 
     public void TakeDamage(float damageAmount, float shieldBonus, float minimum, float maximum, DamageType type)
     {
@@ -115,53 +100,40 @@ public class UnitParentClass : MonoBehaviour
         }
     }
 
-
     public float TotalDamageAfterReduction(float damageAmount, DamageType type)
     {
-        float returnedDamageAmount = 0;
         switch (type)
         {
             case DamageType.Arcana:
-                returnedDamageAmount = damageAmount * Mathf.Pow(damageReductionBaseModifier, arcanaDefense);
-                break;
-            case DamageType.Elemental:
-                returnedDamageAmount = damageAmount * Mathf.Pow(damageReductionBaseModifier, elementalDefense);
-                break;
+                return damageAmount * Mathf.Pow(damageReductionBaseModifier, arcanaDefense);
+            case DamageType.Natural:
+                return damageAmount * Mathf.Pow(damageReductionBaseModifier, elementalDefense);
             case DamageType.Physical:
-                returnedDamageAmount = damageAmount * Mathf.Pow(damageReductionBaseModifier, physicalDefense);
-                break;
+                return damageAmount * Mathf.Pow(damageReductionBaseModifier, physicalDefense);
+            case DamageType.Piercing:
+                return damageAmount * Mathf.Pow(damageReductionBaseModifier, physicalDefense / 2);
             case DamageType.Poison:
-                returnedDamageAmount = damageAmount * Mathf.Pow(damageReductionBaseModifier, poisonDefense);
-                break;
+                return damageAmount * Mathf.Pow(damageReductionBaseModifier, poisonDefense);
             case DamageType.Pure:
-                returnedDamageAmount = damageAmount * Mathf.Pow(damageReductionBaseModifier, pureDefense);
-                break;
+                return damageAmount;
             default:
-                returnedDamageAmount = damageAmount;
-                break;
+                return damageAmount;
         }
-        return returnedDamageAmount;
     }
 
     public void HandleDeath()
     {
-        if (isAlive == true)
+        if (isAlive)
         {
-            if (lifeCurrent < 0)
-            {
+            if (lifeCurrent <= 0)
                 isAlive = false;
-            }
         }
         else
         {
             if (decayTimer > 0)
-            {
                 decayTimer -= 1;
-            }
             else
-            {
                 Destroy(gameObject);
-            }
         }
     }
 }

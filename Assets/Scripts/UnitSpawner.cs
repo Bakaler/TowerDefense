@@ -1,71 +1,135 @@
-using System.Collections;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Data entry for one wave in this spawner's sequence.
+/// Each wave spawns 'count' units of 'unitDefinitionId' with random spread.
+/// </summary>
+[Serializable]
+public class WaveEntry
+{
+    [Tooltip("Must match an id in Resources/Definitions/units.json")]
+    public string unitDefinitionId = "basic_enemy";
+
+    [Tooltip("Number of units to spawn in this wave")]
+    public int count = 3;
+
+    [Tooltip("Random spread radius around spawn point (world units)")]
+    public float spread = 0.5f;
+
+    [Tooltip("Seconds between each unit in this wave")]
+    public float spawnInterval = 0.4f;
+}
+
 public class UnitSpawner : MonoBehaviour
 {
+    [Header("References")]
     public RoundManager roundManager;
 
-    public WayPoint firstWayPoint;
-    public List<GameObject> formationSpawn;
+    [Tooltip("Head node this spawner feeds units into. Must be a PathGraph node with no incoming connections.")]
+    public PathNode headNode;
 
-    public int spawnCount = -1;
-    public int formationArrayIndex = -1;
-    public bool isActive = false;
+    [Header("Waves")]
+    [Tooltip("One entry per wave — spawned in order each round")]
+    public List<WaveEntry> waves = new List<WaveEntry>();
 
-    public float timer;
-    public float coolDown;
+    // ── Internal state ────────────────────────────────────────────────
+    public int  spawnCount         = 0;
+    public int  formationArrayIndex = -1;
+    public bool isActive           = false;
 
+    private float _timer;
+    private float _coolDown;
 
-    // Start is called before the first frame update
+    // ── Lifecycle ─────────────────────────────────────────────────────
+
     void Start()
     {
         roundManager = GameObject.FindGameObjectWithTag("RoundManager").GetComponent<RoundManager>();
         roundManager.spawners.Add(gameObject);
     }
 
-    // Update is called once per frame
     void Update()
     {
-        if (formationArrayIndex != -1)
-        {
-            if (formationArrayIndex == spawnCount)
-            {
-                isActive = false;
-            }
-            else
-            {
-                isActive = true;
-            }
+        if (formationArrayIndex == -1) return;
 
-            if (timer < coolDown)
-            {
-                timer += Time.deltaTime;
-            }
-            else if (formationArrayIndex < spawnCount)
-            {
-                Spawn();
-                timer = 0;
-            }
-            
+        isActive = formationArrayIndex < spawnCount;
+        if (!isActive) return;
+
+        if (_timer < _coolDown)
+        {
+            _timer += Time.deltaTime;
+        }
+        else if (formationArrayIndex < spawnCount)
+        {
+            Spawn();
+            _timer = 0f;
         }
     }
 
+    // ── Spawn ─────────────────────────────────────────────────────────
+
     void Spawn()
     {
-        GameObject newFormation = Instantiate(formationSpawn[formationArrayIndex], new Vector3(transform.position.x, transform.position.y, 0), transform.rotation);
+        if (waves == null || waves.Count == 0) { formationArrayIndex++; return; }
 
-        FormationSpawn formation = newFormation.GetComponent<FormationSpawn>();
+        WaveEntry entry = waves[formationArrayIndex % waves.Count];
+        _coolDown = entry.spawnInterval > 0f ? entry.spawnInterval : 0.4f;
 
-        for (int i = 0, limi = newFormation.transform.childCount; i<limi; i++)
+        if (UnitFactory.Instance == null)
         {
-            //Debug.Log(newFormation.transform.GetChild(i).gameObject);
-            roundManager.aliveEnemies.Add(newFormation.transform.GetChild(i).gameObject);
-
+            Debug.LogError("[UnitSpawner] UnitFactory not found in scene.");
+            formationArrayIndex++;
+            return;
         }
-        //Debug.Log(firstWayPoint.transform.position);
-        //Debug.Log(formation);
-        formation.SetChildWayPoint(firstWayPoint.transform.position);
+
+        if (PathGraph.Instance == null)
+            Debug.LogWarning("[UnitSpawner] PathGraph not in scene — units will have no route.");
+
+        for (int i = 0; i < entry.count; i++)
+        {
+            Vector3 offset = new Vector3(
+                UnityEngine.Random.Range(-entry.spread, entry.spread),
+                UnityEngine.Random.Range(-entry.spread, entry.spread),
+                0f);
+
+            Vector3 spawnPos = new Vector3(transform.position.x, transform.position.y, 0f) + offset;
+
+            GameObject unitGO = UnitFactory.Instance.Build(entry.unitDefinitionId, spawnPos);
+            if (unitGO == null) continue;
+
+            // Build and assign route
+            UnitManager unit = unitGO.GetComponent<UnitManager>();
+            if (unit != null && PathGraph.Instance != null)
+            {
+                PathNode head = headNode != null ? headNode : GetNearestHead();
+                if (head != null)
+                    unit.AssignRoute(PathGraph.Instance.BuildRoute(head));
+                else
+                    Debug.LogWarning("[UnitSpawner] No head node found — unit will not move.");
+            }
+
+            roundManager.aliveEnemies.Add(unitGO);
+        }
+
         formationArrayIndex++;
+    }
+
+    PathNode GetNearestHead()
+    {
+        var heads = PathGraph.Instance.GetHeads();
+        if (heads.Count == 0) return null;
+        if (heads.Count == 1) return heads[0];
+
+        // Pick the head closest to this spawner
+        PathNode best = null;
+        float bestDist = float.MaxValue;
+        foreach (var h in heads)
+        {
+            float d = ((Vector2)transform.position - h.Position).sqrMagnitude;
+            if (d < bestDist) { bestDist = d; best = h; }
+        }
+        return best;
     }
 }

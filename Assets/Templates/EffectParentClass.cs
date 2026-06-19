@@ -1,18 +1,6 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-public class EffectParentClass : MonoBehaviour
-{
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-}
+// Superseded by the ScriptableObject-based effect system.
+// Use Effect (Assets/Scripts/Abilities/Effect.cs) and its subclasses instead.
+// DamageEffectParent is kept for legacy collision-based projectiles.
+public class EffectParentClass : MonoBehaviour { }

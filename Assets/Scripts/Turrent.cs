@@ -1,117 +1,138 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+[RequireComponent(typeof(AbilityManager))]
 public class Turrent : MonoBehaviour
 {
-
     public GameObject target;
     public List<GameObject> enemiesInRange = new List<GameObject>();
 
+    [Tooltip("Must match an id in Resources/Definitions/towers.json")]
+    public string definitionId;
 
-    public GameObject projectile;
-    public float coolDown = 5;
+    // Resolved in Start() from definitionId via TowerDefinitionLibrary → AbilityLibrary.
+    // Never injected by the factory — the data drives it.
+    [HideInInspector] public Ability_Effect fireAbility;
 
+    private AbilityManager _abilityManager;
+    private CircleCollider2D _rangeCollider;
 
-    private float timer = 5;
-
-    // Start is called before the first frame update
     void Start()
     {
-        
+        _abilityManager  = GetComponent<AbilityManager>();
+        _rangeCollider   = GetComponent<CircleCollider2D>();
+        ResolveAbilityFromDefinition();
     }
 
-    // Update is called once per frame
+    void ResolveAbilityFromDefinition()
+    {
+        if (string.IsNullOrEmpty(definitionId)) return;
+
+        if (TowerDefinitionLibrary.Instance == null)
+        {
+            Debug.LogWarning($"[Turrent] TowerDefinitionLibrary not ready for '{definitionId}'.");
+            return;
+        }
+
+        if (!TowerDefinitionLibrary.Instance.TryGet(definitionId, out var def)) return;
+        if (string.IsNullOrEmpty(def.fireAbilityId)) return;
+
+        if (AbilityLibrary.Instance == null)
+        {
+            Debug.LogWarning($"[Turrent] AbilityLibrary not ready for '{def.fireAbilityId}'.");
+            return;
+        }
+
+        if (!AbilityLibrary.Instance.TryGet(def.fireAbilityId, out var ability))
+        {
+            Debug.LogWarning($"[Turrent] Ability '{def.fireAbilityId}' not found in AbilityLibrary.");
+            return;
+        }
+
+        fireAbility = ability;
+        _abilityManager.RegisterAbility(ability);
+
+        // Range lives on the ability — size the detection collider to match
+        if (_rangeCollider != null && ability.range > 0f)
+            _rangeCollider.radius = ability.range;
+
+        Debug.Log($"[Turrent] '{definitionId}' armed with '{ability.abilityID}', range={ability.range}");
+    }
+
     void Update()
     {
-
         CleanUpDead();
-
-        if (timer < coolDown)
-        {
-            timer += Time.deltaTime;
-        }
-        else
-        {
-            if (target != null && !target.gameObject.GetComponent<UnitManager>().isDead)
-            {
-                Fire();
-                timer = 0;
-            }
-            else
-            {
-                GetClosestEnemy();
-            }
-        }
-
+        // Always re-evaluate — lock onto whoever is furthest along the path
+        target = GetLeadEnemy();
+        if (target != null) TryFire();
     }
 
-
-    void Fire()
+    void TryFire()
     {
-        GameObject newProjectile = Instantiate(projectile, new Vector3(transform.position.x, transform.position.y , 0), transform.rotation);
-        newProjectile.GetComponent<ProjectileFollow>().target = target;
+        if (fireAbility == null)
+        {
+            Debug.LogWarning($"[Turrent:{definitionId}] TryFire — fireAbility is NULL");
+            return;
+        }
+
+        var targetUnit = target.GetComponent<UnitParentClass>();
+        if (targetUnit == null) return;
+
+        var context = new EffectContext
+        {
+            Caster          = null,
+            CasterTransform = transform,
+            Target          = targetUnit,
+            TargetPoint     = target.transform.position,
+            OriginAbility   = fireAbility,
+            CustomData      = new Dictionary<string, object>(),
+            AimOrigin2D     = (Vector2)transform.position,
+            AimDirection2D  = ((Vector2)(target.transform.position - transform.position)).normalized,
+        };
+
+        _abilityManager.TryExecuteAbility(fireAbility, context);
     }
 
     void CleanUpDead()
     {
-        List<GameObject> aliveEnemiesInRange = new List<GameObject>();
-        for (int i = 0; i < enemiesInRange.Count; i++)
+        for (int i = enemiesInRange.Count - 1; i >= 0; i--)
         {
-            if (!enemiesInRange[i].GetComponent<UnitManager>().isDead)
-            {
-                aliveEnemiesInRange.Add(enemiesInRange[i]);
-            }
-        }
-
-        enemiesInRange = aliveEnemiesInRange;
-
-    }
-
-
-    void OnCollisionEnter2D(Collision2D collision)
-    {
-
-
-        if (collision.gameObject.layer == 10)
-        {
-            enemiesInRange.Add(collision.gameObject);
+            var go = enemiesInRange[i];
+            if (go == null || !go.GetComponent<UnitParentClass>()?.isAlive == true)
+                enemiesInRange.RemoveAt(i);
         }
     }
 
-    void OnCollisionExit2D(Collision2D collision)
+    void OnTriggerEnter2D(Collider2D other)
     {
-
-        if(collision.gameObject == target)
-        {
-            target = null;
-        }
-
-        if (collision.gameObject.layer == 10 && enemiesInRange.Contains(collision.gameObject))
-        {
-            enemiesInRange.Remove(collision.gameObject);
-        }
+        var unit = other.GetComponent<UnitParentClass>();
+        Debug.Log($"[Turrent:{definitionId}] OnTriggerEnter2D — '{other.name}' hasUnit={unit != null}");
+        if (unit != null)
+            enemiesInRange.Add(other.gameObject);
     }
 
-    void GetClosestEnemy()
+    void OnTriggerExit2D(Collider2D other)
     {
-        if (enemiesInRange.Count > 0)
+        if (other.gameObject == target) target = null;
+        enemiesInRange.Remove(other.gameObject);
+    }
+
+    /// <summary>Returns the enemy in range that is furthest along the path.</summary>
+    GameObject GetLeadEnemy()
+    {
+        GameObject best        = null;
+        float      bestProgress = -1f;
+
+        foreach (var go in enemiesInRange)
         {
-            GameObject bestTarget = null;
-            float closestDistanceSqr = Mathf.Infinity;
-            Vector3 currentPosition = transform.position;
-            for (int i = 0; i< enemiesInRange.Count; i++)
-            {
-                Vector3 directionToTarget = enemiesInRange[i].transform.position - currentPosition;
-                float dSqrToTarget = directionToTarget.sqrMagnitude;
-                if (dSqrToTarget < closestDistanceSqr)
-                {
-                    closestDistanceSqr = dSqrToTarget;
-                    bestTarget = enemiesInRange[i];
-                }
-            }
-            target = bestTarget;
+            if (go == null) continue;
+            var unit = go.GetComponent<UnitParentClass>();
+            if (unit == null || !unit.isAlive) continue;
+
+            float progress = go.GetComponent<RouteFollower>()?.Progress ?? 0f;
+            if (progress > bestProgress) { bestProgress = progress; best = go; }
         }
 
+        return best;
     }
 }

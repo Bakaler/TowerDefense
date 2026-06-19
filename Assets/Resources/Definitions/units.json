@@ -1,0 +1,72 @@
+{
+  "units": [
+    {
+      "id": "basic_enemy",
+      "displayName": "Basic Enemy",
+      "description": "A standard enemy with no special properties.",
+      "life": 100,
+      "speed": 2.0,
+      "physicalDefense": 0,
+      "bounty": 10,
+      "deathBlow": 1,
+      "colliderRadius": 0.3,
+      "layer": 0,
+      "scale": 3,
+      "spriteSheet": "Art/Enemies/Enemies",
+      "spriteIndex": 0,
+      "debugColor": { "r": 1.0, "g": 0.2, "b": 0.2, "a": 1.0 },
+      "components": []
+    },
+    {
+      "id": "armored_enemy",
+      "displayName": "Armored Enemy",
+      "description": "High defense, slow movement.",
+      "life": 200,
+      "speed": 0.5,
+      "physicalDefense": 20,
+      "bounty": 25,
+      "deathBlow": 1,
+      "colliderRadius": 0.35,
+      "layer": 0,
+      "scale": 3,
+      "spriteSheet": "Art/Enemies/Enemies",
+      "spriteIndex": 1,
+      "debugColor": { "r": 0.5, "g": 0.5, "b": 0.5, "a": 1.0 },
+      "components": []
+    },
+    {
+      "id": "fast_enemy",
+      "displayName": "Fast Enemy",
+      "description": "Low health but moves very quickly.",
+      "life": 50,
+      "speed": 3.0,
+      "physicalDefense": 0,
+      "bounty": 15,
+      "deathBlow": 1,
+      "colliderRadius": 0.2,
+      "layer": 0,
+      "scale": 3,
+      "spriteSheet": "Art/Enemies/Enemies",
+      "spriteIndex": 2,
+      "debugColor": { "r": 1.0, "g": 0.8, "b": 0.0, "a": 1.0 },
+      "components": []
+    },
+    {
+      "id": "boss_enemy",
+      "displayName": "Boss",
+      "description": "Massive health pool and high defense.",
+      "life": 1000,
+      "speed": 0.75,
+      "physicalDefense": 30,
+      "bounty": 150,
+      "deathBlow": 3,
+      "colliderRadius": 0.5,
+      "layer": 0,
+      "scale": 5,
+      "spriteSheet": "Art/Enemies/Enemies",
+      "spriteIndex": 3,
+      "debugColor": { "r": 0.8, "g": 0.0, "b": 0.8, "a": 1.0 },
+      "components": []
+    }
+  ]
+}

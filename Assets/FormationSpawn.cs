@@ -1,31 +1,6 @@
-using System.Collections;
-using System.Collections.Generic;
+// DEPRECATED — superseded by UnitSpawner + UnitFactory + PathGraph.
+// Kept as a compile-safe stub so any lingering scene references don't break the build.
 using UnityEngine;
 
-public class FormationSpawn : MonoBehaviour
-{
-    // Start is called before the first frame update
-    void Start()
-    {
-        for (int i = 0, limi = transform.childCount; i < limi; i++)
-        {
-
-        }
-    }
-
-    public void SetChildWayPoint(Vector3 waypoint)
-    {
-        while (transform.childCount > 0)
-        {
-
-            UnitManager c = transform.GetChild(0).GetComponent<UnitManager>();
-            c.xOffset = c.gameObject.transform.position.x - transform.position.x;
-            c.yOffset = c.gameObject.transform.position.y - transform.position.y;
-            c.wayPoint = waypoint;
-
-            transform.GetChild(0).SetParent(null);
-        }
-
-        Destroy(gameObject);
-    }
-}
+[System.Obsolete("Use UnitSpawner with PathGraph/PathNode instead.")]
+public class FormationSpawn : MonoBehaviour { }

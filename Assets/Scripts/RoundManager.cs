@@ -79,7 +79,7 @@ public class RoundManager : MonoBehaviour
         for (int i = 0, limi = spawners.Count; i< limi; i++)
         {
             spawners[i].GetComponent<UnitSpawner>().formationArrayIndex = 0;
-            if (spawners[i].GetComponent<UnitSpawner>().formationSpawn.Count > spawners[i].GetComponent<UnitSpawner>().spawnCount - 1)
+            if (spawners[i].GetComponent<UnitSpawner>().waves.Count > spawners[i].GetComponent<UnitSpawner>().spawnCount - 1)
             {
                 spawners[i].GetComponent<UnitSpawner>().spawnCount += 1;
             }

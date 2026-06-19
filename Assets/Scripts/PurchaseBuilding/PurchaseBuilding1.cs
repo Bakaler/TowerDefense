@@ -1,32 +1,22 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Legacy button script — now delegates to TowerPlacer so towers are built
+/// entirely from data (no prefab instantiation).
+/// Set towerId to "basic_tower" (or any id from towers.json) in the Inspector.
+/// </summary>
 public class PurchaseBuilding1 : MonoBehaviour
 {
+    [Tooltip("Must match an id in Resources/Definitions/towers.json")]
+    public string towerId = "basic_tower";
 
-    public GameObject towerType;
-    public GameObject tower;
-
-    public int n;
-
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        transform.position = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-    }
     public void OnButtonPress()
     {
-        Vector2 mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        tower = Instantiate(towerType, new Vector3(mousePosition.x, mousePosition.y, 0), transform.rotation);
-        tower.transform.SetParent(transform);
+        if (TowerPlacer.Instance == null)
+        {
+            Debug.LogError("[PurchaseBuilding1] TowerPlacer not in scene.");
+            return;
+        }
+        TowerPlacer.Instance.SelectTower(towerId);
     }
-
-
 }

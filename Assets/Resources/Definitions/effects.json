@@ -1,0 +1,33 @@
+{
+  "effects": [
+    {
+      "id": "basic_impact",
+      "displayName": "Basic Impact",
+      "type": "damage",
+      "chance": 1.0,
+      "data": {
+        "damageBase": 25.0,
+        "minimumDamage": 10.0,
+        "maximumDamage": 50.0,
+        "damageType": 0,
+        "shieldBonus": 0.0,
+        "criticalChance": 0.1,
+        "criticalDamageMultiplier": 2.0
+      }
+    },
+    {
+      "id": "basic_shot",
+      "displayName": "Basic Shot",
+      "type": "launch_missile",
+      "chance": 1.0,
+      "data": {
+        "impactEffectId": "basic_impact",
+        "missileSpeed": 8.0,
+        "missileScale": 0.5,
+        "missileLifetime": 7.0,
+        "missileSpriteSheet": "Art/Towers/TowerSet1",
+        "missileSpriteIndex": 1
+      }
+    }
+  ]
+}

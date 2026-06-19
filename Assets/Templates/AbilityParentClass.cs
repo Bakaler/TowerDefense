@@ -1,18 +1,6 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-public class AbilityParentClass : MonoBehaviour
-{
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-}
+// Superseded by the ScriptableObject-based ability system.
+// Use Ability_Effect (Assets/Scripts/Abilities/Ability_Effect.cs) instead.
+// This stub is kept to avoid breaking any prefab references.
+public class AbilityParentClass : MonoBehaviour { }

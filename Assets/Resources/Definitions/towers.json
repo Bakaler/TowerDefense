@@ -1,0 +1,38 @@
+{
+  "towers": [
+    {
+      "id": "basic_tower",
+      "displayName": "Basic Tower",
+      "description": "A standard attack tower that fires at nearby enemies.",
+      "range": 4.0,
+      "resourceCost": 3,
+      "fireAbilityId": "basic_tower_shot",
+      "spritePath": "Art/Towers/Tower1",
+      "scale": 1.5,
+      "debugColor": { "r": 0.2, "g": 0.6, "b": 1.0, "a": 1.0 },
+      "components": []
+    },
+    {
+      "id": "income_tower",
+      "displayName": "Income Tower",
+      "description": "Generates resources over time instead of attacking.",
+      "range": 0.0,
+      "resourceCost": 5,
+      "fireAbilityId": "",
+      "spriteSheet": "Art/Towers/TowerSet1",
+      "spriteIndex": 0,
+      "scale": 1.5,
+      "debugColor": { "r": 1.0, "g": 0.8, "b": 0.0, "a": 1.0 },
+      "components": [
+        {
+          "key": "income_tower",
+          "data": {
+            "orbInterval": 8.0,
+            "orbSpriteSheet": "Art/Towers/TowerSet1",
+            "orbSpriteIndex": 1
+          }
+        }
+      ]
+    }
+  ]
+}

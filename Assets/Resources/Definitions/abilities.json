@@ -1,0 +1,15 @@
+{
+  "abilities": [
+    {
+      "id": "basic_tower_shot",
+      "displayName": "Basic Tower Shot",
+      "effectId": "basic_shot",
+      "range": 4.0,
+      "cooldownDuration": 2.0,
+      "prepare_time": 0.0,
+      "cast_start_time": 0.0,
+      "cast_finish_time": 0.0,
+      "finish_time": 0.0
+    }
+  ]
+}

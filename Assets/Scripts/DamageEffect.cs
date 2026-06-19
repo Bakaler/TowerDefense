@@ -22,11 +22,10 @@ public class DamageEffect : MonoBehaviour
         if (collision.gameObject.layer == 10)
         {
             // Check if the projectile hits the target unit
-            UnitManager unitHealth = collision.gameObject.GetComponent<UnitManager>();
+            UnitParentClass unitHealth = collision.gameObject.GetComponent<UnitParentClass>();
             if (unitHealth != null)
             {
-                // Deal damage to the unit
-                unitHealth.TakeDamage(damage);
+                unitHealth.TakeDamage(damage, 0f, 0f, float.MaxValue, DamageType.Physical);
 
                 Destroy(transform.parent.gameObject);
                 // Destroy the projectile after hitting the unit

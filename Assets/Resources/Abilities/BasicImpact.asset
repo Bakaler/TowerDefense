@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: db8aa51bde9426040aeeaa33e037d8fb, type: 3}
+  m_Name: BasicImpact
+  m_EditorClassIdentifier: 
+  effectName: Basic Impact
+  effectID: basic_impact
+  editorPrefix: 
+  editorSuffix: 
+  chance: 1
+  canBeBlocked: 0
+  validators: []
+  damageBase: 25
+  damageAccumulators: []
+  preDamageEffect: {fileID: 0}
+  minimumDamage: 10
+  maximumDamage: 50
+  damageType: 0
+  shieldBonus: 0
+  criticalChance: 0.1
+  criticalDamageMultiplier: 2
