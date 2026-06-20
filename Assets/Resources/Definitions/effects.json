@@ -6,13 +6,43 @@
       "type": "damage",
       "chance": 1.0,
       "data": {
-        "damageBase": 25.0,
-        "minimumDamage": 10.0,
-        "maximumDamage": 50.0,
+        "damageBase": 4.0,
+        "minimumDamage": 1.0,
+        "maximumDamage": 1000000.0,
         "damageType": 0,
         "shieldBonus": 0.0,
         "criticalChance": 0.1,
         "criticalDamageMultiplier": 2.0
+      }
+    },
+    {
+      "id": "boomerang_impact",
+      "displayName": "Boomerang Impact",
+      "type": "damage",
+      "chance": 1.0,
+      "data": {
+        "damageBase": 2.0,
+        "minimumDamage": 1.0,
+        "maximumDamage": 1000000.0,
+        "damageType": 2,
+        "criticalChance": 0.0,
+        "criticalDamageMultiplier": 2.0
+      }
+    },
+    {
+      "id": "boomerang_throw",
+      "displayName": "Boomerang Throw",
+      "type": "launch_boomerang",
+      "chance": 1.0,
+      "data": {
+        "impactEffectId": "boomerang_impact",
+        "arcRadius": 1,
+        "sweepSpeed": 500.0,
+        "hitRadius": 0.45,
+        "boomerangScale": 0.7,
+        "boomerangSpriteSheet": "Art/Towers/TowerSet1",
+        "boomerangSpriteIndex": 1,
+        "boomerangColor": {"r": 0.9, "g": 0.7, "b": 0.2, "a": 1.0}
       }
     },
     {
@@ -27,6 +57,115 @@
         "missileLifetime": 7.0,
         "missileSpriteSheet": "Art/Towers/TowerSet1",
         "missileSpriteIndex": 1
+      }
+    }
+    ,
+    {
+      "id": "chain_damage",
+      "displayName": "Chain Damage",
+      "type": "damage",
+      "chance": 1.0,
+      "data": {
+        "damageBase": 3.0,
+        "minimumDamage": 1.0,
+        "maximumDamage": 1000000.0,
+        "damageType": 1,
+        "criticalChance": 0.0,
+        "criticalDamageMultiplier": 2.0
+      }
+    },
+    {
+      "id": "chain_shot",
+      "displayName": "Chain Shot",
+      "type": "launch_missile",
+      "chance": 1.0,
+      "data": {
+        "impactEffectId": "chain_impact",
+        "missileSpeed": 64.0,
+        "missileScale": 0.4,
+        "missileLifetime": 5.0,
+        "missileSpriteSheet": "Art/Towers/TowerSet1",
+        "missileSpriteIndex": 1,
+        "drawLine": true,
+        "missileColor": {"r": 0.2, "g": 0.6, "b": 1.0, "a": 1.0}
+      }
+    },
+    {
+      "id": "chain_impact",
+      "displayName": "Chain Impact",
+      "type": "set",
+      "chance": 1.0,
+      "data": {
+        "effectIds": ["chain_damage", "chain_bounce_1_search"]
+      }
+    },
+    {
+      "id": "chain_bounce_1_search",
+      "displayName": "Chain Bounce 1 Search",
+      "type": "search_area",
+      "chance": 1.0,
+      "data": {
+        "effectId": "chain_bounce_1_missile",
+        "radius": 4.0,
+        "maxTargets": 1,
+        "horizontalArc": 360.0,
+        "startingDepth": 0.0,
+        "searchFromTarget": true
+      }
+    },
+    {
+      "id": "chain_bounce_1_missile",
+      "displayName": "Chain Bounce 1",
+      "type": "launch_missile",
+      "chance": 1.0,
+      "data": {
+        "impactEffectId": "chain_bounce_1_impact",
+        "missileSpeed": 6.0,
+        "missileScale": 0.35,
+        "missileLifetime": 3.0,
+        "missileSpriteSheet": "Art/Towers/TowerSet1",
+        "missileSpriteIndex": 1,
+        "drawLine": true,
+        "missileColor": {"r": 0.2, "g": 0.6, "b": 1.0, "a": 1.0}
+      }
+    },
+    {
+      "id": "chain_bounce_1_impact",
+      "displayName": "Chain Bounce 1 Impact",
+      "type": "set",
+      "chance": 1.0,
+      "data": {
+        "effectIds": ["chain_damage", "chain_bounce_2_search"]
+      }
+    },
+    {
+      "id": "chain_bounce_2_search",
+      "displayName": "Chain Bounce 2 Search",
+      "type": "search_area",
+      "chance": 1.0,
+      "data": {
+        "effectId": "chain_bounce_2_missile",
+        "radius": 4.0,
+        "maxTargets": 1,
+        "horizontalArc": 360.0,
+        "startingDepth": 0.0,
+        "searchFromTarget": true
+      }
+    },
+    {
+      "id": "chain_bounce_2_missile",
+      "displayName": "Chain Bounce 2",
+      "type": "launch_missile",
+      "chance": 1.0,
+      "data": {
+        "impactEffectId": "chain_damage",
+        "missileSpeed": 6.0,
+        "missileScale": 0.3,
+        "missileLifetime": 3.0,
+        "missileSpriteSheet": "Art/Towers/TowerSet1",
+        "missileSpriteIndex": 1,
+        "drawLine": true,
+        "missileColor": {"r": 0.2, "g": 0.6, "b": 1.0, "a": 1.0}
       }
     }
   ]

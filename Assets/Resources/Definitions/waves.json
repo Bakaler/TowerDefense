@@ -1,0 +1,32 @@
+{
+  "waves": [
+    {
+      "groups": [
+        { "unitDefinitionId": "basic_enemy", "count": 5, "spawnInterval": 0.6, "spread": 0.4 }
+      ]
+    },
+    {
+      "groups": [
+        { "unitDefinitionId": "basic_enemy", "count": 9, "spawnInterval": 0.5, "spread": 0.4 }
+      ]
+    },
+    {
+      "groups": [
+        { "unitDefinitionId": "basic_enemy", "count": 7, "spawnInterval": 0.5, "spread": 0.4 },
+        { "unitDefinitionId": "fast_enemy",  "count": 4, "spawnInterval": 0.3, "spread": 0.5 }
+      ]
+    },
+    {
+      "groups": [
+        { "unitDefinitionId": "basic_enemy", "count": 12, "spawnInterval": 0.4, "spread": 0.4 },
+        { "unitDefinitionId": "fast_enemy",  "count": 6,  "spawnInterval": 0.3, "spread": 0.5 }
+      ]
+    },
+    {
+      "groups": [
+        { "unitDefinitionId": "basic_enemy", "count": 10, "spawnInterval": 0.35, "spread": 0.4 },
+        { "unitDefinitionId": "fast_enemy",  "count": 8,  "spawnInterval": 0.25, "spread": 0.5 }
+      ]
+    }
+  ]
+}

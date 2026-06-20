@@ -1,93 +1,44 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
-using UnityEngine.SceneManagement;
 
+/// <summary>
+/// Holds the player's resource values.
+/// Display is handled by GameHUD — no Text refs needed here.
+/// </summary>
 public class ResourceManagerScript : MonoBehaviour
 {
-    // UI
-    public Text researchText;
-    public Text fundingText;
-    public Text developmentText;
+    [Header("Starting Values")]
+    public int   resourceOne = 20;   // Gold
+    public int   research    = 0;
+    public float funding     = 1f;
+    public float development = 0f;
 
-    public Text resourceOneText;
-
-
-    // Winning Resources
-    public int research;
-    public float funding;
-    public float development;
-
-    // Trading Resources
-    public int resourceOne;
-
-
-    public List<GameObject> structures = new List<GameObject>();
-
-
-    // Start is called before the first frame update
-    void Start()
+    public void ChangeResourceOne(int delta)
     {
-
+        resourceOne += delta;
     }
 
-    // Update is called once per frame
-    void Update()
+    public void ChangeResearch(int delta)
     {
-        
+        research += delta;
     }
 
-    public void UpdateResearchScore()
+    public void SetResearch(int value)
     {
-        int researchValue = 0;
-        for (int i = 0, limi = structures.Count; i<limi; i++)
-        {
-            if (structures[i].GetComponent<TowerScriptParent>().purchased)
-            {
-                researchValue += structures[i].GetComponent<TowerScriptParent>().towerResearchScore;
-            }
-        }
-        SetResearch(researchValue);
+        research = value;
+    }
+
+    public void ChangeFunding(float delta)
+    {
+        funding += delta;
+    }
+
+    public void ChangeDevelopment(float delta)
+    {
+        development += delta;
     }
 
     public void UpdateDevelopmentScore()
     {
-        ChangeDevelopment(research * funding);
+        development += research * funding;
     }
-
-    [ContextMenu("Change ResourceOne")]
-    public void ChangeResourceOne(int resourceOneChange)
-    {
-        resourceOne += resourceOneChange;
-        resourceOneText.text = resourceOne.ToString();
-    }
-
-    [ContextMenu("Change Research")]
-    public void ChangeResearch(int researchChange)
-    {
-        research += researchChange;
-        researchText.text = research.ToString();
-    }
-
-    public void SetResearch(int researchValue)
-    {
-        research = researchValue;
-        researchText.text = research.ToString();
-    }
-
-    [ContextMenu("Change Funding")]
-    public void ChangeFunding(int fundingChange)
-    {
-        funding += fundingChange;
-        fundingText.text = funding.ToString();
-    }
-
-    [ContextMenu("Change Development")]
-    public void ChangeDevelopment(float developmentChange)
-    {
-        development += developmentChange;
-        developmentText.text = development.ToString();
-    }
-
 }

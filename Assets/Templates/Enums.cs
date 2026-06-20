@@ -8,10 +8,17 @@ public class Enums : MonoBehaviour
 
 public enum DamageType
 {
+    Elemental,
+    Arcane,
     Physical,
     Piercing,
-    Natural,
     Poison,
-    Arcana,
     Pure,
+}
+
+public enum BalanceType
+{
+    Elemental,
+    Arcane,
+    Physical,
 }

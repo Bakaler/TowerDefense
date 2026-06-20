@@ -15,6 +15,11 @@ public class UnitManager : UnitParentClass
     // isDead compatibility shim — reads from UnitParentClass.isAlive
     public bool isDead => !isAlive;
 
+    // ── Hit flash ────────────────────────────────────────────────────
+    private SpriteRenderer _sr;
+    private Color          _baseColor = Color.white;
+    private Coroutine      _flashCoroutine;
+
     // ── Route ─────────────────────────────────────────────────────────
     private RouteFollower _follower;
 
@@ -22,12 +27,9 @@ public class UnitManager : UnitParentClass
 
     void Start()
     {
-        // If spawned via UnitFactory, stats are already applied — skip lookup.
-        // If spawned directly (legacy), try to load from definition.
         if (!string.IsNullOrEmpty(definitionId) && lifeMax <= 0)
             ApplyDefinition(definitionId);
 
-        // Final fallbacks so unit is never stuck at 0 hp / 0 speed
         if (lifeMax <= 0)  lifeMax  = 100f;
         if (speedMax <= 0) speedMax = 3f;
 
@@ -36,7 +38,9 @@ public class UnitManager : UnitParentClass
         speedCurrent = speedMax;
         decayTimer   = 24;
 
-        _follower = GetComponent<RouteFollower>();
+        _follower  = GetComponent<RouteFollower>();
+        _sr        = GetComponent<SpriteRenderer>();
+        if (_sr != null) _baseColor = _sr.color;
     }
 
     public void ApplyDefinition(string id)
@@ -52,9 +56,34 @@ public class UnitManager : UnitParentClass
         deathBlow       = def.deathBlow;
     }
 
+    // ── Damage override (triggers hit flash) ─────────────────────────
+
+    public override void TakeDamage(float damageAmount, float shieldBonus, float minimum, float maximum, DamageType type)
+    {
+        base.TakeDamage(damageAmount, shieldBonus, minimum, maximum, type);
+        if (_sr != null)
+        {
+            if (_flashCoroutine != null) StopCoroutine(_flashCoroutine);
+            _flashCoroutine = StartCoroutine(HitFlashRoutine());
+        }
+    }
+
+    IEnumerator HitFlashRoutine()
+    {
+        _sr.color     = Color.red;
+        float elapsed = 0f;
+        while (elapsed < 0.2f)
+        {
+            elapsed  += Time.deltaTime;
+            _sr.color = Color.Lerp(Color.red, _baseColor, elapsed / 0.2f);
+            yield return null;
+        }
+        _sr.color = _baseColor;
+    }
+
+
     // ── Route assignment ──────────────────────────────────────────────
 
-    /// <summary>Called by UnitSpawner after the unit is built.</summary>
     public void AssignRoute(Route route)
     {
         if (_follower == null)
@@ -87,9 +116,8 @@ public class UnitManager : UnitParentClass
     void Move()
     {
         if (_follower == null || !_follower.HasRoute)
-            return; // no route assigned yet
+            return;
 
-        // Keep RouteFollower's speed in sync (in case a slow/haste effect changed speedCurrent)
         float speed = speedCurrent > 0 ? speedCurrent : speedMax;
         _follower.SetSpeed(speed);
 
@@ -97,7 +125,6 @@ public class UnitManager : UnitParentClass
 
         if (reachedEnd)
         {
-            // Unit reached the terminus — deal damage to the player's base
             LogicManager logic = GameObject.FindGameObjectWithTag("Logic")?.GetComponent<LogicManager>();
             if (logic != null)
                 logic.UpdateLives(deathBlow * -1);

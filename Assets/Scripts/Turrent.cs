@@ -85,6 +85,7 @@ public class Turrent : MonoBehaviour
             Target          = targetUnit,
             TargetPoint     = target.transform.position,
             OriginAbility   = fireAbility,
+            OriginTower     = gameObject,
             CustomData      = new Dictionary<string, object>(),
             AimOrigin2D     = (Vector2)transform.position,
             AimDirection2D  = ((Vector2)(target.transform.position - transform.position)).normalized,

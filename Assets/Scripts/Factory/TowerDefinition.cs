@@ -18,6 +18,9 @@ public class TowerDefinition
     public float range        = 5f;
     public int   resourceCost = 100;
 
+    // ── Balance ───────────────────────────────────────────────────────
+    public string balanceType = "Physical";  // "Elemental" | "Arcane" | "Physical"
+
     // ── Ability ───────────────────────────────────────────────────────
     /// <summary>
     /// ID of the Ability_Effect to load from abilities.json via AbilityLibrary.

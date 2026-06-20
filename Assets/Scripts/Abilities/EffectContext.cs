@@ -12,6 +12,9 @@ public class EffectContext
     // Spawn/aim reference when Caster UnitParentClass is not available (e.g. turrets)
     public Transform CasterTransform;
 
+    // Tower that originated this effect chain — used for kill tracking
+    public GameObject OriginTower;
+
     // 2D aim data — used by SearchArea effects
     public Vector2? AimOrigin2D;
     public Vector2? AimDirection2D;
@@ -28,6 +31,7 @@ public class EffectContext
             AimOrigin2D = this.AimOrigin2D,
             AimDirection2D = this.AimDirection2D,
             CasterTransform = this.CasterTransform,
+            OriginTower     = this.OriginTower,
         };
     }
 }

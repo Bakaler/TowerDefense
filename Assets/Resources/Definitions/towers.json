@@ -4,6 +4,7 @@
       "id": "basic_tower",
       "displayName": "Basic Tower",
       "description": "A standard attack tower that fires at nearby enemies.",
+      "balanceType": "Physical",
       "range": 4.0,
       "resourceCost": 3,
       "fireAbilityId": "basic_tower_shot",
@@ -15,6 +16,7 @@
     {
       "id": "income_tower",
       "displayName": "Income Tower",
+      "balanceType": "Elemental",
       "description": "Generates resources over time instead of attacking.",
       "range": 0.0,
       "resourceCost": 5,
@@ -33,6 +35,33 @@
           }
         }
       ]
+    }
+    ,
+    {
+      "id": "boomerang_tower",
+      "displayName": "Boomerang Tower",
+      "balanceType": "Physical",
+      "description": "Throws a boomerang that sweeps through all enemies in a wide arc and returns.",
+      "range": 4.0,
+      "resourceCost": 5,
+      "fireAbilityId": "boomerang_shot",
+      "spritePath": "Art/Towers/Tower1",
+      "scale": 1.5,
+      "debugColor": { "r": 0.9, "g": 0.7, "b": 0.2, "a": 1.0 },
+      "components": []
+    },
+    {
+      "id": "chain_tower",
+      "displayName": "Chain Tower",
+      "balanceType": "Arcane",
+      "description": "Fires chain lightning that arcs between up to 4 enemies.",
+      "range": 5.0,
+      "resourceCost": 6,
+      "fireAbilityId": "chain_lightning_shot",
+      "spritePath": "Art/Towers/Tower1",
+      "scale": 1.5,
+      "debugColor": { "r": 0.4, "g": 0.8, "b": 1.0, "a": 1.0 },
+      "components": []
     }
   ]
 }

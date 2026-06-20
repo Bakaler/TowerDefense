@@ -1,62 +1,51 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Owns the player's lives.
+/// Lives start at startingLives and decrease when enemies reach the terminus.
+/// When lives hit zero, WaveManager is notified which triggers the Game Over state.
+/// </summary>
 public class LogicManager : MonoBehaviour
 {
-    public ResourceManagerScript resourceManager;
-    public float lives;
-    public float developmentWinCondition;
+    [Header("Config")]
+    public int startingLives = 20;
 
-    public bool gameOver = false;
+    // ── State ─────────────────────────────────────────────────────────
+    public float lives    { get; private set; }
+    public bool  gameOver { get; private set; }
 
-    // Start is called before the first frame update
+    // ── Lifecycle ─────────────────────────────────────────────────────
+
     void Start()
     {
-        resourceManager = GameObject.FindGameObjectWithTag("ResourceManager").GetComponent<ResourceManagerScript>();
+        lives = startingLives;
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        if (!gameOver)
-        {
-            CheckDevelopmentWinCondition();
-            CheckLivesLossCondition();
-        }
-    }
+    // ── Public API ────────────────────────────────────────────────────
 
-    public void CheckDevelopmentWinCondition()
+    /// <summary>
+    /// Change lives by delta (negative to subtract).
+    /// Triggers game over when lives reach zero.
+    /// </summary>
+    public void UpdateLives(float delta)
     {
-        if (resourceManager.development >= developmentWinCondition)
-        {
-            Win();
-        }
-    }
+        if (gameOver) return;
 
-    public void CheckLivesLossCondition()
-    {
-        if (lives <= 0)
+        lives += delta;
+
+        if (lives <= 0f)
         {
+            lives = 0f;
             Lose();
         }
     }
 
-    public void UpdateLives(float livesUpdate)
-    {
-        lives += livesUpdate; 
-    }
+    // ── Private ───────────────────────────────────────────────────────
 
-
-    public void Win()
+    void Lose()
     {
-        Debug.Log("WINNER");
+        if (gameOver) return;
         gameOver = true;
-    }
-
-    public void Lose()
-    {
-        Debug.Log("LOSER");
-        gameOver = true;
+        WaveManager.Instance?.NotifyGameOver();
     }
 }

@@ -11,5 +11,28 @@
       "cast_finish_time": 0.0,
       "finish_time": 0.0
     }
+    ,
+    {
+      "id": "boomerang_shot",
+      "displayName": "Boomerang Shot",
+      "effectId": "boomerang_throw",
+      "range": 1.25,
+      "cooldownDuration": 2.5,
+      "prepare_time": 0.0,
+      "cast_start_time": 0.0,
+      "cast_finish_time": 0.0,
+      "finish_time": 0.0
+    },
+    {
+      "id": "chain_lightning_shot",
+      "displayName": "Chain Lightning",
+      "effectId": "chain_shot",
+      "range": 5.0,
+      "cooldownDuration": 3.0,
+      "prepare_time": 0.0,
+      "cast_start_time": 0.0,
+      "cast_finish_time": 0.0,
+      "finish_time": 0.0
+    }
   ]
 }

@@ -19,6 +19,8 @@ public class Effect_Launch_Missile : Effect
     public float  missileLifetime    = 7f;
     public string missileSpriteSheet = "";
     public int    missileSpriteIndex = -1;
+    public bool   drawLine           = false;
+    public Color  missileColor       = Color.white;
 
     // ── Resolved at runtime ───────────────────────────────────────────
     private Effect _impactEffect;
@@ -48,9 +50,11 @@ public class Effect_Launch_Missile : Effect
         if (_impactEffect == null)  { Debug.LogWarning("[Effect_Launch_Missile] impactEffect is null."); return; }
         if (context.Target == null) { Debug.LogWarning("[Effect_Launch_Missile] context.Target is null."); return; }
 
+        // Spawn origin: explicit caster transform → caster unit → target position (chain/bounce fallback)
         Transform spawnTransform = context.CasterTransform
-            ?? context.Caster?.transform;
-        if (spawnTransform == null) { Debug.LogWarning("[Effect_Launch_Missile] No caster transform."); return; }
+            ?? context.Caster?.transform
+            ?? context.Target?.transform;
+        if (spawnTransform == null) { Debug.LogWarning("[Effect_Launch_Missile] No spawn origin."); return; }
 
         // ── Build projectile GO ───────────────────────────────────────
         var go = new GameObject("Missile");
@@ -70,20 +74,23 @@ public class Effect_Launch_Missile : Effect
         // Sprite
         var sr              = go.AddComponent<SpriteRenderer>();
         sr.sprite           = LoadMissileSprite();
-        sr.color            = Color.white;
+        sr.color            = missileColor;
         sr.sortingLayerName = "Units";
         sr.sortingOrder     = 10;
 
         // ProjectileUnit — the actual movement + impact logic
-        var proj           = go.AddComponent<ProjectileUnit>();
-        proj.moveSpeed     = missileSpeed;
-        proj.lifetime      = missileLifetime;
-        proj.impactEffect  = _impactEffect;
-        proj.originAbility = context.OriginAbility;
-        proj.caster        = context.Caster;
-        proj.target        = context.Target.transform;
-        proj.targetPoint   = context.TargetPoint;
-        proj.homing        = true;
+        var proj                = go.AddComponent<ProjectileUnit>();
+        proj.moveSpeed          = missileSpeed;
+        proj.lifetime           = missileLifetime;
+        proj.impactEffect       = _impactEffect;
+        proj.originAbility      = context.OriginAbility;
+        proj.caster             = context.Caster;
+        proj.casterTransform    = context.CasterTransform ?? context.Caster?.transform;
+        proj.target             = context.Target.transform;
+        proj.targetPoint        = context.TargetPoint;
+        proj.homing             = true;
+        proj.drawImpactLine     = drawLine;
+        proj.originTower        = context.OriginTower;
 
         Debug.Log($"[Effect_Launch_Missile] Spawned missile → {context.Target.name}");
     }

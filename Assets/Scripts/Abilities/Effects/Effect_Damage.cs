@@ -39,6 +39,10 @@ public class Effect_Damage : Effect
             damage *= criticalDamageMultiplier;
 
         float finalDamage = Mathf.Clamp(damage, minimumDamage, maximumDamage);
+        bool wasAlive = target.isAlive && target.lifeCurrent > 0f;
         target.TakeDamage(finalDamage, shieldBonus, minimumDamage, maximumDamage, damageType);
+        bool killedIt = wasAlive && (target.lifeCurrent <= 0f || !target.isAlive);
+        if (killedIt && context.OriginTower != null)
+            context.OriginTower.GetComponent<TowerInfo>()?.RegisterKill();
     }
 }

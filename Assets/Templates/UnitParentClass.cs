@@ -81,7 +81,7 @@ public class UnitParentClass : MonoBehaviour
         HandleDeath();
     }
 
-    public void TakeDamage(float damageAmount, float shieldBonus, float minimum, float maximum, DamageType type)
+    public virtual void TakeDamage(float damageAmount, float shieldBonus, float minimum, float maximum, DamageType type)
     {
         float damageTaken = Mathf.Min(Mathf.Max(TotalDamageAfterReduction(damageAmount, type), minimum), maximum);
 
@@ -104,9 +104,9 @@ public class UnitParentClass : MonoBehaviour
     {
         switch (type)
         {
-            case DamageType.Arcana:
+            case DamageType.Arcane:
                 return damageAmount * Mathf.Pow(damageReductionBaseModifier, arcanaDefense);
-            case DamageType.Natural:
+            case DamageType.Elemental:
                 return damageAmount * Mathf.Pow(damageReductionBaseModifier, elementalDefense);
             case DamageType.Physical:
                 return damageAmount * Mathf.Pow(damageReductionBaseModifier, physicalDefense);

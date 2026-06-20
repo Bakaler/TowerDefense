@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEditor;
 using UnityEditor.SceneManagement;
+using UnityEditor.Events;
 using System.Collections.Generic;
 
 /// <summary>
@@ -26,9 +27,10 @@ public static class SceneBootstrap
         Undo.SetCurrentGroupName("Setup Basic Wave Scene");
         int undoGroup = Undo.GetCurrentGroup();
 
-        // ── Always reset managers & spawner ───────────────────────────
+        // ── Always reset managers, spawner, and shop UI ───────────────
         DestroyIfExists("--- MANAGERS ---");
         DestroyIfExists("--- SPAWNER ---");
+        DestroyIfExists("--- SHOP UI ---");
 
         // ─────────────────────────────────────────────────────────────
         // 1. MANAGERS
@@ -44,9 +46,9 @@ public static class SceneBootstrap
         logicGO.tag = EnsureTag("Logic");
         logicGO.AddComponent<LogicManager>();
 
-        var roundGO = CreateChild("RoundManager", managersRoot);
-        roundGO.tag = EnsureTag("RoundManager");
-        var roundManager = roundGO.AddComponent<RoundManager>();
+        var roundGO = CreateChild("WaveManager", managersRoot);
+        roundGO.AddComponent<WaveManager>();
+        roundGO.AddComponent<GameHUD>();
 
         var librariesGO = CreateChild("Libraries", managersRoot);
         librariesGO.AddComponent<UnitDefinitionLibrary>();
@@ -56,8 +58,6 @@ public static class SceneBootstrap
         librariesGO.AddComponent<EffectLibrary>();
         librariesGO.AddComponent<AbilityLibrary>();
         librariesGO.AddComponent<TowerPlacer>();
-
-        roundManager.resourceManager = resourceGO.GetComponent<ResourceManagerScript>();
 
         // ─────────────────────────────────────────────────────────────
         // 2. PATH — only create if it doesn't already exist
@@ -141,11 +141,15 @@ public static class SceneBootstrap
             new WaveEntry { unitDefinitionId = "armored_enemy", count = 2, spread = 0.3f, spawnInterval = 0.8f },
             new WaveEntry { unitDefinitionId = "boss_enemy",    count = 1, spread = 0f,   spawnInterval = 1.0f },
         };
-        spawner.spawnCount          = 0;
-        spawner.formationArrayIndex = -1;
+        // WaveManager drives spawner state at runtime via BeginWave()
 
         // ─────────────────────────────────────────────────────────────
-        // 4. CAMERA
+        // 4. SHOP UI — tower purchase buttons on the right side
+        // ─────────────────────────────────────────────────────────────
+        BuildShopUI(managersRoot);
+
+        // ─────────────────────────────────────────────────────────────
+        // 5. CAMERA
         // ─────────────────────────────────────────────────────────────
         var cam = Camera.main;
         if (cam != null)
@@ -159,7 +163,102 @@ public static class SceneBootstrap
         Undo.CollapseUndoOperations(undoGroup);
         EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
 
-        Debug.Log("[SceneBootstrap] Done. Press SPACE in Play mode to start the wave.");
+        Debug.Log("[SceneBootstrap] Done. Click 'START WAVE 1' (or press Space) in Play mode to begin.");
+    }
+
+    // ── Shop UI ───────────────────────────────────────────────────────
+
+    static void BuildShopUI(GameObject managersRoot)
+    {
+        var shopRoot = new GameObject("--- SHOP UI ---");
+        Undo.RegisterCreatedObjectUndo(shopRoot, "Create Shop UI");
+
+        // Canvas
+        var canvas = shopRoot.AddComponent<Canvas>();
+        canvas.renderMode   = RenderMode.ScreenSpaceOverlay;
+        canvas.sortingOrder = 5;
+
+        var scaler = shopRoot.AddComponent<UnityEngine.UI.CanvasScaler>();
+        scaler.uiScaleMode         = UnityEngine.UI.CanvasScaler.ScaleMode.ScaleWithScreenSize;
+        scaler.referenceResolution = new Vector2(1920f, 1080f);
+        scaler.matchWidthOrHeight  = 0.5f;
+
+        shopRoot.AddComponent<UnityEngine.UI.GraphicRaycaster>();
+
+        // Right panel background
+        var panel = new GameObject("ShopPanel");
+        Undo.RegisterCreatedObjectUndo(panel, "Create ShopPanel");
+        panel.transform.SetParent(shopRoot.transform, false);
+
+        var panelRT = panel.AddComponent<RectTransform>();
+        panelRT.anchorMin        = new Vector2(1f, 0f);
+        panelRT.anchorMax        = new Vector2(1f, 1f);
+        panelRT.pivot            = new Vector2(1f, 0.5f);
+        panelRT.anchoredPosition = Vector2.zero;
+        panelRT.sizeDelta        = new Vector2(160f, 0f);
+
+        panel.AddComponent<UnityEngine.UI.Image>().color = new Color(0.1f, 0.1f, 0.15f, 0.92f);
+
+        // Tower definitions — add entries here as new towers are added to towers.json
+        var towers = new (string id, string label, string cost)[]
+        {
+            ("basic_tower",     "Basic\nTower",     "3g"),
+            ("income_tower",    "Income\nTower",    "5g"),
+            ("chain_tower",     "Chain\nTower",     "6g"),
+            ("boomerang_tower", "Boomerang\nTower", "5g"),
+        };
+
+        float startY = -80f;
+        float stepY  = -120f;
+        float btnW   = 120f;
+        float btnH   = 90f;
+
+        for (int i = 0; i < towers.Length; i++)
+        {
+            var (towerId, label, cost) = towers[i];
+
+            var btnGO = new GameObject($"Buy_{towerId}");
+            Undo.RegisterCreatedObjectUndo(btnGO, "Create TowerButton");
+            btnGO.transform.SetParent(panel.transform, false);
+
+            var rt = btnGO.AddComponent<RectTransform>();
+            rt.anchorMin        = new Vector2(0.5f, 1f);
+            rt.anchorMax        = new Vector2(0.5f, 1f);
+            rt.pivot            = new Vector2(0.5f, 1f);
+            rt.anchoredPosition = new Vector2(0f, startY + stepY * i);
+            rt.sizeDelta        = new Vector2(btnW, btnH);
+
+            var img = btnGO.AddComponent<UnityEngine.UI.Image>();
+            img.color = new Color(0.18f, 0.20f, 0.28f, 1f);
+
+            var btn = btnGO.AddComponent<UnityEngine.UI.Button>();
+            btn.targetGraphic = img;
+            var cols = btn.colors;
+            cols.highlightedColor = new Color(0.28f, 0.32f, 0.44f, 1f);
+            cols.pressedColor     = new Color(0.12f, 0.14f, 0.20f, 1f);
+            btn.colors = cols;
+
+            // Generic shop button — works for any tower id
+            var shopBtn = btnGO.AddComponent<TowerShopButton>();
+            shopBtn.towerId = towerId;
+            UnityEventTools.AddPersistentListener(btn.onClick, shopBtn.OnButtonPress);
+
+            // Label
+            var labelGO = new GameObject("Label");
+            Undo.RegisterCreatedObjectUndo(labelGO, "Create Label");
+            labelGO.transform.SetParent(btnGO.transform, false);
+            var labelRT = labelGO.AddComponent<RectTransform>();
+            labelRT.anchorMin = new Vector2(0f, 0f);
+            labelRT.anchorMax = new Vector2(1f, 1f);
+            labelRT.offsetMin = Vector2.zero;
+            labelRT.offsetMax = Vector2.zero;
+            var labelTxt = labelGO.AddComponent<UnityEngine.UI.Text>();
+            labelTxt.text      = $"{label}\n<size=13>({cost})</size>";
+            labelTxt.color     = Color.white;
+            labelTxt.font      = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            labelTxt.fontSize  = 15;
+            labelTxt.alignment = TextAnchor.MiddleCenter;
+        }
     }
 
     // ── Helpers ───────────────────────────────────────────────────────

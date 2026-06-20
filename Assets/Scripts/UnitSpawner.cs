@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// Data entry for one wave in this spawner's sequence.
-/// Each wave spawns 'count' units of 'unitDefinitionId' with random spread.
+/// Data entry for one spawn group within a wave.
+/// unitDefinitionId must match an id in Resources/Definitions/units.json.
 /// </summary>
 [Serializable]
 public class WaveEntry
@@ -12,119 +12,146 @@ public class WaveEntry
     [Tooltip("Must match an id in Resources/Definitions/units.json")]
     public string unitDefinitionId = "basic_enemy";
 
-    [Tooltip("Number of units to spawn in this wave")]
+    [Tooltip("Number of units to spawn in this group")]
     public int count = 3;
 
     [Tooltip("Random spread radius around spawn point (world units)")]
     public float spread = 0.5f;
 
-    [Tooltip("Seconds between each unit in this wave")]
+    [Tooltip("Seconds between each unit in this group")]
     public float spawnInterval = 0.4f;
 }
 
+/// <summary>
+/// Spawns enemies when told to by WaveManager.
+/// Self-registers with WaveManager.Instance on Start.
+/// Call BeginWave() to start a new wave's spawn sequence.
+/// </summary>
 public class UnitSpawner : MonoBehaviour
 {
     [Header("References")]
-    public RoundManager roundManager;
-
-    [Tooltip("Head node this spawner feeds units into. Must be a PathGraph node with no incoming connections.")]
+    [Tooltip("Head node this spawner feeds units into.")]
     public PathNode headNode;
 
-    [Header("Waves")]
-    [Tooltip("One entry per wave — spawned in order each round")]
-    public List<WaveEntry> waves = new List<WaveEntry>();
-
     // ── Internal state ────────────────────────────────────────────────
-    public int  spawnCount         = 0;
-    public int  formationArrayIndex = -1;
-    public bool isActive           = false;
+    [HideInInspector] public List<WaveEntry> waves = new List<WaveEntry>();
 
+    private int   _formationIndex;
+    private int   _subIndex;          // position within current WaveEntry
+    private int   _spawnTarget;
     private float _timer;
     private float _coolDown;
+    private bool  _running;
+
+    // ── Public state ──────────────────────────────────────────────────
+    /// <summary>True while this spawner still has units left to emit this wave.</summary>
+    public bool IsSpawning => _running && _formationIndex < _spawnTarget;
 
     // ── Lifecycle ─────────────────────────────────────────────────────
 
     void Start()
     {
-        roundManager = GameObject.FindGameObjectWithTag("RoundManager").GetComponent<RoundManager>();
-        roundManager.spawners.Add(gameObject);
+        WaveManager.Instance?.RegisterSpawner(this);
     }
 
     void Update()
     {
-        if (formationArrayIndex == -1) return;
+        if (!IsSpawning) return;
 
-        isActive = formationArrayIndex < spawnCount;
-        if (!isActive) return;
-
-        if (_timer < _coolDown)
+        _timer += Time.deltaTime;
+        if (_timer >= _coolDown)
         {
-            _timer += Time.deltaTime;
-        }
-        else if (formationArrayIndex < spawnCount)
-        {
-            Spawn();
             _timer = 0f;
+            Spawn();
         }
+    }
+
+    // ── Public API ────────────────────────────────────────────────────
+
+    /// <summary>
+    /// Called by WaveManager at the start of each wave.
+    /// Replaces the current spawn queue with the new group list.
+    /// </summary>
+    public void BeginWave(List<WaveEntry> groups)
+    {
+        waves           = groups ?? new List<WaveEntry>();
+        _formationIndex = 0;
+        _subIndex       = 0;
+        _spawnTarget    = waves.Count;
+        _timer          = 0f;
+        _coolDown       = 0f;   // first unit spawns immediately
+        _running        = waves.Count > 0;
     }
 
     // ── Spawn ─────────────────────────────────────────────────────────
 
     void Spawn()
     {
-        if (waves == null || waves.Count == 0) { formationArrayIndex++; return; }
+        if (_formationIndex >= waves.Count) { _running = false; return; }
 
-        WaveEntry entry = waves[formationArrayIndex % waves.Count];
+        WaveEntry entry = waves[_formationIndex];
         _coolDown = entry.spawnInterval > 0f ? entry.spawnInterval : 0.4f;
 
         if (UnitFactory.Instance == null)
         {
-            Debug.LogError("[UnitSpawner] UnitFactory not found in scene.");
-            formationArrayIndex++;
+            Debug.LogError("[UnitSpawner] UnitFactory not in scene.");
+            _formationIndex++;
             return;
         }
 
-        if (PathGraph.Instance == null)
-            Debug.LogWarning("[UnitSpawner] PathGraph not in scene — units will have no route.");
+        // Spawn ONE unit this tick
+        SpawnUnit(entry);
+        _subIndex++;
 
-        for (int i = 0; i < entry.count; i++)
+        // Advance to next WaveEntry when this one is exhausted
+        if (_subIndex >= entry.count)
         {
-            Vector3 offset = new Vector3(
-                UnityEngine.Random.Range(-entry.spread, entry.spread),
-                UnityEngine.Random.Range(-entry.spread, entry.spread),
-                0f);
-
-            Vector3 spawnPos = new Vector3(transform.position.x, transform.position.y, 0f) + offset;
-
-            GameObject unitGO = UnitFactory.Instance.Build(entry.unitDefinitionId, spawnPos);
-            if (unitGO == null) continue;
-
-            // Build and assign route
-            UnitManager unit = unitGO.GetComponent<UnitManager>();
-            if (unit != null && PathGraph.Instance != null)
-            {
-                PathNode head = headNode != null ? headNode : GetNearestHead();
-                if (head != null)
-                    unit.AssignRoute(PathGraph.Instance.BuildRoute(head));
-                else
-                    Debug.LogWarning("[UnitSpawner] No head node found — unit will not move.");
-            }
-
-            roundManager.aliveEnemies.Add(unitGO);
+            _formationIndex++;
+            _subIndex = 0;
         }
 
-        formationArrayIndex++;
+        if (_formationIndex >= _spawnTarget)
+            _running = false;
     }
+
+    void SpawnUnit(WaveEntry entry)
+    {
+        Vector3 offset = new Vector3(
+            UnityEngine.Random.Range(-entry.spread, entry.spread),
+            UnityEngine.Random.Range(-entry.spread, entry.spread),
+            0f);
+
+        Vector3 spawnPos = transform.position + offset;
+        spawnPos.z = 0f;
+
+        GameObject unitGO = UnitFactory.Instance.Build(entry.unitDefinitionId, spawnPos);
+        if (unitGO == null) return;
+
+        UnitManager unit = unitGO.GetComponent<UnitManager>();
+        if (unit != null && PathGraph.Instance != null)
+        {
+            PathNode head = headNode != null ? headNode : GetNearestHead();
+            if (head != null)
+                unit.AssignRoute(PathGraph.Instance.BuildRoute(head));
+            else
+                Debug.LogWarning("[UnitSpawner] No head PathNode found — unit will not move.");
+        }
+
+        if (unit != null)
+            WaveManager.Instance?.RegisterUnit(unit);
+    }
+
+    // ── Helpers ───────────────────────────────────────────────────────
 
     PathNode GetNearestHead()
     {
+        if (PathGraph.Instance == null) return null;
         var heads = PathGraph.Instance.GetHeads();
         if (heads.Count == 0) return null;
         if (heads.Count == 1) return heads[0];
 
-        // Pick the head closest to this spawner
-        PathNode best = null;
-        float bestDist = float.MaxValue;
+        PathNode best     = null;
+        float    bestDist = float.MaxValue;
         foreach (var h in heads)
         {
             float d = ((Vector2)transform.position - h.Position).sqrMagnitude;

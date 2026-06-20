@@ -98,6 +98,17 @@ public class TowerFactory : MonoBehaviour
         // Turrent.Start() resolves fireAbilityId → Ability_Effect from the libraries itself.
         turrent.definitionId = def.id;
 
+        // ── 5b. TowerInfo ─────────────────────────────────────────
+        var info          = go.AddComponent<TowerInfo>();
+        info.definitionId = def.id;
+        info.displayName  = def.displayName ?? def.id;
+        info.description  = def.description ?? "";
+        info.resourceCost = def.resourceCost;
+        info.cooldown     = ResolveCooldown(def.fireAbilityId);
+        info.damage       = ResolveDamage(def.fireAbilityId);
+        if (System.Enum.TryParse<BalanceType>(def.balanceType, true, out var bt))
+            info.balanceType = bt;
+
         // ── 6. Extra components ───────────────────────────────────
         var orderedKeys   = ResolveOrder(def.components);
         var dataOverrides = BuildDataMap(def.components);
@@ -142,6 +153,40 @@ public class TowerFactory : MonoBehaviour
         tex.Apply();
         tex.filterMode = FilterMode.Bilinear;
         return Sprite.Create(tex, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f), size);
+    }
+
+    private static float ResolveCooldown(string abilityId)
+    {
+        if (string.IsNullOrEmpty(abilityId)) return 0f;
+        if (AbilityLibrary.Instance == null) return 0f;
+        var ab = AbilityLibrary.Instance.GetAbility(abilityId);
+        return ab != null ? ab.cost.cooldownDuration : 0f;
+    }
+
+    private static float ResolveDamage(string abilityId)
+    {
+        if (string.IsNullOrEmpty(abilityId)) return 0f;
+        if (AbilityLibrary.Instance == null || EffectLibrary.Instance == null) return 0f;
+        var ab = AbilityLibrary.Instance.GetAbility(abilityId);
+        if (ab == null) return 0f;
+        return FindFirstDamage(ab.effectId, 0);
+    }
+
+    // Walk the effect tree up to 4 levels deep looking for the first damage value
+    private static float FindFirstDamage(string effectId, int depth)
+    {
+        if (depth > 4 || string.IsNullOrEmpty(effectId)) return 0f;
+        var effect = EffectLibrary.Instance?.GetEffect(effectId);
+        if (effect == null) return 0f;
+        if (effect is Effect_Damage dmg) return dmg.damageBase;
+        if (effect is Effect_Launch_Missile missile) return FindFirstDamage(missile.impactEffectId, depth + 1);
+        if (effect is Effect_Set set)
+            foreach (var id in set.EffectIds)
+            {
+                float v = FindFirstDamage(id, depth + 1);
+                if (v > 0f) return v;
+            }
+        return 0f;
     }
 
     private static List<string> ResolveOrder(ComponentEntry[] entries)

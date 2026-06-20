@@ -121,6 +121,10 @@ public class TowerPlacer : MonoBehaviour
         if (_ghost == null) return;
         _ghost.name = $"[Ghost] {_ghost.name}";
 
+        // Mark as ghost so balance counts ignore it
+        var ghostInfo = _ghost.GetComponent<TowerInfo>();
+        if (ghostInfo != null) ghostInfo.isGhost = true;
+
         // Disable all logic components — ghost is visual only
         // (SpriteRenderer is a Renderer, not MonoBehaviour, so it's unaffected here)
         foreach (var mb in _ghost.GetComponents<MonoBehaviour>())
