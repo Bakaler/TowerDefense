@@ -16,6 +16,7 @@ public class BoomerangProjectile : MonoBehaviour
     public float            arcRadius   = 4f;   // distance of the circle center from caster
     public float            sweepSpeed  = 180f; // degrees per second
     public float            hitRadius   = 0.4f; // overlap check radius for piercing hits
+    public float            spinSpeed   = 0f;   // extra self-rotation degrees per second
 
     // ── Internal ─────────────────────────────────────────────────────
     private Vector2 _center;
@@ -69,9 +70,10 @@ public class BoomerangProjectile : MonoBehaviour
             _center.y + Mathf.Sin(rad) * _radius,
             0f);
 
-        // Rotate sprite to face movement direction (tangent)
+        // Tangent-facing + extra spin
         float tangentAngle = _currentAngle + 90f;
-        transform.rotation = Quaternion.Euler(0f, 0f, tangentAngle);
+        float spin         = _totalSweep / sweepSpeed * spinSpeed; // spin proportional to time elapsed
+        transform.rotation = Quaternion.Euler(0f, 0f, tangentAngle + spin);
 
         CheckHits();
     }

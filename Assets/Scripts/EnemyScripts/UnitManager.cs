@@ -41,6 +41,8 @@ public class UnitManager : UnitParentClass
         _follower  = GetComponent<RouteFollower>();
         _sr        = GetComponent<SpriteRenderer>();
         if (_sr != null) _baseColor = _sr.color;
+
+        HealthBar.Attach(gameObject);
     }
 
     public void ApplyDefinition(string id)
@@ -118,7 +120,9 @@ public class UnitManager : UnitParentClass
         if (_follower == null || !_follower.HasRoute)
             return;
 
-        float speed = speedCurrent > 0 ? speedCurrent : speedMax;
+        // Use speedCurrent directly — BehaviorHandler sets it to 0 for root/freeze effects.
+        // Only fall back to speedMax if the unit was never initialized (speedCurrent == speedMax == 0).
+        float speed = (speedMax <= 0f) ? speedCurrent : Mathf.Max(0f, speedCurrent);
         _follower.SetSpeed(speed);
 
         bool reachedEnd = _follower.Tick();

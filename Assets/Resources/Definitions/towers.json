@@ -7,9 +7,13 @@
       "balanceType": "Physical",
       "range": 4.0,
       "resourceCost": 3,
+      "maxTier": 3,
+      "towerTier": 1,
+      "upgradeStatMultiplier": 2.25,
       "fireAbilityId": "basic_tower_shot",
       "spritePath": "Art/Towers/Tower1",
       "scale": 1.5,
+      "rotationSpeed": 180.0,
       "debugColor": { "r": 0.2, "g": 0.6, "b": 1.0, "a": 1.0 },
       "components": []
     },
@@ -20,6 +24,7 @@
       "description": "Generates resources over time instead of attacking.",
       "range": 0.0,
       "resourceCost": 5,
+      "towerTier": 1,
       "fireAbilityId": "",
       "spriteSheet": "Art/Towers/TowerSet1",
       "spriteIndex": 0,
@@ -35,20 +40,36 @@
           }
         }
       ]
-    }
-    ,
+    },
     {
-      "id": "boomerang_tower",
-      "displayName": "Boomerang Tower",
-      "balanceType": "Physical",
-      "description": "Throws a boomerang that sweeps through all enemies in a wide arc and returns.",
-      "range": 4.0,
-      "resourceCost": 5,
-      "fireAbilityId": "boomerang_shot",
-      "spritePath": "Art/Towers/Tower1",
+      "id": "research_tower",
+      "displayName": "Research Tower",
+      "balanceType": "Arcane",
+      "description": "Passively generates tech over time. Arcane balance reduces the generation interval.",
+      "range": 0.0,
+      "resourceCost": 6,
+      "towerTier": 1,
+      "fireAbilityId": "",
+      "spriteSheet": "Art/Towers/TowerSet1",
+      "spriteIndex": 0,
       "scale": 1.5,
-      "debugColor": { "r": 0.9, "g": 0.7, "b": 0.2, "a": 1.0 },
-      "components": []
+      "tintColor": { "r": 0.35, "g": 1.0, "b": 0.45, "a": 1.0 },
+      "debugColor": { "r": 0.35, "g": 1.0, "b": 0.45, "a": 1.0 },
+      "components": [
+        {
+          "key": "research_tower",
+          "data": {
+            "orbInterval": 12.0,
+            "minInterval": 4.0,
+            "arcaneScale": 0.12,
+            "travelTime": 9.0,
+            "fullValue": 2,
+            "arrivalValue": 1,
+            "orbSpriteSheet": "Art/Towers/TowerSet1",
+            "orbSpriteIndex": 1
+          }
+        }
+      ]
     },
     {
       "id": "chain_tower",
@@ -57,11 +78,233 @@
       "description": "Fires chain lightning that arcs between up to 4 enemies.",
       "range": 5.0,
       "resourceCost": 6,
+      "maxTier": 3,
+      "towerTier": 2,
+      "upgradeStatMultiplier": 2.25,
       "fireAbilityId": "chain_lightning_shot",
-      "spritePath": "Art/Towers/Tower1",
+      "spritePath": "Art/Towers/Tower4",
       "scale": 1.5,
       "debugColor": { "r": 0.4, "g": 0.8, "b": 1.0, "a": 1.0 },
       "components": []
+    },
+    {
+      "id": "shotgun_tower",
+      "displayName": "Shotgun Tower",
+      "balanceType": "Physical",
+      "description": "Fires a spray of fast pellets in a cone. All pellets that connect deal damage; those that miss vanish quickly.",
+      "range": 5.5,
+      "resourceCost": 5,
+      "maxTier": 3,
+      "towerTier": 1,
+      "upgradeStatMultiplier": 2.25,
+      "fireAbilityId": "shotgun_tower_shot",
+      "spriteSheet": "Art/Towers/TowerSet1",
+      "spriteIndex": 2,
+      "scale": 1.5,
+      "tintColor": { "r": 1.0, "g": 0.65, "b": 0.15, "a": 1.0 },
+      "debugColor": { "r": 1.0, "g": 0.65, "b": 0.15, "a": 1.0 },
+      "rotationSpeed": 180.0,
+      "components": []
+    },
+    {
+      "id": "bee_tower",
+      "displayName": "Bee Tower",
+      "balanceType": "Physical",
+      "description": "Deploys 4 bees that wander the area, swarming and attacking nearby enemies.",
+      "range": 5.0,
+      "resourceCost": 6,
+      "maxTier": 3,
+      "towerTier": 2,
+      "upgradeStatMultiplier": 2.25,
+      "fireAbilityId": "",
+      "spriteSheet": "Art/Towers/TowerSet1",
+      "spriteIndex": 0,
+      "scale": 1.5,
+      "tintColor": { "r": 1.0, "g": 0.85, "b": 0.1, "a": 1.0 },
+      "debugColor": { "r": 1.0, "g": 0.85, "b": 0.1, "a": 1.0 },
+      "components": [
+        {
+          "key": "bee_tower",
+          "data": {
+            "beeCount": 4,
+            "beeRange": 5.0,
+            "beeCooldown": 0.8,
+            "beeDamage": 6.0,
+            "bulletSpeed": 14.0,
+            "bulletLifetime": 0.6
+          }
+        }
+      ]
+    },
+    {
+      "id": "boomerang_tower",
+      "displayName": "Boomerang Tower",
+      "balanceType": "Physical",
+      "description": "Throws a boomerang that sweeps through all enemies in a wide arc and returns.",
+      "range": 4.0,
+      "resourceCost": 5,
+      "maxTier": 3,
+      "towerTier": 2,
+      "upgradeStatMultiplier": 2.25,
+      "fireAbilityId": "boomerang_shot",
+      "spritePath": "Art/Towers/Tower2",
+      "scale": 1.2,
+      "rotationSpeed": 120.0,
+      "debugColor": { "r": 0.9, "g": 0.7, "b": 0.2, "a": 1.0 },
+      "components": []
+    },
+    {
+      "id": "root_tower",
+      "displayName": "Root Tower",
+      "balanceType": "Elemental",
+      "description": "Fires a projectile that roots enemies in place for 1 second. Will not target already-rooted units.",
+      "range": 4.5,
+      "resourceCost": 7,
+      "maxTier": 3,
+      "towerTier": 2,
+      "upgradeStatMultiplier": 2.25,
+      "fireAbilityId": "root_tower_shot",
+      "spriteSheet": "Art/Towers/TowerSet1",
+      "spriteIndex": 2,
+      "scale": 1.5,
+      "tintColor": { "r": 0.65, "g": 0.2, "b": 0.9, "a": 1.0 },
+      "debugColor": { "r": 0.65, "g": 0.2, "b": 0.9, "a": 1.0 },
+      "components": []
+    },
+    {
+      "id": "entropy_tower",
+      "displayName": "Entropy Tower",
+      "balanceType": "Arcane",
+      "description": "Gains a stack (max 50) on each kill. Each stack increases damage by 4%.",
+      "range": 5.0,
+      "resourceCost": 8,
+      "maxTier": 3,
+      "towerTier": 2,
+      "upgradeStatMultiplier": 2.25,
+      "fireAbilityId": "entropy_tower_shot",
+      "spriteSheet": "Art/Towers/TowerSet1",
+      "spriteIndex": 2,
+      "scale": 1.5,
+      "tintColor": { "r": 0.9, "g": 0.4, "b": 0.1, "a": 1.0 },
+      "debugColor": { "r": 0.9, "g": 0.4, "b": 0.1, "a": 1.0 },
+      "rotationSpeed": 90.0,
+      "components": [
+        {
+          "key": "entropy_tower",
+          "data": { "perStackBonus": 0.04 }
+        }
+      ]
+    },
+    {
+      "id": "poison_tower",
+      "displayName": "Poison Tower",
+      "balanceType": "Elemental",
+      "description": "Fires a poison glob that splashes on impact, applying a damage-over-time to all nearby enemies.",
+      "range": 3.0,
+      "resourceCost": 6,
+      "maxTier": 3,
+      "towerTier": 2,
+      "upgradeStatMultiplier": 2.25,
+      "fireAbilityId": "poison_tower_shot",
+      "spriteSheet": "Art/Towers/TowerSet1",
+      "spriteIndex": 2,
+      "scale": 1.5,
+      "tintColor": { "r": 0.4, "g": 1.0, "b": 0.3, "a": 1.0 },
+      "debugColor": { "r": 0.4, "g": 1.0, "b": 0.3, "a": 1.0 },
+      "components": []
+    },
+    {
+      "id": "collector_tower",
+      "displayName": "Collector Tower",
+      "balanceType": "Elemental",
+      "description": "Sends a light tether to grab nearby bounty drops and collect full income towers automatically.",
+      "range": 3.5,
+      "resourceCost": 7,
+      "towerTier": 3,
+      "fireAbilityId": "",
+      "spriteSheet": "Art/Towers/Tower3",
+      "spriteIndex": 0,
+      "scale": 1.5,
+      "debugColor": { "r": 0.4, "g": 1.0, "b": 0.9, "a": 1.0 },
+      "components": [
+        {
+          "key": "collector_tower",
+          "data": {
+            "range": 3.5,
+            "reachTime": 0.35,
+            "cooldown": 1.2
+          }
+        }
+      ]
+    },
+    {
+      "id": "slow_tower",
+      "displayName": "Slow Tower",
+      "balanceType": "Elemental",
+      "description": "Fires chilling projectiles that reduce enemy movement speed by 60% for 2 seconds.",
+      "range": 3.5,
+      "resourceCost": 5,
+      "maxTier": 3,
+      "towerTier": 1,
+      "upgradeStatMultiplier": 2.25,
+      "fireAbilityId": "slow_tower_shot",
+      "spriteSheet": "Art/Towers/TowerSet1",
+      "spriteIndex": 2,
+      "scale": 1.5,
+      "tintColor": { "r": 0.5, "g": 0.85, "b": 1.0, "a": 1.0 },
+      "debugColor": { "r": 0.5, "g": 0.85, "b": 1.0, "a": 1.0 },
+      "components": []
+    },
+    {
+      "id": "railgun_tower",
+      "displayName": "Railgun Tower",
+      "balanceType": "Physical",
+      "description": "Charges up and fires a piercing beam across the entire map, hitting every enemy in its path.",
+      "range": 22.0,
+      "resourceCost": 9,
+      "maxTier": 3,
+      "towerTier": 3,
+      "upgradeStatMultiplier": 2.25,
+      "fireAbilityId": "railgun_shot",
+      "spriteSheet": "Art/Towers/TowerSet1",
+      "spriteIndex": 2,
+      "scale": 1.5,
+      "rotationSpeed": 90.0,
+      "tintColor": { "r": 0.4, "g": 0.9, "b": 1.0, "a": 1.0 },
+      "debugColor": { "r": 0.4, "g": 0.9, "b": 1.0, "a": 1.0 },
+      "components": []
+    },
+    {
+      "id": "laser_tower",
+      "displayName": "Laser Tower",
+      "balanceType": "Arcane",
+      "description": "Locks a continuous beam onto an enemy. Damage ramps up the longer it holds the lock.",
+      "range": 5.5,
+      "resourceCost": 7,
+      "maxTier": 3,
+      "towerTier": 3,
+      "upgradeStatMultiplier": 2.25,
+      "fireAbilityId": "",
+      "spriteSheet": "Art/Towers/TowerSet1",
+      "spriteIndex": 2,
+      "scale": 1.5,
+      "rotationSpeed": 200.0,
+      "tintColor": { "r": 1.0, "g": 0.25, "b": 0.1, "a": 1.0 },
+      "debugColor": { "r": 1.0, "g": 0.25, "b": 0.1, "a": 1.0 },
+      "components": [
+        {
+          "key": "laser_tower",
+          "data": {
+            "baseDamagePerSecond": 8.0,
+            "maxRampMultiplier": 5.0,
+            "rampDuration": 4.0,
+            "beamWidth": 0.06,
+            "beamColorR": 1.0,
+            "beamColorG": 0.25,
+            "beamColorB": 0.1
+          }
+        }
+      ]
     }
   ]
 }

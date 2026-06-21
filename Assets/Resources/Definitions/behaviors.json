@@ -1,0 +1,31 @@
+{
+  "behaviors": [
+    {
+      "id": "rooted",
+      "displayName": "Rooted",
+      "duration": 1.0,
+      "stackRule": "refresh",
+      "moveSpeedMultiplier": 0.0,
+      "tintColor": { "r": 0.6, "g": 0.2, "b": 0.85, "a": 1.0 }
+    },
+    {
+      "id": "slowed",
+      "displayName": "Slowed",
+      "duration": 2.5,
+      "stackRule": "refresh",
+      "moveSpeedMultiplier": 0.4,
+      "tintColor": { "r": 0.45, "g": 0.75, "b": 1.0, "a": 1.0 }
+    },
+    {
+      "id": "poisoned",
+      "displayName": "Poisoned",
+      "duration": 4.0,
+      "stackRule": "refresh",
+      "moveSpeedMultiplier": 1.0,
+      "tickInterval": 0.75,
+      "tickDamage": 4.0,
+      "tickDamageType": 4,
+      "tintColor": { "r": 0.45, "g": 1.0, "b": 0.35, "a": 1.0 }
+    }
+  ]
+}

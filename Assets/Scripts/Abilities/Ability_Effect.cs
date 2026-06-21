@@ -11,6 +11,9 @@ public class Ability_Effect : Ability
     /// <summary>Detection radius in world units. Turrent sizes its trigger collider to this.</summary>
     public float range = 5f;
 
+    /// <summary>Total fire cone in degrees. 360 = omnidirectional (no arc restriction).</summary>
+    public float fireArc = 360f;
+
     [Tooltip("Time before cast officially starts (wind-up)")]
     public float prepare_time    = 0f;
     [Tooltip("Time at which the ability fires")]
@@ -28,4 +31,11 @@ public class Ability_Effect : Ability
     /// <summary>The actual Effect instance, resolved from effectId by AbilityLibrary.</summary>
     [System.NonSerialized]
     public Effect effect;
+
+    /// <summary>
+    /// Optional target-selection filters. The tower prefers targets that pass all validators,
+    /// falling back to normal lead-enemy selection if no valid target exists.
+    /// </summary>
+    [System.NonSerialized]
+    public TargetValidator[] targetValidators;
 }

@@ -35,10 +35,12 @@ Gold is the primary resource used to place towers.
 
 **Tower costs:**
 
-| Tower | Cost |
-|---|---|
-| Basic Tower | 3 |
-| Income Tower | 5 |
+| Tower | Cost | Balance Type |
+|---|---|---|
+| Basic Tower | 3 | Physical |
+| Income Tower | 5 | Elemental |
+| Boomerang Tower | 5 | Physical |
+| Chain Tower | 8 | Arcane |
 
 ### Income Towers
 
@@ -115,7 +117,9 @@ Each tower contributes Balance score every round. Balance flows into pools deter
 
 ### Balance Output Formula
 
-    Output = Level Value x Type Percentage
+    Output = Level Value × Type Ratio
+
+Each tower's individual contribution is `1 × ratio`, where ratio depends on how many towers of the same definition ID exist. The cumulative Balance for a type displayed in the HUD is the sum of all individual tower contributions.
 
 **Level Value** doubles each level:
 
@@ -127,14 +131,17 @@ Each tower contributes Balance score every round. Balance flows into pools deter
 | L4 | 8 |
 | L5 | 16 |
 
-**Type Percentage** is based on how many towers of the same type ID are placed. All levels of a type share one count:
+**Type Ratio** is based on how many towers of the same definition ID are placed. All levels of a type share one count:
 
-| Count of same type | Percentage |
+| Count of same ID | Ratio |
 |---|---|
-| 1 to 4 | 100% |
-| 5 | Drops sharply |
-| 6 to 9 | Continues declining |
-| 10 | 1% |
+| 1 to 4 | 1.00 (100%) |
+| 5 | 0.64 |
+| 6 | 0.44 |
+| 8 | 0.25 |
+| 10 | 0.16 |
+
+The formula for count > 4 is `(4 / count)²`.
 
 ### Grouping Rules
 
@@ -253,8 +260,27 @@ All gameplay objects are defined in JSON and built entirely in code. No prefabs.
 Abilities reference effects by string ID. Effects reference other effects by string ID. All cross-references are resolved at runtime by EffectLibrary and AbilityLibrary. No ScriptableObject direct references are serialized.
 
 **Effect types implemented:**
-- damage: applies damage with crit, min/max clamping, and damage type
-- launch_missile: spawns a homing ProjectileUnit, applies impactEffect on hit
+- `damage` — applies damage with crit, min/max clamping, and damage type
+- `launch_missile` — spawns a homing ProjectileUnit, applies impactEffect on hit; supports custom color tint
+- `search_area` — area-of-effect search with arc and max target filtering; used for chain lightning bounces
+- `set` — executes a list of effects in sequence on the same context
+- `launch_boomerang` — fires a projectile in a full 360° arc; pierces and multi-hits; clears hit list at 180° to allow re-hits on the return leg
+
+### Tower Info Panel
+
+Clicking a placed tower opens a panel showing:
+- **Name** — tower display name
+- **Balance** — balance type initial + individual contribution: `P  1 (0.85)` (value = 1, ratio in parens)
+- **Damage** — base damage per hit resolved from the effect chain
+- **Fire Rate** — shots per second
+- **Kills** — lifetime kill count for that specific tower instance
+
+### HUD Header Balance Bar
+
+A second row in the top bar shows cumulative Balance per type:
+- `E  {sum}` `A  {sum}` `P  {sum}`
+- Each value is the sum of all non-ghost tower contributions for that type: `count × ratio`
+- Ghost preview towers are excluded from all counts
 
 ### Path System
 
@@ -268,7 +294,7 @@ Turrets detect enemies via a trigger CircleCollider2D sized to the ability range
 
 ## Open Questions
 
-- Balance percentage curve: exact shape from 5 to 10 towers
+- Balance ratio curve is `(4/count)²` — may need tuning as more tower types are added
 - Tower level cap
 - How tech accumulates and exact Research costs per tier batch
 - Ability bar slot limit, whether building too many tower types forces the player to choose

@@ -6,14 +6,16 @@ public class Effect_Launch_Boomerang : Effect
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
     static void Register() => EffectRegistry.Register("launch_boomerang", typeof(Effect_Launch_Boomerang));
 
-    public string impactEffectId  = "";
-    public float  arcRadius       = 4f;
-    public float  sweepSpeed      = 180f;
-    public float  hitRadius       = 0.4f;
-    public float  boomerangScale  = 0.6f;
+    public string impactEffectId      = "";
+    public float  arcRadius           = 4f;
+    public float  sweepSpeed          = 180f;
+    public float  hitRadius           = 0.4f;
+    public float  boomerangScale      = 0.6f;
+    public string boomerangSpritePath = "";
     public string boomerangSpriteSheet = "";
     public int    boomerangSpriteIndex = -1;
-    public Color  boomerangColor  = Color.white;
+    public Color  boomerangColor      = Color.white;
+    public float  spinSpeed           = 0f;   // extra degrees/s spin on the sprite
 
     private Effect _impactEffect;
 
@@ -62,11 +64,19 @@ public class Effect_Launch_Boomerang : Effect
         proj.arcRadius         = arcRadius;
         proj.sweepSpeed        = sweepSpeed;
         proj.hitRadius         = hitRadius;
+        proj.spinSpeed         = spinSpeed;
         proj.Launch((Vector2)origin.position, targetDir);
     }
 
     Sprite LoadSprite()
     {
+        // Single-sprite path takes priority
+        if (!string.IsNullOrEmpty(boomerangSpritePath))
+        {
+            var s = Resources.Load<Sprite>(boomerangSpritePath);
+            if (s != null) return s;
+        }
+        // Sheet fallback
         if (!string.IsNullOrEmpty(boomerangSpriteSheet) && boomerangSpriteIndex >= 0)
         {
             if (_cachedSheetPath != boomerangSpriteSheet)

@@ -1,11 +1,11 @@
 public class AbilityInstance
 {
-    public Ability_Effect Definition { get; private set; }
-    public float CooldownRemaining { get; private set; }
+    public Ability_Effect Definition       { get; private set; }
+    public float          CooldownRemaining { get; private set; }
 
     public AbilityInstance(Ability_Effect definition)
     {
-        Definition = definition;
+        Definition        = definition;
         CooldownRemaining = 0f;
     }
 

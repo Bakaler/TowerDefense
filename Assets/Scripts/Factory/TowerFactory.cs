@@ -68,14 +68,14 @@ public class TowerFactory : MonoBehaviour
         {
             var sheet = Resources.LoadAll<Sprite>(def.spriteSheet);
             if (sheet != null && def.spriteIndex < sheet.Length)
-                { sr.sprite = sheet[def.spriteIndex]; sr.color = Color.white; }
+                { sr.sprite = sheet[def.spriteIndex]; sr.color = def.tintColor; }
             else
                 Debug.LogWarning($"[TowerFactory] Sheet '{def.spriteSheet}' index {def.spriteIndex} not found for '{def.id}'.");
         }
         else if (!string.IsNullOrEmpty(def.spritePath))
         {
             var sprite = Resources.Load<Sprite>(def.spritePath);
-            if (sprite != null) { sr.sprite = sprite; sr.color = Color.white; }
+            if (sprite != null) { sr.sprite = sprite; sr.color = def.tintColor; }
             else Debug.LogWarning($"[TowerFactory] Sprite not found at '{def.spritePath}' for '{def.id}'.");
         }
 
@@ -108,6 +108,14 @@ public class TowerFactory : MonoBehaviour
         info.damage       = ResolveDamage(def.fireAbilityId);
         if (System.Enum.TryParse<BalanceType>(def.balanceType, true, out var bt))
             info.balanceType = bt;
+        info.maxTier               = def.maxTier > 0 ? def.maxTier : 1;
+        info.upgradeStatMultiplier = def.upgradeStatMultiplier > 0f ? def.upgradeStatMultiplier : 2.25f;
+        info.towerTier             = def.towerTier > 0 ? def.towerTier : 1;
+
+        // ── 5c. Range circle (hidden until tower is selected) ─────
+        float rangeForCircle = ResolveRange(def.fireAbilityId, def.range);
+        if (rangeForCircle > 0f)
+            info.SetupRangeCircle(rangeForCircle);
 
         // ── 6. Extra components ───────────────────────────────────
         var orderedKeys   = ResolveOrder(def.components);
@@ -153,6 +161,16 @@ public class TowerFactory : MonoBehaviour
         tex.Apply();
         tex.filterMode = FilterMode.Bilinear;
         return Sprite.Create(tex, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f), size);
+    }
+
+    private static float ResolveRange(string abilityId, float defRange)
+    {
+        if (!string.IsNullOrEmpty(abilityId) && AbilityLibrary.Instance != null)
+        {
+            var ab = AbilityLibrary.Instance.GetAbility(abilityId);
+            if (ab != null && ab.range > 0f) return ab.range;
+        }
+        return defRange;
     }
 
     private static float ResolveCooldown(string abilityId)

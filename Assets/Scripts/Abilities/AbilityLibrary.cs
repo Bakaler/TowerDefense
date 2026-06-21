@@ -77,6 +77,7 @@ public class AbilityLibrary : MonoBehaviour
             ability.cast_finish_time = def.cast_finish_time;
             ability.finish_time      = def.finish_time;
             ability.range            = def.range;
+            ability.fireArc          = def.fireArc;
             ability.cost             = new AbilityCost { cooldownDuration = def.cooldownDuration };
 
             // Resolve effect reference
@@ -86,6 +87,19 @@ public class AbilityLibrary : MonoBehaviour
                     ability.effect = effect;
                 else
                     Debug.LogWarning($"[AbilityLibrary] Effect id '{def.effectId}' not found for ability '{def.id}'.");
+            }
+
+            // Resolve target validators
+            if (def.targetValidatorIds != null && def.targetValidatorIds.Length > 0)
+            {
+                var validators = new System.Collections.Generic.List<TargetValidator>();
+                foreach (var vid in def.targetValidatorIds)
+                {
+                    var v = TargetValidatorRegistry.Create(vid);
+                    if (v != null) validators.Add(v);
+                    else Debug.LogWarning($"[AbilityLibrary] Unknown targetValidatorId '{vid}' on ability '{def.id}'.");
+                }
+                ability.targetValidators = validators.ToArray();
             }
 
             _cache[def.id] = ability;
@@ -98,15 +112,17 @@ public class AbilityLibrary : MonoBehaviour
 [Serializable]
 public class AbilityDefinition
 {
-    public string id              = "";
-    public string displayName     = "";
-    public string effectId        = "";
-    public float  cooldownDuration = 1f;
-    public float  range            = 5f;
-    public float  prepare_time    = 0f;
-    public float  cast_start_time = 0f;
-    public float  cast_finish_time = 0f;
-    public float  finish_time     = 0f;
+    public string   id              = "";
+    public string   displayName     = "";
+    public string   effectId        = "";
+    public float    cooldownDuration = 1f;
+    public float    range            = 5f;
+    public float    fireArc          = 360f;
+    public float    prepare_time    = 0f;
+    public float    cast_start_time = 0f;
+    public float    cast_finish_time = 0f;
+    public float    finish_time     = 0f;
+    public string[] targetValidatorIds;
 }
 
 [Serializable]

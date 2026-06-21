@@ -49,6 +49,8 @@ public static class SceneBootstrap
         var roundGO = CreateChild("WaveManager", managersRoot);
         roundGO.AddComponent<WaveManager>();
         roundGO.AddComponent<GameHUD>();
+        roundGO.AddComponent<BalanceManager>();
+        roundGO.AddComponent<TechManager>();
 
         var librariesGO = CreateChild("Libraries", managersRoot);
         librariesGO.AddComponent<UnitDefinitionLibrary>();
@@ -57,6 +59,7 @@ public static class SceneBootstrap
         librariesGO.AddComponent<TowerFactory>();
         librariesGO.AddComponent<EffectLibrary>();
         librariesGO.AddComponent<AbilityLibrary>();
+        librariesGO.AddComponent<BehaviorLibrary>();
         librariesGO.AddComponent<TowerPlacer>();
 
         // ─────────────────────────────────────────────────────────────
@@ -195,27 +198,50 @@ public static class SceneBootstrap
         panelRT.anchorMax        = new Vector2(1f, 1f);
         panelRT.pivot            = new Vector2(1f, 0.5f);
         panelRT.anchoredPosition = Vector2.zero;
-        panelRT.sizeDelta        = new Vector2(160f, 0f);
+        panelRT.sizeDelta        = new Vector2(290f, 0f);
 
-        panel.AddComponent<UnityEngine.UI.Image>().color = new Color(0.1f, 0.1f, 0.15f, 0.92f);
+        var panelImg = panel.AddComponent<UnityEngine.UI.Image>();
+        panelImg.color = new Color(0.1f, 0.1f, 0.15f, 0.92f);
+        panelImg.raycastTarget = false;   // let world clicks pass through the panel background
 
-        // Tower definitions — add entries here as new towers are added to towers.json
-        var towers = new (string id, string label, string cost)[]
+        // 3-column layout  (T1 / T2 / T3)
+        var columns = new (string id, string label, string cost)[][]
         {
-            ("basic_tower",     "Basic\nTower",     "3g"),
-            ("income_tower",    "Income\nTower",    "5g"),
-            ("chain_tower",     "Chain\nTower",     "6g"),
-            ("boomerang_tower", "Boomerang\nTower", "5g"),
+            new[] {
+                ("basic_tower",    "Basic\nTower",    "3g"),
+                ("shotgun_tower",  "Shotgun\nTower",  "5g"),
+                ("slow_tower",     "Slow\nTower",     "5g"),
+                ("income_tower",   "Income\nTower",   "5g"),
+                ("research_tower", "Research\nTower", "6g"),
+            },
+            new[] {
+                ("chain_tower",     "Chain\nTower",     "6g"),
+                ("bee_tower",       "Bee\nTower",       "6g"),
+                ("boomerang_tower", "Boomerang\nTower", "5g"),
+                ("root_tower",      "Root\nTower",      "7g"),
+                ("entropy_tower",   "Entropy\nTower",   "8g"),
+                ("poison_tower",    "Poison\nTower",    "6g"),
+            },
+            new[] {
+                ("collector_tower", "Collector\nTower", "7g"),
+                ("railgun_tower",   "Railgun\nTower",   "9g"),
+                ("laser_tower",     "Laser\nTower",     "7g"),
+            },
         };
 
-        float startY = -80f;
-        float stepY  = -120f;
-        float btnW   = 120f;
-        float btnH   = 90f;
+        float startY   = -80f;
+        float stepY    = -110f;
+        float btnW     = 85f;
+        float btnH     = 85f;
+        float colStep  = 95f;
+        float colStart = -colStep;   // left column offset from panel center
 
-        for (int i = 0; i < towers.Length; i++)
+        for (int col = 0; col < columns.Length; col++)
         {
-            var (towerId, label, cost) = towers[i];
+            float xOff = colStart + colStep * col;
+            for (int row = 0; row < columns[col].Length; row++)
+            {
+            var (towerId, label, cost) = columns[col][row];
 
             var btnGO = new GameObject($"Buy_{towerId}");
             Undo.RegisterCreatedObjectUndo(btnGO, "Create TowerButton");
@@ -225,7 +251,7 @@ public static class SceneBootstrap
             rt.anchorMin        = new Vector2(0.5f, 1f);
             rt.anchorMax        = new Vector2(0.5f, 1f);
             rt.pivot            = new Vector2(0.5f, 1f);
-            rt.anchoredPosition = new Vector2(0f, startY + stepY * i);
+            rt.anchoredPosition = new Vector2(xOff, startY + stepY * row);
             rt.sizeDelta        = new Vector2(btnW, btnH);
 
             var img = btnGO.AddComponent<UnityEngine.UI.Image>();
@@ -258,7 +284,8 @@ public static class SceneBootstrap
             labelTxt.font      = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
             labelTxt.fontSize  = 15;
             labelTxt.alignment = TextAnchor.MiddleCenter;
-        }
+            } // row
+        } // col
     }
 
     // ── Helpers ───────────────────────────────────────────────────────

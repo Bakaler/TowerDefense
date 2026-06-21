@@ -43,6 +43,8 @@ public class IncomeTower : MonoBehaviour, IFactoryInitializable
     private readonly List<GameObject> _orbs = new();
     private Sprite[] _orbSheet;
 
+    public int OrbCount => _orbs.Count;
+
     // ── IFactoryInitializable ─────────────────────────────────────────
 
     public void Initialize(string dataJson)
@@ -124,7 +126,7 @@ public class IncomeTower : MonoBehaviour, IFactoryInitializable
         Collect();
     }
 
-    void Collect()
+    public void Collect()
     {
         int count = Mathf.Clamp(_orbs.Count, 0, Payout.Length - 1);
         if (count == 0) return;

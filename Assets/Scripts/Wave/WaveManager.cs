@@ -25,6 +25,11 @@ public class WaveManager : MonoBehaviour
     public bool IsVictory    { get; private set; }
     public bool IsGameOver   { get; private set; }
 
+    // ── Auto-start ────────────────────────────────────────────────────
+    public const float AutoStartDelay = 5f;
+    public float AutoStartCountdown   { get; set; } = -1f;  // -1 = not counting
+    public bool  IsCountingDown       => AutoStartCountdown >= 0f;
+
     // ── Private ───────────────────────────────────────────────────────
     private List<WaveDefinition> _waveDefs   = new List<WaveDefinition>();
     private List<UnitSpawner>    _spawners   = new List<UnitSpawner>();
@@ -64,12 +69,26 @@ public class WaveManager : MonoBehaviour
     {
         if (IsGameOver || IsVictory) return;
 
-        // Space bar as a convenience shortcut (GameHUD button is the primary trigger)
+        // Space bar as a convenience shortcut
         if (Input.GetKeyDown(KeyCode.Space) && CanStartWave)
+        {
+            AutoStartCountdown = -1f;
             StartNextWave();
+        }
 
         if (IsWaveActive)
+        {
             CheckWaveClear();
+        }
+        else if (IsCountingDown)
+        {
+            AutoStartCountdown -= Time.deltaTime;
+            if (AutoStartCountdown <= 0f)
+            {
+                AutoStartCountdown = -1f;
+                StartNextWave();
+            }
+        }
     }
 
     // ── Wave clear detection ──────────────────────────────────────────
@@ -97,6 +116,8 @@ public class WaveManager : MonoBehaviour
 
         if (CurrentWave >= TotalWaves)
             Victory();
+        else
+            AutoStartCountdown = AutoStartDelay;
     }
 
     // ── Public API ────────────────────────────────────────────────────

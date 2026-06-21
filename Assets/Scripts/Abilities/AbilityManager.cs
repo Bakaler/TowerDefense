@@ -28,6 +28,8 @@ public class AbilityManager : MonoBehaviour
         return instance;
     }
 
+    public IEnumerable<AbilityInstance> GetInstances() => activeInstances.Values;
+
     public void Tick(float deltaTime)
     {
         foreach (var inst in activeInstances.Values)

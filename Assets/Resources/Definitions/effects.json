@@ -6,10 +6,10 @@
       "type": "damage",
       "chance": 1.0,
       "data": {
-        "damageBase": 4.0,
+        "damageBase": 18.0,
         "minimumDamage": 1.0,
         "maximumDamage": 1000000.0,
-        "damageType": 0,
+        "damageType": 2,
         "shieldBonus": 0.0,
         "criticalChance": 0.1,
         "criticalDamageMultiplier": 2.0
@@ -21,10 +21,10 @@
       "type": "damage",
       "chance": 1.0,
       "data": {
-        "damageBase": 2.0,
+        "damageBase": 14.0,
         "minimumDamage": 1.0,
         "maximumDamage": 1000000.0,
-        "damageType": 2,
+        "damageType": 3,
         "criticalChance": 0.0,
         "criticalDamageMultiplier": 2.0
       }
@@ -36,13 +36,13 @@
       "chance": 1.0,
       "data": {
         "impactEffectId": "boomerang_impact",
-        "arcRadius": 1,
+        "arcRadius": 1.0,
         "sweepSpeed": 500.0,
         "hitRadius": 0.45,
-        "boomerangScale": 0.7,
-        "boomerangSpriteSheet": "Art/Towers/TowerSet1",
-        "boomerangSpriteIndex": 1,
-        "boomerangColor": {"r": 0.9, "g": 0.7, "b": 0.2, "a": 1.0}
+        "boomerangScale": 1.35,
+        "boomerangSpritePath": "Art/Towers/Bullet2",
+        "boomerangColor": {"r": 1.0, "g": 1.0, "b": 1.0, "a": 1.0},
+        "spinSpeed": 720.0
       }
     },
     {
@@ -52,21 +52,20 @@
       "chance": 1.0,
       "data": {
         "impactEffectId": "basic_impact",
-        "missileSpeed": 8.0,
+        "missileSpeed": 10.0,
         "missileScale": 0.5,
         "missileLifetime": 7.0,
         "missileSpriteSheet": "Art/Towers/TowerSet1",
         "missileSpriteIndex": 1
       }
-    }
-    ,
+    },
     {
       "id": "chain_damage",
       "displayName": "Chain Damage",
       "type": "damage",
       "chance": 1.0,
       "data": {
-        "damageBase": 3.0,
+        "damageBase": 14.0,
         "minimumDamage": 1.0,
         "maximumDamage": 1000000.0,
         "damageType": 1,
@@ -120,7 +119,7 @@
       "chance": 1.0,
       "data": {
         "impactEffectId": "chain_bounce_1_impact",
-        "missileSpeed": 6.0,
+        "missileSpeed": 12.0,
         "missileScale": 0.35,
         "missileLifetime": 3.0,
         "missileSpriteSheet": "Art/Towers/TowerSet1",
@@ -159,13 +158,173 @@
       "chance": 1.0,
       "data": {
         "impactEffectId": "chain_damage",
-        "missileSpeed": 6.0,
+        "missileSpeed": 12.0,
         "missileScale": 0.3,
         "missileLifetime": 3.0,
         "missileSpriteSheet": "Art/Towers/TowerSet1",
         "missileSpriteIndex": 1,
         "drawLine": true,
         "missileColor": {"r": 0.2, "g": 0.6, "b": 1.0, "a": 1.0}
+      }
+    },
+    {
+      "id": "apply_poison",
+      "displayName": "Apply Poison",
+      "type": "apply_behavior",
+      "chance": 1.0,
+      "data": { "behaviorId": "poisoned" }
+    },
+    {
+      "id": "poison_splash",
+      "displayName": "Poison Splash",
+      "type": "search_area",
+      "chance": 1.0,
+      "data": {
+        "effectId": "apply_poison",
+        "radius": 2.2,
+        "maxTargets": -1,
+        "horizontalArc": 360.0,
+        "searchFromTarget": true
+      }
+    },
+    {
+      "id": "poison_impact",
+      "displayName": "Poison Impact",
+      "type": "set",
+      "chance": 1.0,
+      "data": { "effectIds": ["apply_poison", "poison_splash"] }
+    },
+    {
+      "id": "poison_missile",
+      "displayName": "Poison Missile",
+      "type": "launch_missile",
+      "chance": 1.0,
+      "data": {
+        "impactEffectId": "poison_impact",
+        "missileSpeed": 7.0,
+        "missileScale": 0.55,
+        "missileLifetime": 6.0,
+        "missileSpriteSheet": "Art/Towers/TowerSet1",
+        "missileSpriteIndex": 1,
+        "missileColor": { "r": 0.4, "g": 1.0, "b": 0.3, "a": 1.0 }
+      }
+    },
+    {
+      "id": "slow_impact",
+      "displayName": "Slow Impact",
+      "type": "apply_behavior",
+      "chance": 1.0,
+      "data": { "behaviorId": "slowed" }
+    },
+    {
+      "id": "slow_missile",
+      "displayName": "Slow Missile",
+      "type": "launch_missile",
+      "chance": 1.0,
+      "data": {
+        "impactEffectId": "slow_impact",
+        "missileSpeed": 11.0,
+        "missileScale": 0.45,
+        "missileLifetime": 6.0,
+        "missileSpriteSheet": "Art/Towers/TowerSet1",
+        "missileSpriteIndex": 1,
+        "missileColor": {"r": 0.45, "g": 0.75, "b": 1.0, "a": 1.0}
+      }
+    },
+    {
+      "id": "root_impact",
+      "displayName": "Root Impact",
+      "type": "apply_behavior",
+      "chance": 1.0,
+      "data": { "behaviorId": "rooted" }
+    },
+    {
+      "id": "root_missile",
+      "displayName": "Root Missile",
+      "type": "launch_missile",
+      "chance": 1.0,
+      "data": {
+        "impactEffectId": "root_impact",
+        "missileSpeed": 9.0,
+        "missileScale": 0.5,
+        "missileLifetime": 6.0,
+        "missileSpriteSheet": "Art/Towers/TowerSet1",
+        "missileSpriteIndex": 1,
+        "missileColor": { "r": 0.65, "g": 0.2, "b": 0.9, "a": 1.0 }
+      }
+    },
+    {
+      "id": "shotgun_pellet_impact",
+      "displayName": "Shotgun Pellet Impact",
+      "type": "damage",
+      "chance": 1.0,
+      "data": {
+        "damageBase": 8.0,
+        "minimumDamage": 1.0,
+        "maximumDamage": 1000000.0,
+        "damageType": 2,
+        "criticalChance": 0.0,
+        "criticalDamageMultiplier": 2.0
+      }
+    },
+    {
+      "id": "shotgun_shot",
+      "displayName": "Shotgun Shot",
+      "type": "launch_shotgun",
+      "chance": 1.0,
+      "data": {
+        "impactEffectId": "shotgun_pellet_impact",
+        "pelletCount": 10,
+        "spreadAngle": 70.0,
+        "missileSpeed": 22.0,
+        "missileScale": 0.28,
+        "missileLifetime": 0.15,
+        "missileSpriteSheet": "Art/Towers/TowerSet1",
+        "missileSpriteIndex": 1,
+        "missileColor": { "r": 1.0, "g": 0.7, "b": 0.2, "a": 1.0 }
+      }
+    },
+    {
+      "id": "entropy_impact",
+      "displayName": "Entropy Impact",
+      "type": "damage",
+      "chance": 1.0,
+      "data": {
+        "damageBase": 12.0,
+        "minimumDamage": 1.0,
+        "maximumDamage": 1000000.0,
+        "damageType": 1,
+        "criticalChance": 0.0,
+        "criticalDamageMultiplier": 2.0
+      }
+    },
+    {
+      "id": "entropy_shot",
+      "displayName": "Entropy Shot",
+      "type": "launch_missile",
+      "chance": 1.0,
+      "data": {
+        "impactEffectId": "entropy_impact",
+        "missileSpeed": 10.0,
+        "missileScale": 0.45,
+        "missileLifetime": 6.0,
+        "missileSpriteSheet": "Art/Towers/TowerSet1",
+        "missileSpriteIndex": 1,
+        "missileColor": { "r": 0.9, "g": 0.4, "b": 0.1, "a": 1.0 }
+      }
+    },
+    {
+      "id": "railgun_beam",
+      "displayName": "Railgun Beam",
+      "type": "railgun",
+      "chance": 1.0,
+      "data": {
+        "damageBase": 90.0,
+        "beamRange": 22.0,
+        "beamWidth": 0.18,
+        "beamFadeDuration": 0.3,
+        "damageType": 2,
+        "beamColor": { "r": 0.4, "g": 0.9, "b": 1.0, "a": 1.0 }
       }
     }
   ]

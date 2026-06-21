@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 
 /// <summary>
 /// Builds and drives the entire game HUD in code. No inspector wiring, no prefabs.
@@ -20,6 +21,7 @@ public class GameHUD : MonoBehaviour
 
     // ── Live refs ─────────────────────────────────────────────────────
     private Text   _goldText;
+    private Text   _techText;
     private Text   _waveText;
     private Text   _livesText;
     private Button _waveButton;
@@ -31,6 +33,14 @@ public class GameHUD : MonoBehaviour
     private Text _hdrElem;
     private Text _hdrArc;
     private Text _hdrPhys;
+    private Text _hdrPhysDrop;
+
+    // ── Research panel ────────────────────────────────────────────────
+    private GameObject _researchPanel;
+    private Button     _researchT2Btn;
+    private Text       _researchT2Label;
+    private Button     _researchT3Btn;
+    private Text       _researchT3Label;
 
     // ── Tower info panel ──────────────────────────────────────────────
     private GameObject _towerPanel;
@@ -40,6 +50,8 @@ public class GameHUD : MonoBehaviour
     private Text       _tpDamage;
     private Text       _tpFireRate;
     private Text       _tpKills;
+    private Button     _tpUpgradeBtn;
+    private Text       _tpUpgradeBtnLabel;
     private TowerInfo  _selectedTower;
 
     // ── Cached managers ───────────────────────────────────────────────
@@ -95,6 +107,7 @@ public class GameHUD : MonoBehaviour
         BuildTopBar(canvasGO);
         BuildWaveButton(canvasGO);
         BuildTowerPanel(canvasGO);
+        BuildResearchPanel(canvasGO);
         _gameOverPanel = BuildOverlay(canvasGO, "GameOverPanel",  "GAME OVER", C_GameOver,  "Restart",    WaveManager.Restart);
         _victoryPanel  = BuildOverlay(canvasGO, "VictoryPanel",   "VICTORY",   C_Victory,   "Play Again", WaveManager.Restart);
 
@@ -116,6 +129,12 @@ public class GameHUD : MonoBehaviour
 
     void ShowTowerPanel(TowerInfo info)
     {
+        if (info == null)
+        {
+            _selectedTower = null;
+            _towerPanel?.SetActive(false);
+            return;
+        }
         _selectedTower = info;
         RefreshTowerPanel(info);
         _towerPanel?.SetActive(true);
@@ -124,12 +143,71 @@ public class GameHUD : MonoBehaviour
     void RefreshTowerPanel(TowerInfo info)
     {
         if (info != _selectedTower) return;
-        if (_tpName     != null) _tpName.text     = info.displayName.ToUpper();
+        string tierLabel = info.maxTier > 1 ? $"  [Tier {info.Tier}/{info.maxTier}]" : "";
+        if (_tpName     != null) _tpName.text     = info.displayName.ToUpper() + tierLabel;
         if (_tpBalance  != null) _tpBalance.text  = $"Type  {info.balanceType}";
         RefreshBalanceDist();
-        if (_tpDamage   != null) _tpDamage.text   = $"Damage   {info.damage:0.#}";
+        if (_tpDamage   != null) _tpDamage.text   = $"Damage   {info.damage * info.StatMultiplier:0.#}";
         if (_tpFireRate != null) _tpFireRate.text  = $"Fire Rate  {info.FireRate:0.##}/s";
         if (_tpKills    != null) _tpKills.text     = $"Kills  {info.KillCount}";
+
+        if (_tpUpgradeBtn != null)
+        {
+            bool canTier     = info.CanUpgrade;
+            bool hasResearch = info.HasResearchForUpgrade;
+            bool hasGold     = _rm != null && _rm.resourceOne >= info.UpgradeCost;
+            _tpUpgradeBtn.gameObject.SetActive(info.maxTier > 1);
+            _tpUpgradeBtn.interactable = canTier && hasResearch && hasGold;
+            if (_tpUpgradeBtnLabel != null)
+            {
+                if (!canTier)
+                    _tpUpgradeBtnLabel.text = "MAX TIER";
+                else if (!hasResearch)
+                    _tpUpgradeBtnLabel.text = $"LOCKED  (needs Tier {info.RequiredResearchTier} research)";
+                else
+                    _tpUpgradeBtnLabel.text = $"UPGRADE  Tier {info.Tier + 1}  —  {info.UpgradeCost}g";
+            }
+        }
+    }
+
+    void OnUpgradeClicked()
+    {
+        if (_selectedTower == null) return;
+        if (_selectedTower.TryUpgrade(_rm))
+            RefreshTowerPanel(_selectedTower);
+    }
+
+    void RefreshResearchPanel()
+    {
+        var tm = TechManager.Instance;
+        if (tm == null) return;
+
+        if (_researchT2Btn != null)
+        {
+            bool done = tm.T2Unlocked;
+            _researchT2Btn.interactable = !done && tm.Tech >= TechManager.T2Cost;
+            if (_researchT2Label != null)
+                _researchT2Label.text = done
+                    ? "Tier 2  ✓  Unlocked"
+                    : $"Unlock Tier 2  —  {TechManager.T2Cost} tech";
+        }
+
+        if (_researchT3Btn != null)
+        {
+            bool done    = tm.T3Unlocked;
+            bool canAfford = tm.Tech >= TechManager.T3Cost;
+            bool prereq  = tm.T2Unlocked;
+            _researchT3Btn.interactable = !done && prereq && canAfford;
+            if (_researchT3Label != null)
+            {
+                if (done)
+                    _researchT3Label.text = "Tier 3  ✓  Unlocked";
+                else if (!prereq)
+                    _researchT3Label.text = $"Unlock Tier 3  —  {TechManager.T3Cost} tech  (needs T2)";
+                else
+                    _researchT3Label.text = $"Unlock Tier 3  —  {TechManager.T3Cost} tech";
+            }
+        }
     }
 
     // Returns all non-ghost towers, plus a dictionary of definitionId → count
@@ -184,13 +262,103 @@ public class GameHUD : MonoBehaviour
         if (_hdrElem != null) _hdrElem.text = $"E  {eCum:0.00}";
         if (_hdrArc  != null) _hdrArc.text  = $"A  {aCum:0.00}";
         if (_hdrPhys != null) _hdrPhys.text = $"P  {pCum:0.00}";
+
+        if (_hdrPhysDrop != null)
+        {
+            int baseChance  = 15;
+            int bonusChance = Mathf.FloorToInt(pCum * 0.25f);
+            _hdrPhysDrop.text = $"{baseChance}% + {bonusChance}%";
+        }
     }
 
     // ── Tower info panel ──────────────────────────────────────────────
 
+    void BuildResearchPanel(GameObject root)
+    {
+        const float W = 420f, H = 500f, PAD = 18f;
+
+        _researchPanel = new GameObject("ResearchPanel");
+        _researchPanel.transform.SetParent(root.transform, false);
+
+        // Centered on screen
+        var rt          = _researchPanel.AddComponent<RectTransform>();
+        rt.anchorMin    = new Vector2(0.5f, 0.5f);
+        rt.anchorMax    = new Vector2(0.5f, 0.5f);
+        rt.pivot        = new Vector2(0.5f, 0.5f);
+        rt.anchoredPosition = Vector2.zero;
+        rt.sizeDelta    = new Vector2(W, H);
+
+        var rpBg = _researchPanel.AddComponent<Image>();
+        rpBg.color = new Color(0.06f, 0.09f, 0.07f, 0.97f);
+        rpBg.raycastTarget = false;   // let world clicks pass through the panel background
+
+        // Title
+        var titleGO = MakeRect("Title", _researchPanel, PAD, H - PAD - 40f, W - PAD * 2f - 36f, 40f);
+        var title   = MakeText(titleGO, "RESEARCH", new Color(0.35f, 1f, 0.55f), 20, bold: true);
+        title.alignment = TextAnchor.MiddleLeft;
+
+        // Close button — top right
+        var closeGO  = MakeRect("CloseBtn", _researchPanel, W - PAD - 32f, H - PAD - 36f, 32f, 32f);
+        var closeImg = closeGO.AddComponent<Image>();
+        closeImg.color = new Color(0.4f, 0.12f, 0.12f, 1f);
+        var closeBtn = closeGO.AddComponent<Button>();
+        closeBtn.targetGraphic = closeImg;
+        closeBtn.onClick.AddListener(() => _researchPanel.SetActive(false));
+        MakeText(MakeRect("X", closeGO, 0f, 0f, 32f, 32f), "×", Color.white, 22, bold: true)
+            .alignment = TextAnchor.MiddleCenter;
+
+        // ── Tier 2 unlock ─────────────────────────────────────────────
+        var div2GO = MakeRect("Div2", _researchPanel, PAD, H - PAD - 90f, W - PAD * 2f, 22f);
+        var div2   = MakeText(div2GO, "── Tier 2 ──────────────────", new Color(0.5f, 0.7f, 0.55f), 12);
+        div2.alignment = TextAnchor.MiddleLeft;
+
+        var t2GO  = MakeRect("T2Btn", _researchPanel, PAD, H - PAD - 165f, W - PAD * 2f, 65f);
+        var t2Img = t2GO.AddComponent<Image>();
+        t2Img.color = new Color(0.12f, 0.22f, 0.15f, 1f);
+        _researchT2Btn = t2GO.AddComponent<Button>();
+        _researchT2Btn.targetGraphic = t2Img;
+        var t2Cols = _researchT2Btn.colors;
+        t2Cols.highlightedColor = new Color(0.18f, 0.32f, 0.22f, 1f);
+        t2Cols.pressedColor     = new Color(0.08f, 0.14f, 0.10f, 1f);
+        t2Cols.disabledColor    = new Color(0.18f, 0.18f, 0.20f, 1f);
+        _researchT2Btn.colors = t2Cols;
+        _researchT2Label = MakeText(MakeRect("Label", t2GO, 0f, 0f, W - PAD * 2f, 65f),
+            "", new Color(0.6f, 0.9f, 0.65f), 15);
+        _researchT2Label.alignment = TextAnchor.MiddleCenter;
+        _researchT2Btn.onClick.AddListener(() => {
+            if (TechManager.Instance != null && TechManager.Instance.TryUnlockT2())
+                RefreshResearchPanel();
+        });
+
+        // ── Tier 3 unlock ─────────────────────────────────────────────
+        var div3GO = MakeRect("Div3", _researchPanel, PAD, H - PAD - 205f, W - PAD * 2f, 22f);
+        var div3   = MakeText(div3GO, "── Tier 3 ──────────────────", new Color(0.6f, 0.55f, 0.8f), 12);
+        div3.alignment = TextAnchor.MiddleLeft;
+
+        var t3GO  = MakeRect("T3Btn", _researchPanel, PAD, H - PAD - 280f, W - PAD * 2f, 65f);
+        var t3Img = t3GO.AddComponent<Image>();
+        t3Img.color = new Color(0.16f, 0.12f, 0.26f, 1f);
+        _researchT3Btn = t3GO.AddComponent<Button>();
+        _researchT3Btn.targetGraphic = t3Img;
+        var t3Cols = _researchT3Btn.colors;
+        t3Cols.highlightedColor = new Color(0.24f, 0.18f, 0.38f, 1f);
+        t3Cols.pressedColor     = new Color(0.10f, 0.08f, 0.16f, 1f);
+        t3Cols.disabledColor    = new Color(0.18f, 0.18f, 0.20f, 1f);
+        _researchT3Btn.colors = t3Cols;
+        _researchT3Label = MakeText(MakeRect("Label", t3GO, 0f, 0f, W - PAD * 2f, 65f),
+            "", new Color(0.85f, 0.70f, 1.0f), 15);
+        _researchT3Label.alignment = TextAnchor.MiddleCenter;
+        _researchT3Btn.onClick.AddListener(() => {
+            if (TechManager.Instance != null && TechManager.Instance.TryUnlockT3())
+                RefreshResearchPanel();
+        });
+
+        _researchPanel.SetActive(false);
+    }
+
     void BuildTowerPanel(GameObject root)
     {
-        const float W = 260f, H = 256f, PAD = 14f, ROW = 36f;
+        const float W = 260f, H = 300f, PAD = 14f, ROW = 36f;
 
         _towerPanel = new GameObject("TowerInfoPanel");
         _towerPanel.transform.SetParent(root.transform, false);
@@ -202,7 +370,9 @@ public class GameHUD : MonoBehaviour
         rt.anchoredPosition = new Vector2(20f, 20f);
         rt.sizeDelta        = new Vector2(W, H);
 
-        _towerPanel.AddComponent<Image>().color = new Color(0.07f, 0.07f, 0.13f, 0.95f);
+        var tpBg = _towerPanel.AddComponent<Image>();
+        tpBg.color = new Color(0.07f, 0.07f, 0.13f, 0.95f);
+        tpBg.raycastTarget = false;   // let world clicks pass through the panel background
 
         // × close button — top-right corner
         var closeGO = MakeRect("CloseBtn", _towerPanel, W - 34f, H - 34f, 30f, 30f);
@@ -220,7 +390,23 @@ public class GameHUD : MonoBehaviour
         _tpBalanceDist = MakeText(MakeRect("BalanceDist", _towerPanel, PAD, y, W - PAD*2, ROW), "", new Color(0.75f, 0.75f, 0.85f), 12); y -= ROW;
         _tpDamage      = MakeText(MakeRect("Damage",      _towerPanel, PAD, y, W - PAD*2, ROW), "", new Color(0.9f, 0.9f, 0.9f), 14); y -= ROW;
         _tpFireRate    = MakeText(MakeRect("FireRate",    _towerPanel, PAD, y, W - PAD*2, ROW), "", new Color(0.9f, 0.9f, 0.9f), 14); y -= ROW;
-        _tpKills       = MakeText(MakeRect("Kills",       _towerPanel, PAD, y, W - PAD*2, ROW), "", new Color(0.95f, 0.5f, 0.5f), 14);
+        _tpKills       = MakeText(MakeRect("Kills",       _towerPanel, PAD, y, W - PAD*2, ROW), "", new Color(0.95f, 0.5f, 0.5f), 14); y -= ROW + 4f;
+
+        // Upgrade button
+        var upgGO  = MakeRect("UpgradeBtn", _towerPanel, PAD, y, W - PAD*2, 38f);
+        var upgImg = upgGO.AddComponent<Image>();
+        upgImg.color = new Color(0.15f, 0.55f, 0.25f, 1f);
+        _tpUpgradeBtn = upgGO.AddComponent<Button>();
+        _tpUpgradeBtn.targetGraphic = upgImg;
+        var cols2 = _tpUpgradeBtn.colors;
+        cols2.highlightedColor = new Color(0.2f, 0.7f, 0.3f, 1f);
+        cols2.pressedColor     = new Color(0.1f, 0.4f, 0.18f, 1f);
+        cols2.disabledColor    = new Color(0.25f, 0.25f, 0.25f, 1f);
+        _tpUpgradeBtn.colors   = cols2;
+        _tpUpgradeBtnLabel     = MakeText(MakeRect("Label", upgGO, 0f, 0f, W - PAD*2, 38f),
+            "UPGRADE", Color.white, 14, bold: true);
+        _tpUpgradeBtnLabel.alignment = TextAnchor.MiddleCenter;
+        _tpUpgradeBtn.onClick.AddListener(OnUpgradeClicked);
 
         _towerPanel.SetActive(false);
     }
@@ -241,13 +427,14 @@ public class GameHUD : MonoBehaviour
 
     Text MakeText(GameObject go, string text, Color color, int size, bool bold = false)
     {
-        var txt       = go.AddComponent<Text>();
-        txt.text      = text;
-        txt.color     = color;
-        txt.font      = GetFont();
-        txt.fontSize  = size;
-        txt.fontStyle = bold ? FontStyle.Bold : FontStyle.Normal;
-        txt.alignment = TextAnchor.MiddleLeft;
+        var txt            = go.AddComponent<Text>();
+        txt.text           = text;
+        txt.color          = color;
+        txt.font           = GetFont();
+        txt.fontSize       = size;
+        txt.fontStyle      = bold ? FontStyle.Bold : FontStyle.Normal;
+        txt.alignment      = TextAnchor.MiddleLeft;
+        txt.raycastTarget  = false;   // labels must not steal button clicks
         return txt;
     }
 
@@ -255,6 +442,11 @@ public class GameHUD : MonoBehaviour
 
     void BuildTopBar(GameObject root)
     {
+        const float BAR_H  = 100f;
+        const float TOP_H  = 50f;   // gold / wave / lives row height
+        const float ROW_H  = 17f;   // each balance row height
+        const float LEFT   = 20f;   // left padding
+
         var bar = new GameObject("TopBar");
         bar.transform.SetParent(root.transform, false);
 
@@ -263,25 +455,110 @@ public class GameHUD : MonoBehaviour
         rt.anchorMax        = new Vector2(1f, 1f);
         rt.pivot            = new Vector2(0.5f, 1f);
         rt.anchoredPosition = Vector2.zero;
-        rt.sizeDelta        = new Vector2(0f, 90f);
+        rt.sizeDelta        = new Vector2(0f, BAR_H);
 
-        bar.AddComponent<Image>().color = C_BarBg;
+        var barBg = bar.AddComponent<Image>();
+        barBg.color = C_BarBg;
+        barBg.raycastTarget = false;
 
-        // Top row: Gold | Wave | Lives
-        _goldText  = AddLabel(bar, "Gold",  new Vector2(0f,    0.45f), new Vector2(0.33f, 1f),
-            "⚡  0",  C_Gold,  26, TextAnchor.MiddleLeft,   leftPad: 24f);
-        _waveText  = AddLabel(bar, "Wave",  new Vector2(0.33f, 0.45f), new Vector2(0.67f, 1f),
-            "Ready", C_Wave,  24, TextAnchor.MiddleCenter);
-        _livesText = AddLabel(bar, "Lives", new Vector2(0.67f, 0.45f), new Vector2(1f,    1f),
-            "♥  20", C_Lives, 26, TextAnchor.MiddleRight,  rightPad: 24f);
+        // Top row: Gold | Wave | Lives  (anchored to top, fixed height TOP_H)
+        _goldText  = AddAbsLabel(bar, "Gold",  LEFT,          BAR_H - TOP_H, 220f, TOP_H,
+            "⚡  0",  C_Gold,  24, TextAnchor.MiddleLeft);
+        _techText  = AddAbsLabel(bar, "Tech",  LEFT + 220f,   BAR_H - TOP_H, 120f, TOP_H,
+            "🔬  0", new Color(0.35f, 1f, 0.55f), 22, TextAnchor.MiddleLeft);
 
-        // Bottom row: Elemental | Arcane | Physical balance totals
-        _hdrElem = AddLabel(bar, "Elem", new Vector2(0f,    0f), new Vector2(0.33f, 0.5f),
-            "E  0 (0%)", new Color(0.4f, 0.85f, 0.5f), 18, TextAnchor.MiddleLeft, leftPad: 24f);
-        _hdrArc  = AddLabel(bar, "Arc",  new Vector2(0.33f, 0f), new Vector2(0.67f, 0.5f),
-            "A  0 (0%)", new Color(0.7f, 0.5f, 1.0f),  18, TextAnchor.MiddleCenter);
-        _hdrPhys = AddLabel(bar, "Phys", new Vector2(0.67f, 0f), new Vector2(1f,    0.5f),
-            "P  0 (0%)", new Color(0.9f, 0.55f, 0.3f), 18, TextAnchor.MiddleRight, rightPad: 24f);
+        // "RESEARCH" button — sits right of the tech count, opens the research panel
+        var rBtnGO  = new GameObject("ResearchBtn");
+        rBtnGO.transform.SetParent(bar.transform, false);
+        var rBtnRT  = rBtnGO.AddComponent<RectTransform>();
+        rBtnRT.anchorMin = new Vector2(0f, 0f);
+        rBtnRT.anchorMax = new Vector2(0f, 0f);
+        rBtnRT.pivot     = new Vector2(0f, 0f);
+        rBtnRT.offsetMin = new Vector2(LEFT + 345f, BAR_H - TOP_H + 8f);
+        rBtnRT.offsetMax = new Vector2(LEFT + 475f, BAR_H - 8f);
+        var rBtnImg  = rBtnGO.AddComponent<Image>();
+        rBtnImg.color = new Color(0.12f, 0.30f, 0.16f, 1f);
+        var rBtn     = rBtnGO.AddComponent<Button>();
+        rBtn.targetGraphic = rBtnImg;
+        var rCols = rBtn.colors;
+        rCols.highlightedColor = new Color(0.18f, 0.42f, 0.22f, 1f);
+        rCols.pressedColor     = new Color(0.08f, 0.18f, 0.10f, 1f);
+        rBtn.colors = rCols;
+        var rLabelGO = new GameObject("Label");
+        rLabelGO.transform.SetParent(rBtnGO.transform, false);
+        var rLabelRT = rLabelGO.AddComponent<RectTransform>();
+        rLabelRT.anchorMin = Vector2.zero; rLabelRT.anchorMax = Vector2.one;
+        rLabelRT.offsetMin = Vector2.zero; rLabelRT.offsetMax = Vector2.zero;
+        var rLabelTxt = MakeText(rLabelGO, "RESEARCH", Color.white, 13, bold: true);
+        rLabelTxt.alignment = TextAnchor.MiddleCenter;
+        rBtn.onClick.AddListener(() =>
+        {
+            if (_researchPanel != null)
+                _researchPanel.SetActive(!_researchPanel.activeSelf);
+        });
+        _waveText  = AddAbsLabel(bar, "Wave",  0f,            BAR_H - TOP_H, 0f,   TOP_H,
+            "Ready", C_Wave,  22, TextAnchor.MiddleCenter, stretchX: true);
+        _livesText = AddAbsLabel(bar, "Lives", 0f,            BAR_H - TOP_H, 320f, TOP_H,
+            "♥  20", C_Lives, 24, TextAnchor.MiddleRight,  fromRight: true);
+
+        // Balance rows stacked under gold, left-aligned
+        Color cE = new Color(0.4f, 0.85f, 0.5f);
+        Color cA = new Color(0.7f, 0.5f,  1.0f);
+        Color cP = new Color(0.9f, 0.55f, 0.3f);
+        Color cD = new Color(1.0f, 0.85f, 0.3f);
+
+        float y2 = BAR_H - TOP_H - ROW_H;         // E row top-Y from bar bottom
+        float y1 = BAR_H - TOP_H - ROW_H * 2f;    // A row
+        float y0 = BAR_H - TOP_H - ROW_H * 3f;    // P row
+
+        _hdrElem     = AddAbsLabel(bar, "Elem",     LEFT, y2, 160f, ROW_H, "E  0.00",   cE, 13, TextAnchor.MiddleLeft);
+        _hdrArc      = AddAbsLabel(bar, "Arc",      LEFT, y1, 160f, ROW_H, "A  0.00",   cA, 13, TextAnchor.MiddleLeft);
+        _hdrPhys     = AddAbsLabel(bar, "Phys",     LEFT, y0, 160f, ROW_H, "P  0.00",   cP, 13, TextAnchor.MiddleLeft);
+        _hdrPhysDrop = AddAbsLabel(bar, "PhysDrop", LEFT + 160f, y0, 180f, ROW_H, "15% + 0%", cD, 13, TextAnchor.MiddleLeft);
+    }
+
+    // Places a label at an absolute pixel position within parent (anchor bottom-left).
+    Text AddAbsLabel(GameObject parent, string goName,
+        float x, float y, float w, float h,
+        string content, Color color, int size, TextAnchor anchor,
+        bool stretchX = false, bool fromRight = false)
+    {
+        var go = new GameObject(goName);
+        go.transform.SetParent(parent.transform, false);
+        var rt = go.AddComponent<RectTransform>();
+
+        if (stretchX)
+        {
+            rt.anchorMin = new Vector2(0f, 0f);
+            rt.anchorMax = new Vector2(1f, 0f);
+            rt.offsetMin = new Vector2(0f, y);
+            rt.offsetMax = new Vector2(0f, y + h);
+        }
+        else if (fromRight)
+        {
+            rt.anchorMin = new Vector2(1f, 0f);
+            rt.anchorMax = new Vector2(1f, 0f);
+            rt.pivot     = new Vector2(1f, 0f);
+            rt.offsetMin = new Vector2(-w, y);
+            rt.offsetMax = new Vector2(0f, y + h);
+        }
+        else
+        {
+            rt.anchorMin = new Vector2(0f, 0f);
+            rt.anchorMax = new Vector2(0f, 0f);
+            rt.pivot     = new Vector2(0f, 0f);
+            rt.offsetMin = new Vector2(x, y);
+            rt.offsetMax = new Vector2(x + w, y + h);
+        }
+
+        var txt = go.AddComponent<Text>();
+        txt.text          = content;
+        txt.color         = color;
+        txt.font          = GetFont();
+        txt.fontSize      = size;
+        txt.alignment     = anchor;
+        txt.raycastTarget = false;
+        return txt;
     }
 
     // ── Start Wave button ─────────────────────────────────────────────
@@ -311,7 +588,12 @@ public class GameHUD : MonoBehaviour
         cols.disabledColor    = C_BtnWait;
         _waveButton.colors    = cols;
 
-        _waveButton.onClick.AddListener(() => WaveManager.Instance?.StartNextWave());
+        _waveButton.onClick.AddListener(() => {
+            var wm = WaveManager.Instance;
+            if (wm == null) return;
+            wm.AutoStartCountdown = -1f;
+            wm.StartNextWave();
+        });
 
         // Label
         _waveButtonLabel = AddLabel(btnGO, "Label",
@@ -398,11 +680,40 @@ public class GameHUD : MonoBehaviour
 
     void Update()
     {
+        BalanceManager.Instance?.Recalculate();
+
+        // Tower selection — manual proximity scan so we don't rely on OnMouseDown + triggers
+        if (Input.GetMouseButtonDown(0) &&
+            !EventSystem.current.IsPointerOverGameObject() &&
+            !(TowerPlacer.Instance != null && TowerPlacer.Instance.IsPlacing) &&
+            Camera.main != null)
+        {
+            Vector2 mouse = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+
+            TowerInfo best = null;
+            float bestDist = float.MaxValue;
+            foreach (var ti in FindObjectsByType<TowerInfo>(FindObjectsSortMode.None))
+            {
+                if (ti.isGhost) continue;
+                float dist = Vector2.Distance(mouse, ti.transform.position);
+                if (dist <= ti.ClickRadius && dist < bestDist)
+                {
+                    best = ti;
+                    bestDist = dist;
+                }
+            }
+
+            TowerInfo.OnTowerClickedPublic(best);  // null = deselect
+        }
+
         var wm = WaveManager.Instance;
 
         // Gold
         if (_goldText != null && _rm != null)
             _goldText.text = $"⚡  {_rm.resourceOne}";
+
+        if (_techText != null)
+            _techText.text = $"🔬  {TechManager.Instance?.Tech ?? 0}";
 
         // Lives
         if (_livesText != null && _lm != null)
@@ -419,6 +730,8 @@ public class GameHUD : MonoBehaviour
                 _waveText.text = $"Wave  {wm.CurrentWave} / {wm.TotalWaves}";
             else if (wm.CurrentWave >= wm.TotalWaves)
                 _waveText.text = $"Wave  {wm.CurrentWave} / {wm.TotalWaves}  —  Cleared";
+            else if (wm.IsCountingDown)
+                _waveText.text = $"Wave  {wm.CurrentWave} / {wm.TotalWaves}  —  Next in {Mathf.CeilToInt(wm.AutoStartCountdown)}s";
             else
                 _waveText.text = $"Wave  {wm.CurrentWave} / {wm.TotalWaves}  —  Prep";
         }
@@ -426,7 +739,7 @@ public class GameHUD : MonoBehaviour
         // Wave button
         if (_waveButton != null && wm != null)
         {
-            bool canSend = wm.CanStartWave;
+            bool canSend = wm.CanStartWave || wm.IsCountingDown;
             _waveButton.interactable = canSend;
 
             if (_waveButtonLabel != null)
@@ -434,9 +747,11 @@ public class GameHUD : MonoBehaviour
                 int next = wm.CurrentWave + 1;
                 _waveButtonLabel.text = wm.IsWaveActive
                     ? "Wave in progress..."
-                    : wm.CurrentWave == 0
-                        ? "START WAVE 1"
-                        : $"SEND WAVE {next}";
+                    : wm.IsCountingDown
+                        ? $"SEND NOW  ({Mathf.CeilToInt(wm.AutoStartCountdown)}s)"
+                        : wm.CurrentWave == 0
+                            ? "START WAVE 1"
+                            : $"SEND WAVE {next}";
             }
         }
 
@@ -450,12 +765,13 @@ public class GameHUD : MonoBehaviour
         // Header balance (always live)
         RefreshHeaderBalance();
 
-        // Tower panel live refresh
+        // Research panel live refresh (updates button state as tech changes)
+        if (_researchPanel != null && _researchPanel.activeSelf)
+            RefreshResearchPanel();
+
+        // Tower panel live refresh (upgrade button affordability and kill count update each frame)
         if (_selectedTower != null)
-        {
-            if (_tpKills != null) _tpKills.text = $"Kills  {_selectedTower.KillCount}";
-            RefreshBalanceDist();
-        }
+            RefreshTowerPanel(_selectedTower);
     }
 
     // ── Helpers ───────────────────────────────────────────────────────

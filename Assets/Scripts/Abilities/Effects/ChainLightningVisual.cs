@@ -4,7 +4,7 @@ using UnityEngine;
 
 /// <summary>
 /// Draws a jagged lightning bolt through a list of world positions then fades and destroys itself.
-/// Spawned automatically by Effect_Chain_Lightning — no manual setup needed.
+/// Spawned automatically by Effect_Chain_Lightning — no manual setup needed. 
 /// </summary>
 [RequireComponent(typeof(LineRenderer))]
 public class ChainLightningVisual : MonoBehaviour
@@ -32,8 +32,15 @@ public class ChainLightningVisual : MonoBehaviour
         _lr.positionCount = pts.Count;
         _lr.SetPositions(pts.ToArray());
 
-        _lr.startWidth = 0.08f;
-        _lr.endWidth   = 0.03f;
+        // Diamond profile: thin at both ends, wide in the middle
+        var curve = new AnimationCurve(
+            new Keyframe(0f,    0.005f),
+            new Keyframe(0.15f, 0.04f),
+            new Keyframe(0.5f,  0.03f),
+            new Keyframe(0.85f, 0.04f),
+            new Keyframe(1f,    0.005f));
+        _lr.widthCurve = curve;
+        _lr.widthMultiplier = 1f;
         _lr.useWorldSpace  = true;
         _lr.sortingLayerName = "Towers";
         _lr.sortingOrder     = 20;

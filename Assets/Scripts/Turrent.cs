@@ -10,70 +10,68 @@ public class Turrent : MonoBehaviour
     [Tooltip("Must match an id in Resources/Definitions/towers.json")]
     public string definitionId;
 
-    // Resolved in Start() from definitionId via TowerDefinitionLibrary → AbilityLibrary.
-    // Never injected by the factory — the data drives it.
     [HideInInspector] public Ability_Effect fireAbility;
 
-    private AbilityManager _abilityManager;
+    private AbilityManager  _abilityManager;
     private CircleCollider2D _rangeCollider;
+
+    // Rotation speed from tower definition; arc from the ability
+    private float _rotationSpeed = 0f;    // deg/s; 0 = no rotation
 
     void Start()
     {
-        _abilityManager  = GetComponent<AbilityManager>();
-        _rangeCollider   = GetComponent<CircleCollider2D>();
+        _abilityManager = GetComponent<AbilityManager>();
+        _rangeCollider  = GetComponent<CircleCollider2D>();
         ResolveAbilityFromDefinition();
     }
 
     void ResolveAbilityFromDefinition()
     {
         if (string.IsNullOrEmpty(definitionId)) return;
-
-        if (TowerDefinitionLibrary.Instance == null)
-        {
-            Debug.LogWarning($"[Turrent] TowerDefinitionLibrary not ready for '{definitionId}'.");
-            return;
-        }
-
+        if (TowerDefinitionLibrary.Instance == null) return;
         if (!TowerDefinitionLibrary.Instance.TryGet(definitionId, out var def)) return;
+
+        _rotationSpeed = def.rotationSpeed;
+
         if (string.IsNullOrEmpty(def.fireAbilityId)) return;
-
-        if (AbilityLibrary.Instance == null)
-        {
-            Debug.LogWarning($"[Turrent] AbilityLibrary not ready for '{def.fireAbilityId}'.");
-            return;
-        }
-
-        if (!AbilityLibrary.Instance.TryGet(def.fireAbilityId, out var ability))
-        {
-            Debug.LogWarning($"[Turrent] Ability '{def.fireAbilityId}' not found in AbilityLibrary.");
-            return;
-        }
+        if (AbilityLibrary.Instance == null) return;
+        if (!AbilityLibrary.Instance.TryGet(def.fireAbilityId, out var ability)) return;
 
         fireAbility = ability;
         _abilityManager.RegisterAbility(ability);
 
-        // Range lives on the ability — size the detection collider to match
         if (_rangeCollider != null && ability.range > 0f)
             _rangeCollider.radius = ability.range;
-
-        Debug.Log($"[Turrent] '{definitionId}' armed with '{ability.abilityID}', range={ability.range}");
     }
 
     void Update()
     {
         CleanUpDead();
-        // Always re-evaluate — lock onto whoever is furthest along the path
         target = GetLeadEnemy();
-        if (target != null) TryFire();
+
+        if (target == null) return;
+
+        Vector2 dir = ((Vector2)target.transform.position - (Vector2)transform.position).normalized;
+
+        if (_rotationSpeed > 0f)
+        {
+            // Rotate so transform.up points at target
+            float targetAngle  = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg - 90f;
+            float currentAngle = transform.eulerAngles.z;
+            float newAngle     = Mathf.MoveTowardsAngle(currentAngle, targetAngle, _rotationSpeed * Time.deltaTime);
+            transform.rotation = Quaternion.Euler(0f, 0f, newAngle);
+        }
+
+        // Gate firing on arc — always passes for 360°
+        float arc      = fireAbility != null ? fireAbility.fireArc : 360f;
+        float aimAngle = Vector2.Angle(transform.up, dir);
+        if (aimAngle <= arc * 0.5f)
+            TryFire();
     }
 
     void TryFire()
     {
-        if (fireAbility == null)
-        {
-            Debug.LogWarning($"[Turrent:{definitionId}] TryFire — fireAbility is NULL");
-            return;
-        }
+        if (fireAbility == null) return;
 
         var targetUnit = target.GetComponent<UnitParentClass>();
         if (targetUnit == null) return;
@@ -106,9 +104,7 @@ public class Turrent : MonoBehaviour
 
     void OnTriggerEnter2D(Collider2D other)
     {
-        var unit = other.GetComponent<UnitParentClass>();
-        Debug.Log($"[Turrent:{definitionId}] OnTriggerEnter2D — '{other.name}' hasUnit={unit != null}");
-        if (unit != null)
+        if (other.GetComponent<UnitParentClass>() != null)
             enemiesInRange.Add(other.gameObject);
     }
 
@@ -118,11 +114,15 @@ public class Turrent : MonoBehaviour
         enemiesInRange.Remove(other.gameObject);
     }
 
-    /// <summary>Returns the enemy in range that is furthest along the path.</summary>
     GameObject GetLeadEnemy()
     {
-        GameObject best        = null;
-        float      bestProgress = -1f;
+        var validators = fireAbility?.targetValidators;
+        bool hasValidators = validators != null && validators.Length > 0;
+
+        GameObject best          = null;
+        float      bestProgress  = -1f;
+        GameObject fallback      = null;
+        float      fallbackProg  = -1f;
 
         foreach (var go in enemiesInRange)
         {
@@ -131,9 +131,22 @@ public class Turrent : MonoBehaviour
             if (unit == null || !unit.isAlive) continue;
 
             float progress = go.GetComponent<RouteFollower>()?.Progress ?? 0f;
+
+            // Always track overall lead for fallback
+            if (progress > fallbackProg) { fallbackProg = progress; fallback = go; }
+
+            // Track validated lead separately
+            if (hasValidators && !PassesTargetValidators(go, validators)) continue;
             if (progress > bestProgress) { bestProgress = progress; best = go; }
         }
 
-        return best;
+        return best ?? fallback;
+    }
+
+    static bool PassesTargetValidators(GameObject candidate, TargetValidator[] validators)
+    {
+        foreach (var v in validators)
+            if (!v.IsValid(candidate)) return false;
+        return true;
     }
 }

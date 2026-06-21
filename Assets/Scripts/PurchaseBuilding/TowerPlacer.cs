@@ -142,6 +142,47 @@ public class TowerPlacer : MonoBehaviour
         // No collider on ghost
         foreach (var col in _ghost.GetComponents<Collider2D>())
             col.enabled = false;
+
+        // Draw range circle using ability range (the collider is still at placeholder radius 1)
+        if (TowerDefinitionLibrary.Instance.TryGet(definitionId, out var ghostDef))
+        {
+            float circleRange = ghostDef.range;
+            if (!string.IsNullOrEmpty(ghostDef.fireAbilityId) &&
+                AbilityLibrary.Instance != null &&
+                AbilityLibrary.Instance.TryGet(ghostDef.fireAbilityId, out var ghostAbility) &&
+                ghostAbility.range > 0f)
+                circleRange = ghostAbility.range;
+
+            if (circleRange > 0f)
+                AddRangeCircle(_ghost, circleRange);
+        }
+    }
+
+    static void AddRangeCircle(GameObject go, float radius)
+    {
+        const int   SEGMENTS = 64;
+        const float LINE_W   = 0.04f;
+
+        var lr               = go.AddComponent<LineRenderer>();
+        lr.loop              = true;
+        lr.positionCount     = SEGMENTS;
+        lr.startWidth        = LINE_W;
+        lr.endWidth          = LINE_W;
+        lr.useWorldSpace     = false;
+        lr.sortingLayerName  = "Units";
+        lr.sortingOrder      = 20;
+
+        var mat      = new Material(Shader.Find("Sprites/Default"));
+        lr.material  = mat;
+        lr.startColor = new Color(1f, 1f, 1f, 0.35f);
+        lr.endColor   = new Color(1f, 1f, 1f, 0.35f);
+
+        for (int i = 0; i < SEGMENTS; i++)
+        {
+            float angle = i / (float)SEGMENTS * Mathf.PI * 2f;
+            lr.SetPosition(i, new Vector3(Mathf.Cos(angle) * radius,
+                                          Mathf.Sin(angle) * radius, 0f));
+        }
     }
 
     static Vector2 GetMouseWorldPos()
