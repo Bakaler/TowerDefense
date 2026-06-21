@@ -44,7 +44,9 @@ public class Effect_Damage : Effect
         TowerInfo towerInfo = context.OriginTower != null
             ? context.OriginTower.GetComponent<TowerInfo>()
             : null;
-        float towerMult = towerInfo != null ? towerInfo.StatMultiplier * towerInfo.ExtraMultiplier : 1f;
+        float towerMult = towerInfo != null
+            ? towerInfo.StatMultiplier * towerInfo.ExtraMultiplier * towerInfo.AuraDamageMultiplier
+            : 1f;
 
         float damage = damageBase * towerMult;
 

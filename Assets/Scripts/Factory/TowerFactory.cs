@@ -67,10 +67,14 @@ public class TowerFactory : MonoBehaviour
         if (!string.IsNullOrEmpty(def.spriteSheet) && def.spriteIndex >= 0)
         {
             var sheet = Resources.LoadAll<Sprite>(def.spriteSheet);
-            if (sheet != null && def.spriteIndex < sheet.Length)
-                { sr.sprite = sheet[def.spriteIndex]; sr.color = def.tintColor; }
+            if (sheet != null && sheet.Length > 0)
+            {
+                int idx = Mathf.Clamp(def.spriteIndex, 0, sheet.Length - 1);
+                sr.sprite = sheet[idx];
+                sr.color  = def.tintColor;
+            }
             else
-                Debug.LogWarning($"[TowerFactory] Sheet '{def.spriteSheet}' index {def.spriteIndex} not found for '{def.id}'.");
+                Debug.LogWarning($"[TowerFactory] Sheet '{def.spriteSheet}' not found for '{def.id}'.");
         }
         else if (!string.IsNullOrEmpty(def.spritePath))
         {
@@ -189,6 +193,7 @@ public class TowerFactory : MonoBehaviour
         if (effect == null) return 0f;
         if (effect is Effect_Damage dmg) return dmg.damageBase;
         if (effect is Effect_Launch_Missile missile) return FindFirstDamage(missile.impactEffectId, depth + 1);
+        if (effect is Effect_Launch_Shotgun shotgun) return FindFirstDamage(shotgun.impactEffectId, depth + 1);
         if (effect is Effect_Set set)
             foreach (var id in set.EffectIds)
             {

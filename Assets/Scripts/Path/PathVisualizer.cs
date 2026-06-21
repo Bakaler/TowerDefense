@@ -8,7 +8,6 @@ using UnityEngine;
 /// Call RebuildLines() after editing nodes, or enable 'autoRebuildInEditor'
 /// to refresh automatically whenever a node moves.
 /// </summary>
-[RequireComponent(typeof(PathGraph))]
 public class PathVisualizer : MonoBehaviour
 {
     [Header("Visibility")]
@@ -38,7 +37,15 @@ public class PathVisualizer : MonoBehaviour
 
     void Awake()
     {
+        ResolveGraph();
+    }
+
+    void ResolveGraph()
+    {
+        // Prefer the local PathGraph if it has nodes; otherwise use the scene singleton.
         _graph = GetComponent<PathGraph>();
+        if (_graph == null || _graph.nodes.Count == 0)
+            _graph = FindFirstObjectByType<PathGraph>();
     }
 
     void Start()
@@ -52,13 +59,23 @@ public class PathVisualizer : MonoBehaviour
     // ── Public API ────────────────────────────────────────────────────
 
     /// <summary>Destroy existing LineRenderers and rebuild from current graph state.</summary>
+    [ContextMenu("Rebuild Lines")]
     public void RebuildLines()
     {
-        // Clear old lines
-        if (_lineRoot != null) Destroy(_lineRoot);
+        // Clear old lines — use DestroyImmediate in edit mode, Destroy at runtime
+        if (_lineRoot != null)
+        {
+#if UNITY_EDITOR
+            if (!Application.isPlaying)
+                DestroyImmediate(_lineRoot);
+            else
+#endif
+                Destroy(_lineRoot);
+        }
         _lines.Clear();
         _arrows.Clear();
 
+        if (_graph == null) ResolveGraph();
         if (_graph == null) _graph = GetComponent<PathGraph>();
         if (_graph == null || _graph.nodes == null) return;
 

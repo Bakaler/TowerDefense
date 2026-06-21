@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -27,6 +28,33 @@ public class TowerInfo : MonoBehaviour
     public int   Tier                 { get; private set; } = 1;
     public float StatMultiplier       { get; private set; } = 1f;
     public float ExtraMultiplier      { get; set; }         = 1f;
+
+    // ── Aura buffs ────────────────────────────────────────────────────
+    private Dictionary<object, (float dmg, float spd)> _auraBuffs;
+    public float AuraDamageMultiplier { get; private set; } = 1f;
+    public float AuraSpeedMultiplier  { get; private set; } = 1f;
+
+    public void ApplyAura(object source, float dmgMult, float spdMult)
+    {
+        if (_auraBuffs == null) _auraBuffs = new Dictionary<object, (float, float)>();
+        _auraBuffs[source] = (dmgMult, spdMult);
+        RecalcAuras();
+    }
+
+    public void RemoveAura(object source)
+    {
+        if (_auraBuffs == null || !_auraBuffs.Remove(source)) return;
+        RecalcAuras();
+    }
+
+    void RecalcAuras()
+    {
+        float d = 1f, s = 1f;
+        if (_auraBuffs != null)
+            foreach (var (dm, sm) in _auraBuffs.Values) { d *= dm; s *= sm; }
+        AuraDamageMultiplier = d;
+        AuraSpeedMultiplier  = s;
+    }
 
     public int  UpgradeCost => resourceCost * (1 << Tier);   // tier1→2: cost*2, tier2→3: cost*4
     public bool CanUpgrade  => Tier < maxTier;

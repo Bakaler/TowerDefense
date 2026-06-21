@@ -17,8 +17,9 @@ public class ProjectileUnit : MonoBehaviour
     public GameObject       originTower;
 
     // ── Config ────────────────────────────────────────────────────────
-    public float moveSpeed = 8f;
-    public float lifetime  = 7f;
+    public float moveSpeed     = 8f;
+    public float lifetime      = 7f;
+    public bool  faceDirection = false;
 
     // ── Internal ──────────────────────────────────────────────────────
     private bool    _hit;
@@ -44,6 +45,9 @@ public class ProjectileUnit : MonoBehaviour
         }
 
         Vector3 destination = (homing && target != null) ? target.position : targetPoint;
+        Vector3 dir = destination - transform.position;
+        if (faceDirection && dir.sqrMagnitude > 0.0001f)
+            transform.up = dir.normalized;
         transform.position = Vector3.MoveTowards(transform.position, destination, moveSpeed * Time.deltaTime);
     }
 

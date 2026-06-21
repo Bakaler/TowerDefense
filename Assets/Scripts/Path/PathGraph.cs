@@ -33,12 +33,29 @@ public class PathGraph : MonoBehaviour
 
     void Awake()
     {
-        if (Instance != null && Instance != this) { Destroy(gameObject); return; }
+        if (Instance != null && Instance != this)
+        {
+            // Disable this duplicate component — do NOT destroy the GameObject,
+            // as it may contain path nodes other spawners hold references to.
+            enabled = false;
+            return;
+        }
         Instance = this;
         BuildIncomingMap();
     }
 
     void OnValidate() => BuildIncomingMap();
+
+    [ContextMenu("Scan Scene for PathNodes")]
+    public void ScanScene()
+    {
+        nodes = new List<PathNode>(FindObjectsByType<PathNode>(FindObjectsSortMode.None));
+        BuildIncomingMap();
+        Debug.Log($"[PathGraph] Scanned scene — found {nodes.Count} PathNode(s).");
+#if UNITY_EDITOR
+        UnityEditor.EditorUtility.SetDirty(this);
+#endif
+    }
 
     // ── Incoming-edge map (for head detection) ────────────────────────
 
@@ -200,7 +217,7 @@ public class PathGraph : MonoBehaviour
 
                 Gizmos.color = new Color(1f, 0.75f, 0f, 0.9f);
                 Vector2 prev = p1;
-                int drawSamples = samplesPerSegment * 2; // draw at higher resolution
+                int drawSamples = samplesPerSegment * 2;
                 for (int i = 1; i <= drawSamples; i++)
                 {
                     float t    = i / (float)drawSamples;
@@ -208,13 +225,6 @@ public class PathGraph : MonoBehaviour
                     Gizmos.DrawLine(prev, pt);
                     prev = pt;
                 }
-
-                // Arrow head
-                Vector2 dir = (next.Position - node.Position).normalized;
-                Vector2 mid = Vector2.Lerp(node.Position, next.Position, 0.6f);
-                Gizmos.color = Color.white;
-                Gizmos.DrawLine(mid, mid - dir * 0.3f + new Vector2(-dir.y, dir.x) * 0.15f);
-                Gizmos.DrawLine(mid, mid - dir * 0.3f - new Vector2(-dir.y, dir.x) * 0.15f);
             }
         }
     }

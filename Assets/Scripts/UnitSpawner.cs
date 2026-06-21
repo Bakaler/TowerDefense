@@ -20,6 +20,9 @@ public class WaveEntry
 
     [Tooltip("Seconds between each unit in this group")]
     public float spawnInterval = 0.4f;
+
+    [Tooltip("-1 = all spawners, 0/1/2 = specific spawner by pathIndex")]
+    public int spawnerIndex = -1;
 }
 
 /// <summary>
@@ -33,6 +36,9 @@ public class UnitSpawner : MonoBehaviour
     [Tooltip("Head node this spawner feeds units into.")]
     public PathNode headNode;
 
+    [Tooltip("Index used to match WaveEntry.spawnerIndex (0=main, 1=upper, 2=lower).")]
+    public int pathIndex = 0;
+
     // ── Internal state ────────────────────────────────────────────────
     [HideInInspector] public List<WaveEntry> waves = new List<WaveEntry>();
 
@@ -42,6 +48,7 @@ public class UnitSpawner : MonoBehaviour
     private float _timer;
     private float _coolDown;
     private bool  _running;
+    private int   _waveNumber;        // used for difficulty scaling
 
     // ── Public state ──────────────────────────────────────────────────
     /// <summary>True while this spawner still has units left to emit this wave.</summary>
@@ -72,7 +79,7 @@ public class UnitSpawner : MonoBehaviour
     /// Called by WaveManager at the start of each wave.
     /// Replaces the current spawn queue with the new group list.
     /// </summary>
-    public void BeginWave(List<WaveEntry> groups)
+    public void BeginWave(List<WaveEntry> groups, int waveNumber = 1)
     {
         waves           = groups ?? new List<WaveEntry>();
         _formationIndex = 0;
@@ -81,6 +88,7 @@ public class UnitSpawner : MonoBehaviour
         _timer          = 0f;
         _coolDown       = 0f;   // first unit spawns immediately
         _running        = waves.Count > 0;
+        _waveNumber     = waveNumber;
     }
 
     // ── Spawn ─────────────────────────────────────────────────────────
@@ -126,6 +134,15 @@ public class UnitSpawner : MonoBehaviour
 
         GameObject unitGO = UnitFactory.Instance.Build(entry.unitDefinitionId, spawnPos);
         if (unitGO == null) return;
+
+        // Scale stats with wave number — +8% health and +3% speed compounding per wave
+        var upc = unitGO.GetComponent<UnitParentClass>();
+        if (upc != null && _waveNumber > 1)
+        {
+            float healthMult = Mathf.Pow(1.08f, _waveNumber - 1);
+            upc.lifeMax     *= healthMult;
+            upc.lifeCurrent  = upc.lifeMax;
+        }
 
         UnitManager unit = unitGO.GetComponent<UnitManager>();
         if (unit != null && PathGraph.Instance != null)

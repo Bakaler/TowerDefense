@@ -18,12 +18,15 @@ public class Effect_Launch_Shotgun : Effect
     public float  missileLifetime = 0.38f;
     public string missileSpriteSheet = "";
     public int    missileSpriteIndex = -1;
+    public string missileSpritePath  = "";
     public Color  missileColor    = Color.white;
 
     private Effect _impactEffect;
 
     private static Sprite[] _cachedSheet;
     private static string   _cachedSheetPath;
+    private static Sprite   _cachedSingleSprite;
+    private static string   _cachedSinglePath;
     private static Sprite   _fallbackSprite;
 
     public override void ApplyData(string dataJson, EffectLibrary library)
@@ -107,6 +110,16 @@ public class Effect_Launch_Shotgun : Effect
 
     Sprite LoadSprite()
     {
+        if (!string.IsNullOrEmpty(missileSpritePath))
+        {
+            if (_cachedSinglePath != missileSpritePath)
+            {
+                _cachedSingleSprite = Resources.Load<Sprite>(missileSpritePath);
+                _cachedSinglePath   = missileSpritePath;
+            }
+            if (_cachedSingleSprite != null) return _cachedSingleSprite;
+        }
+
         if (!string.IsNullOrEmpty(missileSpriteSheet) && missileSpriteIndex >= 0)
         {
             if (_cachedSheetPath != missileSpriteSheet)

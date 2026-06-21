@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: b31a17cf88d627146b64078b524f4349
+guid: 4fb4f63ca85d64445b2986fc8dd62401
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 816188478487842006
-    second: Tower4_0
+      213: -3767008943530109070
+    second: Tower6_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -100,13 +100,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Tower4_0
+      name: Tower6_0
       rect:
         serializedVersion: 2
-        x: 0
-        y: 2
-        width: 63
-        height: 58
+        x: 17
+        y: 15
+        width: 31
+        height: 27
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -115,8 +115,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 6dcc80ac81fa35b00800000000000000
-      internalID: 816188478487842006
+      spriteID: 2771b270355e8bbc0800000000000000
+      internalID: -3767008943530109070
       vertices: []
       indices: 
       edges: []

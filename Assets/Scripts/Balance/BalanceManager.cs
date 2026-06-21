@@ -24,7 +24,15 @@ public class BalanceManager : MonoBehaviour
     {
         var towers = FindObjectsByType<TowerInfo>(FindObjectsSortMode.None);
 
-        var idCounts = new Dictionary<string, int>();
+        // Count how many of each tower ID exist, grouped by balance type
+        var idCounts   = new Dictionary<string, int>();
+        var typeMaxCount = new Dictionary<BalanceType, int>
+        {
+            { BalanceType.Elemental, 0 },
+            { BalanceType.Arcane,    0 },
+            { BalanceType.Physical,  0 },
+        };
+
         foreach (var t in towers)
         {
             if (t.isGhost) continue;
@@ -32,11 +40,21 @@ public class BalanceManager : MonoBehaviour
             idCounts[t.definitionId]++;
         }
 
+        // Worst decay within a type = highest single-ID count of that type
+        foreach (var t in towers)
+        {
+            if (t.isGhost) continue;
+            int cnt = idCounts[t.definitionId];
+            if (cnt > typeMaxCount[t.balanceType])
+                typeMaxCount[t.balanceType] = cnt;
+        }
+
+        // Each tower contributes BalanceRatio(worstDecayForItsType)
         float e = 0f, a = 0f, p = 0f;
         foreach (var t in towers)
         {
             if (t.isGhost) continue;
-            float ratio = BalanceRatio(idCounts[t.definitionId]);
+            float ratio = BalanceRatio(typeMaxCount[t.balanceType]);
             switch (t.balanceType)
             {
                 case BalanceType.Elemental: e += ratio; break;

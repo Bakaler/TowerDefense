@@ -49,7 +49,7 @@ public class ResearchTower : MonoBehaviour, IFactoryInitializable
         while (true)
         {
             float arcane   = BalanceManager.Instance != null ? BalanceManager.Instance.Arcane : 0f;
-            float interval = Mathf.Max(minInterval, orbInterval / (1f + arcane * arcaneScale));
+            float interval = Mathf.Max(minInterval, orbInterval * Mathf.Pow(0.99f, arcane));
             yield return new WaitForSeconds(interval);
 
             ResearchOrb.Spawn(transform.position, orbSpriteSheet, orbSpriteIndex,

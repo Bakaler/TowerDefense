@@ -31,7 +31,9 @@ public class GameHUD : MonoBehaviour
 
     // ── Header balance scores ─────────────────────────────────────────
     private Text _hdrElem;
+    private Text _hdrElemBonus;
     private Text _hdrArc;
+    private Text _hdrArcBonus;
     private Text _hdrPhys;
     private Text _hdrPhysDrop;
 
@@ -50,8 +52,11 @@ public class GameHUD : MonoBehaviour
     private Text       _tpDamage;
     private Text       _tpFireRate;
     private Text       _tpKills;
+    private Text       _tpAura;
     private Button     _tpUpgradeBtn;
     private Text       _tpUpgradeBtnLabel;
+    private Button[]   _tpTargetBtns;
+    private Image[]    _tpTargetImgs;
     private TowerInfo  _selectedTower;
 
     // ── Cached managers ───────────────────────────────────────────────
@@ -147,8 +152,34 @@ public class GameHUD : MonoBehaviour
         if (_tpName     != null) _tpName.text     = info.displayName.ToUpper() + tierLabel;
         if (_tpBalance  != null) _tpBalance.text  = $"Type  {info.balanceType}";
         RefreshBalanceDist();
-        if (_tpDamage   != null) _tpDamage.text   = $"Damage   {info.damage * info.StatMultiplier:0.#}";
-        if (_tpFireRate != null) _tpFireRate.text  = $"Fire Rate  {info.FireRate:0.##}/s";
+        if (_tpDamage != null)
+        {
+            float baseDmg = info.damage * info.StatMultiplier;
+            string dmgStr = $"Damage   {baseDmg:0.#}";
+            if (info.AuraDamageMultiplier > 1.001f)
+            {
+                float bonus = baseDmg * (info.AuraDamageMultiplier - 1f);
+                dmgStr += $"  <color=#4DFF73>(+{bonus:0.#})</color>";
+            }
+            _tpDamage.text = dmgStr;
+        }
+
+        if (_tpFireRate != null)
+        {
+            string rateStr = $"Fire Rate  {info.FireRate:0.##}/s";
+            if (info.AuraSpeedMultiplier > 1.001f)
+            {
+                float reduction = info.AuraSpeedMultiplier - 1f;
+                rateStr += $"  <color=#4DFF73>(-{reduction:0.##})</color>";
+            }
+            _tpFireRate.text = rateStr;
+        }
+
+        if (_tpAura != null) _tpAura.text = "";
+
+        // Highlight active targeting button
+        RefreshTargetingButtons(info);
+
         if (_tpKills    != null) _tpKills.text     = $"Kills  {info.KillCount}";
 
         if (_tpUpgradeBtn != null)
@@ -168,6 +199,27 @@ public class GameHUD : MonoBehaviour
                     _tpUpgradeBtnLabel.text = $"UPGRADE  Tier {info.Tier + 1}  —  {info.UpgradeCost}g";
             }
         }
+    }
+
+    void SetTargetingMode(TargetingMode mode)
+    {
+        if (_selectedTower == null) return;
+        var turrent = _selectedTower.GetComponent<Turrent>();
+        if (turrent != null) turrent.Targeting = mode;
+        RefreshTargetingButtons(_selectedTower);
+    }
+
+    void RefreshTargetingButtons(TowerInfo info)
+    {
+        if (_tpTargetImgs == null) return;
+        var turrent = info.GetComponent<Turrent>();
+        TargetingMode current = turrent != null ? turrent.Targeting : TargetingMode.Furthest;
+
+        Color active   = new Color(0.25f, 0.50f, 0.80f, 1f);
+        Color inactive = new Color(0.18f, 0.18f, 0.28f, 1f);
+        for (int i = 0; i < _tpTargetImgs.Length; i++)
+            if (_tpTargetImgs[i] != null)
+                _tpTargetImgs[i].color = (TargetingMode)i == current ? active : inactive;
     }
 
     void OnUpgradeClicked()
@@ -269,6 +321,16 @@ public class GameHUD : MonoBehaviour
             int bonusChance = Mathf.FloorToInt(pCum * 0.25f);
             _hdrPhysDrop.text = $"{baseChance}% + {bonusChance}%";
         }
+        if (_hdrElemBonus != null)
+        {
+            int elemBonus = Mathf.FloorToInt((1f - Mathf.Pow(0.99f, eCum)) * 100f);
+            _hdrElemBonus.text = $"+{elemBonus}% orbs";
+        }
+        if (_hdrArcBonus != null)
+        {
+            int arcBonus = Mathf.FloorToInt((1f - Mathf.Pow(0.99f, aCum)) * 100f);
+            _hdrArcBonus.text = $"+{arcBonus}% sci";
+        }
     }
 
     // ── Tower info panel ──────────────────────────────────────────────
@@ -358,7 +420,7 @@ public class GameHUD : MonoBehaviour
 
     void BuildTowerPanel(GameObject root)
     {
-        const float W = 260f, H = 300f, PAD = 14f, ROW = 36f;
+        const float W = 260f, H = 430f, PAD = 14f, ROW = 36f;
 
         _towerPanel = new GameObject("TowerInfoPanel");
         _towerPanel.transform.SetParent(root.transform, false);
@@ -390,6 +452,7 @@ public class GameHUD : MonoBehaviour
         _tpBalanceDist = MakeText(MakeRect("BalanceDist", _towerPanel, PAD, y, W - PAD*2, ROW), "", new Color(0.75f, 0.75f, 0.85f), 12); y -= ROW;
         _tpDamage      = MakeText(MakeRect("Damage",      _towerPanel, PAD, y, W - PAD*2, ROW), "", new Color(0.9f, 0.9f, 0.9f), 14); y -= ROW;
         _tpFireRate    = MakeText(MakeRect("FireRate",    _towerPanel, PAD, y, W - PAD*2, ROW), "", new Color(0.9f, 0.9f, 0.9f), 14); y -= ROW;
+        _tpAura        = MakeText(MakeRect("Aura",        _towerPanel, PAD, y, W - PAD*2, ROW), "", new Color(0.3f, 1f, 0.45f), 13); y -= ROW;
         _tpKills       = MakeText(MakeRect("Kills",       _towerPanel, PAD, y, W - PAD*2, ROW), "", new Color(0.95f, 0.5f, 0.5f), 14); y -= ROW + 4f;
 
         // Upgrade button
@@ -407,6 +470,35 @@ public class GameHUD : MonoBehaviour
             "UPGRADE", Color.white, 14, bold: true);
         _tpUpgradeBtnLabel.alignment = TextAnchor.MiddleCenter;
         _tpUpgradeBtn.onClick.AddListener(OnUpgradeClicked);
+        y -= 38f + 6f;
+
+        // Targeting mode buttons — Furthest / Closest / Lowest
+        MakeText(MakeRect("TargetLabel", _towerPanel, PAD, y, W - PAD * 2, 20f),
+            "TARGET", new Color(0.6f, 0.6f, 0.7f), 11, bold: true);
+        y -= 22f;
+
+        string[] modeLabels = { "Furthest", "Closest", "Lowest" };
+        float btnW = (W - PAD * 2 - 8f) / 3f;
+        _tpTargetBtns = new Button[3];
+        _tpTargetImgs = new Image[3];
+
+        for (int i = 0; i < 3; i++)
+        {
+            float xOff = PAD + i * (btnW + 4f);
+            var bGO  = MakeRect($"Target_{modeLabels[i]}", _towerPanel, xOff, y, btnW, 32f);
+            var bImg = bGO.AddComponent<Image>();
+            bImg.color = new Color(0.18f, 0.18f, 0.28f, 1f);
+            var btn  = bGO.AddComponent<Button>();
+            btn.targetGraphic = bImg;
+            MakeText(MakeRect("L", bGO, 0f, 0f, btnW, 32f), modeLabels[i], Color.white, 11, bold: true)
+                .alignment = TextAnchor.MiddleCenter;
+
+            int idx = i;
+            btn.onClick.AddListener(() => SetTargetingMode((TargetingMode)idx));
+
+            _tpTargetBtns[i] = btn;
+            _tpTargetImgs[i] = bImg;
+        }
 
         _towerPanel.SetActive(false);
     }
@@ -511,10 +603,12 @@ public class GameHUD : MonoBehaviour
         float y1 = BAR_H - TOP_H - ROW_H * 2f;    // A row
         float y0 = BAR_H - TOP_H - ROW_H * 3f;    // P row
 
-        _hdrElem     = AddAbsLabel(bar, "Elem",     LEFT, y2, 160f, ROW_H, "E  0.00",   cE, 13, TextAnchor.MiddleLeft);
-        _hdrArc      = AddAbsLabel(bar, "Arc",      LEFT, y1, 160f, ROW_H, "A  0.00",   cA, 13, TextAnchor.MiddleLeft);
-        _hdrPhys     = AddAbsLabel(bar, "Phys",     LEFT, y0, 160f, ROW_H, "P  0.00",   cP, 13, TextAnchor.MiddleLeft);
-        _hdrPhysDrop = AddAbsLabel(bar, "PhysDrop", LEFT + 160f, y0, 180f, ROW_H, "15% + 0%", cD, 13, TextAnchor.MiddleLeft);
+        _hdrElem      = AddAbsLabel(bar, "Elem",      LEFT,        y2, 160f, ROW_H, "E  0.00",  cE, 13, TextAnchor.MiddleLeft);
+        _hdrElemBonus = AddAbsLabel(bar, "ElemBonus", LEFT + 160f, y2, 180f, ROW_H, "+0% orbs", cE, 13, TextAnchor.MiddleLeft);
+        _hdrArc       = AddAbsLabel(bar, "Arc",       LEFT,        y1, 160f, ROW_H, "A  0.00",  cA, 13, TextAnchor.MiddleLeft);
+        _hdrArcBonus  = AddAbsLabel(bar, "ArcBonus",  LEFT + 160f, y1, 180f, ROW_H, "+0% sci",  cA, 13, TextAnchor.MiddleLeft);
+        _hdrPhys      = AddAbsLabel(bar, "Phys",      LEFT,        y0, 160f, ROW_H, "P  0.00",  cP, 13, TextAnchor.MiddleLeft);
+        _hdrPhysDrop  = AddAbsLabel(bar, "PhysDrop",  LEFT + 160f, y0, 180f, ROW_H, "15% + 0%", cD, 13, TextAnchor.MiddleLeft);
     }
 
     // Places a label at an absolute pixel position within parent (anchor bottom-left).

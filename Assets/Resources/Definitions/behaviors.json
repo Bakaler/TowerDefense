@@ -11,7 +11,7 @@
     {
       "id": "slowed",
       "displayName": "Slowed",
-      "duration": 2.5,
+      "duration": 6.5,
       "stackRule": "refresh",
       "moveSpeedMultiplier": 0.4,
       "tintColor": { "r": 0.45, "g": 0.75, "b": 1.0, "a": 1.0 }

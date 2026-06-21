@@ -136,7 +136,12 @@ public class WaveManager : MonoBehaviour
 
         var def = _waveDefs[CurrentWave - 1];
         foreach (var s in _spawners)
-            if (s != null) s.BeginWave(def.groups);
+        {
+            if (s == null) continue;
+            int pi = s.pathIndex;
+            var groups = def.groups.FindAll(g => g.spawnerIndex < 0 || g.spawnerIndex == pi);
+            s.BeginWave(groups, CurrentWave);
+        }
 
         Debug.Log($"[WaveManager] Wave {CurrentWave}/{TotalWaves} started.");
     }

@@ -35,6 +35,8 @@ public class IncomeTower : MonoBehaviour, IFactoryInitializable
 
     // ── Data (set from towers.json via Initialize) ────────────────────
     public float  orbInterval     = 8f;
+    public float  minInterval     = 2f;
+    public float  elementalScale  = 0.15f;
     public string orbSpriteSheet  = "";
     public int    orbSpriteIndex  = 1;
 
@@ -53,6 +55,8 @@ public class IncomeTower : MonoBehaviour, IFactoryInitializable
         var d = JsonUtility.FromJson<IncomeTowerData>(dataJson);
         if (d == null) return;
         if (d.orbInterval    > 0f)                     orbInterval    = d.orbInterval;
+        if (d.minInterval    > 0f)                     minInterval    = d.minInterval;
+        if (d.elementalScale > 0f)                     elementalScale = d.elementalScale;
         if (!string.IsNullOrEmpty(d.orbSpriteSheet))   orbSpriteSheet = d.orbSpriteSheet;
         if (d.orbSpriteIndex >= 0)                     orbSpriteIndex = d.orbSpriteIndex;
     }
@@ -75,7 +79,9 @@ public class IncomeTower : MonoBehaviour, IFactoryInitializable
 
         while (true)
         {
-            yield return new WaitForSeconds(orbInterval);
+            float elemental = BalanceManager.Instance != null ? BalanceManager.Instance.Elemental : 0f;
+            float interval  = Mathf.Max(minInterval, orbInterval * Mathf.Pow(0.99f, elemental));
+            yield return new WaitForSeconds(interval);
             if (_orbs.Count < SlotOffsets.Length)
                 SpawnOrb();
         }
@@ -161,6 +167,8 @@ public class IncomeTower : MonoBehaviour, IFactoryInitializable
 public class IncomeTowerData
 {
     public float  orbInterval    = 8f;
+    public float  minInterval    = 2f;
+    public float  elementalScale = 0.15f;
     public string orbSpriteSheet = "";
     public int    orbSpriteIndex = 1;
 }

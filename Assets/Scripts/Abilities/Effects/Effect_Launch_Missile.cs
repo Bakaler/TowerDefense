@@ -19,7 +19,9 @@ public class Effect_Launch_Missile : Effect
     public float  missileLifetime    = 7f;
     public string missileSpriteSheet = "";
     public int    missileSpriteIndex = -1;
+    public string missileSpritePath  = "";
     public bool   drawLine           = false;
+    public bool   faceDirection      = false;
     public Color  missileColor       = Color.white;
 
     // ── Resolved at runtime ───────────────────────────────────────────
@@ -90,6 +92,7 @@ public class Effect_Launch_Missile : Effect
         proj.targetPoint        = context.TargetPoint;
         proj.homing             = true;
         proj.drawImpactLine     = drawLine;
+        proj.faceDirection      = faceDirection;
         proj.originTower        = context.OriginTower;
 
         Debug.Log($"[Effect_Launch_Missile] Spawned missile → {context.Target.name}");
@@ -110,6 +113,13 @@ public class Effect_Launch_Missile : Effect
                 return _cachedSheet[missileSpriteIndex];
 
             Debug.LogWarning($"[Effect_Launch_Missile] Sheet '{missileSpriteSheet}' index {missileSpriteIndex} not found.");
+        }
+
+        if (!string.IsNullOrEmpty(missileSpritePath))
+        {
+            var spr = Resources.Load<Sprite>(missileSpritePath);
+            if (spr != null) return spr;
+            Debug.LogWarning($"[Effect_Launch_Missile] Sprite not found at '{missileSpritePath}'.");
         }
 
         return GetFallbackSprite();

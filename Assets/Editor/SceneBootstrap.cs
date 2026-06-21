@@ -15,11 +15,14 @@ public static class SceneBootstrap
     [MenuItem("TowerDefense/Setup Basic Wave Scene")]
     public static void SetupScene()
     {
-        bool pathExists = GameObject.Find("--- PATH ---") != null;
+        bool pathAExists   = GameObject.Find("--- PATH ---")   != null;
+        bool pathBExists   = GameObject.Find("--- PATH 2 ---") != null;
+        bool pathCExists   = GameObject.Find("--- PATH 3 ---") != null;
+        bool anyPathExists = pathAExists || pathBExists || pathCExists;
 
-        string msg = pathExists
-            ? "This will reset Managers and Spawner.\nYour existing path nodes will be preserved.\nProceed?"
-            : "This will create Managers, a default S-curve path, and a Spawner.\nProceed?";
+        string msg = anyPathExists
+            ? "This will reset Managers and all Spawners.\nExisting path nodes will be preserved.\nProceed?"
+            : "This will create Managers, 3 paths, and 3 Spawners.\nProceed?";
 
         if (!EditorUtility.DisplayDialog("Setup Basic Wave Scene", msg, "Yes", "Cancel"))
             return;
@@ -27,9 +30,11 @@ public static class SceneBootstrap
         Undo.SetCurrentGroupName("Setup Basic Wave Scene");
         int undoGroup = Undo.GetCurrentGroup();
 
-        // ── Always reset managers, spawner, and shop UI ───────────────
+        // ── Always reset managers, spawners, and shop UI ─────────────
         DestroyIfExists("--- MANAGERS ---");
         DestroyIfExists("--- SPAWNER ---");
+        DestroyIfExists("--- SPAWNER 2 ---");
+        DestroyIfExists("--- SPAWNER 3 ---");
         DestroyIfExists("--- SHOP UI ---");
 
         // ─────────────────────────────────────────────────────────────
@@ -63,16 +68,22 @@ public static class SceneBootstrap
         librariesGO.AddComponent<TowerPlacer>();
 
         // ─────────────────────────────────────────────────────────────
-        // 2. PATH — only create if it doesn't already exist
+        // 2. PATHS — only create each path if it doesn't already exist
+        //    All three paths share the same PathGraph singleton.
         // ─────────────────────────────────────────────────────────────
-        PathNode spawnHeadNode = null;
 
-        if (!pathExists)
+        // Locate or build PathGraph (lives on the main path root)
+        PathGraph pathGraph = Object.FindFirstObjectByType<PathGraph>();
+
+        PathNode headA = null, headB = null, headC = null;
+
+        // ── PATH A (middle, existing S-curve) ─────────────────────────
+        if (!pathAExists)
         {
             var pathRoot = new GameObject("--- PATH ---");
-            Undo.RegisterCreatedObjectUndo(pathRoot, "Create Path");
+            Undo.RegisterCreatedObjectUndo(pathRoot, "Create Path A");
 
-            Vector3[] nodePositions =
+            Vector3[] posA =
             {
                 new Vector3(-9f,  0f, 0f),
                 new Vector3(-5f,  3f, 0f),
@@ -82,69 +93,163 @@ public static class SceneBootstrap
                 new Vector3( 9f,  0f, 0f),
             };
 
-            var nodes = new PathNode[nodePositions.Length];
-            for (int i = 0; i < nodePositions.Length; i++)
-            {
-                var nodeGO = new GameObject($"PathNode_{i:00}");
-                Undo.RegisterCreatedObjectUndo(nodeGO, "Create PathNode");
-                nodeGO.transform.SetParent(pathRoot.transform);
-                nodeGO.transform.position = nodePositions[i];
-                nodes[i] = nodeGO.AddComponent<PathNode>();
-            }
+            var nodesA = BuildPathNodes(pathRoot, "PathNode_A", posA);
+            headA = nodesA[0];
 
-            for (int i = 0; i < nodes.Length - 1; i++)
-                nodes[i].connections.Add(nodes[i + 1]);
-
-            var pathGraph           = pathRoot.AddComponent<PathGraph>();
-            pathGraph.nodes         = new List<PathNode>(nodes);
+            // PathGraph lives here; paths B+C register into it
+            pathGraph = pathRoot.AddComponent<PathGraph>();
+            pathGraph.nodes = new List<PathNode>(nodesA);
             pathGraph.samplesPerSegment = 12;
 
-            var pathVis             = pathRoot.AddComponent<PathVisualizer>();
-            pathVis.pathColor       = new Color(1f, 0.75f, 0f, 0.9f);
-            pathVis.lineWidth       = 0.1f;
-            pathVis.showArrows      = false;
-            pathVis.showInGame      = false;
+            var vis = pathRoot.AddComponent<PathVisualizer>();
+            vis.pathColor  = new Color(1f, 0.75f, 0f, 0.9f);
+            vis.lineWidth  = 0.1f;
+            vis.showInGame = false;
 
-            spawnHeadNode = nodes[0];
-
-            Selection.activeGameObject = pathRoot;
-            SceneView.FrameLastActiveSceneView();
-
-            Debug.Log("[SceneBootstrap] Created default S-curve path (6 nodes).");
+            Debug.Log("[SceneBootstrap] Created Path A (middle S-curve).");
         }
         else
         {
-            // Use the existing path's head node for the spawner
-            var existingGraph = Object.FindFirstObjectByType<PathGraph>();
-            if (existingGraph != null)
+            // Find existing head node
+            var go = GameObject.Find("PathNode_A_00");
+            if (go != null) headA = go.GetComponent<PathNode>();
+            if (headA == null && pathGraph != null)
             {
-                var heads = existingGraph.GetHeads();
-                if (heads.Count > 0) spawnHeadNode = heads[0];
+                var heads = pathGraph.GetHeads();
+                if (heads.Count > 0) headA = heads[0];
             }
-            Debug.Log("[SceneBootstrap] Existing path preserved.");
+            Debug.Log("[SceneBootstrap] Path A preserved.");
+        }
+
+        // ── PATH B (split path — shared entry, forks into upper + lower) ─
+        if (!pathBExists)
+        {
+            var pathRoot = new GameObject("--- PATH 2 ---");
+            Undo.RegisterCreatedObjectUndo(pathRoot, "Create Path B");
+
+            // Shared approach section
+            var b00 = MakeNode(pathRoot, "PathNode_B_00",   new Vector3(-9f,  5f, 0f));
+            var b01 = MakeNode(pathRoot, "PathNode_B_01",   new Vector3(-5f,  5f, 0f));
+            var fork = MakeNode(pathRoot, "PathNode_B_fork", new Vector3(-1f,  5f, 0f));
+
+            // Upper branch
+            var hi0 = MakeNode(pathRoot, "PathNode_B_hi_0", new Vector3( 2f,  8f, 0f));
+            var hi1 = MakeNode(pathRoot, "PathNode_B_hi_1", new Vector3( 6f,  7f, 0f));
+            var hiE = MakeNode(pathRoot, "PathNode_B_hi_E", new Vector3( 9f,  8f, 0f));
+
+            // Lower branch
+            var lo0 = MakeNode(pathRoot, "PathNode_B_lo_0", new Vector3( 2f,  3f, 0f));
+            var lo1 = MakeNode(pathRoot, "PathNode_B_lo_1", new Vector3( 6f,  4f, 0f));
+            var loE = MakeNode(pathRoot, "PathNode_B_lo_E", new Vector3( 9f,  3f, 0f));
+
+            // Wire connections
+            b00.connections.Add(b01);
+            b01.connections.Add(fork);
+            fork.connections.Add(hi0);   // junction — two outgoing edges
+            fork.connections.Add(lo0);
+            hi0.connections.Add(hi1);
+            hi1.connections.Add(hiE);    // terminus (no connections)
+            lo0.connections.Add(lo1);
+            lo1.connections.Add(loE);    // terminus (no connections)
+
+            headB = b00;
+
+            // Register all nodes with the shared PathGraph
+            if (pathGraph != null)
+            {
+                pathGraph.nodes.Add(b00); pathGraph.nodes.Add(b01); pathGraph.nodes.Add(fork);
+                pathGraph.nodes.Add(hi0); pathGraph.nodes.Add(hi1); pathGraph.nodes.Add(hiE);
+                pathGraph.nodes.Add(lo0); pathGraph.nodes.Add(lo1); pathGraph.nodes.Add(loE);
+            }
+
+            // PathVisualizer may auto-add a PathGraph via RequireComponent on older versions;
+            // strip it here so the scene only has one PathGraph (on Path A).
+            var strayPG = pathRoot.GetComponent<PathGraph>();
+            if (strayPG != null) Object.DestroyImmediate(strayPG);
+
+            var vis = pathRoot.AddComponent<PathVisualizer>();
+            vis.pathColor  = new Color(0.3f, 0.8f, 1.0f, 0.9f);
+            vis.lineWidth  = 0.1f;
+            vis.showInGame = false;
+
+            Debug.Log("[SceneBootstrap] Created Path B (split: upper + lower fork).");
+        }
+        else
+        {
+            var go = GameObject.Find("PathNode_B_00");
+            if (go != null) headB = go.GetComponent<PathNode>();
+            Debug.Log("[SceneBootstrap] Path B preserved.");
+        }
+
+        // ── PATH C (triple-exit — shared entry, 3-way junction, exits A/B/C) ─
+        if (!pathCExists)
+        {
+            var pathRoot = new GameObject("--- PATH 3 ---");
+            Undo.RegisterCreatedObjectUndo(pathRoot, "Create Path C");
+
+            // Shared approach
+            var c00  = MakeNode(pathRoot, "PathNode_C_00",   new Vector3(-9f, -5f, 0f));
+            var c01  = MakeNode(pathRoot, "PathNode_C_01",   new Vector3(-5f, -4f, 0f));
+            var cJxn = MakeNode(pathRoot, "PathNode_C_jxn",  new Vector3(-1f, -4f, 0f));
+
+            // Exit A — upper
+            var cA0 = MakeNode(pathRoot, "PathNode_C_A0",   new Vector3( 2f, -1f, 0f));
+            var cA1 = MakeNode(pathRoot, "PathNode_C_A1",   new Vector3( 6f, -1f, 0f));
+            var cAE = MakeNode(pathRoot, "PathNode_C_AE",   new Vector3( 9f, -1f, 0f));
+
+            // Exit B — middle
+            var cB0 = MakeNode(pathRoot, "PathNode_C_B0",   new Vector3( 2f, -4f, 0f));
+            var cB1 = MakeNode(pathRoot, "PathNode_C_B1",   new Vector3( 6f, -4f, 0f));
+            var cBE = MakeNode(pathRoot, "PathNode_C_BE",   new Vector3( 9f, -4f, 0f));
+
+            // Exit C — lower
+            var cC0 = MakeNode(pathRoot, "PathNode_C_C0",   new Vector3( 2f, -7f, 0f));
+            var cC1 = MakeNode(pathRoot, "PathNode_C_C1",   new Vector3( 6f, -7f, 0f));
+            var cCE = MakeNode(pathRoot, "PathNode_C_CE",   new Vector3( 9f, -7f, 0f));
+
+            // Wire — 3-way junction connects to all three exits equally
+            c00.connections.Add(c01);
+            c01.connections.Add(cJxn);
+            cJxn.connections.Add(cA0);   // ~33% chance each
+            cJxn.connections.Add(cB0);
+            cJxn.connections.Add(cC0);
+            cA0.connections.Add(cA1); cA1.connections.Add(cAE);
+            cB0.connections.Add(cB1); cB1.connections.Add(cBE);
+            cC0.connections.Add(cC1); cC1.connections.Add(cCE);
+
+            headC = c00;
+
+            if (pathGraph != null)
+            {
+                pathGraph.nodes.Add(c00);  pathGraph.nodes.Add(c01);  pathGraph.nodes.Add(cJxn);
+                pathGraph.nodes.Add(cA0);  pathGraph.nodes.Add(cA1);  pathGraph.nodes.Add(cAE);
+                pathGraph.nodes.Add(cB0);  pathGraph.nodes.Add(cB1);  pathGraph.nodes.Add(cBE);
+                pathGraph.nodes.Add(cC0);  pathGraph.nodes.Add(cC1);  pathGraph.nodes.Add(cCE);
+            }
+
+            var strayPGc = pathRoot.GetComponent<PathGraph>();
+            if (strayPGc != null) Object.DestroyImmediate(strayPGc);
+
+            var vis = pathRoot.AddComponent<PathVisualizer>();
+            vis.pathColor  = new Color(1.0f, 0.4f, 0.4f, 0.9f);
+            vis.lineWidth  = 0.1f;
+            vis.showInGame = false;
+
+            Debug.Log("[SceneBootstrap] Created Path C (3-way split: exits A/B/C).");
+        }
+        else
+        {
+            var go = GameObject.Find("PathNode_C_00");
+            if (go != null) headC = go.GetComponent<PathNode>();
+            Debug.Log("[SceneBootstrap] Path C preserved.");
         }
 
         // ─────────────────────────────────────────────────────────────
-        // 3. UNIT SPAWNER
+        // 3. UNIT SPAWNERS (one per path)
         // ─────────────────────────────────────────────────────────────
-        Vector3 spawnerPos = spawnHeadNode != null
-            ? spawnHeadNode.transform.position
-            : new Vector3(-9f, 0f, 0f);
-
-        var spawnerRoot = new GameObject("--- SPAWNER ---");
-        Undo.RegisterCreatedObjectUndo(spawnerRoot, "Create Spawner");
-        spawnerRoot.transform.position = spawnerPos;
-
-        var spawner          = spawnerRoot.AddComponent<UnitSpawner>();
-        spawner.headNode     = spawnHeadNode;
-        spawner.waves        = new List<WaveEntry>
-        {
-            new WaveEntry { unitDefinitionId = "basic_enemy",   count = 3, spread = 0.4f, spawnInterval = 0.6f },
-            new WaveEntry { unitDefinitionId = "fast_enemy",    count = 2, spread = 0.3f, spawnInterval = 0.4f },
-            new WaveEntry { unitDefinitionId = "armored_enemy", count = 2, spread = 0.3f, spawnInterval = 0.8f },
-            new WaveEntry { unitDefinitionId = "boss_enemy",    count = 1, spread = 0f,   spawnInterval = 1.0f },
-        };
-        // WaveManager drives spawner state at runtime via BeginWave()
+        CreateSpawner("--- SPAWNER ---",   headA, pathIndex: 0);
+        CreateSpawner("--- SPAWNER 2 ---", headB, pathIndex: 1);
+        CreateSpawner("--- SPAWNER 3 ---", headC, pathIndex: 2);
 
         // ─────────────────────────────────────────────────────────────
         // 4. SHOP UI — tower purchase buttons on the right side
@@ -215,12 +320,14 @@ public static class SceneBootstrap
                 ("research_tower", "Research\nTower", "6g"),
             },
             new[] {
-                ("chain_tower",     "Chain\nTower",     "6g"),
-                ("bee_tower",       "Bee\nTower",       "6g"),
-                ("boomerang_tower", "Boomerang\nTower", "5g"),
-                ("root_tower",      "Root\nTower",      "7g"),
-                ("entropy_tower",   "Entropy\nTower",   "8g"),
-                ("poison_tower",    "Poison\nTower",    "6g"),
+                ("chain_tower",       "Chain\nTower",       "6g"),
+                ("bee_tower",         "Bee\nTower",         "6g"),
+                ("boomerang_tower",   "Boomerang\nTower",   "5g"),
+                ("root_tower",        "Root\nTower",        "7g"),
+                ("entropy_tower",     "Entropy\nTower",     "8g"),
+                ("poison_tower",      "Poison\nTower",      "6g"),
+                ("speed_aura_tower",  "Speed\nAura",        "7g"),
+                ("damage_aura_tower", "Damage\nAura",       "7g"),
             },
             new[] {
                 ("collector_tower", "Collector\nTower", "7g"),
@@ -302,6 +409,46 @@ public static class SceneBootstrap
         Undo.RegisterCreatedObjectUndo(go, $"Create {name}");
         go.transform.SetParent(parent.transform);
         return go;
+    }
+
+    // ── Path / Spawner builders ───────────────────────────────────────
+
+    static PathNode MakeNode(GameObject parent, string nodeName, Vector3 pos)
+    {
+        var go = new GameObject(nodeName);
+        Undo.RegisterCreatedObjectUndo(go, $"Create {nodeName}");
+        go.transform.SetParent(parent.transform);
+        go.transform.position = pos;
+        return go.AddComponent<PathNode>();
+    }
+
+    static PathNode[] BuildPathNodes(GameObject parent, string prefix, Vector3[] positions)
+    {
+        var nodes = new PathNode[positions.Length];
+        for (int i = 0; i < positions.Length; i++)
+        {
+            var nodeGO = new GameObject($"{prefix}_{i:00}");
+            Undo.RegisterCreatedObjectUndo(nodeGO, $"Create {prefix}_{i:00}");
+            nodeGO.transform.SetParent(parent.transform);
+            nodeGO.transform.position = positions[i];
+            nodes[i] = nodeGO.AddComponent<PathNode>();
+        }
+        for (int i = 0; i < nodes.Length - 1; i++)
+            nodes[i].connections.Add(nodes[i + 1]);
+        return nodes;
+    }
+
+    static void CreateSpawner(string goName, PathNode head, int pathIndex)
+    {
+        Vector3 pos = head != null ? head.transform.position : new Vector3(-9f, 0f, 0f);
+        var spawnerRoot = new GameObject(goName);
+        Undo.RegisterCreatedObjectUndo(spawnerRoot, $"Create {goName}");
+        spawnerRoot.transform.position = pos;
+
+        var spawner          = spawnerRoot.AddComponent<UnitSpawner>();
+        spawner.headNode     = head;
+        spawner.pathIndex    = pathIndex;
+        spawner.waves        = new List<WaveEntry>();
     }
 
     static string EnsureTag(string tag)

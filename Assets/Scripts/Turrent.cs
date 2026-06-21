@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+public enum TargetingMode { Furthest, Closest, Lowest }
+
 [RequireComponent(typeof(AbilityManager))]
 public class Turrent : MonoBehaviour
 {
@@ -9,6 +11,8 @@ public class Turrent : MonoBehaviour
 
     [Tooltip("Must match an id in Resources/Definitions/towers.json")]
     public string definitionId;
+
+    public TargetingMode Targeting { get; set; } = TargetingMode.Furthest;
 
     [HideInInspector] public Ability_Effect fireAbility;
 
@@ -119,31 +123,56 @@ public class Turrent : MonoBehaviour
 
     GameObject GetLeadEnemy()
     {
-        var validators = fireAbility?.targetValidators;
+        var validators    = fireAbility?.targetValidators;
         bool hasValidators = validators != null && validators.Length > 0;
 
-        GameObject best          = null;
-        float      bestProgress  = -1f;
-        GameObject fallback      = null;
-        float      fallbackProg  = -1f;
+        GameObject best     = null;
+        float      bestVal  = Targeting == TargetingMode.Closest ? float.MaxValue : -1f;
+        GameObject fallback = null;
+        float      fbVal    = bestVal;
 
         foreach (var go in enemiesInRange)
         {
             if (go == null) continue;
             var unit = go.GetComponent<UnitParentClass>();
             if (unit == null || !unit.isAlive) continue;
+            if (!IsOnScreen(go)) continue;
 
-            float progress = go.GetComponent<RouteFollower>()?.Progress ?? 0f;
+            float val = Score(go, unit);
 
-            // Always track overall lead for fallback
-            if (progress > fallbackProg) { fallbackProg = progress; fallback = go; }
+            // Track unvalidated fallback
+            if (IsBetter(val, fbVal)) { fbVal = val; fallback = go; }
 
-            // Track validated lead separately
             if (hasValidators && !PassesTargetValidators(go, validators)) continue;
-            if (progress > bestProgress) { bestProgress = progress; best = go; }
+            if (IsBetter(val, bestVal)) { bestVal = val; best = go; }
         }
 
         return best ?? fallback;
+    }
+
+    float Score(GameObject go, UnitParentClass unit)
+    {
+        switch (Targeting)
+        {
+            case TargetingMode.Closest:
+                return Vector2.SqrMagnitude((Vector2)go.transform.position - (Vector2)transform.position);
+            case TargetingMode.Lowest:
+                return unit.lifeCurrent;
+            default: // Furthest
+                return go.GetComponent<RouteFollower>()?.Progress ?? 0f;
+        }
+    }
+
+    bool IsBetter(float val, float current)
+    {
+        return Targeting == TargetingMode.Closest ? val < current : val > current;
+    }
+
+    static bool IsOnScreen(GameObject go)
+    {
+        if (Camera.main == null) return true;
+        var vp = Camera.main.WorldToViewportPoint(go.transform.position);
+        return vp.x >= 0f && vp.x <= 1f && vp.y >= 0f && vp.y <= 1f && vp.z > 0f;
     }
 
     static bool PassesTargetValidators(GameObject candidate, TargetValidator[] validators)

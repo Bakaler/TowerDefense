@@ -11,9 +11,14 @@ public class AbilityManager : MonoBehaviour
     protected Dictionary<Ability_Effect, AbilityInstance> activeInstances
         = new Dictionary<Ability_Effect, AbilityInstance>();
 
+    private TowerInfo _towerInfo;
+
+    void Awake() => _towerInfo = GetComponent<TowerInfo>();
+
     private void Update()
     {
-        Tick(Time.deltaTime);
+        float speedMult = _towerInfo != null ? _towerInfo.AuraSpeedMultiplier : 1f;
+        Tick(Time.deltaTime * speedMult);
     }
 
     public void RegisterAbility(Ability_Effect ability)

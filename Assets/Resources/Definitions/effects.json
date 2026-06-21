@@ -217,18 +217,38 @@
       "data": { "behaviorId": "slowed" }
     },
     {
+      "id": "slow_damage",
+      "displayName": "Slow Damage",
+      "type": "damage",
+      "chance": 1.0,
+      "data": {
+        "damageBase": 4.5,
+        "minimumDamage": 1.0,
+        "maximumDamage": 1000000.0,
+        "damageType": 1,
+        "criticalChance": 0.0,
+        "criticalDamageMultiplier": 2.0
+      }
+    },
+    {
+      "id": "slow_impact_set",
+      "displayName": "Slow Impact Set",
+      "type": "set",
+      "chance": 1.0,
+      "data": { "effectIds": ["slow_impact", "slow_damage"] }
+    },
+    {
       "id": "slow_missile",
       "displayName": "Slow Missile",
       "type": "launch_missile",
       "chance": 1.0,
       "data": {
-        "impactEffectId": "slow_impact",
+        "impactEffectId": "slow_impact_set",
         "missileSpeed": 11.0,
-        "missileScale": 0.45,
+        "missileScale": 2,
         "missileLifetime": 6.0,
-        "missileSpriteSheet": "Art/Towers/TowerSet1",
-        "missileSpriteIndex": 1,
-        "missileColor": {"r": 0.45, "g": 0.75, "b": 1.0, "a": 1.0}
+        "missileSpritePath": "Art/Towers/Bullet6",
+        "faceDirection": true
       }
     },
     {
@@ -277,11 +297,9 @@
         "pelletCount": 10,
         "spreadAngle": 70.0,
         "missileSpeed": 22.0,
-        "missileScale": 0.28,
+        "missileScale": 1.25,
         "missileLifetime": 0.15,
-        "missileSpriteSheet": "Art/Towers/TowerSet1",
-        "missileSpriteIndex": 1,
-        "missileColor": { "r": 1.0, "g": 0.7, "b": 0.2, "a": 1.0 }
+        "missileSpritePath": "Art/Towers/Bullet7"
       }
     },
     {

@@ -98,11 +98,8 @@
       "towerTier": 1,
       "upgradeStatMultiplier": 2.25,
       "fireAbilityId": "shotgun_tower_shot",
-      "spriteSheet": "Art/Towers/TowerSet1",
-      "spriteIndex": 2,
+      "spritePath": "Art/Towers/Tower7",
       "scale": 1.5,
-      "tintColor": { "r": 1.0, "g": 0.65, "b": 0.15, "a": 1.0 },
-      "debugColor": { "r": 1.0, "g": 0.65, "b": 0.15, "a": 1.0 },
       "rotationSpeed": 180.0,
       "components": []
     },
@@ -251,16 +248,13 @@
       "balanceType": "Elemental",
       "description": "Fires chilling projectiles that reduce enemy movement speed by 60% for 2 seconds.",
       "range": 3.5,
-      "resourceCost": 5,
+      "resourceCost": 3,
       "maxTier": 3,
       "towerTier": 1,
       "upgradeStatMultiplier": 2.25,
       "fireAbilityId": "slow_tower_shot",
-      "spriteSheet": "Art/Towers/TowerSet1",
-      "spriteIndex": 2,
-      "scale": 1.5,
-      "tintColor": { "r": 0.5, "g": 0.85, "b": 1.0, "a": 1.0 },
-      "debugColor": { "r": 0.5, "g": 0.85, "b": 1.0, "a": 1.0 },
+      "spritePath": "Art/Towers/Tower6",
+      "scale": 2,
       "components": []
     },
     {
@@ -274,13 +268,70 @@
       "towerTier": 3,
       "upgradeStatMultiplier": 2.25,
       "fireAbilityId": "railgun_shot",
-      "spriteSheet": "Art/Towers/TowerSet1",
-      "spriteIndex": 2,
+      "spritePath": "Art/Towers/Tower5",
       "scale": 1.5,
       "rotationSpeed": 90.0,
-      "tintColor": { "r": 0.4, "g": 0.9, "b": 1.0, "a": 1.0 },
-      "debugColor": { "r": 0.4, "g": 0.9, "b": 1.0, "a": 1.0 },
       "components": []
+    },
+    {
+      "id": "speed_aura_tower",
+      "displayName": "Speed Aura",
+      "balanceType": "Arcane",
+      "description": "Radiates an aura that increases nearby towers' attack speed by 30%. Upgrades strengthen the aura.",
+      "range": 0.0,
+      "resourceCost": 7,
+      "maxTier": 3,
+      "towerTier": 2,
+      "upgradeStatMultiplier": 2.25,
+      "fireAbilityId": "",
+      "spriteSheet": "Art/Towers/TowerSet1",
+      "spriteIndex": 0,
+      "scale": 1.5,
+      "tintColor": { "r": 0.3, "g": 0.8, "b": 1.0, "a": 1.0 },
+      "debugColor": { "r": 0.3, "g": 0.8, "b": 1.0, "a": 1.0 },
+      "components": [
+        {
+          "key": "tower_aura",
+          "data": {
+            "range": 5.0,
+            "damageMultiplier": 1.0,
+            "attackSpeedMultiplier": 1.3,
+            "auraColorR": 0.3,
+            "auraColorG": 0.8,
+            "auraColorB": 1.0
+          }
+        }
+      ]
+    },
+    {
+      "id": "damage_aura_tower",
+      "displayName": "Damage Aura",
+      "balanceType": "Physical",
+      "description": "Radiates an aura that increases nearby towers' damage by 30%. Upgrades strengthen the aura.",
+      "range": 0.0,
+      "resourceCost": 7,
+      "maxTier": 3,
+      "towerTier": 2,
+      "upgradeStatMultiplier": 2.25,
+      "fireAbilityId": "",
+      "spriteSheet": "Art/Towers/TowerSet1",
+      "spriteIndex": 0,
+      "scale": 1.5,
+      "tintColor": { "r": 1.0, "g": 0.4, "b": 0.2, "a": 1.0 },
+      "debugColor": { "r": 1.0, "g": 0.4, "b": 0.2, "a": 1.0 },
+      "components": [
+        {
+          "key": "tower_aura",
+          "data": {
+            "range": 5.0,
+            "damageMultiplier": 1.3,
+            "attackSpeedMultiplier": 1.0,
+            "auraColorR": 1.0,
+            "auraColorG": 0.4,
+            "auraColorB": 0.2
+          }
+        }
+      ]
     },
     {
       "id": "laser_tower",
