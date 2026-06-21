@@ -163,6 +163,10 @@ public class TowerPlacer : MonoBehaviour
         const int   SEGMENTS = 64;
         const float LINE_W   = 0.04f;
 
+        // Compensate for tower scale so local-space positions match world-space range
+        float scale       = Mathf.Max(0.01f, go.transform.localScale.x);
+        float localRadius = radius / scale;
+
         var lr               = go.AddComponent<LineRenderer>();
         lr.loop              = true;
         lr.positionCount     = SEGMENTS;
@@ -172,16 +176,16 @@ public class TowerPlacer : MonoBehaviour
         lr.sortingLayerName  = "Units";
         lr.sortingOrder      = 20;
 
-        var mat      = new Material(Shader.Find("Sprites/Default"));
-        lr.material  = mat;
+        var mat       = new Material(Shader.Find("Sprites/Default"));
+        lr.material   = mat;
         lr.startColor = new Color(1f, 1f, 1f, 0.35f);
         lr.endColor   = new Color(1f, 1f, 1f, 0.35f);
 
         for (int i = 0; i < SEGMENTS; i++)
         {
             float angle = i / (float)SEGMENTS * Mathf.PI * 2f;
-            lr.SetPosition(i, new Vector3(Mathf.Cos(angle) * radius,
-                                          Mathf.Sin(angle) * radius, 0f));
+            lr.SetPosition(i, new Vector3(Mathf.Cos(angle) * localRadius,
+                                          Mathf.Sin(angle) * localRadius, 0f));
         }
     }
 

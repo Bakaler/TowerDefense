@@ -147,29 +147,33 @@ public class TowerInfo : MonoBehaviour
     {
         if (radius <= 0f || isGhost) return;
 
-        var go               = new GameObject("RangeCircle");
-        go.transform.SetParent(transform, false);
+        if (_rangeCircle == null)
+        {
+            var go = new GameObject("RangeCircle");
+            go.transform.SetParent(transform, false);
 
-        _rangeCircle             = go.AddComponent<LineRenderer>();
-        _rangeCircle.loop        = true;
-        _rangeCircle.positionCount = CIRCLE_SEGMENTS;
-        _rangeCircle.startWidth  = CIRCLE_WIDTH;
-        _rangeCircle.endWidth    = CIRCLE_WIDTH;
-        _rangeCircle.useWorldSpace = false;
-        _rangeCircle.sortingLayerName = "Units";
-        _rangeCircle.sortingOrder     = 20;
-        _rangeCircle.material    = new Material(Shader.Find("Sprites/Default"));
-        _rangeCircle.startColor  = new Color(1f, 1f, 1f, 0.5f);
-        _rangeCircle.endColor    = new Color(1f, 1f, 1f, 0.5f);
+            _rangeCircle                  = go.AddComponent<LineRenderer>();
+            _rangeCircle.loop             = true;
+            _rangeCircle.positionCount    = CIRCLE_SEGMENTS;
+            _rangeCircle.startWidth       = CIRCLE_WIDTH;
+            _rangeCircle.endWidth         = CIRCLE_WIDTH;
+            _rangeCircle.useWorldSpace    = false;
+            _rangeCircle.sortingLayerName = "Units";
+            _rangeCircle.sortingOrder     = 20;
+            _rangeCircle.material         = new Material(Shader.Find("Sprites/Default"));
+            _rangeCircle.startColor       = new Color(1f, 1f, 1f, 0.5f);
+            _rangeCircle.endColor         = new Color(1f, 1f, 1f, 0.5f);
+            _rangeCircle.gameObject.SetActive(false);
+        }
 
+        // Compensate for tower's local scale so the circle matches world-space range
+        float localRadius = radius / Mathf.Max(0.01f, transform.localScale.x);
         for (int i = 0; i < CIRCLE_SEGMENTS; i++)
         {
             float angle = i / (float)CIRCLE_SEGMENTS * Mathf.PI * 2f;
-            _rangeCircle.SetPosition(i, new Vector3(Mathf.Cos(angle) * radius,
-                                                     Mathf.Sin(angle) * radius, 0f));
+            _rangeCircle.SetPosition(i, new Vector3(Mathf.Cos(angle) * localRadius,
+                                                     Mathf.Sin(angle) * localRadius, 0f));
         }
-
-        _rangeCircle.gameObject.SetActive(false);
     }
 
     public void RegisterKill()

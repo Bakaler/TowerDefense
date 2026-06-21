@@ -42,6 +42,9 @@ public class Turrent : MonoBehaviour
 
         if (_rangeCollider != null && ability.range > 0f)
             _rangeCollider.radius = ability.range;
+
+        if (ability.range > 0f)
+            GetComponent<TowerInfo>()?.SetupRangeCircle(ability.range);
     }
 
     void Update()

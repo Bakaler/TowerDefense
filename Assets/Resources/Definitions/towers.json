@@ -124,14 +124,22 @@
       "debugColor": { "r": 1.0, "g": 0.85, "b": 0.1, "a": 1.0 },
       "components": [
         {
-          "key": "bee_tower",
+          "key": "drone_swarm",
           "data": {
-            "beeCount": 4,
-            "beeRange": 5.0,
-            "beeCooldown": 0.8,
-            "beeDamage": 6.0,
+            "droneCount": 4,
+            "range": 5.0,
+            "cooldown": 0.8,
+            "damage": 6.0,
             "bulletSpeed": 14.0,
-            "bulletLifetime": 0.6
+            "bulletLifetime": 0.6,
+            "maxAwayTime": 6.0,
+            "restDuration": 1.0,
+            "droneColorR": 1.0,
+            "droneColorG": 0.85,
+            "droneColorB": 0.1,
+            "bulletColorR": 1.0,
+            "bulletColorG": 0.95,
+            "bulletColorB": 0.3
           }
         }
       ]
@@ -190,8 +198,8 @@
       "rotationSpeed": 90.0,
       "components": [
         {
-          "key": "entropy_tower",
-          "data": { "perStackBonus": 0.04 }
+          "key": "stack_on_kill",
+          "data": { "perStackBonus": 0.04, "maxStacks": 50 }
         }
       ]
     },
@@ -293,12 +301,13 @@
       "debugColor": { "r": 1.0, "g": 0.25, "b": 0.1, "a": 1.0 },
       "components": [
         {
-          "key": "laser_tower",
+          "key": "continuous_beam",
           "data": {
-            "baseDamagePerSecond": 8.0,
+            "damagePerSecond": 8.0,
             "maxRampMultiplier": 5.0,
             "rampDuration": 4.0,
             "beamWidth": 0.06,
+            "damageType": 1,
             "beamColorR": 1.0,
             "beamColorG": 0.25,
             "beamColorB": 0.1
