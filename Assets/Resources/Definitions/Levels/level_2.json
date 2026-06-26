@@ -1,0 +1,211 @@
+{
+    "id": "level_2",
+    "displayName": "The Fork",
+    "startGold": 60,
+    "startLives": 20,
+    "backgroundSprite": "Art/Maps/level_2",
+    "backgroundX": -1.8700000047683716,
+    "backgroundY": 0.0,
+    "paths": [
+        {
+            "spawnerIndex": 0,
+            "nodes": [
+                {
+                    "id": "n0",
+                    "x": -9.0,
+                    "y": 2.5,
+                    "next": [
+                        "n1"
+                    ]
+                },
+                {
+                    "id": "n1",
+                    "x": -5.0,
+                    "y": 2.5,
+                    "next": [
+                        "n2"
+                    ]
+                },
+                {
+                    "id": "n2",
+                    "x": -1.0,
+                    "y": 0.0,
+                    "next": [
+                        "n3",
+                        "n4"
+                    ]
+                },
+                {
+                    "id": "n3",
+                    "x": 3.0,
+                    "y": 2.5,
+                    "next": [
+                        "n5"
+                    ]
+                },
+                {
+                    "id": "n4",
+                    "x": 3.0,
+                    "y": -2.5,
+                    "next": [
+                        "n5"
+                    ]
+                },
+                {
+                    "id": "n5",
+                    "x": 9.0,
+                    "y": 0.0,
+                    "next": []
+                }
+            ]
+        }
+    ],
+    "placementZones": [
+        {
+            "x": -7.0,
+            "y": 0.0,
+            "radius": 2.5
+        },
+        {
+            "x": 0.0,
+            "y": 3.5,
+            "radius": 2.0
+        },
+        {
+            "x": 0.0,
+            "y": -3.5,
+            "radius": 2.0
+        },
+        {
+            "x": 7.0,
+            "y": 0.0,
+            "radius": 2.5
+        }
+    ],
+    "waves": [
+        {
+            "groups": [
+                {
+                    "unitDefinitionId": "basic_enemy",
+                    "count": 10,
+                    "spread": 0.4000000059604645,
+                    "spawnInterval": 0.699999988079071,
+                    "groupDelay": 2.5,
+                    "spawnerIndex": 0
+                },
+                {
+                    "unitDefinitionId": "fast_enemy",
+                    "count": 5,
+                    "spread": 0.5,
+                    "spawnInterval": 0.5,
+                    "groupDelay": 2.0,
+                    "spawnerIndex": 0
+                }
+            ]
+        },
+        {
+            "groups": [
+                {
+                    "unitDefinitionId": "basic_enemy",
+                    "count": 10,
+                    "spread": 0.4000000059604645,
+                    "spawnInterval": 0.6499999761581421,
+                    "groupDelay": 2.5,
+                    "spawnerIndex": 0
+                },
+                {
+                    "unitDefinitionId": "fast_enemy",
+                    "count": 8,
+                    "spread": 0.5,
+                    "spawnInterval": 0.44999998807907107,
+                    "groupDelay": 2.0,
+                    "spawnerIndex": 0
+                }
+            ]
+        },
+        {
+            "groups": [
+                {
+                    "unitDefinitionId": "basic_enemy",
+                    "count": 12,
+                    "spread": 0.4000000059604645,
+                    "spawnInterval": 0.6000000238418579,
+                    "groupDelay": 2.5,
+                    "spawnerIndex": 0
+                },
+                {
+                    "unitDefinitionId": "fast_enemy",
+                    "count": 6,
+                    "spread": 0.5,
+                    "spawnInterval": 0.44999998807907107,
+                    "groupDelay": 2.5,
+                    "spawnerIndex": 0
+                },
+                {
+                    "unitDefinitionId": "armored_enemy",
+                    "count": 2,
+                    "spread": 0.30000001192092898,
+                    "spawnInterval": 1.7999999523162842,
+                    "groupDelay": 2.0,
+                    "spawnerIndex": 0
+                }
+            ]
+        },
+        {
+            "groups": [
+                {
+                    "unitDefinitionId": "basic_enemy",
+                    "count": 10,
+                    "spread": 0.4000000059604645,
+                    "spawnInterval": 0.550000011920929,
+                    "groupDelay": 2.5,
+                    "spawnerIndex": 0
+                },
+                {
+                    "unitDefinitionId": "armored_enemy",
+                    "count": 4,
+                    "spread": 0.30000001192092898,
+                    "spawnInterval": 1.5,
+                    "groupDelay": 2.5,
+                    "spawnerIndex": 0
+                },
+                {
+                    "unitDefinitionId": "fast_enemy",
+                    "count": 10,
+                    "spread": 0.5,
+                    "spawnInterval": 0.4000000059604645,
+                    "groupDelay": 2.0,
+                    "spawnerIndex": 0
+                }
+            ]
+        },
+        {
+            "groups": [
+                {
+                    "unitDefinitionId": "boss_enemy",
+                    "count": 1,
+                    "spread": 0.0,
+                    "spawnInterval": 1.0,
+                    "groupDelay": 3.0,
+                    "spawnerIndex": 0
+                },
+                {
+                    "unitDefinitionId": "basic_enemy",
+                    "count": 10,
+                    "spread": 0.4000000059604645,
+                    "spawnInterval": 0.5,
+                    "groupDelay": 2.5,
+                    "spawnerIndex": 0
+                },
+                {
+                    "unitDefinitionId": "fast_enemy",
+                    "count": 8,
+                    "spread": 0.5,
+                    "spawnInterval": 0.4000000059604645,
+                    "groupDelay": 2.0,
+                    "spawnerIndex": 0
+                }
+            ]
+        }
+    ]
+}

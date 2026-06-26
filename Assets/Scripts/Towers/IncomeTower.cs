@@ -20,17 +20,17 @@ public class IncomeTower : MonoBehaviour, IFactoryInitializable
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
     static void Register() => ComponentRegistry.Register("income_tower", typeof(IncomeTower));
 
-    // ── Payout table (index = orb count) ─────────────────────────────
-    static readonly int[] Payout = { 0, 1, 3, 5, 8 };
+    // ── Full payout per tier when all orb slots are filled ───────────
+    static readonly int[] FullPayout = { 0, 1, 3, 6, 10, 15 };  // index = tier
 
-    // ── Orb slot offsets in world space (relative to tower center) ───
-    // Arranged as a 2x2 grid sitting just above the tower sprite
-    static readonly Vector2[] SlotOffsets =
+    // ── Orb slot layouts per tier (tier 1 = index 0) ─────────────────
+    static readonly Vector2[][] TierSlots =
     {
-        new Vector2(-0.22f, 0.40f),
-        new Vector2( 0.22f, 0.40f),
-        new Vector2(-0.22f, 0.72f),
-        new Vector2( 0.22f, 0.72f),
+        new[] { new Vector2( 0.00f,  0.60f) },                                                                                                                          // T1: 1 orb center
+        new[] { new Vector2(-0.25f,  0.60f), new Vector2( 0.25f,  0.60f) },                                                                                            // T2: 2 orbs side by side
+        new[] { new Vector2(-0.25f,  0.70f), new Vector2( 0.25f,  0.70f), new Vector2( 0.00f,  0.48f) },                                                               // T3: triangle
+        new[] { new Vector2(-0.25f,  0.72f), new Vector2( 0.25f,  0.72f), new Vector2(-0.25f,  0.48f), new Vector2( 0.25f,  0.48f) },                                  // T4: 2×2 grid
+        new[] { new Vector2(-0.25f,  0.72f), new Vector2( 0.25f,  0.72f), new Vector2(-0.25f,  0.48f), new Vector2( 0.25f,  0.48f), new Vector2( 0.00f,  0.60f) },    // T5: 4 corners + center
     };
 
     // ── Data (set from towers.json via Initialize) ────────────────────
@@ -76,9 +76,11 @@ public class IncomeTower : MonoBehaviour, IFactoryInitializable
         StartCoroutine(OrbSpawnLoop());
     }
 
+    int CurrentTier => GetComponent<TowerInfo>()?.Tier ?? 1;
+    Vector2[] CurrentSlots => TierSlots[Mathf.Clamp(CurrentTier, 1, TierSlots.Length) - 1];
+
     IEnumerator OrbSpawnLoop()
     {
-        // Small random stagger so multiple income towers don't all tick together
         yield return new WaitForSeconds(Random.Range(0f, orbInterval * 0.5f));
 
         while (true)
@@ -86,7 +88,7 @@ public class IncomeTower : MonoBehaviour, IFactoryInitializable
             float elemental = BalanceManager.Instance != null ? BalanceManager.Instance.Elemental : 0f;
             float interval  = Mathf.Max(minInterval, orbInterval * Mathf.Pow(0.99f, elemental));
             yield return new WaitForSeconds(interval);
-            if (_orbs.Count < SlotOffsets.Length)
+            if (_orbs.Count < CurrentSlots.Length)
                 SpawnOrb();
         }
     }
@@ -95,8 +97,10 @@ public class IncomeTower : MonoBehaviour, IFactoryInitializable
 
     void SpawnOrb()
     {
-        int slot       = _orbs.Count;
-        Vector3 worldPos = transform.position + (Vector3)SlotOffsets[slot];
+        int slot         = _orbs.Count;
+        var slots        = CurrentSlots;
+        if (slot >= slots.Length) return;
+        Vector3 worldPos = transform.position + (Vector3)slots[slot];
 
         var go = new GameObject($"IncomeOrb_{slot}");
         go.transform.position   = worldPos;
@@ -139,15 +143,17 @@ public class IncomeTower : MonoBehaviour, IFactoryInitializable
 
     public void Collect()
     {
-        int count = Mathf.Clamp(_orbs.Count, 0, Payout.Length - 1);
-        if (count == 0) return;
+        int orbCount = _orbs.Count;
+        if (orbCount == 0) return;
 
-        int gold = Payout[count];
+        int tier      = CurrentTier;
+        int maxOrbs   = CurrentSlots.Length;
+        int fullGold  = tier < FullPayout.Length ? FullPayout[tier] : FullPayout[FullPayout.Length - 1];
+        int gold      = Mathf.Max(1, Mathf.RoundToInt((float)orbCount / maxOrbs * fullGold));
 
-        if (_rm != null)
-            _rm.ChangeResourceOne(gold);
+        if (_rm != null) _rm.ChangeResourceOne(gold);
+        FloatingText.Spawn($"+{gold}g", transform.position + Vector3.up * 0.9f, new Color(1f, 0.85f, 0.25f));
 
-        // Trigger pop animation on each orb — they self-destruct when done
         foreach (var orb in _orbs)
         {
             if (orb == null) continue;
@@ -156,8 +162,6 @@ public class IncomeTower : MonoBehaviour, IFactoryInitializable
             else Destroy(orb);
         }
         _orbs.Clear();
-
-        Debug.Log($"[IncomeTower] Collected {count} orb(s) → +{gold} gold");
     }
 
     void OnDestroy()

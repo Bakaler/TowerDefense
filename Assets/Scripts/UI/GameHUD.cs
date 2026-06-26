@@ -22,6 +22,7 @@ public class GameHUD : MonoBehaviour
     // ── Live refs ─────────────────────────────────────────────────────
     private Text   _goldText;
     private Text   _techText;
+    private Text   _towerCountText;
     private Text   _waveText;
     private Text   _livesText;
     private Button _waveButton;
@@ -63,6 +64,8 @@ public class GameHUD : MonoBehaviour
     private Text       _tpSellBtnLabel;
     private Button[]   _tpTargetBtns;
     private Image[]    _tpTargetImgs;
+    private Button     _tpMoveZoneBtn;
+    private Text       _tpMoveZoneLabel;
     private TowerInfo  _selectedTower;
 
     // ── Tower research sub-panel ──────────────────────────────────────
@@ -160,6 +163,10 @@ public class GameHUD : MonoBehaviour
 
     void ShowTowerPanel(TowerInfo info)
     {
+        // Deselect previous sniper zone
+        if (_selectedTower != null)
+            _selectedTower.GetComponent<SniperZone>()?.SetSelected(false);
+
         if (info == null)
         {
             _selectedTower = null;
@@ -169,6 +176,7 @@ public class GameHUD : MonoBehaviour
         _selectedEnemy = null;
         _enemyPanel?.SetActive(false);
         _selectedTower = info;
+        info.GetComponent<SniperZone>()?.SetSelected(true);
         HideResearchBody();
         RefreshTowerPanel(info);
         _towerPanel?.SetActive(true);
@@ -254,6 +262,15 @@ public class GameHUD : MonoBehaviour
 
         if (_tpKills    != null) _tpKills.text     = $"Kills  {info.KillCount}";
 
+        // Show Move Zone button only for sniper towers
+        if (_tpMoveZoneBtn != null)
+        {
+            var zone = info.GetComponent<SniperZone>();
+            _tpMoveZoneBtn.gameObject.SetActive(zone != null);
+            if (zone != null && _tpMoveZoneLabel != null)
+                _tpMoveZoneLabel.text = zone.IsRepositioning ? "CONFIRMING..." : "MOVE ZONE";
+        }
+
         if (_tpUpgradeBtn != null)
         {
             bool canTier     = info.CanUpgrade;
@@ -274,6 +291,14 @@ public class GameHUD : MonoBehaviour
 
         if (_tpSellBtnLabel != null)
             _tpSellBtnLabel.text = $"SELL  —  {info.SellRefund}g";
+    }
+
+    void OnMoveZoneClicked()
+    {
+        if (_selectedTower == null) return;
+        var zone = _selectedTower.GetComponent<SniperZone>();
+        if (zone != null) zone.BeginReposition();
+        if (_tpMoveZoneLabel != null) _tpMoveZoneLabel.text = "CONFIRMING...";
     }
 
     void SetTargetingMode(TargetingMode mode)
@@ -635,10 +660,23 @@ public class GameHUD : MonoBehaviour
         _tpKills       = MakeText(MakeRect("Kills",       _towerPanelBody, c0x, y, cW, ROW), "", new Color(0.95f, 0.5f, 0.5f),  16);
         _tpAura        = MakeText(MakeRect("Aura",        _towerPanelBody, c0x, y - ROW, cW, ROW), "", new Color(0.3f, 1f, 0.45f), 14);
 
-        // C1: Damage / FireRate
+        // C1: Damage / FireRate / MoveZone (sniper only)
         y = topY;
         _tpDamage   = MakeText(MakeRect("Damage",   _towerPanelBody, c1x, y, cW, ROW), "", new Color(0.9f, 0.9f, 0.9f), 17); y -= ROW;
-        _tpFireRate = MakeText(MakeRect("FireRate",  _towerPanelBody, c1x, y, cW, ROW), "", new Color(0.9f, 0.9f, 0.9f), 17);
+        _tpFireRate = MakeText(MakeRect("FireRate",  _towerPanelBody, c1x, y, cW, ROW), "", new Color(0.9f, 0.9f, 0.9f), 17); y -= ROW + 4f;
+
+        // "MOVE ZONE" button — only visible for sniper towers
+        var mzGO  = MakeRect("MoveZoneBtn", _towerPanelBody, c1x, y - 38f + ROW, cW, 38f);
+        var mzImg = mzGO.AddComponent<Image>(); mzImg.color = new Color(0.2f, 0.45f, 0.65f, 1f);
+        _tpMoveZoneBtn = mzGO.AddComponent<Button>(); _tpMoveZoneBtn.targetGraphic = mzImg;
+        var mzc = _tpMoveZoneBtn.colors;
+        mzc.highlightedColor = new Color(0.3f, 0.6f, 0.85f, 1f);
+        mzc.pressedColor     = new Color(0.12f, 0.28f, 0.45f, 1f);
+        _tpMoveZoneBtn.colors = mzc;
+        _tpMoveZoneLabel = MakeText(MakeRect("Label", mzGO, 0f, 0f, cW, 38f), "MOVE ZONE", Color.white, 13, bold: true);
+        _tpMoveZoneLabel.alignment = TextAnchor.MiddleCenter;
+        _tpMoveZoneBtn.onClick.AddListener(OnMoveZoneClicked);
+        mzGO.SetActive(false); // hidden until a sniper is selected
 
         // C2: Upgrade / Research / TARGET
         y = topY;
@@ -747,6 +785,24 @@ public class GameHUD : MonoBehaviour
     {
         _towerResearchBody.SetActive(false);
         _towerPanelBody?.SetActive(true);
+    }
+
+    public void ResetForLevelLoad()
+    {
+        _towerPanel?.SetActive(false);
+        _researchPanel?.SetActive(false);
+        _selectedTower = null;
+        TowerInfo.OnTowerClickedPublic(null);
+    }
+
+    public void CloseAllPanels()
+    {
+        _towerPanel?.SetActive(false);
+        _enemyPanel?.SetActive(false);
+        _researchPanel?.SetActive(false);
+        _selectedTower = null;
+        _selectedEnemy = null;
+        TowerInfo.OnTowerClickedPublic(null);
     }
 
     void RefreshResearchBody()
@@ -1011,6 +1067,8 @@ public class GameHUD : MonoBehaviour
             if (_researchPanel != null)
                 _researchPanel.SetActive(!_researchPanel.activeSelf);
         });
+        _towerCountText = AddAbsLabel(bar, "TowerCount", LEFT + 475f, BAR_H - TOP_H, 180f, TOP_H,
+            "Towers  0/8", new Color(0.75f, 0.75f, 0.85f), 14, TextAnchor.MiddleLeft);
         _waveText  = AddAbsLabel(bar, "Wave",  0f, BAR_H - TOP_H, 0f,   TOP_H,
             "Ready", C_Wave,  22, TextAnchor.MiddleCenter, stretchX: true);
         _livesText = AddAbsLabel(bar, "Lives", 0f, BAR_H - TOP_H, 500f, TOP_H,
@@ -1186,6 +1244,14 @@ public class GameHUD : MonoBehaviour
     {
         BalanceManager.Instance?.Recalculate();
 
+        // Keep Move Zone button label in sync with zone state
+        if (_tpMoveZoneLabel != null && _selectedTower != null)
+        {
+            var zone = _selectedTower.GetComponent<SniperZone>();
+            if (zone != null)
+                _tpMoveZoneLabel.text = zone.IsRepositioning ? "CONFIRMING..." : "MOVE ZONE";
+        }
+
         // Selection — click towers or enemies
         if (Input.GetMouseButtonDown(0) &&
             !EventSystem.current.IsPointerOverGameObject() &&
@@ -1193,6 +1259,12 @@ public class GameHUD : MonoBehaviour
             Camera.main != null)
         {
             Vector2 mouse = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+
+            // Don't open any panel when clicking a collectible resource drop
+            bool hitDrop = false;
+            foreach (var drop in FindObjectsByType<BountyDrop>(FindObjectsSortMode.None))
+                if (Vector2.Distance(mouse, drop.transform.position) <= drop.clickRadius) { hitDrop = true; break; }
+            if (hitDrop) goto skipSelection;
 
             // Towers
             TowerInfo best = null;
@@ -1225,6 +1297,7 @@ public class GameHUD : MonoBehaviour
                 else
                     TowerInfo.OnTowerClickedPublic(null);   // deselect everything
             }
+            skipSelection:;
         }
 
         // Rotate selected tower base with Q / E
@@ -1278,6 +1351,15 @@ public class GameHUD : MonoBehaviour
 
         if (_techText != null)
             _techText.text = $"🔬  {TechManager.Instance?.Tech ?? 0}";
+
+        if (_towerCountText != null && BalanceManager.Instance != null)
+        {
+            var bm = BalanceManager.Instance;
+            _towerCountText.color = bm.TowerCount >= bm.MaxTowers
+                ? new Color(1f, 0.35f, 0.35f)
+                : new Color(0.75f, 0.75f, 0.85f);
+            _towerCountText.text = $"Towers  {bm.TowerCount}/{bm.MaxTowers}";
+        }
 
         // Lives
         if (_livesText != null && _lm != null)

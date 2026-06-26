@@ -12,6 +12,14 @@ public class ResourceManagerScript : MonoBehaviour
     public float funding     = 1f;
     public float development = 0f;
 
+    public void ResetToStart(int gold)
+    {
+        resourceOne = gold;
+        research    = 0;
+        funding     = 1f;
+        development = 0f;
+    }
+
     public void ChangeResourceOne(int delta)
     {
         resourceOne += delta;

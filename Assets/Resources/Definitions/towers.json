@@ -31,6 +31,7 @@
       "description": "Generates resources over time instead of attacking.",
       "range": 0.0,
       "resourceCost": 5,
+      "maxTier": 5,
       "towerTier": 1,
       "fireAbilityId": "",
       "spriteSheet": "Art/Towers/TowerSet1",
@@ -514,6 +515,36 @@
         "a": 1.0
       },
       "components": []
+    },
+    {
+      "id": "sniper_tower",
+      "displayName": "Sniper",
+      "description": "Unlimited range. Fires a hitscan shot at the furthest enemy inside its repositionable firing box. Press Move Zone in the panel to reposition the box.",
+      "balanceType": "Physical",
+      "range": 999.0,
+      "resourceCost": 8,
+      "maxTier": 5,
+      "towerTier": 2,
+      "upgradeStatMultiplier": 2.25,
+      "fireAbilityId": "",
+      "displayDamage": 60.0,
+      "displayCooldown": 2.0,
+      "spriteSheet": "Art/Towers/TowerSet1",
+      "spriteIndex": 2,
+      "scale": 1.5,
+      "placementRadius": 0.45,
+      "tintColor": { "r": 0.75, "g": 0.85, "b": 1.0, "a": 1.0 },
+      "debugColor": { "r": 0.75, "g": 0.85, "b": 1.0, "a": 1.0 },
+      "components": [
+        {
+          "key": "sniper_zone",
+          "data": { "halfWidth": 0.68, "halfHeight": 2.98 }
+        },
+        {
+          "key": "sniper_turrent",
+          "data": { "damage": 60.0, "cooldown": 2.0 }
+        }
+      ]
     },
     {
       "id": "siphon_tower",

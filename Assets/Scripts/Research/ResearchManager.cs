@@ -42,6 +42,12 @@ public class ResearchManager : MonoBehaviour
 
     public bool IsPurchased(string id) => _purchased.Contains(id);
 
+    public void ResetAll()
+    {
+        _purchased.Clear();
+        OnResearchChanged?.Invoke();
+    }
+
     public bool TryPurchase(ResearchDefinition def)
     {
         if (_purchased.Contains(def.id)) return false;

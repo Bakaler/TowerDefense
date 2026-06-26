@@ -49,6 +49,7 @@ public class TowerShopButton : MonoBehaviour
             Debug.LogError("[TowerShopButton] TowerPlacer not in scene.");
             return;
         }
+        GameHUD.Instance?.CloseAllPanels();
         TowerPlacer.Instance.SelectTower(towerId);
     }
 }

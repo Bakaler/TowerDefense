@@ -130,6 +130,7 @@ public class ResearchOrb : MonoBehaviour
         if (_done) return;
         _done = true;
         TechManager.Instance?.AddTech(value);
+        FloatingText.Spawn($"+{value} sci", transform.position, new Color(0.35f, 1f, 0.5f));
         Destroy(gameObject);
     }
 

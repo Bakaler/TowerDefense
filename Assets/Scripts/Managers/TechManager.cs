@@ -36,6 +36,15 @@ public class TechManager : MonoBehaviour
 
     public int techAmount => Tech;
 
+    public void ResetAll()
+    {
+        Tech       = 0;
+        T2Unlocked = false;
+        T3Unlocked = false;
+        T4Unlocked = false;
+        T5Unlocked = false;
+    }
+
     public bool TryUnlockT2()
     {
         if (T2Unlocked || Tech < T2Cost) return false;

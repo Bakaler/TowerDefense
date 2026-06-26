@@ -35,6 +35,7 @@ public class BountyDrop : MonoBehaviour
 
         var rm = FindFirstObjectByType<ResourceManagerScript>();
         if (rm != null) rm.ChangeResourceOne(goldValue);
+        FloatingText.Spawn($"+{goldValue}g", transform.position, new Color(1f, 0.85f, 0.25f));
 
         // IncomeOrb.Pop() destroys itself; destroy GO if no orb component
         if (orb == null) Destroy(gameObject);

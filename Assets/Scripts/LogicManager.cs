@@ -21,6 +21,12 @@ public class LogicManager : MonoBehaviour
         lives = startingLives;
     }
 
+    public void ResetToStart(int overrideLives = -1)
+    {
+        lives    = overrideLives >= 0 ? overrideLives : startingLives;
+        gameOver = false;
+    }
+
     // ── Public API ────────────────────────────────────────────────────
 
     /// <summary>

@@ -132,6 +132,14 @@ public class TowerPlacer : MonoBehaviour
             return;
         }
 
+        // Tower count cap
+        var bm = BalanceManager.Instance;
+        if (bm != null && bm.TowerCount >= bm.MaxTowers)
+        {
+            Debug.Log($"[TowerPlacer] Tower cap reached ({bm.TowerCount}/{bm.MaxTowers}). Diversify your balance to expand.");
+            return;
+        }
+
         // Overlap check — no other tower body within footprint
         var nearby = Physics2D.OverlapCircleAll(worldPos, checkRadius);
         foreach (var col in nearby)

@@ -10,9 +10,11 @@ public class BalanceManager : MonoBehaviour
 {
     public static BalanceManager Instance { get; private set; }
 
-    public float Elemental { get; private set; }
-    public float Arcane    { get; private set; }
-    public float Physical  { get; private set; }
+    public float Elemental  { get; private set; }
+    public float Arcane     { get; private set; }
+    public float Physical   { get; private set; }
+    public int   MaxTowers  { get; private set; } = 8;
+    public int   TowerCount { get; private set; }
 
     void Awake()
     {
@@ -63,9 +65,13 @@ public class BalanceManager : MonoBehaviour
             }
         }
 
-        Elemental = e;
-        Arcane    = a;
-        Physical  = p;
+        Elemental   = e;
+        Arcane      = a;
+        Physical    = p;
+        MaxTowers   = 8 + Mathf.FloorToInt(Mathf.Min(e, Mathf.Min(a, p)) * 4f);
+        TowerCount  = 0;
+        foreach (var t in towers)
+            if (!t.isGhost) TowerCount++;
     }
 
     static float BalanceRatio(int count)

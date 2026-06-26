@@ -129,10 +129,16 @@ public class UnitManager : UnitParentClass
         if (_follower == null || !_follower.HasRoute)
             return;
 
-        // Use speedCurrent directly — BehaviorHandler sets it to 0 for root/freeze effects.
-        // Only fall back to speedMax if the unit was never initialized (speedCurrent == speedMax == 0).
         float speed = (speedMax <= 0f) ? speedCurrent : Mathf.Max(0f, speedCurrent);
         _follower.SetSpeed(speed);
+
+        // Flip sprite to face movement direction
+        if (_sr != null)
+        {
+            float dx = _follower.CurrentDirection.x;
+            if (Mathf.Abs(dx) > 0.01f)
+                _sr.flipX = dx > 0f;
+        }
 
         bool reachedEnd = _follower.Tick();
 
