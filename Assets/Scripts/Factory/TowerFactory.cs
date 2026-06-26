@@ -56,42 +56,59 @@ public class TowerFactory : MonoBehaviour
         rb.bodyType     = RigidbodyType2D.Kinematic;
         rb.gravityScale = 0f;
 
-        // Range detection trigger — radius is set by Turrent.Start() from the ability's range
+        // Range detection trigger — seeded from def.range; Turrent.Start() may refine it
+        // if the tower has a fireAbility with its own range value.
         var rangeCol       = go.AddComponent<CircleCollider2D>();
-        rangeCol.radius    = 1f;   // placeholder; overwritten by Turrent once ability resolves
+        rangeCol.radius    = def.range > 0f ? def.range : 1f;
         rangeCol.isTrigger = true;
+
+        // Small solid collider used by TowerPlacer overlap check to prevent stacking.
+        // Divide by scale so the world-space radius matches def.placementRadius regardless of tower scale.
+        float towerScale   = def.scale > 0f ? def.scale : 1f;
+        var bodyCol        = go.AddComponent<CircleCollider2D>();
+        bodyCol.radius     = (def.placementRadius > 0f ? def.placementRadius : 0.4f) / towerScale;
+        bodyCol.isTrigger  = false;
 
         // ── 3. Visual ─────────────────────────────────────────────
         var sr = go.AddComponent<SpriteRenderer>();
 
-        if (!string.IsNullOrEmpty(def.spriteSheet) && def.spriteIndex >= 0)
+        if (def.animFps > 0f)
         {
-            var sheet = Resources.LoadAll<Sprite>(def.spriteSheet);
-            if (sheet != null && sheet.Length > 0)
+            var frames = Resources.LoadAll<Sprite>(ResolveTieredPath(def.id, 1, def.spritePath));
+            if (frames != null && frames.Length > 0)
             {
-                int idx = Mathf.Clamp(def.spriteIndex, 0, sheet.Length - 1);
-                sr.sprite = sheet[idx];
+                sr.sprite = frames[0];
                 sr.color  = def.tintColor;
+                var anim = go.AddComponent<SpriteAnimator>();
+                anim.Setup(frames, def.animFps);
             }
-            else
-                Debug.LogWarning($"[TowerFactory] Sheet '{def.spriteSheet}' not found for '{def.id}'.");
+            else { sr.sprite = MakePlaceholderSprite(); sr.color = def.debugColor; }
         }
-        else if (!string.IsNullOrEmpty(def.spritePath))
+        else
         {
-            var sprite = Resources.Load<Sprite>(def.spritePath);
-            if (sprite != null) { sr.sprite = sprite; sr.color = def.tintColor; }
-            else Debug.LogWarning($"[TowerFactory] Sprite not found at '{def.spritePath}' for '{def.id}'.");
-        }
-
-        if (sr.sprite == null)
-        {
-            sr.sprite = MakePlaceholderSprite();
-            sr.color  = def.debugColor;
+            var baseSprite = ResolveTieredSprite(def.id, 1, def.spritePath);
+            if (baseSprite != null) { sr.sprite = baseSprite; sr.color = def.tintColor; }
+            else                    { sr.sprite = MakePlaceholderSprite(); sr.color = def.debugColor; }
         }
         sr.sortingLayerName = "Towers";
 
         float s = def.scale > 0f ? def.scale : 1f;
         go.transform.localScale = new Vector3(s, s, 1f);
+
+        // ── 3b. Turret child (optional rotating layer) ────────────
+        var turretSprite = ResolveTieredSprite(def.id + "_turret", 1, def.turretSpritePath);
+        if (turretSprite != null)
+        {
+            var turretGO = new GameObject("Turret");
+            turretGO.transform.SetParent(go.transform, false);
+            turretGO.transform.localPosition = Vector3.zero;
+            turretGO.transform.localScale    = Vector3.one;
+            var tsr              = turretGO.AddComponent<SpriteRenderer>();
+            tsr.sprite           = turretSprite;
+            tsr.color            = def.tintColor;
+            tsr.sortingLayerName = "Towers";
+            tsr.sortingOrder     = 1;
+        }
 
         // ── 4. AbilityManager ─────────────────────────────────────
         var abilityManager = go.AddComponent<AbilityManager>();
@@ -108,10 +125,12 @@ public class TowerFactory : MonoBehaviour
         info.displayName  = def.displayName ?? def.id;
         info.description  = def.description ?? "";
         info.resourceCost = def.resourceCost;
-        info.cooldown     = ResolveCooldown(def.fireAbilityId);
-        info.damage       = ResolveDamage(def.fireAbilityId);
+        info.cooldown     = def.displayCooldown > 0f ? def.displayCooldown : ResolveCooldown(def.fireAbilityId);
+        info.damage       = def.displayDamage   > 0f ? def.displayDamage   : ResolveDamage(def.fireAbilityId);
         if (System.Enum.TryParse<BalanceType>(def.balanceType, true, out var bt))
             info.balanceType = bt;
+        info.rangePerTier = def.rangePerTier;
+        info.SetBaseRange(def.range);
         info.maxTier               = def.maxTier > 0 ? def.maxTier : 1;
         info.upgradeStatMultiplier = def.upgradeStatMultiplier > 0f ? def.upgradeStatMultiplier : 2.25f;
         info.towerTier             = def.towerTier > 0 ? def.towerTier : 1;
@@ -149,6 +168,35 @@ public class TowerFactory : MonoBehaviour
     }
 
     // ── Helpers ───────────────────────────────────────────────────────
+
+    /// <summary>
+    /// Looks for Art/Towers/{baseId}_T{tier} counting down to T1,
+    /// then falls back to fallbackPath, then returns null.
+    /// </summary>
+    public static string ResolveTieredPath(string baseId, int tier, string fallbackPath)
+    {
+        for (int t = tier; t >= 1; t--)
+        {
+            string path = $"Art/Towers/{baseId}_T{t}";
+            if (Resources.Load<Sprite>(path) != null) return path;
+        }
+        return !string.IsNullOrEmpty(fallbackPath) ? fallbackPath : null;
+    }
+
+    public static Sprite ResolveTieredSprite(string baseId, int tier, string fallbackPath)
+    {
+        for (int t = tier; t >= 1; t--)
+        {
+            var sp = Resources.Load<Sprite>($"Art/Towers/{baseId}_T{t}");
+            if (sp != null) return sp;
+        }
+        if (!string.IsNullOrEmpty(fallbackPath))
+        {
+            var sp = Resources.Load<Sprite>(fallbackPath);
+            if (sp != null) return sp;
+        }
+        return null;
+    }
 
     /// <summary>Creates a small white square sprite used as a tower placeholder.</summary>
     private static Sprite MakePlaceholderSprite()
@@ -190,10 +238,17 @@ public class TowerFactory : MonoBehaviour
     {
         if (depth > 4 || string.IsNullOrEmpty(effectId)) return 0f;
         var effect = EffectLibrary.Instance?.GetEffect(effectId);
-        if (effect == null) return 0f;
+        return effect != null ? FindFirstDamage(effect, depth) : 0f;
+    }
+
+    private static float FindFirstDamage(Effect effect, int depth)
+    {
+        if (depth > 4 || effect == null) return 0f;
         if (effect is Effect_Damage dmg) return dmg.damageBase;
         if (effect is Effect_Launch_Missile missile) return FindFirstDamage(missile.impactEffectId, depth + 1);
         if (effect is Effect_Launch_Shotgun shotgun) return FindFirstDamage(shotgun.impactEffectId, depth + 1);
+        if (effect is Effect_Search_Area area && area.areas.Count > 0 && area.areas[0].effect != null)
+            return FindFirstDamage(area.areas[0].effect, depth + 1);
         if (effect is Effect_Set set)
             foreach (var id in set.EffectIds)
             {

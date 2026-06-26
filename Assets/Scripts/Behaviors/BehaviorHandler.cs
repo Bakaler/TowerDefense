@@ -49,6 +49,18 @@ public class BehaviorHandler : MonoBehaviour
 
     public void Apply(BehaviorDefinition def)
     {
+        // Check if any active behavior grants immunity to the incoming type
+        if (def.behaviorType != BehaviorType.None)
+        {
+            string typeName = def.behaviorType.ToString();
+            foreach (var inst in _active)
+            {
+                if (inst.Def.immunities != null)
+                    foreach (var imm in inst.Def.immunities)
+                        if (imm == typeName) return;
+            }
+        }
+
         switch (def.stackRule)
         {
             case "refresh":
@@ -66,6 +78,35 @@ public class BehaviorHandler : MonoBehaviour
         Recalculate();
     }
 
+    /// <summary>Apply a behavior permanently (no expiry). Used for starting behaviors.</summary>
+    public void ApplyPermanent(BehaviorDefinition def)
+    {
+        if (_active.Exists(b => b.Def.id == def.id)) return;
+        var inst = new Instance(def);
+        inst.Remaining = float.MaxValue;   // never expires
+        _active.Add(inst);
+        Recalculate();
+    }
+
+    /// <summary>Called by UnitManager.Die() — executes onDeathEffectId on any active behaviors.</summary>
+    public void TriggerDeathEffects(GameObject self)
+    {
+        foreach (var inst in _active)
+        {
+            if (string.IsNullOrEmpty(inst.Def.onDeathEffectId)) continue;
+            if (EffectLibrary.Instance == null) continue;
+            var effect = EffectLibrary.Instance.GetEffect(inst.Def.onDeathEffectId);
+            if (effect == null) continue;
+            var ctx = new EffectContext
+            {
+                CasterTransform = self.transform,
+                AimOrigin2D     = self.transform.position,
+                CustomData      = new System.Collections.Generic.Dictionary<string, object>(),
+            };
+            effect.Execute(ctx);
+        }
+    }
+
     public bool HasBehavior(string behaviorId) => _active.Exists(b => b.Def.id == behaviorId);
 
     public void Remove(string behaviorId)
@@ -73,6 +114,25 @@ public class BehaviorHandler : MonoBehaviour
         int removed = _active.RemoveAll(b => b.Def.id == behaviorId);
         if (removed > 0) Recalculate();
     }
+
+    /// <summary>Force-reapply all active behaviors (e.g. after an external speed override ends).</summary>
+    public void Refresh() => Recalculate();
+
+    /// <summary>Remove every active behavior (cleanse).</summary>
+    public void RemoveAll()
+    {
+        _active.Clear();
+        Recalculate();
+    }
+
+    /// <summary>Remove all behaviors matching a specific type (e.g. all Rooted or Slowed).</summary>
+    public void RemoveByType(BehaviorType type)
+    {
+        int removed = _active.RemoveAll(b => b.Def.behaviorType == type);
+        if (removed > 0) Recalculate();
+    }
+
+    public bool HasBehaviorType(BehaviorType type) => _active.Exists(b => b.Def.behaviorType == type);
 
     // ── Lifecycle ─────────────────────────────────────────────────────
 

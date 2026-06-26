@@ -54,7 +54,7 @@ public class BalanceManager : MonoBehaviour
         foreach (var t in towers)
         {
             if (t.isGhost) continue;
-            float ratio = BalanceRatio(typeMaxCount[t.balanceType]);
+            float ratio = BalanceRatio(typeMaxCount[t.balanceType]) * t.balanceMultiplier;
             switch (t.balanceType)
             {
                 case BalanceType.Elemental: e += ratio; break;

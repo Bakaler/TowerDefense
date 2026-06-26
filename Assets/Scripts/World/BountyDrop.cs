@@ -46,16 +46,15 @@ public class BountyDrop : MonoBehaviour
     {
         var go = new GameObject("BountyDrop");
         go.transform.position   = worldPos;
-        go.transform.localScale = Vector3.one * 1.1f;
+        go.transform.localScale = Vector3.one * .85f;
 
         var sr              = go.AddComponent<SpriteRenderer>();
         sr.sortingLayerName = "Units";
         sr.sortingOrder     = 5;
         sr.color            = Color.white;
 
-        var sheet = Resources.LoadAll<Sprite>("Art/Towers/TowerSet1");
-        if (sheet != null && sheet.Length > 1)
-            sr.sprite = sheet[1];
+        var orb = Resources.Load<Sprite>("Art/resource_1");
+        if (orb != null) sr.sprite = orb;
 
         go.AddComponent<IncomeOrb>();   // handles bob + pop animation
 

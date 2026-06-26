@@ -3,6 +3,7 @@
     {
       "id": "rooted",
       "displayName": "Rooted",
+      "behaviorType": 2,
       "duration": 1.0,
       "stackRule": "refresh",
       "moveSpeedMultiplier": 0.0,
@@ -11,6 +12,7 @@
     {
       "id": "slowed",
       "displayName": "Slowed",
+      "behaviorType": 1,
       "duration": 6.5,
       "stackRule": "refresh",
       "moveSpeedMultiplier": 0.4,
@@ -19,6 +21,7 @@
     {
       "id": "poisoned",
       "displayName": "Poisoned",
+      "behaviorType": 0,
       "duration": 4.0,
       "stackRule": "refresh",
       "moveSpeedMultiplier": 1.0,
@@ -26,6 +29,27 @@
       "tickDamage": 4.0,
       "tickDamageType": 4,
       "tintColor": { "r": 0.45, "g": 1.0, "b": 0.35, "a": 1.0 }
+    }
+  ,
+    {
+      "id": "phantom_immunity",
+      "displayName": "Phantom Immunity",
+      "behaviorType": 0,
+      "duration": 999999,
+      "stackRule": "none",
+      "moveSpeedMultiplier": 1.0,
+      "immunities": ["Slowed", "Rooted"],
+      "tintColor": { "r": 1.0, "g": 1.0, "b": 1.0, "a": 1.0 }
+    },
+    {
+      "id": "charger_death_rage",
+      "displayName": "Death Rage",
+      "behaviorType": 0,
+      "duration": 999999,
+      "stackRule": "none",
+      "moveSpeedMultiplier": 1.0,
+      "onDeathEffectId": "charger_rage_buff",
+      "tintColor": { "r": 1.0, "g": 1.0, "b": 1.0, "a": 1.0 }
     }
   ]
 }

@@ -22,6 +22,9 @@ public class Effect_Launch_Missile : Effect
     public string missileSpritePath  = "";
     public bool   drawLine           = false;
     public bool   faceDirection      = false;
+    public bool   homing             = true;    // false = flies to last-known TargetPoint (mortar)
+    public bool   arcFlight          = false;   // lob arc visual (mortar)
+    public bool   piercing           = false;   // passes through ShieldBubble
     public Color  missileColor       = Color.white;
 
     // ── Resolved at runtime ───────────────────────────────────────────
@@ -49,8 +52,8 @@ public class Effect_Launch_Missile : Effect
     public override void Execute(EffectContext context)
     {
         if (!PassesValidators(context)) return;
-        if (_impactEffect == null)  { Debug.LogWarning("[Effect_Launch_Missile] impactEffect is null."); return; }
-        if (context.Target == null) { Debug.LogWarning("[Effect_Launch_Missile] context.Target is null."); return; }
+        if (_impactEffect == null) { Debug.LogWarning("[Effect_Launch_Missile] impactEffect is null."); return; }
+        if (homing && context.Target == null) { Debug.LogWarning("[Effect_Launch_Missile] homing missile needs a target."); return; }
 
         // Spawn origin: explicit caster transform → caster unit → target position (chain/bounce fallback)
         Transform spawnTransform = context.CasterTransform
@@ -75,7 +78,7 @@ public class Effect_Launch_Missile : Effect
 
         // Sprite
         var sr              = go.AddComponent<SpriteRenderer>();
-        sr.sprite           = LoadMissileSprite();
+        sr.sprite           = LoadMissileSprite(context);
         sr.color            = missileColor;
         sr.sortingLayerName = "Units";
         sr.sortingOrder     = 10;
@@ -88,38 +91,36 @@ public class Effect_Launch_Missile : Effect
         proj.originAbility      = context.OriginAbility;
         proj.caster             = context.Caster;
         proj.casterTransform    = context.CasterTransform ?? context.Caster?.transform;
-        proj.target             = context.Target.transform;
+        proj.target             = homing ? context.Target?.transform : null;
         proj.targetPoint        = context.TargetPoint;
-        proj.homing             = true;
+        proj.homing             = homing;
         proj.drawImpactLine     = drawLine;
         proj.faceDirection      = faceDirection;
         proj.originTower        = context.OriginTower;
-
-        Debug.Log($"[Effect_Launch_Missile] Spawned missile → {context.Target.name}");
+        proj.arcFlight          = arcFlight;
+        proj.piercing           = piercing;
+        if (!homing) proj.targetPoint = context.TargetPoint;
     }
 
     // ── Sprite loading ────────────────────────────────────────────────
 
-    Sprite LoadMissileSprite()
+    Sprite LoadMissileSprite(EffectContext context)
     {
-        if (!string.IsNullOrEmpty(missileSpriteSheet) && missileSpriteIndex >= 0)
+        // Tiered art: {towerId}_missile_T{tier} counting down to T1
+        if (context?.OriginTower != null)
         {
-            if (_cachedSheetPath != missileSpriteSheet)
+            var info = context.OriginTower.GetComponent<TowerInfo>();
+            if (info != null)
             {
-                _cachedSheet     = Resources.LoadAll<Sprite>(missileSpriteSheet);
-                _cachedSheetPath = missileSpriteSheet;
+                var sp = TowerFactory.ResolveTieredSprite(info.definitionId + "_missile", info.Tier, null);
+                if (sp != null) return sp;
             }
-            if (_cachedSheet != null && missileSpriteIndex < _cachedSheet.Length)
-                return _cachedSheet[missileSpriteIndex];
-
-            Debug.LogWarning($"[Effect_Launch_Missile] Sheet '{missileSpriteSheet}' index {missileSpriteIndex} not found.");
         }
 
         if (!string.IsNullOrEmpty(missileSpritePath))
         {
             var spr = Resources.Load<Sprite>(missileSpritePath);
             if (spr != null) return spr;
-            Debug.LogWarning($"[Effect_Launch_Missile] Sprite not found at '{missileSpritePath}'.");
         }
 
         return GetFallbackSprite();

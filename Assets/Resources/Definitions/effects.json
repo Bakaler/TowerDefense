@@ -53,10 +53,10 @@
       "data": {
         "impactEffectId": "basic_impact",
         "missileSpeed": 10.0,
-        "missileScale": 0.5,
+        "missileScale": 1.0,
         "missileLifetime": 7.0,
-        "missileSpriteSheet": "Art/Towers/TowerSet1",
-        "missileSpriteIndex": 1
+        "missileSpritePath": "Art/Towers/T8Bullet",
+        "faceDirection": true
       }
     },
     {
@@ -245,9 +245,11 @@
       "data": {
         "impactEffectId": "slow_impact_set",
         "missileSpeed": 11.0,
-        "missileScale": 2,
+        "missileScale": 1.5,
         "missileLifetime": 6.0,
-        "missileSpritePath": "Art/Towers/Bullet6",
+        "missileSpriteSheet": "Art/Towers/TowerSet1",
+        "missileSpriteIndex": 1,
+        "missileColor": { "r": 0.4, "g": 0.8, "b": 1.0, "a": 1.0 },
         "faceDirection": true
       }
     },
@@ -282,7 +284,7 @@
         "damageBase": 8.0,
         "minimumDamage": 1.0,
         "maximumDamage": 1000000.0,
-        "damageType": 2,
+        "damageType": 1,
         "criticalChance": 0.0,
         "criticalDamageMultiplier": 2.0
       }
@@ -343,6 +345,69 @@
         "beamFadeDuration": 0.3,
         "damageType": 2,
         "beamColor": { "r": 0.4, "g": 0.9, "b": 1.0, "a": 1.0 }
+      }
+    }
+  ,
+    {
+      "id": "charger_rage_buff",
+      "displayName": "Charger Rage Buff",
+      "type": "apply_permanent_speed_buff",
+      "chance": 1.0,
+      "data": {
+        "speedBonus": 0.4,
+        "radius": 4.0,
+        "targetDefinitionId": "charger_enemy"
+      }
+    },
+    {
+      "id": "mortar_explosion",
+      "displayName": "Mortar Explosion",
+      "type": "search_area",
+      "chance": 1.0,
+      "data": {
+        "radius": 1.2,
+        "maxTargets": 20,
+        "horizontalArc": 360.0,
+        "effectId": "mortar_impact_damage"
+      }
+    },
+    {
+      "id": "mortar_impact_damage",
+      "displayName": "Mortar Damage",
+      "type": "damage",
+      "chance": 1.0,
+      "data": {
+        "damageBase": 25.0,
+        "damageType": 0,
+        "minimumDamage": 1.0,
+        "maximumDamage": 9999.0
+      }
+    },
+    {
+      "id": "mortar_shell",
+      "displayName": "Mortar Shell",
+      "type": "launch_missile",
+      "chance": 1.0,
+      "data": {
+        "impactEffectId": "mortar_explosion",
+        "missileSpeed": 5.5,
+        "missileScale": 0.6,
+        "missileLifetime": 6.0,
+        "homing": false,
+        "arcFlight": true,
+        "piercing": false,
+        "missileColor": { "r": 0.9, "g": 0.6, "b": 0.2, "a": 1.0 }
+      }
+    },
+    {
+      "id": "drain_life",
+      "displayName": "Drain Life",
+      "type": "drain_life",
+      "chance": 1.0,
+      "data": {
+        "damage": 2.0,
+        "goldPerDrain": 1,
+        "techPerDrain": 0
       }
     }
   ]

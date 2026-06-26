@@ -45,17 +45,24 @@ public class UnitManager : UnitParentClass
         HealthBar.Attach(gameObject);
     }
 
+    public string displayName;
+    public string description;
+
     public void ApplyDefinition(string id)
     {
         if (UnitDefinitionLibrary.Instance == null) return;
         if (!UnitDefinitionLibrary.Instance.TryGet(id, out var def)) return;
 
-        definitionId    = def.id;
-        lifeMax         = def.life;
-        speedMax        = def.speed;
-        physicalDefense = def.physicalDefense;
-        bounty          = def.bounty;
-        deathBlow       = def.deathBlow;
+        definitionId      = def.id;
+        displayName       = def.displayName;
+        description       = def.description;
+        lifeMax           = def.life;
+        speedMax          = def.speed;
+        physicalDefense   = def.physicalDefense;
+        elementalDefense  = def.elementalDefense;
+        arcanaDefense     = def.arcanaDefense;
+        bounty            = def.bounty;
+        deathBlow         = def.deathBlow;
     }
 
     // ── Damage override (triggers hit flash) ─────────────────────────
@@ -108,6 +115,8 @@ public class UnitManager : UnitParentClass
         }
         else
         {
+            // Let SpriteAnimator handle destruction if a death animation is playing
+            if (GetComponent<SpriteAnimator>()?.IsPlayingDeath == true) return;
             if (decayTimer > 0)
                 decayTimer -= 1;
             else
@@ -137,6 +146,14 @@ public class UnitManager : UnitParentClass
         }
     }
 
+    // ── Click ─────────────────────────────────────────────────────────
+
+    void OnMouseDown()
+    {
+        if (isAlive)
+            GameHUD.Instance?.SelectEnemy(this);
+    }
+
     // ── Death ─────────────────────────────────────────────────────────
 
     public void Die()
@@ -144,5 +161,16 @@ public class UnitManager : UnitParentClass
         isAlive = false;
         if (myCollider != null)
             myCollider.enabled = false;
+
+        GetComponent<BehaviorHandler>()?.TriggerDeathEffects(gameObject);
+
+        var hb = GetComponentInChildren<HealthBar>();
+        if (hb != null) hb.gameObject.SetActive(false);
+
+        var anim = GetComponent<SpriteAnimator>();
+        if (anim != null)
+            anim.PlayDeath();
+        else
+            Destroy(gameObject);
     }
 }

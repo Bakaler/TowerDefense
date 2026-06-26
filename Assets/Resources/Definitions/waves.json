@@ -2,148 +2,148 @@
   "waves": [
     {
       "groups": [
-        { "unitDefinitionId": "basic_enemy", "count": 5, "spawnInterval": 0.6, "spread": 0.4, "spawnerIndex": 0 }
+        { "unitDefinitionId": "basic_enemy", "count": 5, "spawnInterval": 1.0, "spread": 0.4, "spawnerIndex": 0, "groupDelay": 2.0 }
       ]
     },
     {
       "groups": [
-        { "unitDefinitionId": "basic_enemy", "count": 9, "spawnInterval": 0.5, "spread": 0.4, "spawnerIndex": 0 }
+        { "unitDefinitionId": "basic_enemy", "count": 9, "spawnInterval": 0.9, "spread": 0.4, "spawnerIndex": 0, "groupDelay": 2.0 }
       ]
     },
     {
       "groups": [
-        { "unitDefinitionId": "basic_enemy", "count": 7, "spawnInterval": 0.5, "spread": 0.4, "spawnerIndex": 0 },
-        { "unitDefinitionId": "fast_enemy",  "count": 4, "spawnInterval": 0.3, "spread": 0.5, "spawnerIndex": 0 }
+        { "unitDefinitionId": "basic_enemy", "count": 7, "spawnInterval": 0.8, "spread": 0.4, "spawnerIndex": 0, "groupDelay": 2.5 },
+        { "unitDefinitionId": "fast_enemy",  "count": 4, "spawnInterval": 0.6, "spread": 0.5, "spawnerIndex": 0, "groupDelay": 2.0 }
       ]
     },
     {
       "groups": [
-        { "unitDefinitionId": "basic_enemy", "count": 12, "spawnInterval": 0.4, "spread": 0.4, "spawnerIndex": 0 },
-        { "unitDefinitionId": "fast_enemy",  "count": 6,  "spawnInterval": 0.3, "spread": 0.5, "spawnerIndex": 0 }
+        { "unitDefinitionId": "basic_enemy", "count": 12, "spawnInterval": 0.7, "spread": 0.4, "spawnerIndex": 0, "groupDelay": 2.5 },
+        { "unitDefinitionId": "fast_enemy",  "count": 6,  "spawnInterval": 0.5, "spread": 0.5, "spawnerIndex": 0, "groupDelay": 2.0 }
       ]
     },
     {
       "groups": [
-        { "unitDefinitionId": "basic_enemy", "count": 10, "spawnInterval": 0.35, "spread": 0.4, "spawnerIndex": 0 },
-        { "unitDefinitionId": "fast_enemy",  "count": 8,  "spawnInterval": 0.25, "spread": 0.5, "spawnerIndex": 0 }
+        { "unitDefinitionId": "basic_enemy", "count": 10, "spawnInterval": 0.65, "spread": 0.4, "spawnerIndex": 0, "groupDelay": 2.5 },
+        { "unitDefinitionId": "fast_enemy",  "count": 8,  "spawnInterval": 0.45, "spread": 0.5, "spawnerIndex": 0, "groupDelay": 2.0 }
       ]
     },
     {
       "groups": [
-        { "unitDefinitionId": "basic_enemy",   "count": 14, "spawnInterval": 0.35, "spread": 0.4, "spawnerIndex": 0 },
-        { "unitDefinitionId": "fast_enemy",    "count": 6,  "spawnInterval": 0.25, "spread": 0.5, "spawnerIndex": 0 },
-        { "unitDefinitionId": "armored_enemy", "count": 2,  "spawnInterval": 1.2,  "spread": 0.3, "spawnerIndex": 0 }
+        { "unitDefinitionId": "basic_enemy",   "count": 14, "spawnInterval": 0.6,  "spread": 0.4, "spawnerIndex": 0, "groupDelay": 2.5 },
+        { "unitDefinitionId": "fast_enemy",    "count": 6,  "spawnInterval": 0.45, "spread": 0.5, "spawnerIndex": 0, "groupDelay": 2.5 },
+        { "unitDefinitionId": "armored_enemy", "count": 2,  "spawnInterval": 1.8,  "spread": 0.3, "spawnerIndex": 0, "groupDelay": 2.0 }
       ]
     },
     {
       "groups": [
-        { "unitDefinitionId": "basic_enemy",   "count": 10, "spawnInterval": 0.3,  "spread": 0.4, "spawnerIndex": 0 },
-        { "unitDefinitionId": "armored_enemy", "count": 4,  "spawnInterval": 1.0,  "spread": 0.3, "spawnerIndex": 0 },
-        { "unitDefinitionId": "fast_enemy",    "count": 10, "spawnInterval": 0.2,  "spread": 0.5, "spawnerIndex": 0 }
+        { "unitDefinitionId": "basic_enemy",   "count": 10, "spawnInterval": 0.55, "spread": 0.4, "spawnerIndex": 0, "groupDelay": 2.5 },
+        { "unitDefinitionId": "armored_enemy", "count": 4,  "spawnInterval": 1.5,  "spread": 0.3, "spawnerIndex": 0, "groupDelay": 2.5 },
+        { "unitDefinitionId": "fast_enemy",    "count": 10, "spawnInterval": 0.4,  "spread": 0.5, "spawnerIndex": 0, "groupDelay": 2.0 }
       ]
     },
     {
       "groups": [
-        { "unitDefinitionId": "basic_enemy",   "count": 18, "spawnInterval": 0.3,  "spread": 0.4, "spawnerIndex": 0 },
-        { "unitDefinitionId": "fast_enemy",    "count": 12, "spawnInterval": 0.2,  "spread": 0.5, "spawnerIndex": 0 },
-        { "unitDefinitionId": "armored_enemy", "count": 3,  "spawnInterval": 1.0,  "spread": 0.3, "spawnerIndex": 0 }
+        { "unitDefinitionId": "basic_enemy",   "count": 18, "spawnInterval": 0.5,  "spread": 0.4, "spawnerIndex": 0, "groupDelay": 2.5 },
+        { "unitDefinitionId": "fast_enemy",    "count": 12, "spawnInterval": 0.38, "spread": 0.5, "spawnerIndex": 0, "groupDelay": 2.5 },
+        { "unitDefinitionId": "armored_enemy", "count": 3,  "spawnInterval": 1.5,  "spread": 0.3, "spawnerIndex": 0, "groupDelay": 2.0 }
       ]
     },
     {
       "groups": [
-        { "unitDefinitionId": "boss_enemy",    "count": 1,  "spawnInterval": 1.0,  "spread": 0.0, "spawnerIndex": 0 },
-        { "unitDefinitionId": "basic_enemy",   "count": 8,  "spawnInterval": 0.4,  "spread": 0.4, "spawnerIndex": 0 },
-        { "unitDefinitionId": "fast_enemy",    "count": 6,  "spawnInterval": 0.25, "spread": 0.5, "spawnerIndex": 0 }
+        { "unitDefinitionId": "boss_enemy",    "count": 1,  "spawnInterval": 1.0,  "spread": 0.0, "spawnerIndex": 0, "groupDelay": 3.0 },
+        { "unitDefinitionId": "basic_enemy",   "count": 8,  "spawnInterval": 0.65, "spread": 0.4, "spawnerIndex": 0, "groupDelay": 2.5 },
+        { "unitDefinitionId": "fast_enemy",    "count": 6,  "spawnInterval": 0.45, "spread": 0.5, "spawnerIndex": 0, "groupDelay": 2.0 }
       ]
     },
     {
       "groups": [
-        { "unitDefinitionId": "basic_enemy",   "count": 12, "spawnInterval": 0.3,  "spread": 0.4, "spawnerIndex": 0 },
-        { "unitDefinitionId": "fast_enemy",    "count": 6,  "spawnInterval": 0.3,  "spread": 0.5, "spawnerIndex": 1 },
-        { "unitDefinitionId": "basic_enemy",   "count": 4,  "spawnInterval": 0.5,  "spread": 0.4, "spawnerIndex": 2 }
+        { "unitDefinitionId": "basic_enemy",   "count": 12, "spawnInterval": 0.5,  "spread": 0.4, "spawnerIndex": 0, "groupDelay": 2.5 },
+        { "unitDefinitionId": "fast_enemy",    "count": 6,  "spawnInterval": 0.5,  "spread": 0.5, "spawnerIndex": 1, "groupDelay": 2.5 },
+        { "unitDefinitionId": "basic_enemy",   "count": 4,  "spawnInterval": 0.8,  "spread": 0.4, "spawnerIndex": 2, "groupDelay": 2.0 }
       ]
     },
     {
       "groups": [
-        { "unitDefinitionId": "basic_enemy",   "count": 10, "spawnInterval": 0.28, "spread": 0.4, "spawnerIndex": 0 },
-        { "unitDefinitionId": "armored_enemy", "count": 4,  "spawnInterval": 0.9,  "spread": 0.3, "spawnerIndex": 0 },
-        { "unitDefinitionId": "fast_enemy",    "count": 8,  "spawnInterval": 0.25, "spread": 0.5, "spawnerIndex": 1 },
-        { "unitDefinitionId": "basic_enemy",   "count": 6,  "spawnInterval": 0.4,  "spread": 0.4, "spawnerIndex": 2 }
+        { "unitDefinitionId": "basic_enemy",   "count": 10, "spawnInterval": 0.5,  "spread": 0.4, "spawnerIndex": 0, "groupDelay": 2.5 },
+        { "unitDefinitionId": "armored_enemy", "count": 4,  "spawnInterval": 1.4,  "spread": 0.3, "spawnerIndex": 0, "groupDelay": 2.5 },
+        { "unitDefinitionId": "fast_enemy",    "count": 8,  "spawnInterval": 0.42, "spread": 0.5, "spawnerIndex": 1, "groupDelay": 2.5 },
+        { "unitDefinitionId": "basic_enemy",   "count": 6,  "spawnInterval": 0.65, "spread": 0.4, "spawnerIndex": 2, "groupDelay": 2.0 }
       ]
     },
     {
       "groups": [
-        { "unitDefinitionId": "boss_enemy",    "count": 1,  "spawnInterval": 1.0,  "spread": 0.0, "spawnerIndex": 0 },
-        { "unitDefinitionId": "fast_enemy",    "count": 14, "spawnInterval": 0.2,  "spread": 0.5, "spawnerIndex": 0 },
-        { "unitDefinitionId": "armored_enemy", "count": 4,  "spawnInterval": 0.8,  "spread": 0.3, "spawnerIndex": 1 },
-        { "unitDefinitionId": "fast_enemy",    "count": 6,  "spawnInterval": 0.3,  "spread": 0.5, "spawnerIndex": 2 }
+        { "unitDefinitionId": "boss_enemy",    "count": 1,  "spawnInterval": 1.0,  "spread": 0.0, "spawnerIndex": 0, "groupDelay": 3.0 },
+        { "unitDefinitionId": "fast_enemy",    "count": 14, "spawnInterval": 0.35, "spread": 0.5, "spawnerIndex": 0, "groupDelay": 2.5 },
+        { "unitDefinitionId": "armored_enemy", "count": 4,  "spawnInterval": 1.3,  "spread": 0.3, "spawnerIndex": 1, "groupDelay": 2.5 },
+        { "unitDefinitionId": "fast_enemy",    "count": 6,  "spawnInterval": 0.5,  "spread": 0.5, "spawnerIndex": 2, "groupDelay": 2.0 }
       ]
     },
     {
       "groups": [
-        { "unitDefinitionId": "basic_enemy",   "count": 18, "spawnInterval": 0.25, "spread": 0.4, "spawnerIndex": 0 },
-        { "unitDefinitionId": "armored_enemy", "count": 6,  "spawnInterval": 0.7,  "spread": 0.3, "spawnerIndex": 0 },
-        { "unitDefinitionId": "fast_enemy",    "count": 10, "spawnInterval": 0.2,  "spread": 0.5, "spawnerIndex": 1 },
-        { "unitDefinitionId": "armored_enemy", "count": 3,  "spawnInterval": 0.9,  "spread": 0.3, "spawnerIndex": 1 },
-        { "unitDefinitionId": "fast_enemy",    "count": 8,  "spawnInterval": 0.25, "spread": 0.5, "spawnerIndex": 2 }
+        { "unitDefinitionId": "basic_enemy",   "count": 18, "spawnInterval": 0.42, "spread": 0.4, "spawnerIndex": 0, "groupDelay": 2.5 },
+        { "unitDefinitionId": "armored_enemy", "count": 6,  "spawnInterval": 1.2,  "spread": 0.3, "spawnerIndex": 0, "groupDelay": 2.5 },
+        { "unitDefinitionId": "fast_enemy",    "count": 10, "spawnInterval": 0.35, "spread": 0.5, "spawnerIndex": 1, "groupDelay": 2.5 },
+        { "unitDefinitionId": "armored_enemy", "count": 3,  "spawnInterval": 1.4,  "spread": 0.3, "spawnerIndex": 1, "groupDelay": 2.5 },
+        { "unitDefinitionId": "fast_enemy",    "count": 8,  "spawnInterval": 0.42, "spread": 0.5, "spawnerIndex": 2, "groupDelay": 2.0 }
       ]
     },
     {
       "groups": [
-        { "unitDefinitionId": "boss_enemy",    "count": 2,  "spawnInterval": 3.0,  "spread": 0.2, "spawnerIndex": 0 },
-        { "unitDefinitionId": "armored_enemy", "count": 8,  "spawnInterval": 0.65, "spread": 0.3, "spawnerIndex": 0 },
-        { "unitDefinitionId": "fast_enemy",    "count": 12, "spawnInterval": 0.18, "spread": 0.5, "spawnerIndex": 1 },
-        { "unitDefinitionId": "armored_enemy", "count": 4,  "spawnInterval": 0.8,  "spread": 0.3, "spawnerIndex": 1 },
-        { "unitDefinitionId": "boss_enemy",    "count": 1,  "spawnInterval": 1.0,  "spread": 0.0, "spawnerIndex": 2 },
-        { "unitDefinitionId": "fast_enemy",    "count": 8,  "spawnInterval": 0.25, "spread": 0.5, "spawnerIndex": 2 }
+        { "unitDefinitionId": "boss_enemy",    "count": 2,  "spawnInterval": 3.5,  "spread": 0.2, "spawnerIndex": 0, "groupDelay": 3.0 },
+        { "unitDefinitionId": "armored_enemy", "count": 8,  "spawnInterval": 1.1,  "spread": 0.3, "spawnerIndex": 0, "groupDelay": 2.5 },
+        { "unitDefinitionId": "fast_enemy",    "count": 12, "spawnInterval": 0.32, "spread": 0.5, "spawnerIndex": 1, "groupDelay": 2.5 },
+        { "unitDefinitionId": "armored_enemy", "count": 4,  "spawnInterval": 1.3,  "spread": 0.3, "spawnerIndex": 1, "groupDelay": 2.5 },
+        { "unitDefinitionId": "boss_enemy",    "count": 1,  "spawnInterval": 1.0,  "spread": 0.0, "spawnerIndex": 2, "groupDelay": 3.0 },
+        { "unitDefinitionId": "fast_enemy",    "count": 8,  "spawnInterval": 0.42, "spread": 0.5, "spawnerIndex": 2, "groupDelay": 2.0 }
       ]
     },
     {
       "groups": [
-        { "unitDefinitionId": "boss_enemy",    "count": 1,  "spawnInterval": 1.0,  "spread": 0.0, "spawnerIndex": 0 },
-        { "unitDefinitionId": "fast_enemy",    "count": 18, "spawnInterval": 0.15, "spread": 0.5, "spawnerIndex": 0 },
-        { "unitDefinitionId": "armored_enemy", "count": 8,  "spawnInterval": 0.6,  "spread": 0.3, "spawnerIndex": 0 },
-        { "unitDefinitionId": "boss_enemy",    "count": 1,  "spawnInterval": 1.0,  "spread": 0.0, "spawnerIndex": 1 },
-        { "unitDefinitionId": "fast_enemy",    "count": 10, "spawnInterval": 0.2,  "spread": 0.5, "spawnerIndex": 1 },
-        { "unitDefinitionId": "fast_enemy",    "count": 10, "spawnInterval": 0.2,  "spread": 0.5, "spawnerIndex": 2 },
-        { "unitDefinitionId": "armored_enemy", "count": 5,  "spawnInterval": 0.7,  "spread": 0.3, "spawnerIndex": 2 }
+        { "unitDefinitionId": "boss_enemy",    "count": 1,  "spawnInterval": 1.0,  "spread": 0.0, "spawnerIndex": 0, "groupDelay": 3.0 },
+        { "unitDefinitionId": "fast_enemy",    "count": 18, "spawnInterval": 0.28, "spread": 0.5, "spawnerIndex": 0, "groupDelay": 2.5 },
+        { "unitDefinitionId": "armored_enemy", "count": 8,  "spawnInterval": 1.0,  "spread": 0.3, "spawnerIndex": 0, "groupDelay": 2.5 },
+        { "unitDefinitionId": "boss_enemy",    "count": 1,  "spawnInterval": 1.0,  "spread": 0.0, "spawnerIndex": 1, "groupDelay": 3.0 },
+        { "unitDefinitionId": "fast_enemy",    "count": 10, "spawnInterval": 0.35, "spread": 0.5, "spawnerIndex": 1, "groupDelay": 2.5 },
+        { "unitDefinitionId": "fast_enemy",    "count": 10, "spawnInterval": 0.35, "spread": 0.5, "spawnerIndex": 2, "groupDelay": 2.5 },
+        { "unitDefinitionId": "armored_enemy", "count": 5,  "spawnInterval": 1.1,  "spread": 0.3, "spawnerIndex": 2, "groupDelay": 2.0 }
       ]
     },
     {
       "groups": [
-        { "unitDefinitionId": "boss_enemy",    "count": 2,  "spawnInterval": 2.5,  "spread": 0.2, "spawnerIndex": 0 },
-        { "unitDefinitionId": "armored_enemy", "count": 10, "spawnInterval": 0.55, "spread": 0.3, "spawnerIndex": 0 },
-        { "unitDefinitionId": "fast_enemy",    "count": 20, "spawnInterval": 0.12, "spread": 0.5, "spawnerIndex": 0 },
-        { "unitDefinitionId": "boss_enemy",    "count": 1,  "spawnInterval": 2.5,  "spread": 0.2, "spawnerIndex": 1 },
-        { "unitDefinitionId": "fast_enemy",    "count": 12, "spawnInterval": 0.15, "spread": 0.5, "spawnerIndex": 1 },
-        { "unitDefinitionId": "boss_enemy",    "count": 1,  "spawnInterval": 2.5,  "spread": 0.2, "spawnerIndex": 2 },
-        { "unitDefinitionId": "armored_enemy", "count": 8,  "spawnInterval": 0.6,  "spread": 0.3, "spawnerIndex": 2 }
+        { "unitDefinitionId": "boss_enemy",    "count": 2,  "spawnInterval": 3.0,  "spread": 0.2, "spawnerIndex": 0, "groupDelay": 3.0 },
+        { "unitDefinitionId": "armored_enemy", "count": 10, "spawnInterval": 0.9,  "spread": 0.3, "spawnerIndex": 0, "groupDelay": 2.5 },
+        { "unitDefinitionId": "fast_enemy",    "count": 20, "spawnInterval": 0.22, "spread": 0.5, "spawnerIndex": 0, "groupDelay": 2.5 },
+        { "unitDefinitionId": "boss_enemy",    "count": 1,  "spawnInterval": 1.0,  "spread": 0.2, "spawnerIndex": 1, "groupDelay": 3.0 },
+        { "unitDefinitionId": "fast_enemy",    "count": 12, "spawnInterval": 0.28, "spread": 0.5, "spawnerIndex": 1, "groupDelay": 2.5 },
+        { "unitDefinitionId": "boss_enemy",    "count": 1,  "spawnInterval": 1.0,  "spread": 0.2, "spawnerIndex": 2, "groupDelay": 3.0 },
+        { "unitDefinitionId": "armored_enemy", "count": 8,  "spawnInterval": 1.0,  "spread": 0.3, "spawnerIndex": 2, "groupDelay": 2.0 }
       ]
     },
     {
       "groups": [
-        { "unitDefinitionId": "boss_enemy",    "count": 3,  "spawnInterval": 2.0,  "spread": 0.3, "spawnerIndex": 0 },
-        { "unitDefinitionId": "armored_enemy", "count": 12, "spawnInterval": 0.5,  "spread": 0.3, "spawnerIndex": 0 },
-        { "unitDefinitionId": "fast_enemy",    "count": 25, "spawnInterval": 0.1,  "spread": 0.5, "spawnerIndex": 0 },
-        { "unitDefinitionId": "boss_enemy",    "count": 2,  "spawnInterval": 2.0,  "spread": 0.3, "spawnerIndex": 1 },
-        { "unitDefinitionId": "fast_enemy",    "count": 15, "spawnInterval": 0.15, "spread": 0.5, "spawnerIndex": 1 },
-        { "unitDefinitionId": "armored_enemy", "count": 6,  "spawnInterval": 0.6,  "spread": 0.3, "spawnerIndex": 1 },
-        { "unitDefinitionId": "boss_enemy",    "count": 2,  "spawnInterval": 2.0,  "spread": 0.3, "spawnerIndex": 2 },
-        { "unitDefinitionId": "armored_enemy", "count": 10, "spawnInterval": 0.55, "spread": 0.3, "spawnerIndex": 2 },
-        { "unitDefinitionId": "fast_enemy",    "count": 15, "spawnInterval": 0.15, "spread": 0.5, "spawnerIndex": 2 }
+        { "unitDefinitionId": "boss_enemy",    "count": 3,  "spawnInterval": 2.5,  "spread": 0.3, "spawnerIndex": 0, "groupDelay": 3.0 },
+        { "unitDefinitionId": "armored_enemy", "count": 12, "spawnInterval": 0.8,  "spread": 0.3, "spawnerIndex": 0, "groupDelay": 2.5 },
+        { "unitDefinitionId": "fast_enemy",    "count": 25, "spawnInterval": 0.18, "spread": 0.5, "spawnerIndex": 0, "groupDelay": 2.5 },
+        { "unitDefinitionId": "boss_enemy",    "count": 2,  "spawnInterval": 2.5,  "spread": 0.3, "spawnerIndex": 1, "groupDelay": 3.0 },
+        { "unitDefinitionId": "fast_enemy",    "count": 15, "spawnInterval": 0.25, "spread": 0.5, "spawnerIndex": 1, "groupDelay": 2.5 },
+        { "unitDefinitionId": "armored_enemy", "count": 6,  "spawnInterval": 1.0,  "spread": 0.3, "spawnerIndex": 1, "groupDelay": 2.5 },
+        { "unitDefinitionId": "boss_enemy",    "count": 2,  "spawnInterval": 2.5,  "spread": 0.3, "spawnerIndex": 2, "groupDelay": 3.0 },
+        { "unitDefinitionId": "armored_enemy", "count": 10, "spawnInterval": 0.85, "spread": 0.3, "spawnerIndex": 2, "groupDelay": 2.5 },
+        { "unitDefinitionId": "fast_enemy",    "count": 15, "spawnInterval": 0.25, "spread": 0.5, "spawnerIndex": 2, "groupDelay": 2.0 }
       ]
     },
     {
       "groups": [
-        { "unitDefinitionId": "boss_enemy",    "count": 5,  "spawnInterval": 1.5,  "spread": 0.3, "spawnerIndex": 0 },
-        { "unitDefinitionId": "armored_enemy", "count": 18, "spawnInterval": 0.4,  "spread": 0.3, "spawnerIndex": 0 },
-        { "unitDefinitionId": "fast_enemy",    "count": 30, "spawnInterval": 0.09, "spread": 0.5, "spawnerIndex": 0 },
-        { "unitDefinitionId": "boss_enemy",    "count": 3,  "spawnInterval": 1.5,  "spread": 0.3, "spawnerIndex": 1 },
-        { "unitDefinitionId": "armored_enemy", "count": 12, "spawnInterval": 0.45, "spread": 0.3, "spawnerIndex": 1 },
-        { "unitDefinitionId": "fast_enemy",    "count": 20, "spawnInterval": 0.12, "spread": 0.5, "spawnerIndex": 1 },
-        { "unitDefinitionId": "boss_enemy",    "count": 3,  "spawnInterval": 1.5,  "spread": 0.3, "spawnerIndex": 2 },
-        { "unitDefinitionId": "armored_enemy", "count": 12, "spawnInterval": 0.45, "spread": 0.3, "spawnerIndex": 2 },
-        { "unitDefinitionId": "fast_enemy",    "count": 20, "spawnInterval": 0.12, "spread": 0.5, "spawnerIndex": 2 }
+        { "unitDefinitionId": "boss_enemy",    "count": 5,  "spawnInterval": 2.0,  "spread": 0.3, "spawnerIndex": 0, "groupDelay": 3.0 },
+        { "unitDefinitionId": "armored_enemy", "count": 18, "spawnInterval": 0.65, "spread": 0.3, "spawnerIndex": 0, "groupDelay": 2.5 },
+        { "unitDefinitionId": "fast_enemy",    "count": 30, "spawnInterval": 0.16, "spread": 0.5, "spawnerIndex": 0, "groupDelay": 2.5 },
+        { "unitDefinitionId": "boss_enemy",    "count": 3,  "spawnInterval": 2.0,  "spread": 0.3, "spawnerIndex": 1, "groupDelay": 3.0 },
+        { "unitDefinitionId": "armored_enemy", "count": 12, "spawnInterval": 0.75, "spread": 0.3, "spawnerIndex": 1, "groupDelay": 2.5 },
+        { "unitDefinitionId": "fast_enemy",    "count": 20, "spawnInterval": 0.2,  "spread": 0.5, "spawnerIndex": 1, "groupDelay": 2.5 },
+        { "unitDefinitionId": "boss_enemy",    "count": 3,  "spawnInterval": 2.0,  "spread": 0.3, "spawnerIndex": 2, "groupDelay": 3.0 },
+        { "unitDefinitionId": "armored_enemy", "count": 12, "spawnInterval": 0.75, "spread": 0.3, "spawnerIndex": 2, "groupDelay": 2.5 },
+        { "unitDefinitionId": "fast_enemy",    "count": 20, "spawnInterval": 0.2,  "spread": 0.5, "spawnerIndex": 2, "groupDelay": 2.0 }
       ]
     }
   ]

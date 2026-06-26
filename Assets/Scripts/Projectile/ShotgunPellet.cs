@@ -19,11 +19,14 @@ public class ShotgunPellet : MonoBehaviour
     public UnitParentClass caster;
     public Transform       casterTransform;
     public GameObject      originTower;
+    public bool            piercing = false;   // if true, passes through ShieldBubble
 
     private bool _hit;
 
     void Start()
     {
+        float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg - 90f;
+        transform.rotation = Quaternion.Euler(0f, 0f, angle);
         Destroy(gameObject, lifetime);
     }
 
@@ -36,6 +39,14 @@ public class ShotgunPellet : MonoBehaviour
     void OnTriggerEnter2D(Collider2D other)
     {
         if (_hit) return;
+
+        // Shield interception — non-piercing pellets are stopped by ShieldBubble
+        if (!piercing)
+        {
+            var shield = other.GetComponent<ShieldBubble>();
+            if (shield != null) { shield.AbsorbHit(10f); _hit = true; Destroy(gameObject); return; }
+        }
+
         var hitUnit = other.GetComponent<UnitParentClass>();
         if (hitUnit == null || !hitUnit.isAlive) return;
 

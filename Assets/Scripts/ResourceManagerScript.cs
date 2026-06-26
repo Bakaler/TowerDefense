@@ -7,7 +7,7 @@ using UnityEngine;
 public class ResourceManagerScript : MonoBehaviour
 {
     [Header("Starting Values")]
-    public int   resourceOne = 20;   // Gold
+    public int   resourceOne = 25;   // Gold
     public int   research    = 0;
     public float funding     = 1f;
     public float development = 0f;

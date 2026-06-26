@@ -12,8 +12,9 @@ public class RouteFollower : MonoBehaviour
     private int    _index;
     private float  _speed;
 
-    public bool HasRoute  => _route != null && !_route.IsEmpty;
-    public bool IsFinished => !HasRoute || _index >= _route.Waypoints.Count;
+    public bool  HasRoute   => _route != null && !_route.IsEmpty;
+    public bool  IsFinished => !HasRoute || _index >= _route.Waypoints.Count;
+    public Route CurrentRoute => _route;
 
     /// <summary>
     /// 0–1 progress along the full waypoint list. Useful for sorting enemies
@@ -23,11 +24,11 @@ public class RouteFollower : MonoBehaviour
 
     // ── API ───────────────────────────────────────────────────────────
 
-    public void StartRoute(Route route, float speed)
+    public void StartRoute(Route route, float speed, float progressOffset = 0f)
     {
         _route  = route;
-        _index  = 0;
         _speed  = speed;
+        _index  = HasRoute ? Mathf.Clamp(Mathf.RoundToInt(progressOffset * _route.Waypoints.Count), 0, _route.Waypoints.Count - 1) : 0;
     }
 
     public void SetSpeed(float speed) => _speed = speed;

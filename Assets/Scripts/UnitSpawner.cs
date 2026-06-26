@@ -21,6 +21,9 @@ public class WaveEntry
     [Tooltip("Seconds between each unit in this group")]
     public float spawnInterval = 0.4f;
 
+    [Tooltip("Extra delay after this group finishes before the next group starts")]
+    public float groupDelay = 1.5f;
+
     [Tooltip("-1 = all spawners, 0/1/2 = specific spawner by pathIndex")]
     public int spawnerIndex = -1;
 }
@@ -116,6 +119,9 @@ public class UnitSpawner : MonoBehaviour
         {
             _formationIndex++;
             _subIndex = 0;
+            // pause between groups
+            if (_formationIndex < _spawnTarget)
+                _coolDown = entry.groupDelay > 0f ? entry.groupDelay : 1.5f;
         }
 
         if (_formationIndex >= _spawnTarget)

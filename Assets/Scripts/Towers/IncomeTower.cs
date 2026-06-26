@@ -37,6 +37,7 @@ public class IncomeTower : MonoBehaviour, IFactoryInitializable
     public float  orbInterval     = 8f;
     public float  minInterval     = 2f;
     public float  elementalScale  = 0.15f;
+    public string orbSpritePath   = "";
     public string orbSpriteSheet  = "";
     public int    orbSpriteIndex  = 1;
 
@@ -57,8 +58,9 @@ public class IncomeTower : MonoBehaviour, IFactoryInitializable
         if (d.orbInterval    > 0f)                     orbInterval    = d.orbInterval;
         if (d.minInterval    > 0f)                     minInterval    = d.minInterval;
         if (d.elementalScale > 0f)                     elementalScale = d.elementalScale;
-        if (!string.IsNullOrEmpty(d.orbSpriteSheet))   orbSpriteSheet = d.orbSpriteSheet;
-        if (d.orbSpriteIndex >= 0)                     orbSpriteIndex = d.orbSpriteIndex;
+        if (!string.IsNullOrEmpty(d.orbSpritePath))   orbSpritePath  = d.orbSpritePath;
+        if (!string.IsNullOrEmpty(d.orbSpriteSheet)) orbSpriteSheet = d.orbSpriteSheet;
+        if (d.orbSpriteIndex >= 0)                   orbSpriteIndex = d.orbSpriteIndex;
     }
 
     // ── Lifecycle ─────────────────────────────────────────────────────
@@ -66,7 +68,9 @@ public class IncomeTower : MonoBehaviour, IFactoryInitializable
     void Start()
     {
         _rm = FindFirstObjectByType<ResourceManagerScript>();
-        if (!string.IsNullOrEmpty(orbSpriteSheet))
+        if (!string.IsNullOrEmpty(orbSpritePath))
+            _orbSheet = new[] { Resources.Load<Sprite>(orbSpritePath) };
+        else if (!string.IsNullOrEmpty(orbSpriteSheet))
             _orbSheet = Resources.LoadAll<Sprite>(orbSpriteSheet);
 
         StartCoroutine(OrbSpawnLoop());
@@ -96,15 +100,16 @@ public class IncomeTower : MonoBehaviour, IFactoryInitializable
 
         var go = new GameObject($"IncomeOrb_{slot}");
         go.transform.position   = worldPos;
-        go.transform.localScale = Vector3.one * 0.65f;
+        go.transform.localScale = Vector3.one * .85f;
 
         var sr              = go.AddComponent<SpriteRenderer>();
         sr.sortingLayerName = "Towers";
         sr.sortingOrder     = 10;  // above the tower sprite (which is order 0)
         sr.color            = Color.white;
 
-        if (_orbSheet != null && orbSpriteIndex < _orbSheet.Length)
-            sr.sprite = _orbSheet[orbSpriteIndex];
+        int idx = string.IsNullOrEmpty(orbSpritePath) ? orbSpriteIndex : 0;
+        if (_orbSheet != null && idx < _orbSheet.Length)
+            sr.sprite = _orbSheet[idx];
 
         go.AddComponent<IncomeOrb>();
 
@@ -169,6 +174,7 @@ public class IncomeTowerData
     public float  orbInterval    = 8f;
     public float  minInterval    = 2f;
     public float  elementalScale = 0.15f;
+    public string orbSpritePath  = "";
     public string orbSpriteSheet = "";
     public int    orbSpriteIndex = 1;
 }

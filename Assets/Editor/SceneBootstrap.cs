@@ -3,6 +3,7 @@ using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEditor.Events;
 using System.Collections.Generic;
+using UnityEngine.Rendering.Universal;
 
 /// <summary>
 /// TowerDefense → Setup Basic Wave Scene
@@ -38,6 +39,17 @@ public static class SceneBootstrap
         DestroyIfExists("--- SHOP UI ---");
 
         // ─────────────────────────────────────────────────────────────
+        // 0. GLOBAL LIGHT (required by URP 2D — full brightness baseline)
+        // ─────────────────────────────────────────────────────────────
+        DestroyIfExists("--- GLOBAL LIGHT ---");
+        var lightRoot         = new GameObject("--- GLOBAL LIGHT ---");
+        Undo.RegisterCreatedObjectUndo(lightRoot, "Create Global Light");
+        var globalLight       = lightRoot.AddComponent<Light2D>();
+        globalLight.lightType = Light2D.LightType.Global;
+        globalLight.intensity = 1f;
+        globalLight.color     = Color.white;
+
+        // ─────────────────────────────────────────────────────────────
         // 1. MANAGERS
         // ─────────────────────────────────────────────────────────────
         var managersRoot = new GameObject("--- MANAGERS ---");
@@ -56,6 +68,8 @@ public static class SceneBootstrap
         roundGO.AddComponent<GameHUD>();
         roundGO.AddComponent<BalanceManager>();
         roundGO.AddComponent<TechManager>();
+        roundGO.AddComponent<CheatManager>();
+        roundGO.AddComponent<ResearchManager>();
 
         var librariesGO = CreateChild("Libraries", managersRoot);
         librariesGO.AddComponent<UnitDefinitionLibrary>();
@@ -312,27 +326,32 @@ public static class SceneBootstrap
         // 3-column layout  (T1 / T2 / T3)
         var columns = new (string id, string label, string cost)[][]
         {
+            // T1 — Physical → Arcane → Elemental, sorted by cost within each type
             new[] {
-                ("basic_tower",    "Basic\nTower",    "3g"),
-                ("shotgun_tower",  "Shotgun\nTower",  "5g"),
-                ("slow_tower",     "Slow\nTower",     "5g"),
-                ("income_tower",   "Income\nTower",   "5g"),
-                ("research_tower", "Research\nTower", "6g"),
+                ("basic_tower",    "Basic\nTower",    "3g"),  // Physical 3g
+                ("shotgun_tower",  "Shotgun\nTower",  "5g"),  // Arcane   5g
+                ("research_tower", "Research\nTower", "6g"),  // Arcane   6g
+                ("slow_tower",     "Slow\nTower",     "3g"),  // Elemental 3g
+                ("income_tower",   "Income\nTower",   "5g"),  // Elemental 5g
             },
+            // T2 — Physical → Arcane → Elemental, sorted by cost within each type
             new[] {
-                ("chain_tower",       "Chain\nTower",       "6g"),
-                ("bee_tower",         "Bee\nTower",         "6g"),
-                ("boomerang_tower",   "Boomerang\nTower",   "5g"),
-                ("root_tower",        "Root\nTower",        "7g"),
-                ("entropy_tower",     "Entropy\nTower",     "8g"),
-                ("poison_tower",      "Poison\nTower",      "6g"),
-                ("speed_aura_tower",  "Speed\nAura",        "7g"),
-                ("damage_aura_tower", "Damage\nAura",       "7g"),
+                ("boomerang_tower",   "Boomerang\nTower",   "5g"),  // Physical 5g
+                ("bee_tower",         "Bee\nTower",         "6g"),  // Physical 6g
+                ("damage_aura_tower", "Damage\nAura",       "7g"),  // Physical 7g
+                ("chain_tower",       "Chain\nTower",       "6g"),  // Arcane   6g
+                ("speed_aura_tower",  "Speed\nAura",        "7g"),  // Arcane   7g
+                ("entropy_tower",     "Entropy\nTower",     "8g"),  // Arcane   8g
+                ("siphon_tower",      "Siphon\nTower",      "4g"),  // Elemental 4g
+                ("poison_tower",      "Poison\nTower",      "6g"),  // Elemental 6g
+                ("root_tower",        "Root\nTower",        "7g"),  // Elemental 7g
             },
+            // T3 — Physical → Arcane → Elemental, sorted by cost within each type
             new[] {
-                ("collector_tower", "Collector\nTower", "7g"),
-                ("railgun_tower",   "Railgun\nTower",   "9g"),
-                ("laser_tower",     "Laser\nTower",     "7g"),
+                ("mortar_tower",    "Mortar\nTower",    "7g"),  // Physical 7g
+                ("railgun_tower",   "Railgun\nTower",   "9g"),  // Physical 9g
+                ("laser_tower",     "Laser\nTower",     "7g"),  // Arcane   7g
+                ("collector_tower", "Collector\nTower", "7g"),  // Elemental 7g
             },
         };
 

@@ -86,16 +86,38 @@ public class UnitFactory : MonoBehaviour
             else Debug.LogWarning($"[UnitFactory] Sprite not found at '{def.spritePath}' for '{def.id}'.");
         }
 
-        if (sr.sprite == null)
+        if (sr.sprite == null && string.IsNullOrEmpty(def.animSheet))
         {
-            sr.sprite = MakePlaceholderSprite();
+            sr.sprite = MakePlaceholderSprite(def.scale > 0f ? def.scale : 1f);
             sr.color  = def.debugColor;
+        }
+        else if (def.tintColor != Color.white && def.tintColor.a > 0f)
+        {
+            sr.color = def.tintColor;
         }
         sr.sortingLayerName = "Units";
 
         // Scale — applied after sprite so placeholder doesn't override def.scale
         float s = def.scale > 0f ? def.scale : 1f;
         go.transform.localScale = new Vector3(s, s, 1f);
+
+        // ── 3b. Animation ─────────────────────────────────────────
+        if (!string.IsNullOrEmpty(def.animSheet))
+        {
+            var frames = Resources.LoadAll<Sprite>(def.animSheet);
+            if (frames != null && frames.Length > 0)
+            {
+                sr.sprite = frames[0];
+                sr.color  = def.tintColor.a > 0f ? def.tintColor : Color.white;
+                Sprite[] deathFrames = null;
+                if (!string.IsNullOrEmpty(def.animDeathSheet))
+                    deathFrames = Resources.LoadAll<Sprite>(def.animDeathSheet);
+                var anim = go.AddComponent<SpriteAnimator>();
+                anim.Setup(frames, def.animFps, deathFrames, def.animDeathFps);
+            }
+            else
+                Debug.LogWarning($"[UnitFactory] Animation sheet '{def.animSheet}' not found for '{def.id}'.");
+        }
 
         // ── 4. UnitManager ────────────────────────────────────────
         var unit = go.AddComponent<UnitManager>();
@@ -133,13 +155,29 @@ public class UnitFactory : MonoBehaviour
             init.Initialize(data);
         }
 
+        // ── 7. Starting behaviors (permanent, immune, auras) ──────
+        if (def.startingBehaviors != null && def.startingBehaviors.Length > 0)
+        {
+            if (BehaviorLibrary.Instance != null)
+            {
+                var bh = go.GetComponent<BehaviorHandler>() ?? go.AddComponent<BehaviorHandler>();
+                foreach (var bId in def.startingBehaviors)
+                {
+                    if (BehaviorLibrary.Instance.TryGet(bId, out var bDef))
+                        bh.ApplyPermanent(bDef);
+                    else
+                        Debug.LogWarning($"[UnitFactory] Starting behavior '{bId}' not found in BehaviorLibrary.");
+                }
+            }
+        }
+
         return go;
     }
 
     // ── Helpers ───────────────────────────────────────────────────────
 
-    /// <summary>Creates a 4×4 white circle sprite used as a unit placeholder.</summary>
-    private static Sprite MakePlaceholderSprite()
+    /// <summary>Creates a small circle sprite used as a unit placeholder. Scale is factored into PPU so world size stays ~0.4 units regardless of def.scale.</summary>
+    private static Sprite MakePlaceholderSprite(float scale)
     {
         const int size = 32;
         var tex = new Texture2D(size, size, TextureFormat.RGBA32, false);
@@ -153,7 +191,9 @@ public class UnitFactory : MonoBehaviour
             }
         tex.Apply();
         tex.filterMode = FilterMode.Bilinear;
-        return Sprite.Create(tex, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f), size);
+        // Target ~0.4 world units: world_size = (size/PPU)*scale → PPU = size*scale/0.4
+        int ppu = Mathf.RoundToInt(size * scale / 0.4f);
+        return Sprite.Create(tex, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f), ppu);
     }
 
     private static List<string> ResolveOrder(ComponentEntry[] entries)

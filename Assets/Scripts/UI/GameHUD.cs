@@ -43,6 +43,10 @@ public class GameHUD : MonoBehaviour
     private Text       _researchT2Label;
     private Button     _researchT3Btn;
     private Text       _researchT3Label;
+    private Button     _researchT4Btn;
+    private Text       _researchT4Label;
+    private Button     _researchT5Btn;
+    private Text       _researchT5Label;
 
     // ── Tower info panel ──────────────────────────────────────────────
     private GameObject _towerPanel;
@@ -55,9 +59,30 @@ public class GameHUD : MonoBehaviour
     private Text       _tpAura;
     private Button     _tpUpgradeBtn;
     private Text       _tpUpgradeBtnLabel;
+    private Button     _tpSellBtn;
+    private Text       _tpSellBtnLabel;
     private Button[]   _tpTargetBtns;
     private Image[]    _tpTargetImgs;
     private TowerInfo  _selectedTower;
+
+    // ── Tower research sub-panel ──────────────────────────────────────
+    private GameObject _towerPanelBody;     // shown on main view
+    private GameObject _towerResearchBody;  // shown on research view
+    private GameObject _trHeader;           // shared header (always visible)
+    private Text       _trHeaderName;       // name label in shared header (alias of _tpName)
+    private List<(Button btn, Text lbl, ResearchDefinition def)> _trButtons = new();
+
+    // ── Enemy info panel ──────────────────────────────────────────────
+    private GameObject  _enemyPanel;
+    private Text        _epName;
+    private Text        _epHp;
+    private Text        _epSpeed;
+    private Text        _epDeathBlow;
+    private Text        _epArmor;
+    private Text        _epResistance;
+    private Text        _epFortitude;
+    private Text        _epDescription;
+    private UnitManager _selectedEnemy;
 
     // ── Cached managers ───────────────────────────────────────────────
     private ResourceManagerScript _rm;
@@ -110,9 +135,10 @@ public class GameHUD : MonoBehaviour
         canvasGO.AddComponent<GraphicRaycaster>();
 
         BuildTopBar(canvasGO);
-        BuildWaveButton(canvasGO);
         BuildTowerPanel(canvasGO);
+        BuildEnemyPanel(canvasGO);
         BuildResearchPanel(canvasGO);
+        BuildDebugPanel(canvasGO);
         _gameOverPanel = BuildOverlay(canvasGO, "GameOverPanel",  "GAME OVER", C_GameOver,  "Restart",    WaveManager.Restart);
         _victoryPanel  = BuildOverlay(canvasGO, "VictoryPanel",   "VICTORY",   C_Victory,   "Play Again", WaveManager.Restart);
 
@@ -140,9 +166,47 @@ public class GameHUD : MonoBehaviour
             _towerPanel?.SetActive(false);
             return;
         }
+        _selectedEnemy = null;
+        _enemyPanel?.SetActive(false);
         _selectedTower = info;
+        HideResearchBody();
         RefreshTowerPanel(info);
         _towerPanel?.SetActive(true);
+    }
+
+    public void SelectEnemy(UnitManager unit)
+    {
+        if (unit == null || !unit.isAlive) return;
+        _selectedTower = null;
+        _towerPanel?.SetActive(false);
+        _selectedEnemy = unit;
+        RefreshEnemyPanel();
+        _enemyPanel?.SetActive(true);
+    }
+
+    void RefreshEnemyPanel()
+    {
+        if (_selectedEnemy == null) return;
+        var u = _selectedEnemy;
+
+        // Always resolve name + description from the library so all spawn paths work
+        string name = u.definitionId;
+        string desc = "";
+        if (!string.IsNullOrEmpty(u.definitionId) && UnitDefinitionLibrary.Instance != null &&
+            UnitDefinitionLibrary.Instance.TryGet(u.definitionId, out var def))
+        {
+            if (!string.IsNullOrEmpty(def.displayName)) name = def.displayName;
+            desc = def.description ?? "";
+        }
+
+        if (_epName       != null) _epName.text       = name.ToUpper();
+        if (_epHp         != null) _epHp.text         = $"HP        {u.lifeCurrent:0}/{u.lifeMax:0}";
+        if (_epSpeed      != null) _epSpeed.text      = $"Speed     {u.speedMax:0.##}";
+        if (_epDeathBlow  != null) _epDeathBlow.text  = $"End dmg   {u.deathBlow}";
+        if (_epArmor      != null) _epArmor.text      = $"Armor     {u.physicalDefense}";
+        if (_epResistance != null) _epResistance.text = $"Resist    {u.elementalDefense}";
+        if (_epFortitude  != null) _epFortitude.text  = $"Fortitude {u.arcanaDefense}";
+        if (_epDescription != null) _epDescription.text = desc;
     }
 
     void RefreshTowerPanel(TowerInfo info)
@@ -155,8 +219,10 @@ public class GameHUD : MonoBehaviour
         if (_tpDamage != null)
         {
             float baseDmg = info.damage * info.StatMultiplier;
-            string dmgStr = $"Damage   {baseDmg:0.#}";
-            if (info.AuraDamageMultiplier > 1.001f)
+            string dmgStr = baseDmg > 0f
+                ? $"Damage   {baseDmg:0.#}"
+                : "Damage   —";
+            if (baseDmg > 0f && info.AuraDamageMultiplier > 1.001f)
             {
                 float bonus = baseDmg * (info.AuraDamageMultiplier - 1f);
                 dmgStr += $"  <color=#4DFF73>(+{bonus:0.#})</color>";
@@ -166,11 +232,17 @@ public class GameHUD : MonoBehaviour
 
         if (_tpFireRate != null)
         {
-            string rateStr = $"Fire Rate  {info.FireRate:0.##}/s";
-            if (info.AuraSpeedMultiplier > 1.001f)
+            // Read from ability's actual cooldown so research bonuses show immediately
+            var turrent = info.GetComponent<Turrent>();
+            float cd = turrent?.fireAbility?.cost?.cooldownDuration ?? (info.cooldown > 0f ? info.cooldown : 0f);
+            float fr = cd > 0f ? 1f / cd : 0f;
+            string rateStr = fr > 0f
+                ? $"Fire Rate  {fr:0.##}/s"
+                : "Fire Rate  —";
+            if (fr > 0f && info.AuraSpeedMultiplier > 1.001f)
             {
-                float reduction = info.AuraSpeedMultiplier - 1f;
-                rateStr += $"  <color=#4DFF73>(-{reduction:0.##})</color>";
+                float boost = fr * info.AuraSpeedMultiplier - fr;
+                rateStr += $"  <color=#4DFF73>(+{boost:0.##})</color>";
             }
             _tpFireRate.text = rateStr;
         }
@@ -199,6 +271,9 @@ public class GameHUD : MonoBehaviour
                     _tpUpgradeBtnLabel.text = $"UPGRADE  Tier {info.Tier + 1}  —  {info.UpgradeCost}g";
             }
         }
+
+        if (_tpSellBtnLabel != null)
+            _tpSellBtnLabel.text = $"SELL  —  {info.SellRefund}g";
     }
 
     void SetTargetingMode(TargetingMode mode)
@@ -260,6 +335,34 @@ public class GameHUD : MonoBehaviour
                     _researchT3Label.text = $"Unlock Tier 3  —  {TechManager.T3Cost} tech";
             }
         }
+
+        if (_researchT4Btn != null)
+        {
+            bool done      = tm.T4Unlocked;
+            bool canAfford = tm.Tech >= TechManager.T4Cost;
+            bool prereq    = tm.T3Unlocked;
+            _researchT4Btn.interactable = !done && prereq && canAfford;
+            if (_researchT4Label != null)
+            {
+                if (done)      _researchT4Label.text = "Tier 4  ✓  Unlocked";
+                else if (!prereq) _researchT4Label.text = $"Unlock Tier 4  —  {TechManager.T4Cost} tech  (needs T3)";
+                else           _researchT4Label.text = $"Unlock Tier 4  —  {TechManager.T4Cost} tech";
+            }
+        }
+
+        if (_researchT5Btn != null)
+        {
+            bool done      = tm.T5Unlocked;
+            bool canAfford = tm.Tech >= TechManager.T5Cost;
+            bool prereq    = tm.T4Unlocked;
+            _researchT5Btn.interactable = !done && prereq && canAfford;
+            if (_researchT5Label != null)
+            {
+                if (done)      _researchT5Label.text = "Tier 5  ✓  Unlocked";
+                else if (!prereq) _researchT5Label.text = $"Unlock Tier 5  —  {TechManager.T5Cost} tech  (needs T4)";
+                else           _researchT5Label.text = $"Unlock Tier 5  —  {TechManager.T5Cost} tech";
+            }
+        }
     }
 
     // Returns all non-ghost towers, plus a dictionary of definitionId → count
@@ -288,12 +391,22 @@ public class GameHUD : MonoBehaviour
     void RefreshBalanceDist()
     {
         if (_tpBalanceDist == null || _selectedTower == null) return;
-        GetTowerData(out var idCounts);
-        idCounts.TryGetValue(_selectedTower.definitionId, out int count);
-        if (count == 0) { _tpBalanceDist.text = "—"; return; }
-        string lbl   = _selectedTower.balanceType.ToString()[0].ToString();
-        float  ratio = BalanceRatio(count);
-        _tpBalanceDist.text = $"{lbl}  1 ({ratio:0.00})";
+        var towers = GetTowerData(out var idCounts);
+
+        // Find the worst idCount among all towers of the same balance type
+        int worstCount = 0;
+        foreach (var t in towers)
+        {
+            if (t.isGhost || t.balanceType != _selectedTower.balanceType) continue;
+            int cnt = idCounts.TryGetValue(t.definitionId, out int c) ? c : 0;
+            if (cnt > worstCount) worstCount = cnt;
+        }
+        if (worstCount == 0) { _tpBalanceDist.text = "—"; return; }
+
+        float ratio   = BalanceRatio(worstCount);
+        int   pct     = Mathf.RoundToInt(ratio * 100f);
+        float multVal = _selectedTower.balanceMultiplier;
+        _tpBalanceDist.text = $"{multVal:0.#}  ({pct}%)";
     }
 
     void RefreshHeaderBalance()
@@ -303,7 +416,7 @@ public class GameHUD : MonoBehaviour
         foreach (var t in towers)
         {
             if (t.isGhost) continue;
-            float contribution = BalanceRatio(idCounts[t.definitionId]);
+            float contribution = BalanceRatio(idCounts[t.definitionId]) * t.balanceMultiplier;
             switch (t.balanceType)
             {
                 case BalanceType.Elemental: eCum += contribution; break;
@@ -337,7 +450,7 @@ public class GameHUD : MonoBehaviour
 
     void BuildResearchPanel(GameObject root)
     {
-        const float W = 420f, H = 500f, PAD = 18f;
+        const float W = 420f, H = 780f, PAD = 18f;
 
         _researchPanel = new GameObject("ResearchPanel");
         _researchPanel.transform.SetParent(root.transform, false);
@@ -415,92 +528,271 @@ public class GameHUD : MonoBehaviour
                 RefreshResearchPanel();
         });
 
+        // ── Tier 4 unlock ─────────────────────────────────────────────
+        var div4GO = MakeRect("Div4", _researchPanel, PAD, H - PAD - 375f, W - PAD * 2f, 22f);
+        var div4   = MakeText(div4GO, "── Tier 4 ──────────────────", new Color(0.65f, 0.30f, 1.0f), 12);
+        div4.alignment = TextAnchor.MiddleLeft;
+
+        var t4GO  = MakeRect("T4Btn", _researchPanel, PAD, H - PAD - 450f, W - PAD * 2f, 65f);
+        var t4Img = t4GO.AddComponent<Image>();
+        t4Img.color = new Color(0.18f, 0.10f, 0.28f, 1f);
+        _researchT4Btn = t4GO.AddComponent<Button>();
+        _researchT4Btn.targetGraphic = t4Img;
+        var t4Cols = _researchT4Btn.colors;
+        t4Cols.highlightedColor = new Color(0.28f, 0.15f, 0.42f, 1f);
+        t4Cols.pressedColor     = new Color(0.12f, 0.06f, 0.18f, 1f);
+        t4Cols.disabledColor    = new Color(0.18f, 0.18f, 0.20f, 1f);
+        _researchT4Btn.colors = t4Cols;
+        _researchT4Label = MakeText(MakeRect("Label", t4GO, 0f, 0f, W - PAD * 2f, 65f),
+            "", new Color(0.80f, 0.55f, 1.0f), 15);
+        _researchT4Label.alignment = TextAnchor.MiddleCenter;
+        _researchT4Btn.onClick.AddListener(() => {
+            if (TechManager.Instance != null && TechManager.Instance.TryUnlockT4())
+                RefreshResearchPanel();
+        });
+
+        // ── Tier 5 unlock ─────────────────────────────────────────────
+        var div5GO = MakeRect("Div5", _researchPanel, PAD, H - PAD - 545f, W - PAD * 2f, 22f);
+        var div5   = MakeText(div5GO, "── Tier 5 ──────────────────", new Color(1.0f, 0.20f, 0.60f), 12);
+        div5.alignment = TextAnchor.MiddleLeft;
+
+        var t5GO  = MakeRect("T5Btn", _researchPanel, PAD, H - PAD - 620f, W - PAD * 2f, 65f);
+        var t5Img = t5GO.AddComponent<Image>();
+        t5Img.color = new Color(0.28f, 0.06f, 0.14f, 1f);
+        _researchT5Btn = t5GO.AddComponent<Button>();
+        _researchT5Btn.targetGraphic = t5Img;
+        var t5Cols = _researchT5Btn.colors;
+        t5Cols.highlightedColor = new Color(0.42f, 0.10f, 0.22f, 1f);
+        t5Cols.pressedColor     = new Color(0.18f, 0.04f, 0.10f, 1f);
+        t5Cols.disabledColor    = new Color(0.18f, 0.18f, 0.20f, 1f);
+        _researchT5Btn.colors = t5Cols;
+        _researchT5Label = MakeText(MakeRect("Label", t5GO, 0f, 0f, W - PAD * 2f, 65f),
+            "", new Color(1.0f, 0.55f, 0.75f), 15);
+        _researchT5Label.alignment = TextAnchor.MiddleCenter;
+        _researchT5Btn.onClick.AddListener(() => {
+            if (TechManager.Instance != null && TechManager.Instance.TryUnlockT5())
+                RefreshResearchPanel();
+        });
+
         _researchPanel.SetActive(false);
     }
 
     void BuildTowerPanel(GameObject root)
     {
-        const float W = 260f, H = 430f, PAD = 14f, ROW = 36f;
+        const float W     = 820f, H = 320f;
+        const float HDR_H = 50f;
+        const float PAD   = 16f;
+        const float ROW   = 36f;
+        const float GAP   = 12f;
 
+        float innerW = W - PAD * 2f;
+        float cW     = (innerW - GAP * 2f) / 3f;
+        float c0x    = PAD;
+        float c1x    = c0x + cW + GAP;
+        float c2x    = c1x + cW + GAP;
+
+        // ── Root panel ────────────────────────────────────────────────
         _towerPanel = new GameObject("TowerInfoPanel");
         _towerPanel.transform.SetParent(root.transform, false);
-
-        var rt = _towerPanel.AddComponent<RectTransform>();
-        rt.anchorMin        = new Vector2(0f, 0f);
-        rt.anchorMax        = new Vector2(0f, 0f);
-        rt.pivot            = new Vector2(0f, 0f);
-        rt.anchoredPosition = new Vector2(20f, 20f);
+        var rt              = _towerPanel.AddComponent<RectTransform>();
+        rt.anchorMin        = new Vector2(0.5f, 0f);
+        rt.anchorMax        = new Vector2(0.5f, 0f);
+        rt.pivot            = new Vector2(0.5f, 0f);
+        rt.anchoredPosition = new Vector2(0f, 0f);
         rt.sizeDelta        = new Vector2(W, H);
-
         var tpBg = _towerPanel.AddComponent<Image>();
-        tpBg.color = new Color(0.07f, 0.07f, 0.13f, 0.95f);
-        tpBg.raycastTarget = false;   // let world clicks pass through the panel background
+        tpBg.color = new Color(0.07f, 0.07f, 0.13f, 0.96f);
+        tpBg.raycastTarget = false;
 
-        // × close button — top-right corner
-        var closeGO = MakeRect("CloseBtn", _towerPanel, W - 34f, H - 34f, 30f, 30f);
-        var cImg    = closeGO.AddComponent<Image>();
-        cImg.color  = new Color(0.55f, 0.12f, 0.12f, 1f);
-        var cBtn    = closeGO.AddComponent<Button>();
-        cBtn.targetGraphic = cImg;
-        cBtn.onClick.AddListener(() => { _towerPanel.SetActive(false); _selectedTower = null; });
-        MakeText(MakeRect("Label", closeGO, 0f, 0f, 30f, 30f), "×", Color.white, 22, bold: true);
+        // ── Shared header ─────────────────────────────────────────────
+        var hdrGO = MakeRect("Header", _towerPanel, 0f, H - HDR_H, W, HDR_H);
+        hdrGO.AddComponent<Image>().color = new Color(0.04f, 0.04f, 0.10f, 1f);
+        _tpName = MakeText(MakeRect("Name", hdrGO, PAD, 0f, W - HDR_H - PAD, HDR_H),
+            "", new Color(1f, 0.85f, 0.3f), 19, bold: true);
+        _tpName.alignment = TextAnchor.MiddleLeft;
+        var closeGO = MakeRect("CloseBtn", hdrGO, W - HDR_H, 0f, HDR_H, HDR_H);
+        var cImg    = closeGO.AddComponent<Image>(); cImg.color = new Color(0.55f, 0.12f, 0.12f, 1f);
+        var cBtn    = closeGO.AddComponent<Button>(); cBtn.targetGraphic = cImg;
+        cBtn.onClick.AddListener(() => { _towerPanel.SetActive(false); _selectedTower = null; TowerInfo.OnTowerClickedPublic(null); });
+        MakeText(MakeRect("X", closeGO, 0f, 0f, HDR_H, HDR_H), "×", Color.white, 22, bold: true)
+            .alignment = TextAnchor.MiddleCenter;
 
-        // Stat rows — stacked top-down with PAD margin
-        float y = H - PAD - ROW;
-        _tpName        = MakeText(MakeRect("Name",        _towerPanel, PAD, y, W - PAD*2, ROW), "", new Color(1f, 0.85f, 0.3f), 17, bold: true); y -= ROW;
-        _tpBalance     = MakeText(MakeRect("Balance",     _towerPanel, PAD, y, W - PAD*2, ROW), "", new Color(0.6f, 0.9f, 0.6f), 14); y -= ROW;
-        _tpBalanceDist = MakeText(MakeRect("BalanceDist", _towerPanel, PAD, y, W - PAD*2, ROW), "", new Color(0.75f, 0.75f, 0.85f), 12); y -= ROW;
-        _tpDamage      = MakeText(MakeRect("Damage",      _towerPanel, PAD, y, W - PAD*2, ROW), "", new Color(0.9f, 0.9f, 0.9f), 14); y -= ROW;
-        _tpFireRate    = MakeText(MakeRect("FireRate",    _towerPanel, PAD, y, W - PAD*2, ROW), "", new Color(0.9f, 0.9f, 0.9f), 14); y -= ROW;
-        _tpAura        = MakeText(MakeRect("Aura",        _towerPanel, PAD, y, W - PAD*2, ROW), "", new Color(0.3f, 1f, 0.45f), 13); y -= ROW;
-        _tpKills       = MakeText(MakeRect("Kills",       _towerPanel, PAD, y, W - PAD*2, ROW), "", new Color(0.95f, 0.5f, 0.5f), 14); y -= ROW + 4f;
+        // ── Main body (3 columns) ─────────────────────────────────────
+        _towerPanelBody = new GameObject("TowerBody");
+        _towerPanelBody.transform.SetParent(_towerPanel.transform, false);
+        var bodyRt = _towerPanelBody.AddComponent<RectTransform>();
+        bodyRt.anchorMin = bodyRt.anchorMax = Vector2.zero;
+        bodyRt.pivot     = Vector2.zero;
+        bodyRt.anchoredPosition = Vector2.zero;
+        bodyRt.sizeDelta = new Vector2(W, H);   // full panel size so child coords match
+
+        float topY = H - HDR_H - PAD - ROW;   // bottom of first row in panel-space
+
+        // C0: Balance / BalanceDist / Kills / Aura
+        float y = topY;
+        _tpBalance     = MakeText(MakeRect("Balance",     _towerPanelBody, c0x, y, cW, ROW), "", new Color(0.6f, 0.9f, 0.6f),   17); y -= ROW;
+        _tpBalanceDist = MakeText(MakeRect("BalanceDist", _towerPanelBody, c0x, y, cW, ROW), "", new Color(0.75f, 0.75f, 0.85f), 16); y -= ROW;
+        _tpKills       = MakeText(MakeRect("Kills",       _towerPanelBody, c0x, y, cW, ROW), "", new Color(0.95f, 0.5f, 0.5f),  16);
+        _tpAura        = MakeText(MakeRect("Aura",        _towerPanelBody, c0x, y - ROW, cW, ROW), "", new Color(0.3f, 1f, 0.45f), 14);
+
+        // C1: Damage / FireRate
+        y = topY;
+        _tpDamage   = MakeText(MakeRect("Damage",   _towerPanelBody, c1x, y, cW, ROW), "", new Color(0.9f, 0.9f, 0.9f), 17); y -= ROW;
+        _tpFireRate = MakeText(MakeRect("FireRate",  _towerPanelBody, c1x, y, cW, ROW), "", new Color(0.9f, 0.9f, 0.9f), 17);
+
+        // C2: Upgrade / Research / TARGET
+        y = topY;
+        float btnH = 44f;
 
         // Upgrade button
-        var upgGO  = MakeRect("UpgradeBtn", _towerPanel, PAD, y, W - PAD*2, 38f);
-        var upgImg = upgGO.AddComponent<Image>();
-        upgImg.color = new Color(0.15f, 0.55f, 0.25f, 1f);
-        _tpUpgradeBtn = upgGO.AddComponent<Button>();
-        _tpUpgradeBtn.targetGraphic = upgImg;
-        var cols2 = _tpUpgradeBtn.colors;
-        cols2.highlightedColor = new Color(0.2f, 0.7f, 0.3f, 1f);
-        cols2.pressedColor     = new Color(0.1f, 0.4f, 0.18f, 1f);
-        cols2.disabledColor    = new Color(0.25f, 0.25f, 0.25f, 1f);
-        _tpUpgradeBtn.colors   = cols2;
-        _tpUpgradeBtnLabel     = MakeText(MakeRect("Label", upgGO, 0f, 0f, W - PAD*2, 38f),
-            "UPGRADE", Color.white, 14, bold: true);
+        var upgGO  = MakeRect("UpgradeBtn", _towerPanelBody, c2x, y - btnH + ROW, cW, btnH);
+        var upgImg = upgGO.AddComponent<Image>(); upgImg.color = new Color(0.15f, 0.55f, 0.25f, 1f);
+        _tpUpgradeBtn = upgGO.AddComponent<Button>(); _tpUpgradeBtn.targetGraphic = upgImg;
+        var uc = _tpUpgradeBtn.colors;
+        uc.highlightedColor = new Color(0.2f, 0.7f, 0.3f, 1f);
+        uc.pressedColor     = new Color(0.1f, 0.4f, 0.18f, 1f);
+        uc.disabledColor    = new Color(0.22f, 0.22f, 0.22f, 1f);
+        _tpUpgradeBtn.colors = uc;
+        _tpUpgradeBtnLabel = MakeText(MakeRect("Label", upgGO, 0f, 0f, cW, btnH), "UPGRADE", Color.white, 14, bold: true);
         _tpUpgradeBtnLabel.alignment = TextAnchor.MiddleCenter;
         _tpUpgradeBtn.onClick.AddListener(OnUpgradeClicked);
-        y -= 38f + 6f;
 
-        // Targeting mode buttons — Furthest / Closest / Lowest
-        MakeText(MakeRect("TargetLabel", _towerPanel, PAD, y, W - PAD * 2, 20f),
+        // Research button (below Upgrade)
+        float researchBtnY = y - btnH + ROW - btnH - 6f;
+        var resBtnGO  = MakeRect("ResearchBtn", _towerPanelBody, c2x, researchBtnY, cW, btnH);
+        var resBtnImg = resBtnGO.AddComponent<Image>(); resBtnImg.color = new Color(0.15f, 0.30f, 0.60f, 1f);
+        var resBtn    = resBtnGO.AddComponent<Button>(); resBtn.targetGraphic = resBtnImg;
+        var rc = resBtn.colors;
+        rc.highlightedColor = new Color(0.2f, 0.4f, 0.8f, 1f);
+        rc.pressedColor     = new Color(0.1f, 0.2f, 0.45f, 1f);
+        resBtn.colors = rc;
+        MakeText(MakeRect("Label", resBtnGO, 0f, 0f, cW, btnH), "RESEARCH", Color.white, 14, bold: true)
+            .alignment = TextAnchor.MiddleCenter;
+        resBtn.onClick.AddListener(ShowResearchBody);
+
+        // Sell button (below Research)
+        float sellBtnY = researchBtnY - btnH - 6f;
+        var sellGO  = MakeRect("SellBtn", _towerPanelBody, c2x, sellBtnY, cW, btnH);
+        var sellImg = sellGO.AddComponent<Image>(); sellImg.color = new Color(0.55f, 0.10f, 0.10f, 1f);
+        _tpSellBtn  = sellGO.AddComponent<Button>(); _tpSellBtn.targetGraphic = sellImg;
+        var sc = _tpSellBtn.colors;
+        sc.highlightedColor = new Color(0.75f, 0.15f, 0.15f, 1f);
+        sc.pressedColor     = new Color(0.35f, 0.06f, 0.06f, 1f);
+        _tpSellBtn.colors = sc;
+        _tpSellBtnLabel = MakeText(MakeRect("Label", sellGO, 0f, 0f, cW, btnH), "SELL", Color.white, 14, bold: true);
+        _tpSellBtnLabel.alignment = TextAnchor.MiddleCenter;
+        _tpSellBtn.onClick.AddListener(() =>
+        {
+            if (_selectedTower == null) return;
+            _selectedTower.Sell(_rm);
+            _towerPanel.SetActive(false);
+            _selectedTower = null;
+        });
+
+        // TARGET section pinned to bottom
+        float tgtBtnY = PAD;
+        float tgtTop  = tgtBtnY + 36f + 6f;
+        MakeText(MakeRect("TargetLabel", _towerPanelBody, c2x, tgtTop, cW, 22f),
             "TARGET", new Color(0.6f, 0.6f, 0.7f), 11, bold: true);
-        y -= 22f;
 
         string[] modeLabels = { "Furthest", "Closest", "Lowest" };
-        float btnW = (W - PAD * 2 - 8f) / 3f;
+        float mBtnW = (cW - 8f) / 3f;
         _tpTargetBtns = new Button[3];
         _tpTargetImgs = new Image[3];
-
         for (int i = 0; i < 3; i++)
         {
-            float xOff = PAD + i * (btnW + 4f);
-            var bGO  = MakeRect($"Target_{modeLabels[i]}", _towerPanel, xOff, y, btnW, 32f);
-            var bImg = bGO.AddComponent<Image>();
-            bImg.color = new Color(0.18f, 0.18f, 0.28f, 1f);
-            var btn  = bGO.AddComponent<Button>();
-            btn.targetGraphic = bImg;
-            MakeText(MakeRect("L", bGO, 0f, 0f, btnW, 32f), modeLabels[i], Color.white, 11, bold: true)
+            float xOff = c2x + i * (mBtnW + 4f);
+            var bGO  = MakeRect($"Target_{modeLabels[i]}", _towerPanelBody, xOff, tgtBtnY, mBtnW, 36f);
+            var bImg = bGO.AddComponent<Image>(); bImg.color = new Color(0.18f, 0.18f, 0.28f, 1f);
+            var btn  = bGO.AddComponent<Button>(); btn.targetGraphic = bImg;
+            MakeText(MakeRect("L", bGO, 0f, 0f, mBtnW, 36f), modeLabels[i], Color.white, 11, bold: true)
                 .alignment = TextAnchor.MiddleCenter;
-
             int idx = i;
             btn.onClick.AddListener(() => SetTargetingMode((TargetingMode)idx));
-
             _tpTargetBtns[i] = btn;
             _tpTargetImgs[i] = bImg;
         }
 
+        // ── Research body (replaces 3-col content) ────────────────────
+        _towerResearchBody = new GameObject("ResearchBody");
+        _towerResearchBody.transform.SetParent(_towerPanel.transform, false);
+        var rbRt = _towerResearchBody.AddComponent<RectTransform>();
+        rbRt.anchorMin = rbRt.anchorMax = Vector2.zero;
+        rbRt.pivot     = Vector2.zero;
+        rbRt.anchoredPosition = Vector2.zero;
+        rbRt.sizeDelta = new Vector2(W, H);   // full panel size so child coords match
+
+        // Back button
+        float backBtnY = H - HDR_H - PAD - btnH;
+        var backGO  = MakeRect("BackBtn", _towerResearchBody, PAD, backBtnY, 110f, btnH);
+        var backImg = backGO.AddComponent<Image>(); backImg.color = new Color(0.25f, 0.25f, 0.35f, 1f);
+        var backBtn = backGO.AddComponent<Button>(); backBtn.targetGraphic = backImg;
+        MakeText(MakeRect("L", backGO, 0f, 0f, 110f, btnH), "← Back", Color.white, 13, bold: true)
+            .alignment = TextAnchor.MiddleCenter;
+        backBtn.onClick.AddListener(HideResearchBody);
+
+        _towerResearchBody.SetActive(false);
         _towerPanel.SetActive(false);
+    }
+
+    void ShowResearchBody()
+    {
+        if (_selectedTower == null) return;
+        _towerPanelBody?.SetActive(false);
+        _towerResearchBody.SetActive(true);
+        RefreshResearchBody();
+    }
+
+    void HideResearchBody()
+    {
+        _towerResearchBody.SetActive(false);
+        _towerPanelBody?.SetActive(true);
+    }
+
+    void RefreshResearchBody()
+    {
+        if (_selectedTower == null || ResearchManager.Instance == null) return;
+
+        // Destroy old research buttons
+        foreach (var (btn, lbl, def) in _trButtons)
+            if (btn != null) Destroy(btn.gameObject);
+        _trButtons.Clear();
+
+        var researches = ResearchManager.Instance.GetForTower(_selectedTower.definitionId);
+
+        const float PAD  = 16f;
+        const float BTNW = 260f;
+        const float BTNH = 52f;
+        const float GAP  = 10f;
+        float y = 270f - BTNH;    // start near top of body area
+
+        foreach (var def in researches)
+        {
+            bool purchased = ResearchManager.Instance.IsPurchased(def.id);
+            var bGO  = MakeRect($"Research_{def.id}", _towerResearchBody, PAD + 120f, y, BTNW, BTNH);
+            var bImg = bGO.AddComponent<Image>();
+            bImg.color = purchased ? new Color(0.18f, 0.18f, 0.18f, 1f) : new Color(0.14f, 0.35f, 0.55f, 1f);
+            var btn  = bGO.AddComponent<Button>(); btn.targetGraphic = bImg;
+            btn.interactable = !purchased;
+
+            string label = purchased
+                ? $"{def.displayName}\n(Purchased)"
+                : $"{def.displayName}\n{def.description}   [{def.techCost} Tech]";
+            var lbl = MakeText(MakeRect("L", bGO, 6f, 0f, BTNW - 8f, BTNH), label, Color.white, 13);
+            lbl.alignment = TextAnchor.MiddleLeft;
+            lbl.lineSpacing = 1.1f;
+
+            var capDef = def;
+            btn.onClick.AddListener(() =>
+            {
+                ResearchManager.Instance.TryPurchase(capDef);
+                RefreshResearchBody();
+                RefreshTowerPanel(_selectedTower);
+            });
+
+            _trButtons.Add((btn, lbl, def));
+            y -= BTNH + GAP;
+        }
     }
 
     // Absolute-positioned rect child (x,y from bottom-left of parent)
@@ -528,6 +820,137 @@ public class GameHUD : MonoBehaviour
         txt.alignment      = TextAnchor.MiddleLeft;
         txt.raycastTarget  = false;   // labels must not steal button clicks
         return txt;
+    }
+
+    // ── Enemy info panel (same anchor as tower panel) ─────────────────
+
+    void BuildEnemyPanel(GameObject root)
+    {
+        const float W     = 500f, H = 360f;
+        const float HDR_H = 50f;
+        const float PAD   = 16f;
+        const float ROW   = 36f;
+
+        _enemyPanel = new GameObject("EnemyInfoPanel");
+        _enemyPanel.transform.SetParent(root.transform, false);
+        var rt              = _enemyPanel.AddComponent<RectTransform>();
+        rt.anchorMin        = new Vector2(0.5f, 0f);
+        rt.anchorMax        = new Vector2(0.5f, 0f);
+        rt.pivot            = new Vector2(0.5f, 0f);
+        rt.anchoredPosition = new Vector2(0f, 0f);
+        rt.sizeDelta        = new Vector2(W, H);
+        _enemyPanel.AddComponent<Image>().color = new Color(0.07f, 0.07f, 0.13f, 0.96f);
+
+        // Header
+        var hdrGO = MakeRect("Header", _enemyPanel, 0f, H - HDR_H, W, HDR_H);
+        hdrGO.AddComponent<Image>().color = new Color(0.04f, 0.04f, 0.10f, 1f);
+        _epName = MakeText(MakeRect("Name", hdrGO, PAD, 0f, W - HDR_H - PAD, HDR_H),
+            "", new Color(0.95f, 0.4f, 0.4f, 1f), 19, bold: true);
+        _epName.alignment = TextAnchor.MiddleLeft;
+        var closeGO = MakeRect("CloseBtn", hdrGO, W - HDR_H, 0f, HDR_H, HDR_H);
+        var cImg    = closeGO.AddComponent<Image>(); cImg.color = new Color(0.55f, 0.12f, 0.12f, 1f);
+        var cBtn    = closeGO.AddComponent<Button>(); cBtn.targetGraphic = cImg;
+        cBtn.onClick.AddListener(() => { _enemyPanel.SetActive(false); _selectedEnemy = null; });
+        MakeText(MakeRect("X", closeGO, 0f, 0f, HDR_H, HDR_H), "×", Color.white, 22, bold: true)
+            .alignment = TextAnchor.MiddleCenter;
+
+        // Stats body — two columns
+        float colW = (W - PAD * 3f) * 0.5f;
+        float y    = H - HDR_H - PAD - ROW;
+        _epHp         = MakeText(MakeRect("HP",         _enemyPanel, PAD,          y, colW, ROW), "", Color.white, 17);
+        _epArmor      = MakeText(MakeRect("Armor",      _enemyPanel, PAD + colW + PAD, y, colW, ROW), "", new Color(0.8f, 0.8f, 0.8f, 1f), 17); y -= ROW + 4f;
+        _epSpeed      = MakeText(MakeRect("Speed",      _enemyPanel, PAD,          y, colW, ROW), "", Color.white, 17);
+        _epResistance = MakeText(MakeRect("Resistance", _enemyPanel, PAD + colW + PAD, y, colW, ROW), "", new Color(0.4f, 0.85f, 1f, 1f), 17);  y -= ROW + 4f;
+        _epDeathBlow  = MakeText(MakeRect("DeathBlow",  _enemyPanel, PAD,              y, colW, ROW), "", new Color(0.95f, 0.4f, 0.4f, 1f), 17);
+        _epFortitude  = MakeText(MakeRect("Fortitude",  _enemyPanel, PAD + colW + PAD, y, colW, ROW), "", new Color(0.85f, 0.6f, 1f, 1f), 17);
+        // Description — fixed to panel bottom
+        const float DESC_H = 72f;
+        var divGO = MakeRect("Divider", _enemyPanel, PAD, PAD + DESC_H + 6f, W - PAD * 2f, 1f);
+        divGO.AddComponent<Image>().color = new Color(1f, 1f, 1f, 0.12f);
+        _epDescription = MakeText(MakeRect("Desc", _enemyPanel, PAD, PAD, W - PAD * 2f, DESC_H), "", new Color(0.75f, 0.75f, 0.75f, 1f), 14);
+        _epDescription.alignment          = TextAnchor.UpperLeft;
+        _epDescription.horizontalOverflow = HorizontalWrapMode.Wrap;
+        _epDescription.verticalOverflow   = VerticalWrapMode.Overflow;
+
+        _enemyPanel.SetActive(false);
+    }
+
+    // ── Debug spawn panel (bottom-left) ──────────────────────────────
+
+    void BuildDebugPanel(GameObject root)
+    {
+        const float BTN_W = 110f, BTN_H = 28f, PAD = 6f;
+
+        var (ids, labels, colors) = (
+            new[] { "basic_enemy", "fast_enemy", "armored_enemy", "boss_enemy", "resilient_enemy", "splitter_enemy",
+                    "phantom_enemy", "charger_enemy", "priest_enemy", "shielder_enemy" },
+            new[] { "Basic",  "Fast",    "Armored", "Boss",    "Resilient", "Splitter",
+                    "Phantom", "Charger", "Priest",  "Shielder" },
+            new Color[]
+            {
+                new Color(0.65f, 0.15f, 0.15f, 1f),
+                new Color(0.65f, 0.60f, 0.10f, 1f),
+                new Color(0.35f, 0.35f, 0.40f, 1f),
+                new Color(0.55f, 0.10f, 0.55f, 1f),
+                new Color(0.10f, 0.50f, 0.75f, 1f),
+                new Color(0.70f, 0.28f, 0.05f, 1f),
+                new Color(0.55f, 0.30f, 0.85f, 1f),
+                new Color(0.80f, 0.25f, 0.05f, 1f),
+                new Color(0.75f, 0.70f, 0.10f, 1f),
+                new Color(0.15f, 0.45f, 0.80f, 1f),
+            }
+        );
+
+        var panel = new GameObject("DebugSpawnPanel");
+        panel.transform.SetParent(root.transform, false);
+        var rt          = panel.AddComponent<RectTransform>();
+        rt.anchorMin    = new Vector2(0f, 0f);
+        rt.anchorMax    = new Vector2(0f, 0f);
+        rt.pivot        = new Vector2(0f, 0f);
+        rt.anchoredPosition = new Vector2(PAD, PAD);
+        rt.sizeDelta    = new Vector2(BTN_W + PAD * 2f, Mathf.Min(ids.Length, 10) * (BTN_H + PAD) + PAD);
+
+        var bg = panel.AddComponent<Image>();
+        bg.color = new Color(0f, 0f, 0f, 0.55f);
+
+        for (int i = 0; i < ids.Length; i++)
+        {
+            float y = rt.sizeDelta.y - PAD - (i + 1) * (BTN_H + PAD) + PAD;
+            var bGO  = MakeRect($"Debug_{ids[i]}", panel, PAD, y, BTN_W, BTN_H);
+            var bImg = bGO.AddComponent<Image>();
+            bImg.color = colors[i];
+            var btn  = bGO.AddComponent<Button>();
+            btn.targetGraphic = bImg;
+            MakeText(MakeRect("L", bGO, 0f, 0f, BTN_W, BTN_H), labels[i], Color.white, 11, bold: true)
+                .alignment = TextAnchor.MiddleCenter;
+
+            string unitId = ids[i];
+            btn.onClick.AddListener(() => DebugSpawnUnit(unitId));
+        }
+    }
+
+    void DebugSpawnUnit(string unitId)
+    {
+        if (UnitFactory.Instance == null || PathGraph.Instance == null) return;
+
+        // Find spawner with pathIndex == 1
+        UnitSpawner spawner = null;
+        foreach (var s in FindObjectsByType<UnitSpawner>(FindObjectsSortMode.None))
+        {
+            if (s.pathIndex == 0) { spawner = s; break; }
+        }
+        if (spawner == null) return;
+
+        var go = UnitFactory.Instance.Build(unitId, spawner.transform.position);
+        if (go == null) return;
+
+        var unit = go.GetComponent<UnitManager>();
+        if (unit != null && spawner.headNode != null)
+        {
+            var route = PathGraph.Instance.BuildRoute(spawner.headNode);
+            unit.AssignRoute(route);
+            WaveManager.Instance?.RegisterUnit(unit);
+        }
     }
 
     // ── Top bar ───────────────────────────────────────────────────────
@@ -588,10 +1011,38 @@ public class GameHUD : MonoBehaviour
             if (_researchPanel != null)
                 _researchPanel.SetActive(!_researchPanel.activeSelf);
         });
-        _waveText  = AddAbsLabel(bar, "Wave",  0f,            BAR_H - TOP_H, 0f,   TOP_H,
+        _waveText  = AddAbsLabel(bar, "Wave",  0f, BAR_H - TOP_H, 0f,   TOP_H,
             "Ready", C_Wave,  22, TextAnchor.MiddleCenter, stretchX: true);
-        _livesText = AddAbsLabel(bar, "Lives", 0f,            BAR_H - TOP_H, 320f, TOP_H,
+        _livesText = AddAbsLabel(bar, "Lives", 0f, BAR_H - TOP_H, 500f, TOP_H,
             "♥  20", C_Lives, 24, TextAnchor.MiddleRight,  fromRight: true);
+
+        // Wave button embedded in top bar — centered, second row (below gold/lives)
+        var wBtnGO = new GameObject("WaveButton");
+        wBtnGO.transform.SetParent(bar.transform, false);
+        var wBtnRT       = wBtnGO.AddComponent<RectTransform>();
+        wBtnRT.anchorMin = new Vector2(0.5f, 0f);
+        wBtnRT.anchorMax = new Vector2(0.5f, 0f);
+        wBtnRT.pivot     = new Vector2(0.5f, 0f);
+        wBtnRT.offsetMin = new Vector2(-200f, 5f);
+        wBtnRT.offsetMax = new Vector2( 200f, BAR_H - TOP_H - 5f);
+        var wBtnImg      = wBtnGO.AddComponent<Image>();
+        wBtnImg.color    = C_BtnReady;
+        _waveButton      = wBtnGO.AddComponent<Button>();
+        _waveButton.targetGraphic = wBtnImg;
+        var wCols = _waveButton.colors;
+        wCols.normalColor      = C_BtnReady;
+        wCols.highlightedColor = C_BtnReady + new Color(0.1f, 0.1f, 0.1f, 0f);
+        wCols.pressedColor     = C_BtnReady - new Color(0.1f, 0.1f, 0.1f, 0f);
+        wCols.disabledColor    = C_BtnWait;
+        _waveButton.colors     = wCols;
+        _waveButton.onClick.AddListener(() => {
+            var wm = WaveManager.Instance;
+            if (wm == null) return;
+            wm.AutoStartCountdown = -1f;
+            wm.StartNextWave();
+        });
+        _waveButtonLabel = AddLabel(wBtnGO, "Label", Vector2.zero, Vector2.one,
+            "START WAVE 1", Color.white, 18, TextAnchor.MiddleCenter, bold: true);
 
         // Balance rows stacked under gold, left-aligned
         Color cE = new Color(0.4f, 0.85f, 0.5f);
@@ -653,47 +1104,6 @@ public class GameHUD : MonoBehaviour
         txt.alignment     = anchor;
         txt.raycastTarget = false;
         return txt;
-    }
-
-    // ── Start Wave button ─────────────────────────────────────────────
-
-    void BuildWaveButton(GameObject root)
-    {
-        var btnGO = new GameObject("WaveButton");
-        btnGO.transform.SetParent(root.transform, false);
-
-        var rt = btnGO.AddComponent<RectTransform>();
-        rt.anchorMin        = new Vector2(0.5f, 0f);
-        rt.anchorMax        = new Vector2(0.5f, 0f);
-        rt.pivot            = new Vector2(0.5f, 0f);
-        rt.anchoredPosition = new Vector2(0f, 14f);
-        rt.sizeDelta        = new Vector2(280f, 58f);
-
-        var img = btnGO.AddComponent<Image>();
-        img.color = C_BtnReady;
-
-        _waveButton = btnGO.AddComponent<Button>();
-        _waveButton.targetGraphic = img;
-
-        var cols = _waveButton.colors;
-        cols.normalColor      = C_BtnReady;
-        cols.highlightedColor = C_BtnReady + new Color(0.1f, 0.1f, 0.1f, 0f);
-        cols.pressedColor     = C_BtnReady - new Color(0.1f, 0.1f, 0.1f, 0f);
-        cols.disabledColor    = C_BtnWait;
-        _waveButton.colors    = cols;
-
-        _waveButton.onClick.AddListener(() => {
-            var wm = WaveManager.Instance;
-            if (wm == null) return;
-            wm.AutoStartCountdown = -1f;
-            wm.StartNextWave();
-        });
-
-        // Label
-        _waveButtonLabel = AddLabel(btnGO, "Label",
-            Vector2.zero, Vector2.one,
-            "START WAVE 1", Color.white, 22, TextAnchor.MiddleCenter,
-            bold: true);
     }
 
     // ── Overlay builder ───────────────────────────────────────────────
@@ -776,7 +1186,7 @@ public class GameHUD : MonoBehaviour
     {
         BalanceManager.Instance?.Recalculate();
 
-        // Tower selection — manual proximity scan so we don't rely on OnMouseDown + triggers
+        // Selection — click towers or enemies
         if (Input.GetMouseButtonDown(0) &&
             !EventSystem.current.IsPointerOverGameObject() &&
             !(TowerPlacer.Instance != null && TowerPlacer.Instance.IsPlacing) &&
@@ -784,20 +1194,80 @@ public class GameHUD : MonoBehaviour
         {
             Vector2 mouse = Camera.main.ScreenToWorldPoint(Input.mousePosition);
 
+            // Towers
             TowerInfo best = null;
             float bestDist = float.MaxValue;
             foreach (var ti in FindObjectsByType<TowerInfo>(FindObjectsSortMode.None))
             {
                 if (ti.isGhost) continue;
                 float dist = Vector2.Distance(mouse, ti.transform.position);
-                if (dist <= ti.ClickRadius && dist < bestDist)
-                {
-                    best = ti;
-                    bestDist = dist;
-                }
+                if (dist <= ti.ClickRadius && dist < bestDist) { best = ti; bestDist = dist; }
             }
 
-            TowerInfo.OnTowerClickedPublic(best);  // null = deselect
+            if (best != null)
+            {
+                TowerInfo.OnTowerClickedPublic(best);
+            }
+            else
+            {
+                // Enemies — pick closest within collider radius
+                UnitManager bestUnit = null;
+                float bestUDist = 0.6f;   // max pick radius in world units
+                foreach (var um in FindObjectsByType<UnitManager>(FindObjectsSortMode.None))
+                {
+                    if (!um.isAlive) continue;
+                    float dist = Vector2.Distance(mouse, um.transform.position);
+                    if (dist < bestUDist) { bestUnit = um; bestUDist = dist; }
+                }
+
+                if (bestUnit != null)
+                    SelectEnemy(bestUnit);
+                else
+                    TowerInfo.OnTowerClickedPublic(null);   // deselect everything
+            }
+        }
+
+        // Rotate selected tower base with Q / E
+        if (_selectedTower != null && (TowerPlacer.Instance == null || !TowerPlacer.Instance.IsPlacing))
+        {
+            const float ROT_SPEED = 90f;
+            float rot = 0f;
+            if (Input.GetKey(KeyCode.Q)) rot =  ROT_SPEED * Time.deltaTime;
+            if (Input.GetKey(KeyCode.E)) rot = -ROT_SPEED * Time.deltaTime;
+            if (rot != 0f)
+                _selectedTower.transform.Rotate(0f, 0f, rot);
+        }
+
+        // Keep tower upgrade button live (gold/research state can change any frame)
+        if (_selectedTower != null && _tpUpgradeBtn != null)
+        {
+            bool canTier  = _selectedTower.CanUpgrade;
+            bool hasRes   = _selectedTower.HasResearchForUpgrade;
+            bool hasGold  = _rm != null && _rm.resourceOne >= _selectedTower.UpgradeCost;
+            _tpUpgradeBtn.interactable = canTier && hasRes && hasGold;
+            if (_tpUpgradeBtnLabel != null)
+            {
+                if (!canTier)
+                    _tpUpgradeBtnLabel.text = "MAX TIER";
+                else if (!hasRes)
+                    _tpUpgradeBtnLabel.text = $"LOCKED  (needs Tier {_selectedTower.RequiredResearchTier} research)";
+                else
+                    _tpUpgradeBtnLabel.text = $"UPGRADE  Tier {_selectedTower.Tier + 1}  —  {_selectedTower.UpgradeCost}g";
+            }
+        }
+
+        // Keep enemy panel live while an enemy is selected
+        if (_selectedEnemy != null)
+        {
+            if (!_selectedEnemy.isAlive)
+            {
+                _selectedEnemy = null;
+                _enemyPanel?.SetActive(false);
+            }
+            else
+            {
+                RefreshEnemyPanel();
+            }
         }
 
         var wm = WaveManager.Instance;

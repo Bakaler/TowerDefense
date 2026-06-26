@@ -10,6 +10,7 @@ public class ProjectileFollow : MonoBehaviour
     // Effect pipeline fields — set by Effect_Launch_Missile
     public Effect impactEffect;
     public EffectContext originContext;
+    public bool piercing = false;   // if true, passes through ShieldBubble
 
     private const float HitThreshold = 0.15f;
 
@@ -42,9 +43,24 @@ public class ProjectileFollow : MonoBehaviour
         Destroy(gameObject);
     }
 
+    void OnTriggerEnter2D(Collider2D other)
+    {
+        if (!piercing)
+        {
+            var shield = other.GetComponent<ShieldBubble>();
+            if (shield != null) { shield.AbsorbHit(impactEffect != null ? 10f : 5f); Destroy(gameObject); return; }
+        }
+    }
+
     void OnCollisionEnter2D(Collision2D collision)
     {
         if (collision.gameObject.layer != 10) return;
+
+        if (!piercing)
+        {
+            var shield = collision.gameObject.GetComponentInChildren<ShieldBubble>();
+            if (shield != null) { shield.AbsorbHit(10f); Destroy(gameObject); return; }
+        }
 
         UnitParentClass unit = collision.gameObject.GetComponent<UnitParentClass>();
         if (unit == null) return;

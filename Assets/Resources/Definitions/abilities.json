@@ -110,5 +110,18 @@
       "cast_finish_time": 0.0,
       "finish_time": 0.0
     }
+  ,
+    {
+      "id": "mortar_shot",
+      "displayName": "Mortar Shot",
+      "effectId": "mortar_shell",
+      "range": 7.0,
+      "fireArc": 360.0,
+      "cooldownDuration": 4.0,
+      "prepare_time": 0.0,
+      "cast_start_time": 0.0,
+      "cast_finish_time": 0.0,
+      "finish_time": 0.0
+    }
   ]
 }

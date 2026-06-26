@@ -1,0 +1,26 @@
+{
+  "researches": [
+    {
+      "id": "basic_firerate_1",
+      "towerId": "basic_tower",
+      "displayName": "Rapid Fire",
+      "description": "-10% Cooldown",
+      "techCost": 20,
+      "effectType": "FireRateBonus",
+      "effectValue": -0.1,
+      "abilityId": "basic_tower_shot",
+      "effectId": ""
+    },
+    {
+      "id": "shotgun_bullets_1",
+      "towerId": "shotgun_tower",
+      "displayName": "Extra Pellets",
+      "description": "+5 Bullets",
+      "techCost": 30,
+      "effectType": "BulletCountBonus",
+      "effectValue": 5,
+      "abilityId": "",
+      "effectId": "shotgun_shot"
+    }
+  ]
+}

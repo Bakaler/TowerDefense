@@ -7,9 +7,13 @@ public class TechManager : MonoBehaviour
     public int  Tech       { get; private set; }
     public bool T2Unlocked { get; private set; }
     public bool T3Unlocked { get; private set; }
+    public bool T4Unlocked { get; private set; }
+    public bool T5Unlocked { get; private set; }
 
     public const int T2Cost = 15;
     public const int T3Cost = 30;
+    public const int T4Cost = 70;
+    public const int T5Cost = 150;
 
     void Awake()
     {
@@ -22,6 +26,15 @@ public class TechManager : MonoBehaviour
         if (amount <= 0) return;
         Tech += amount;
     }
+
+    public bool TrySpendTech(int amount)
+    {
+        if (Tech < amount) return false;
+        Tech -= amount;
+        return true;
+    }
+
+    public int techAmount => Tech;
 
     public bool TryUnlockT2()
     {
@@ -36,6 +49,22 @@ public class TechManager : MonoBehaviour
         if (!T2Unlocked || T3Unlocked || Tech < T3Cost) return false;
         Tech -= T3Cost;
         T3Unlocked = true;
+        return true;
+    }
+
+    public bool TryUnlockT4()
+    {
+        if (!T3Unlocked || T4Unlocked || Tech < T4Cost) return false;
+        Tech -= T4Cost;
+        T4Unlocked = true;
+        return true;
+    }
+
+    public bool TryUnlockT5()
+    {
+        if (!T4Unlocked || T5Unlocked || Tech < T5Cost) return false;
+        Tech -= T5Cost;
+        T5Unlocked = true;
         return true;
     }
 }

@@ -20,12 +20,19 @@ public class TowerPlacer : MonoBehaviour
     [Range(0.1f, 1f)]
     public float ghostAlpha = 0.5f;
 
+    [Header("Placement zones")]
+    [Tooltip("Painted placement zones asset. If null, placement is allowed anywhere.")]
+    public PlacementZones placementZones;
+
     // ── State ─────────────────────────────────────────────────────────
-    private string      _selectedId;
-    private GameObject  _ghost;
-    public bool         IsPlacing => !string.IsNullOrEmpty(_selectedId);
+    private string        _selectedId;
+    private GameObject    _ghost;
+    private LineRenderer  _footprintCircle;
+    private float         _footprintRadius;
+    public bool           IsPlacing => !string.IsNullOrEmpty(_selectedId);
 
     // ── Lifecycle ─────────────────────────────────────────────────────
+
 
     void Awake()
     {
@@ -42,6 +49,21 @@ public class TowerPlacer : MonoBehaviour
         // Move ghost
         if (_ghost != null)
             _ghost.transform.position = worldPos;
+
+        // Update footprint circle color: red = blocked, green = clear
+        if (_footprintCircle != null)
+        {
+            bool blocked = placementZones != null && !placementZones.Overlaps(worldPos, _footprintRadius);
+            if (!blocked)
+            {
+                var nearby = Physics2D.OverlapCircleAll(worldPos, _footprintRadius);
+                foreach (var col in nearby)
+                    if (!col.isTrigger && col.GetComponent<TowerInfo>() != null) { blocked = true; break; }
+            }
+            Color fc = blocked ? new Color(1f, 0.15f, 0.15f, 0.7f) : new Color(0.15f, 1f, 0.15f, 0.7f);
+            _footprintCircle.startColor = fc;
+            _footprintCircle.endColor   = fc;
+        }
 
         // Place on left-click (ignore clicks on UI)
         if (Input.GetMouseButtonDown(0) && !EventSystem.current.IsPointerOverGameObject())
@@ -78,7 +100,8 @@ public class TowerPlacer : MonoBehaviour
 
     public void Cancel()
     {
-        _selectedId = null;
+        _selectedId      = null;
+        _footprintCircle = null;
         if (_ghost != null) { Destroy(_ghost); _ghost = null; }
     }
 
@@ -98,6 +121,26 @@ public class TowerPlacer : MonoBehaviour
         {
             Debug.Log($"[TowerPlacer] Not enough resources. Need {def.resourceCost}, have {rm.resourceOne}.");
             return; // keep placement mode active so player can wait / rethink
+        }
+
+        float checkRadius = def.placementRadius > 0f ? def.placementRadius : 0.4f;
+
+        // Zone check — must be within a painted placement zone (if asset assigned)
+        if (placementZones != null && !placementZones.Overlaps(worldPos, checkRadius))
+        {
+            Debug.Log("[TowerPlacer] Can't place here — outside painted placement zones.");
+            return;
+        }
+
+        // Overlap check — no other tower body within footprint
+        var nearby = Physics2D.OverlapCircleAll(worldPos, checkRadius);
+        foreach (var col in nearby)
+        {
+            if (!col.isTrigger && col.GetComponent<TowerInfo>() != null)
+            {
+                Debug.Log("[TowerPlacer] Can't place here — too close to another tower.");
+                return;
+            }
         }
 
         // Build real tower
@@ -155,7 +198,40 @@ public class TowerPlacer : MonoBehaviour
 
             if (circleRange > 0f)
                 AddRangeCircle(_ghost, circleRange);
+
+            // Footprint debug circle — shows placement collision area, green/red feedback
+            _footprintRadius = ghostDef.placementRadius > 0f ? ghostDef.placementRadius : 0.4f;
+            _footprintCircle = AddFootprintCircle(_ghost, _footprintRadius);
         }
+    }
+
+    static LineRenderer AddFootprintCircle(GameObject go, float radius)
+    {
+        const int   SEGMENTS = 48;
+        const float LINE_W   = 0.05f;
+
+        float scale       = Mathf.Max(0.01f, go.transform.localScale.x);
+        float localRadius = radius / scale;
+
+        var child            = new GameObject("[FootprintCircle]");
+        child.transform.SetParent(go.transform, false);
+        var lr               = child.AddComponent<LineRenderer>();
+        lr.loop              = true;
+        lr.positionCount     = SEGMENTS;
+        lr.startWidth        = LINE_W;
+        lr.endWidth          = LINE_W;
+        lr.useWorldSpace     = false;
+        lr.sortingLayerName  = "Units";
+        lr.sortingOrder      = 21;
+        lr.material          = new Material(Shader.Find("Sprites/Default"));
+
+        for (int i = 0; i < SEGMENTS; i++)
+        {
+            float angle = i / (float)SEGMENTS * Mathf.PI * 2f;
+            lr.SetPosition(i, new Vector3(Mathf.Cos(angle) * localRadius,
+                                          Mathf.Sin(angle) * localRadius, 0f));
+        }
+        return lr;
     }
 
     static void AddRangeCircle(GameObject go, float radius)

@@ -15,11 +15,13 @@ public class UnitDefinition
     public string description;
 
     // ── Stats ─────────────────────────────────────────────────────────
-    public float life            = 100f;
-    public float speed           = 3f;
-    public int   physicalDefense = 0;
-    public int   bounty          = 10;
-    public int   deathBlow       = 1;
+    public float life              = 100f;
+    public float speed             = 3f;
+    public int   physicalDefense   = 0;
+    public int   elementalDefense  = 0;
+    public int   arcanaDefense     = 0;
+    public int   bounty            = 10;
+    public int   deathBlow         = 1;
 
     // ── Physics ───────────────────────────────────────────────────────
     /// <summary>Radius of the CircleCollider2D on the unit. Default 0.3.</summary>
@@ -54,12 +56,31 @@ public class UnitDefinition
     /// <summary>Fallback color shown when no sprite is assigned. Useful during dev.</summary>
     public Color debugColor = Color.red;
 
+    /// <summary>Optional tint applied to the sprite (white = no tint).</summary>
+    public Color tintColor = Color.white;
+
+    // ── Animation ─────────────────────────────────────────────────────
+    /// <summary>Resources path to the sliced sprite sheet for walk animation (no extension).</summary>
+    public string animSheet;
+    /// <summary>Frames per second for the walk animation. Default 8.</summary>
+    public float  animFps = 8f;
+    /// <summary>Resources path to the sliced sprite sheet for death animation (no extension).</summary>
+    public string animDeathSheet;
+    /// <summary>Frames per second for the death animation. Default 8.</summary>
+    public float  animDeathFps = 8f;
+
     // ── Components ────────────────────────────────────────────────────
     /// <summary>
     /// Optional extra components added and initialized by the factory.
     /// Keys must match entries in ComponentRegistry.
     /// </summary>
     public ComponentEntry[] components;
+
+    /// <summary>
+    /// Behavior ids applied permanently at spawn (e.g. immunities, passive auras).
+    /// These are never timed out — they last the unit's lifetime.
+    /// </summary>
+    public string[] startingBehaviors = System.Array.Empty<string>();
 }
 
 [Serializable]

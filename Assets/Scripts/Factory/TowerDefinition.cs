@@ -15,8 +15,9 @@ public class TowerDefinition
     public string description;
 
     // ── Stats ─────────────────────────────────────────────────────────
-    public float range        = 5f;
-    public int   resourceCost = 100;
+    public float range           = 5f;
+    public float placementRadius = 0.4f;   // body footprint used for overlap/spacing check
+    public int   resourceCost    = 100;
 
     // ── Balance ───────────────────────────────────────────────────────
     public string balanceType = "Physical";  // "Elemental" | "Arcane" | "Physical"
@@ -24,13 +25,28 @@ public class TowerDefinition
     // ── Ability ───────────────────────────────────────────────────────
     public string fireAbilityId;
 
+    // ── HUD display overrides (for component-driven towers with no fireAbilityId) ──
+    /// <summary>If > 0 overrides the auto-resolved damage shown in the tower panel.</summary>
+    public float displayDamage   = 0f;
+    /// <summary>If > 0 overrides the auto-resolved cooldown (seconds) shown in the tower panel.</summary>
+    public float displayCooldown = 0f;
+
     // ── Rotation / Arc ────────────────────────────────────────────────
     /// <summary>Degrees per second the tower rotates toward its target. 0 = no rotation.</summary>
     public float rotationSpeed = 0f;
 
+    /// <summary>If > 0, the base sprite sheet is animated at this FPS instead of shown as a static image.</summary>
+    public float animFps = 0f;
+
     // ── Art ───────────────────────────────────────────────────────────
     /// <summary>Resources path to a single Sprite (no extension). Leave empty if using a sheet.</summary>
     public string spritePath;
+
+    /// <summary>
+    /// Optional rotating turret sprite rendered as a child GO on top of the base sprite.
+    /// When set, the base sprite stays static and only this child rotates toward targets.
+    /// </summary>
+    public string turretSpritePath;
 
     /// <summary>Resources path to a Multiple-mode sprite sheet (no extension).</summary>
     public string spriteSheet;
@@ -54,6 +70,8 @@ public class TowerDefinition
     public float upgradeStatMultiplier = 2.25f;
     /// <summary>Balance tier of the tower (1=T1, 2=T2, 3=T3) — drives research requirements.</summary>
     public int towerTier = 1;
+    /// <summary>Extra world-space range added to the collider each time this tower upgrades (0 = no range growth).</summary>
+    public float rangePerTier = 0f;
 
     // ── Components ────────────────────────────────────────────────────
     /// <summary>

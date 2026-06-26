@@ -85,7 +85,7 @@ public class Effect_Launch_Shotgun : Effect
         col.isTrigger = true;
 
         var sr              = go.AddComponent<SpriteRenderer>();
-        sr.sprite           = LoadSprite();
+        sr.sprite           = LoadSprite(context);
         sr.color            = missileColor;
         sr.sortingLayerName = "Units";
         sr.sortingOrder     = 10;
@@ -108,8 +108,19 @@ public class Effect_Launch_Shotgun : Effect
         return new Vector2(v.x * cos - v.y * sin, v.x * sin + v.y * cos);
     }
 
-    Sprite LoadSprite()
+    Sprite LoadSprite(EffectContext context)
     {
+        // Tiered art: {towerId}_missile_T{tier} counting down to T1
+        if (context?.OriginTower != null)
+        {
+            var info = context.OriginTower.GetComponent<TowerInfo>();
+            if (info != null)
+            {
+                var sp = TowerFactory.ResolveTieredSprite(info.definitionId + "_missile", info.Tier, null);
+                if (sp != null) return sp;
+            }
+        }
+
         if (!string.IsNullOrEmpty(missileSpritePath))
         {
             if (_cachedSinglePath != missileSpritePath)

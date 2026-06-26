@@ -16,8 +16,9 @@ public class Turrent : MonoBehaviour
 
     [HideInInspector] public Ability_Effect fireAbility;
 
-    private AbilityManager  _abilityManager;
+    private AbilityManager   _abilityManager;
     private CircleCollider2D _rangeCollider;
+    private Transform        _rotatingPart;   // child "Turret" if present, else self
 
     // Rotation speed from tower definition; arc from the ability
     private float _rotationSpeed = 0f;    // deg/s; 0 = no rotation
@@ -26,6 +27,11 @@ public class Turrent : MonoBehaviour
     {
         _abilityManager = GetComponent<AbilityManager>();
         _rangeCollider  = GetComponent<CircleCollider2D>();
+
+        // Use the dedicated "Turret" child for rotation if present; fall back to root
+        var turretChild = transform.Find("Turret");
+        _rotatingPart   = turretChild != null ? turretChild : transform;
+
         ResolveAbilityFromDefinition();
     }
 
@@ -62,16 +68,16 @@ public class Turrent : MonoBehaviour
 
         if (_rotationSpeed > 0f)
         {
-            // Rotate so transform.up points at target
+            // Rotate so _rotatingPart.up points at target (child turret or root)
             float targetAngle  = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg - 90f;
-            float currentAngle = transform.eulerAngles.z;
+            float currentAngle = _rotatingPart.eulerAngles.z;
             float newAngle     = Mathf.MoveTowardsAngle(currentAngle, targetAngle, _rotationSpeed * Time.deltaTime);
-            transform.rotation = Quaternion.Euler(0f, 0f, newAngle);
+            _rotatingPart.rotation = Quaternion.Euler(0f, 0f, newAngle);
         }
 
         // Gate firing on arc — always passes for 360°
         float arc      = fireAbility != null ? fireAbility.fireArc : 360f;
-        float aimAngle = Vector2.Angle(transform.up, dir);
+        float aimAngle = Vector2.Angle(_rotatingPart.up, dir);
         if (aimAngle <= arc * 0.5f)
             TryFire();
     }
@@ -88,11 +94,11 @@ public class Turrent : MonoBehaviour
             Caster          = null,
             CasterTransform = transform,
             Target          = targetUnit,
-            TargetPoint     = target.transform.position,
+            TargetPoint     = target.transform.position,   // captured at fire time — mortar uses this
+            AimOrigin2D     = (Vector2)transform.position,
             OriginAbility   = fireAbility,
             OriginTower     = gameObject,
             CustomData      = new Dictionary<string, object>(),
-            AimOrigin2D     = (Vector2)transform.position,
             AimDirection2D  = ((Vector2)(target.transform.position - transform.position)).normalized,
         };
 
