@@ -507,6 +507,13 @@
                     "spawnerIndex": 0
                 },
                 {
+                    "unitDefinitionId": "armored_enemy",
+                    "count": 5,
+                    "spawnInterval": 4.0,
+                    "startTime": 2.0,
+                    "spawnerIndex": 0
+                },
+                {
                     "unitDefinitionId": "fast_enemy",
                     "count": 3,
                     "spawnInterval": 5.0,
@@ -525,6 +532,38 @@
                     "count": 3,
                     "spawnInterval": 5.0,
                     "startTime": 1.5,
+                    "spawnerIndex": 1
+                }
+            ]
+        },
+        {
+            "groups": [
+                {
+                    "unitDefinitionId": "basic_enemy",
+                    "count": 30,
+                    "spawnInterval": 1.0,
+                    "startTime": 0.0,
+                    "spawnerIndex": 0
+                },
+                {
+                    "unitDefinitionId": "basic_enemy",
+                    "count": 15,
+                    "spawnInterval": 2.0,
+                    "startTime": 1.0,
+                    "spawnerIndex": 0
+                },
+                {
+                    "unitDefinitionId": "basic_enemy",
+                    "count": 10,
+                    "spawnInterval": 3.0,
+                    "startTime": 0.0,
+                    "spawnerIndex": 0
+                },
+                {
+                    "unitDefinitionId": "armored_enemy",
+                    "count": 3,
+                    "spawnInterval": 10.0,
+                    "startTime": 5.0,
                     "spawnerIndex": 1
                 }
             ]

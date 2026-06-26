@@ -1,127 +1,140 @@
 {
-  "abilities": [
-    {
-      "id": "basic_tower_shot",
-      "displayName": "Basic Tower Shot",
-      "effectId": "basic_shot",
-      "range": 3.5,
-      "fireArc": 60.0,
-      "cooldownDuration": 1.2,
-      "prepare_time": 0.0,
-      "cast_start_time": 0.0,
-      "cast_finish_time": 0.0,
-      "finish_time": 0.0
-    },
-    {
-      "id": "boomerang_shot",
-      "displayName": "Boomerang Shot",
-      "effectId": "boomerang_throw",
-      "range": 3.0,
-      "fireArc": 90.0,
-      "cooldownDuration": 2.2,
-      "prepare_time": 0.0,
-      "cast_start_time": 0.0,
-      "cast_finish_time": 0.0,
-      "finish_time": 0.0
-    },
-    {
-      "id": "chain_lightning_shot",
-      "displayName": "Chain Lightning",
-      "effectId": "chain_shot",
-      "range": 4.0,
-      "cooldownDuration": 2.5,
-      "prepare_time": 0.0,
-      "cast_start_time": 0.0,
-      "cast_finish_time": 0.0,
-      "finish_time": 0.0
-    },
-    {
-      "id": "poison_tower_shot",
-      "displayName": "Poison Shot",
-      "effectId": "poison_missile",
-      "range": 3.5,
-      "fireArc": 360.0,
-      "cooldownDuration": 2.5,
-      "prepare_time": 0.0,
-      "cast_start_time": 0.0,
-      "cast_finish_time": 0.0,
-      "finish_time": 0.0,
-      "targetValidatorIds": ["no_behavior:poisoned"]
-    },
-    {
-      "id": "root_tower_shot",
-      "displayName": "Root Shot",
-      "effectId": "root_missile",
-      "range": 2.5,
-      "fireArc": 360.0,
-      "cooldownDuration": 2.0,
-      "prepare_time": 0.0,
-      "cast_start_time": 0.0,
-      "cast_finish_time": 0.0,
-      "finish_time": 0.0,
-      "targetValidatorIds": ["no_behavior:rooted"]
-    },
-    {
-      "id": "shotgun_tower_shot",
-      "displayName": "Shotgun Shot",
-      "effectId": "shotgun_shot",
-      "range": 1.5,
-      "fireArc": 60.0,
-      "cooldownDuration": 2.8,
-      "prepare_time": 0.0,
-      "cast_start_time": 0.0,
-      "cast_finish_time": 0.0,
-      "finish_time": 0.0
-    },
-    {
-      "id": "entropy_tower_shot",
-      "displayName": "Entropy Shot",
-      "effectId": "entropy_shot",
-      "range": 4.0,
-      "fireArc": 360.0,
-      "cooldownDuration": 1.6,
-      "prepare_time": 0.0,
-      "cast_start_time": 0.0,
-      "cast_finish_time": 0.0,
-      "finish_time": 0.0
-    },
-    {
-      "id": "slow_tower_shot",
-      "displayName": "Slow Shot",
-      "effectId": "slow_missile",
-      "range": 4.0,
-      "fireArc": 360.0,
-      "cooldownDuration": 1.5,
-      "prepare_time": 0.0,
-      "cast_start_time": 0.0,
-      "cast_finish_time": 0.0,
-      "finish_time": 0.0,
-      "targetValidatorIds": ["no_behavior:slowed"]
-    },
-    {
-      "id": "railgun_shot",
-      "displayName": "Railgun Shot",
-      "effectId": "railgun_beam",
-      "range": 22.0,
-      "fireArc": 360.0,
-      "cooldownDuration": 4.0,
-      "prepare_time": 0.0,
-      "cast_start_time": 0.0,
-      "cast_finish_time": 0.0,
-      "finish_time": 0.0
-    }
-  ,
-    {
-      "id": "mortar_shot",
-      "displayName": "Mortar Shot",
-      "effectId": "mortar_shell",
-      "range": 7.0,
-      "fireArc": 360.0,
-      "cooldownDuration": 4.0,
-      "prepare_time": 0.0,
-      "cast_start_time": 0.0,
-      "cast_finish_time": 0.0,
-      "finish_time": 0.0
-    }
-  ]
+    "abilities": [
+        {
+            "id": "basic_tower_shot",
+            "displayName": "Basic Tower Shot",
+            "effectId": "basic_shot",
+            "cooldownDuration": 1.2400000095367432,
+            "range": 3.5,
+            "fireArc": 60.0,
+            "prepare_time": 0.0,
+            "cast_start_time": 0.0,
+            "cast_finish_time": 0.0,
+            "finish_time": 0.0,
+            "targetValidatorIds": []
+        },
+        {
+            "id": "boomerang_shot",
+            "displayName": "Boomerang Shot",
+            "effectId": "boomerang_throw",
+            "cooldownDuration": 2.200000047683716,
+            "range": 3.0,
+            "fireArc": 90.0,
+            "prepare_time": 0.0,
+            "cast_start_time": 0.0,
+            "cast_finish_time": 0.0,
+            "finish_time": 0.0,
+            "targetValidatorIds": []
+        },
+        {
+            "id": "chain_lightning_shot",
+            "displayName": "Chain Lightning",
+            "effectId": "chain_shot",
+            "cooldownDuration": 2.5,
+            "range": 4.0,
+            "fireArc": 360.0,
+            "prepare_time": 0.0,
+            "cast_start_time": 0.0,
+            "cast_finish_time": 0.0,
+            "finish_time": 0.0,
+            "targetValidatorIds": []
+        },
+        {
+            "id": "poison_tower_shot",
+            "displayName": "Poison Shot",
+            "effectId": "poison_missile",
+            "cooldownDuration": 2.5,
+            "range": 3.5,
+            "fireArc": 360.0,
+            "prepare_time": 0.0,
+            "cast_start_time": 0.0,
+            "cast_finish_time": 0.0,
+            "finish_time": 0.0,
+            "targetValidatorIds": [
+                "no_behavior:poisoned"
+            ]
+        },
+        {
+            "id": "root_tower_shot",
+            "displayName": "Root Shot",
+            "effectId": "root_missile",
+            "cooldownDuration": 2.0,
+            "range": 2.5,
+            "fireArc": 360.0,
+            "prepare_time": 0.0,
+            "cast_start_time": 0.0,
+            "cast_finish_time": 0.0,
+            "finish_time": 0.0,
+            "targetValidatorIds": [
+                "no_behavior:rooted"
+            ]
+        },
+        {
+            "id": "shotgun_tower_shot",
+            "displayName": "Shotgun Shot",
+            "effectId": "shotgun_shot",
+            "cooldownDuration": 2.799999952316284,
+            "range": 1.5,
+            "fireArc": 60.0,
+            "prepare_time": 0.0,
+            "cast_start_time": 0.0,
+            "cast_finish_time": 0.0,
+            "finish_time": 0.0,
+            "targetValidatorIds": []
+        },
+        {
+            "id": "entropy_tower_shot",
+            "displayName": "Entropy Shot",
+            "effectId": "entropy_shot",
+            "cooldownDuration": 1.600000023841858,
+            "range": 4.0,
+            "fireArc": 360.0,
+            "prepare_time": 0.0,
+            "cast_start_time": 0.0,
+            "cast_finish_time": 0.0,
+            "finish_time": 0.0,
+            "targetValidatorIds": []
+        },
+        {
+            "id": "slow_tower_shot",
+            "displayName": "Slow Shot",
+            "effectId": "slow_missile",
+            "cooldownDuration": 1.5,
+            "range": 4.0,
+            "fireArc": 360.0,
+            "prepare_time": 0.0,
+            "cast_start_time": 0.0,
+            "cast_finish_time": 0.0,
+            "finish_time": 0.0,
+            "targetValidatorIds": [
+                "no_behavior:slowed"
+            ]
+        },
+        {
+            "id": "railgun_shot",
+            "displayName": "Railgun Shot",
+            "effectId": "railgun_beam",
+            "cooldownDuration": 4.0,
+            "range": 22.0,
+            "fireArc": 360.0,
+            "prepare_time": 0.0,
+            "cast_start_time": 0.0,
+            "cast_finish_time": 0.0,
+            "finish_time": 0.0,
+            "targetValidatorIds": []
+        },
+        {
+            "id": "mortar_shot",
+            "displayName": "Mortar Shot",
+            "effectId": "mortar_shell",
+            "cooldownDuration": 4.0,
+            "range": 7.0,
+            "fireArc": 360.0,
+            "prepare_time": 0.0,
+            "cast_start_time": 0.0,
+            "cast_finish_time": 0.0,
+            "finish_time": 0.0,
+            "targetValidatorIds": []
+        }
+    ]
 }

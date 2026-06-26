@@ -4,8 +4,7 @@ using UnityEngine;
 
 /// <summary>
 /// Music-sheet style wave timeline.
-/// One row per spawn group. X axis = time. Each unit spawn = one icon/dot.
-/// Opens from the Level Editor "Graph" button and auto-refreshes as wave data changes.
+/// Scroll wheel zooms toward the cursor; horizontal scrollbar pans; vertical scrollbar handles tall content.
 /// </summary>
 public class WaveGraphWindow : EditorWindow
 {
@@ -16,44 +15,38 @@ public class WaveGraphWindow : EditorWindow
     // ── Per-unit color palette ────────────────────────────────────────
     static readonly Color[] UnitColors =
     {
-        new Color(0.55f, 0.75f, 1.00f),   // 0 blue
-        new Color(1.00f, 0.65f, 0.35f),   // 1 orange
-        new Color(0.55f, 1.00f, 0.55f),   // 2 green
-        new Color(1.00f, 0.45f, 0.45f),   // 3 red
-        new Color(0.85f, 0.55f, 1.00f),   // 4 purple
-        new Color(1.00f, 1.00f, 0.40f),   // 5 yellow
-        new Color(0.45f, 1.00f, 0.90f),   // 6 cyan
-        new Color(1.00f, 0.70f, 0.85f),   // 7 pink
+        new Color(0.55f, 0.75f, 1.00f),
+        new Color(1.00f, 0.65f, 0.35f),
+        new Color(0.55f, 1.00f, 0.55f),
+        new Color(1.00f, 0.45f, 0.45f),
+        new Color(0.85f, 0.55f, 1.00f),
+        new Color(1.00f, 1.00f, 0.40f),
+        new Color(0.45f, 1.00f, 0.90f),
+        new Color(1.00f, 0.70f, 0.85f),
     };
 
     // ── Layout constants ──────────────────────────────────────────────
-    const float RowH       = 28f;
-    const float SpawnerH   = 18f;   // spawner sub-header height
-    const float LabelW     = 130f;
-    const float DotR       = 7f;
-    const float TickH      = 8f;
-    const float HeaderH    = 32f;
-    const float WaveGapH   = 10f;
-    const float PadRight   = 20f;
+    const float RowH     = 28f;
+    const float SpawnerH = 18f;
+    const float LabelW   = 130f;
+    const float DotR     = 7f;
+    const float TickH    = 8f;
+    const float HeaderH  = 32f;
+    const float WaveGapH = 10f;
+    const float PadRight = 20f;
+    const float ToolbarH = 22f;
 
-    float TimeW => Mathf.Max(200f, position.width - LabelW - PadRight);
-
-    // Returns total pixel height for one wave block
-    float WaveHeight(WaveDefinition wave)
-    {
-        // Count spawner sections (one header per distinct spawner transition)
-        int sections = 0;
-        int last = int.MinValue;
-        foreach (var g in wave.groups)
-            if (g.spawnerIndex != last) { sections++; last = g.spawnerIndex; }
-        return HeaderH + sections * SpawnerH + wave.groups.Count * RowH + WaveGapH;
-    }
-
-    // ── Sprite cache (null = not found) ──────────────────────────────
-    readonly Dictionary<string, Sprite> _spriteCache = new();
-
-    // ── Scroll ────────────────────────────────────────────────────────
+    // ── Zoom & scroll ─────────────────────────────────────────────────
+    float _zoom = 1f;
     Vector2 _scroll;
+
+    // Viewport width (pixels available for the timeline, excluding label column)
+    float ViewW => Mathf.Max(200f, position.width - LabelW - PadRight);
+    // Virtual content width — grows with zoom
+    float ContentW => ViewW * _zoom;
+
+    // ── Sprite cache ──────────────────────────────────────────────────
+    readonly Dictionary<string, Sprite> _spriteCache = new();
 
     // ── API ───────────────────────────────────────────────────────────
 
@@ -69,8 +62,6 @@ public class WaveGraphWindow : EditorWindow
     {
         _data    = data;
         _unitIds = unitIds ?? System.Array.Empty<string>();
-
-        // Repaint the open window if it exists
         var existing = Resources.FindObjectsOfTypeAll<WaveGraphWindow>();
         foreach (var w in existing) w.Repaint();
     }
@@ -85,25 +76,47 @@ public class WaveGraphWindow : EditorWindow
             return;
         }
 
-        // Build per-unit-id color map from all wave groups
         var unitColorMap = BuildColorMap();
 
-        // Find global max end time for scale
         float maxTime = 1f;
         foreach (var wave in _data.waves)
             foreach (var g in wave.groups)
                 maxTime = Mathf.Max(maxTime, g.EndTime);
 
-        float pxPerSec = TimeW / maxTime;
+        // ── Toolbar ───────────────────────────────────────────────────
+        DrawToolbar(maxTime);
 
-        // Total canvas height (accounts for spawner sub-headers)
+        // ── Zoom via scroll wheel (before BeginScrollView) ────────────
+        var evt = Event.current;
+        if (evt.type == EventType.ScrollWheel && evt.mousePosition.y > ToolbarH
+                                              && evt.mousePosition.x > LabelW)
+        {
+            float pxPerSecOld = ContentW / maxTime;
+            // Time coordinate under the mouse cursor
+            float contentX    = _scroll.x + evt.mousePosition.x;
+            float timeAtMouse = (contentX - LabelW) / pxPerSecOld;
+
+            float factor = 1f - evt.delta.y * 0.06f;
+            _zoom = Mathf.Clamp(_zoom * factor, 0.25f, 40f);
+
+            // Repin: keep timeAtMouse at the same screen X
+            float pxPerSecNew = ContentW / maxTime;
+            _scroll.x = Mathf.Max(0f, LabelW + timeAtMouse * pxPerSecNew - evt.mousePosition.x);
+
+            evt.Use();
+            Repaint();
+        }
+
+        float pxPerSec = ContentW / maxTime;
+
+        // ── Total canvas height ───────────────────────────────────────
         float totalH = 10f;
         foreach (var wave in _data.waves) totalH += WaveHeight(wave);
 
-        _scroll = GUI.BeginScrollView(
-            new Rect(0, 0, position.width, position.height),
-            _scroll,
-            new Rect(0, 0, LabelW + TimeW + 20f, totalH + 20f));
+        var scrollRect    = new Rect(0, ToolbarH, position.width, position.height - ToolbarH);
+        var contentRect   = new Rect(0, 0, LabelW + ContentW + PadRight, totalH + 20f);
+
+        _scroll = GUI.BeginScrollView(scrollRect, _scroll, contentRect);
 
         float y = 10f;
 
@@ -115,7 +128,8 @@ public class WaveGraphWindow : EditorWindow
             foreach (var g in wave.groups) waveEnd = Mathf.Max(waveEnd, g.EndTime);
 
             // ── Wave header ───────────────────────────────────────────
-            EditorGUI.DrawRect(new Rect(0f, y, LabelW + TimeW, HeaderH - 4f), new Color(0.18f, 0.18f, 0.22f, 1f));
+            EditorGUI.DrawRect(new Rect(0f, y, LabelW + ContentW, HeaderH - 4f),
+                new Color(0.18f, 0.18f, 0.22f, 1f));
 
             var hdrStyle = new GUIStyle(EditorStyles.boldLabel);
             hdrStyle.normal.textColor = new Color(1f, 0.9f, 0.5f);
@@ -124,14 +138,15 @@ public class WaveGraphWindow : EditorWindow
             DrawTimeAxis(LabelW, y + 2f, HeaderH - 4f, pxPerSec, maxTime);
 
             float endX = LabelW + waveEnd * pxPerSec;
-            EditorGUI.DrawRect(new Rect(endX - 1f, y, 2f, HeaderH - 4f), new Color(1f, 0.5f, 0.5f, 0.8f));
+            EditorGUI.DrawRect(new Rect(endX - 1f, y, 2f, HeaderH - 4f),
+                new Color(1f, 0.5f, 0.5f, 0.8f));
             var endStyle = new GUIStyle(EditorStyles.miniLabel);
             endStyle.normal.textColor = new Color(1f, 0.55f, 0.55f);
             GUI.Label(new Rect(endX + 3f, y + 4f, 60f, 16f), $"{waveEnd:F1}s", endStyle);
 
             y += HeaderH;
 
-            // ── Group rows with spawner sub-headers ───────────────────
+            // ── Group rows ────────────────────────────────────────────
             int lastSpawner = int.MinValue;
             int rowParity   = 0;
 
@@ -140,48 +155,44 @@ public class WaveGraphWindow : EditorWindow
                 var g   = wave.groups[gi];
                 var col = unitColorMap.TryGetValue(g.unitDefinitionId, out var c) ? c : Color.white;
 
-                // Spawner section sub-header
+                // Spawner sub-header
                 if (g.spawnerIndex != lastSpawner)
                 {
-                    EditorGUI.DrawRect(new Rect(0f, y, LabelW + TimeW, SpawnerH),
+                    EditorGUI.DrawRect(new Rect(0f, y, LabelW + ContentW, SpawnerH),
                         new Color(0.13f, 0.15f, 0.20f, 1f));
-
-                    // Vertical spawner rule across timeline
-                    EditorGUI.DrawRect(new Rect(LabelW, y, TimeW, 1f),
+                    EditorGUI.DrawRect(new Rect(LabelW, y, ContentW, 1f),
                         new Color(0.3f, 0.4f, 0.55f, 0.6f));
-
                     var spStyle = new GUIStyle(EditorStyles.miniLabel);
                     spStyle.normal.textColor = new Color(0.45f, 0.7f, 1f);
                     GUI.Label(new Rect(10f, y + 2f, LabelW - 12f, SpawnerH - 2f),
                         $"Spawner {g.spawnerIndex}", spStyle);
-
                     lastSpawner = g.spawnerIndex;
                     rowParity   = 0;
                     y += SpawnerH;
                 }
 
                 // Row background
-                EditorGUI.DrawRect(new Rect(0f, y, LabelW + TimeW, RowH),
+                EditorGUI.DrawRect(new Rect(0f, y, LabelW + ContentW, RowH),
                     rowParity % 2 == 0
                         ? new Color(0.14f, 0.14f, 0.18f, 1f)
                         : new Color(0.12f, 0.12f, 0.16f, 1f));
                 rowParity++;
 
-                // Label (no spawner index prefix since it's now in the section header)
-                string shortId = g.unitDefinitionId.Replace("_enemy", "").Replace("_", " ");
-                var labelStyle = new GUIStyle(EditorStyles.miniLabel);
+                // Label
+                string shortId   = g.unitDefinitionId.Replace("_enemy", "").Replace("_", " ");
+                var labelStyle   = new GUIStyle(EditorStyles.miniLabel);
                 labelStyle.normal.textColor = col;
                 GUI.Label(new Rect(18f, y + (RowH - 14f) * 0.5f, LabelW - 20f, 14f),
                     $"{shortId}  x{g.count}", labelStyle);
 
-                // Spawn dots / sprites
+                // Spawn dots / sprites — size grows with zoom (sqrt keeps it from getting huge)
                 var sprite = GetSprite(g.unitDefinitionId);
+                float sz   = DotR * 2.2f * Mathf.Clamp(Mathf.Sqrt(_zoom), 0.6f, 4f);
                 for (int si = 0; si < g.count; si++)
                 {
                     float t  = g.startTime + si * g.spawnInterval;
                     float cx = LabelW + t * pxPerSec;
                     float cy = y + RowH * 0.5f;
-                    float sz = DotR * 2.2f;
                     var dotRect = new Rect(cx - sz * 0.5f, cy - sz * 0.5f, sz, sz);
 
                     if (sprite != null)
@@ -198,7 +209,7 @@ public class WaveGraphWindow : EditorWindow
                     }
                 }
 
-                // Start line
+                // Start-time line
                 float startX = LabelW + g.startTime * pxPerSec;
                 EditorGUI.DrawRect(new Rect(startX, y, 1f, RowH),
                     new Color(col.r, col.g, col.b, 0.5f));
@@ -212,42 +223,111 @@ public class WaveGraphWindow : EditorWindow
         GUI.EndScrollView();
     }
 
-    // ── Helpers ───────────────────────────────────────────────────────
+    // ── Toolbar ───────────────────────────────────────────────────────
+
+    void DrawToolbar(float maxTime)
+    {
+        EditorGUILayout.BeginHorizontal(EditorStyles.toolbar);
+
+        GUILayout.Label($"Zoom: {_zoom:F2}×", EditorStyles.toolbarButton, GUILayout.Width(80));
+
+        if (GUILayout.Button("−", EditorStyles.toolbarButton, GUILayout.Width(24)))
+            ApplyZoom(1f / 1.4f, maxTime);
+        if (GUILayout.Button("+", EditorStyles.toolbarButton, GUILayout.Width(24)))
+            ApplyZoom(1.4f, maxTime);
+        if (GUILayout.Button("Reset", EditorStyles.toolbarButton, GUILayout.Width(46)))
+        { _zoom = 1f; _scroll.x = 0f; Repaint(); }
+
+        GUILayout.FlexibleSpace();
+
+        GUILayout.Label("Scroll wheel to zoom  ·  scrollbar to pan", EditorStyles.centeredGreyMiniLabel);
+
+        EditorGUILayout.EndHorizontal();
+    }
+
+    // Zoom keeping the left edge of the visible area fixed
+    void ApplyZoom(float factor, float maxTime)
+    {
+        float pxPerSecOld = ContentW / maxTime;
+        float visibleLeft = _scroll.x;
+        float timeAtLeft  = Mathf.Max(0f, (visibleLeft - LabelW) / pxPerSecOld);
+
+        _zoom = Mathf.Clamp(_zoom * factor, 0.25f, 40f);
+
+        float pxPerSecNew = ContentW / maxTime;
+        _scroll.x = Mathf.Max(0f, LabelW + timeAtLeft * pxPerSecNew - (ViewW * 0.0f));
+        Repaint();
+    }
+
+    // ── Time axis ─────────────────────────────────────────────────────
 
     void DrawTimeAxis(float xOff, float y, float h, float pxPerSec, float maxTime)
     {
-        // Draw a tick every whole second, label every 5s
-        int totalSecs = Mathf.CeilToInt(maxTime);
-        for (int s = 0; s <= totalSecs; s++)
+        // Choose tick intervals based on how many pixels per second
+        float minorInterval = PickInterval(pxPerSec, 40f);
+        float majorInterval = minorInterval * 5f;
+
+        float t = 0f;
+        while (t <= maxTime + minorInterval)
         {
-            float x = xOff + s * pxPerSec;
-            bool major = s % 5 == 0;
-            float tickH = major ? h : TickH;
-            EditorGUI.DrawRect(new Rect(x, y + h - tickH, 1f, tickH),
+            float x     = xOff + t * pxPerSec;
+            bool  major = Mathf.Abs(t % majorInterval) < minorInterval * 0.5f;
+            float tH    = major ? h : TickH;
+
+            EditorGUI.DrawRect(new Rect(x, y + h - tH, 1f, tH),
                 major ? new Color(0.8f, 0.8f, 0.8f, 0.7f) : new Color(0.5f, 0.5f, 0.5f, 0.4f));
+
             if (major)
             {
                 var style = new GUIStyle(EditorStyles.miniLabel);
                 style.normal.textColor = new Color(0.7f, 0.7f, 0.7f);
-                GUI.Label(new Rect(x + 2f, y, 28f, 14f), $"{s}s", style);
+                GUI.Label(new Rect(x + 2f, y, 40f, 14f), FormatTime(t), style);
             }
+
+            t += minorInterval;
         }
     }
+
+    // Returns the smallest interval (in seconds) such that pxPerSec * interval >= minPx
+    static float PickInterval(float pxPerSec, float minPx)
+    {
+        float[] steps = { 0.1f, 0.25f, 0.5f, 1f, 2f, 5f, 10f, 30f, 60f };
+        foreach (var s in steps)
+            if (pxPerSec * s >= minPx) return s;
+        return 60f;
+    }
+
+    static string FormatTime(float t)
+    {
+        if (t < 60f) return $"{t:0.#}s";
+        return $"{Mathf.FloorToInt(t / 60f)}m{t % 60f:0}s";
+    }
+
+    // ── Layout helpers ────────────────────────────────────────────────
+
+    float WaveHeight(WaveDefinition wave)
+    {
+        int sections = 0, last = int.MinValue;
+        foreach (var g in wave.groups)
+            if (g.spawnerIndex != last) { sections++; last = g.spawnerIndex; }
+        return HeaderH + sections * SpawnerH + wave.groups.Count * RowH + WaveGapH;
+    }
+
+    // ── Color map ─────────────────────────────────────────────────────
 
     Dictionary<string, Color> BuildColorMap()
     {
         var map = new Dictionary<string, Color>();
-        int colorIdx = 0;
+        int idx = 0;
         if (_data == null) return map;
         foreach (var wave in _data.waves)
             foreach (var g in wave.groups)
                 if (!map.ContainsKey(g.unitDefinitionId))
-                {
-                    map[g.unitDefinitionId] = UnitColors[colorIdx % UnitColors.Length];
-                    colorIdx++;
-                }
+                    map[g.unitDefinitionId] = UnitColors[idx++ % UnitColors.Length];
         return map;
     }
+
+    // ── Sprite loading ────────────────────────────────────────────────
 
     Sprite GetSprite(string unitId)
     {
@@ -261,14 +341,10 @@ public class WaveGraphWindow : EditorWindow
                 foreach (var u in col.units)
                     if (u.id == unitId && !string.IsNullOrEmpty(u.animSheet))
                     {
-                        string path = $"Assets/Resources/{u.animSheet}.png";
-                        var assets  = AssetDatabase.LoadAllAssetsAtPath(path);
+                        string path  = $"Assets/Resources/{u.animSheet}.png";
+                        var    assets = AssetDatabase.LoadAllAssetsAtPath(path);
                         foreach (var asset in assets)
-                            if (asset is Sprite sp)
-                            {
-                                _spriteCache[unitId] = sp;
-                                return sp;
-                            }
+                            if (asset is Sprite sp) { _spriteCache[unitId] = sp; return sp; }
                         break;
                     }
         }
