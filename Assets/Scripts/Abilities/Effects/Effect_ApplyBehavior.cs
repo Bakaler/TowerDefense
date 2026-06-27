@@ -22,9 +22,38 @@ public class Effect_ApplyBehavior : Effect
             return;
         }
 
+        SpawnImpactVFX(def, context.Target.transform.position, context.CasterTransform);
+
         var handler = context.Target.GetComponent<BehaviorHandler>()
                    ?? context.Target.gameObject.AddComponent<BehaviorHandler>();
 
         handler.Apply(def);
+    }
+
+    static void SpawnImpactVFX(BehaviorDefinition def, Vector3 position, Transform caster)
+    {
+        if (string.IsNullOrEmpty(def.impactSheetPath) || def.impactFrameCount <= 0) return;
+
+        var go              = new GameObject("[BehaviorImpact]");
+        go.transform.position = position;
+
+        if (caster != null)
+        {
+            Vector2 dir   = (Vector2)(position - caster.position);
+            float   angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
+            go.transform.rotation = Quaternion.Euler(0f, 0f, angle);
+        }
+
+        var sr              = go.AddComponent<SpriteRenderer>();
+        sr.sortingLayerName = "Units";
+        sr.sortingOrder     = 30;
+
+        var anim               = go.AddComponent<SpriteSheetAnimator>();
+        anim.texturePath       = def.impactSheetPath;
+        anim.frameCount        = def.impactFrameCount;
+        anim.fps               = def.impactFps;
+        anim.scale             = def.impactScale;
+        anim.loop              = false;
+        anim.destroyOnComplete = true;
     }
 }

@@ -48,14 +48,16 @@ public class Effect_Damage : Effect
             ? towerInfo.StatMultiplier * towerInfo.ExtraMultiplier * towerInfo.AuraDamageMultiplier
             : 1f;
 
-        float damage = damageBase * towerMult;
+        float rawBase = context.DamageOverride > 0f ? context.DamageOverride : damageBase;
+        float damage  = rawBase * towerMult;
+        DamageType type = context.DamageTypeOverride ?? damageType;
 
         if (criticalChance > 0f && Random.Range(0f, 1f) <= criticalChance)
             damage *= criticalDamageMultiplier;
 
         float finalDamage = Mathf.Clamp(damage, minimumDamage, maximumDamage);
         bool wasAlive = target.isAlive && target.lifeCurrent > 0f;
-        target.TakeDamage(finalDamage, shieldBonus, minimumDamage, maximumDamage, damageType);
+        target.TakeDamage(finalDamage, shieldBonus, minimumDamage, maximumDamage, type);
         bool killedIt = wasAlive && (target.lifeCurrent <= 0f || !target.isAlive);
         if (killedIt)
         {

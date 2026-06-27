@@ -22,26 +22,29 @@ public class DroneSwarm : MonoBehaviour, IFactoryInitializable
     public Color droneColor     = new Color(1f, 0.85f, 0.1f, 1f);
     public Color bulletColor    = new Color(1f, 0.95f, 0.3f, 1f);
 
-    private TowerInfo          _info;
+    private TowerInfo            _info;
     private readonly List<Drone> _drones = new();
+    private Effect               _impactEffect;
+    private string               _pendingEffectId;
 
     [System.Serializable]
     class Data
     {
-        public int   droneCount     = 4;
-        public float range          = 5f;
-        public float cooldown       = 0.8f;
-        public float damage         = 6f;
-        public float bulletSpeed    = 14f;
-        public float bulletLifetime = 0.6f;
-        public float maxAwayTime    = 6f;
-        public float restDuration   = 1f;
-        public float droneColorR    = 1f;
-        public float droneColorG    = 0.85f;
-        public float droneColorB    = 0.1f;
-        public float bulletColorR   = 1f;
-        public float bulletColorG   = 0.95f;
-        public float bulletColorB   = 0.3f;
+        public int    droneCount     = 4;
+        public float  range          = 5f;
+        public float  cooldown       = 0.8f;
+        public float  damage         = 6f;
+        public float  bulletSpeed    = 14f;
+        public float  bulletLifetime = 0.6f;
+        public float  maxAwayTime    = 6f;
+        public float  restDuration   = 1f;
+        public float  droneColorR    = 1f;
+        public float  droneColorG    = 0.85f;
+        public float  droneColorB    = 0.1f;
+        public float  bulletColorR   = 1f;
+        public float  bulletColorG   = 0.95f;
+        public float  bulletColorB   = 0.3f;
+        public string effectId       = "drone_impact";
     }
 
     public void Initialize(string dataJson)
@@ -59,11 +62,19 @@ public class DroneSwarm : MonoBehaviour, IFactoryInitializable
         restDuration   = d.restDuration;
         droneColor     = new Color(d.droneColorR,  d.droneColorG,  d.droneColorB,  1f);
         bulletColor    = new Color(d.bulletColorR, d.bulletColorG, d.bulletColorB, 1f);
+        _pendingEffectId = d.effectId;
+        if (!string.IsNullOrEmpty(d.effectId) && EffectLibrary.Instance != null)
+            _impactEffect = EffectLibrary.Instance.GetEffect(d.effectId);
     }
 
     void Awake() => _info = GetComponent<TowerInfo>();
 
-    void Start() => SpawnDrones();
+    void Start()
+    {
+        if (_impactEffect == null && !string.IsNullOrEmpty(_pendingEffectId) && EffectLibrary.Instance != null)
+            _impactEffect = EffectLibrary.Instance.GetEffect(_pendingEffectId);
+        SpawnDrones();
+    }
 
     void SpawnDrones()
     {
@@ -86,6 +97,7 @@ public class DroneSwarm : MonoBehaviour, IFactoryInitializable
             drone.range          = range;
             drone.cooldown       = cooldown + i * 0.2f;
             drone.damage         = damage;
+            drone.impactEffect   = _impactEffect;
             drone.bulletSpeed    = bulletSpeed;
             drone.bulletLifetime = bulletLifetime;
             drone.bulletColor    = bulletColor;
@@ -98,8 +110,8 @@ public class DroneSwarm : MonoBehaviour, IFactoryInitializable
         }
     }
 
-    public float GetDamage() =>
-        damage * (_info != null ? _info.StatMultiplier * _info.ExtraMultiplier : 1f);
+    // Returns raw damage; scaling is applied by Effect_Damage via OriginTower
+    public float GetDamage() => damage;
 
     static Sprite _droneSprite;
     static Sprite DroneSprite()

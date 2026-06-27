@@ -71,6 +71,8 @@ public class AbilityManager : MonoBehaviour
         if (castDelay > 0)
             yield return new WaitForSeconds(castDelay);
 
+        GetComponentInChildren<TowerAnimator>()?.PlayAttack(ability);
+
         if (ability.effect != null)
         {
             Debug.Log($"[AbilityManager] Firing effect '{ability.effect.name}' on '{context.Target?.name}'");

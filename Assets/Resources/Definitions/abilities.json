@@ -57,7 +57,7 @@
         {
             "id": "root_tower_shot",
             "displayName": "Root Shot",
-            "effectId": "root_missile",
+            "effectId": "root_hit",
             "cooldownDuration": 2.0,
             "range": 2.5,
             "fireArc": 360.0,
@@ -67,7 +67,11 @@
             "finish_time": 0.0,
             "targetValidatorIds": [
                 "no_behavior:rooted"
-            ]
+            ],
+            "attackSheetPath": "Art/VFX/root_attack",
+            "attackFrameCount": 6,
+            "attackFps": 12.0,
+            "attackScale": 1.0
         },
         {
             "id": "shotgun_tower_shot",
@@ -129,6 +133,19 @@
             "effectId": "mortar_shell",
             "cooldownDuration": 4.0,
             "range": 7.0,
+            "fireArc": 360.0,
+            "prepare_time": 0.0,
+            "cast_start_time": 0.0,
+            "cast_finish_time": 0.0,
+            "finish_time": 0.0,
+            "targetValidatorIds": []
+        },
+        {
+            "id": "sniper_shot",
+            "displayName": "Sniper Shot",
+            "effectId": "sniper_damage",
+            "cooldownDuration": 2.0,
+            "range": 999.0,
             "fireArc": 360.0,
             "prepare_time": 0.0,
             "cast_start_time": 0.0,

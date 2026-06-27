@@ -19,6 +19,11 @@ public class EffectContext
     public Vector2? AimOrigin2D;
     public Vector2? AimDirection2D;
 
+    // Optional overrides for Effect_Damage — used by components that compute damage themselves
+    // (continuous beam, drones). >0 replaces damageBase; non-null replaces damageType.
+    public float      DamageOverride;
+    public DamageType? DamageTypeOverride;
+
     public EffectContext CloneForNewTarget(UnitParentClass newTarget)
     {
         return new EffectContext
@@ -30,8 +35,10 @@ public class EffectContext
             CustomData = new Dictionary<string, object>(this.CustomData ?? new Dictionary<string, object>()),
             AimOrigin2D = this.AimOrigin2D,
             AimDirection2D = this.AimDirection2D,
-            CasterTransform = this.CasterTransform,
-            OriginTower     = this.OriginTower,
+            CasterTransform    = this.CasterTransform,
+            OriginTower        = this.OriginTower,
+            DamageOverride     = this.DamageOverride,
+            DamageTypeOverride = this.DamageTypeOverride,
         };
     }
 }

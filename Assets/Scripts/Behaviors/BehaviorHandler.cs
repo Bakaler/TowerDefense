@@ -13,13 +13,15 @@ public class BehaviorHandler : MonoBehaviour
         public BehaviorDefinition Def;
         public float              Remaining;
         public float              TickTimer;
+        public GameObject         DurationVFX;
+
         public Instance(BehaviorDefinition def)
         {
             Def       = def;
             Remaining = def.duration;
             TickTimer = def.tickInterval > 0f ? def.tickInterval : float.MaxValue;
         }
-        // Returns true when expired
+
         public bool Advance(float dt, out bool ticked)
         {
             Remaining -= dt;
@@ -30,6 +32,12 @@ public class BehaviorHandler : MonoBehaviour
                 if (TickTimer <= 0f) { TickTimer += Def.tickInterval; ticked = true; }
             }
             return Remaining <= 0f;
+        }
+
+        public void DestroyVFX()
+        {
+            if (DurationVFX != null) Object.Destroy(DurationVFX);
+            DurationVFX = null;
         }
     }
 
@@ -74,7 +82,15 @@ public class BehaviorHandler : MonoBehaviour
                 break;
             // "stack": always add a new instance
         }
-        _active.Add(new Instance(def));
+
+        var newInst = new Instance(def);
+        float impactDuration = def.impactFrameCount > 0 && def.impactFps > 0f
+            ? def.impactFrameCount / def.impactFps : 0f;
+        if (impactDuration > 0f)
+            StartCoroutine(SpawnDurationVFXDelayed(newInst, def, impactDuration));
+        else
+            newInst.DurationVFX = SpawnDurationVFX(def);
+        _active.Add(newInst);
         Recalculate();
     }
 
@@ -111,7 +127,9 @@ public class BehaviorHandler : MonoBehaviour
 
     public void Remove(string behaviorId)
     {
-        int removed = _active.RemoveAll(b => b.Def.id == behaviorId);
+        int removed = 0;
+        for (int i = _active.Count - 1; i >= 0; i--)
+            if (_active[i].Def.id == behaviorId) { _active[i].DestroyVFX(); _active.RemoveAt(i); removed++; }
         if (removed > 0) Recalculate();
     }
 
@@ -121,6 +139,7 @@ public class BehaviorHandler : MonoBehaviour
     /// <summary>Remove every active behavior (cleanse).</summary>
     public void RemoveAll()
     {
+        foreach (var inst in _active) inst.DestroyVFX();
         _active.Clear();
         Recalculate();
     }
@@ -128,7 +147,9 @@ public class BehaviorHandler : MonoBehaviour
     /// <summary>Remove all behaviors matching a specific type (e.g. all Rooted or Slowed).</summary>
     public void RemoveByType(BehaviorType type)
     {
-        int removed = _active.RemoveAll(b => b.Def.behaviorType == type);
+        int removed = 0;
+        for (int i = _active.Count - 1; i >= 0; i--)
+            if (_active[i].Def.behaviorType == type) { _active[i].DestroyVFX(); _active.RemoveAt(i); removed++; }
         if (removed > 0) Recalculate();
     }
 
@@ -144,7 +165,7 @@ public class BehaviorHandler : MonoBehaviour
         {
             bool expired = _active[i].Advance(dt, out bool ticked);
             if (ticked) ApplyTick(_active[i]);
-            if (expired) { _active.RemoveAt(i); changed = true; }
+            if (expired) { _active[i].DestroyVFX(); _active.RemoveAt(i); changed = true; }
         }
         if (changed) Recalculate();
     }
@@ -155,6 +176,38 @@ public class BehaviorHandler : MonoBehaviour
         if (inst.Def.tickDamage <= 0f) return;
         var dmgType = (DamageType)inst.Def.tickDamageType;
         _unit.TakeDamage(inst.Def.tickDamage, 0f, 0f, inst.Def.tickDamage * 10f, dmgType);
+    }
+
+    // ── VFX ───────────────────────────────────────────────────────────
+
+    System.Collections.IEnumerator SpawnDurationVFXDelayed(Instance inst, BehaviorDefinition def, float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        if (inst.Remaining > 0f)   // only spawn if behavior hasn't already expired
+            inst.DurationVFX = SpawnDurationVFX(def);
+    }
+
+    GameObject SpawnDurationVFX(BehaviorDefinition def)
+    {
+        if (string.IsNullOrEmpty(def.durationSheetPath) || def.durationFrameCount <= 0) return null;
+
+        var go = new GameObject("[BehaviorDuration]");
+        go.transform.SetParent(transform, false);
+        go.transform.localPosition = Vector3.zero;
+
+        var sr              = go.AddComponent<SpriteRenderer>();
+        sr.sortingLayerName = "Units";
+        sr.sortingOrder     = 30;
+
+        var anim               = go.AddComponent<SpriteSheetAnimator>();
+        anim.texturePath       = def.durationSheetPath;
+        anim.frameCount        = def.durationFrameCount;
+        anim.fps               = def.durationFps;
+        anim.scale             = def.durationScale;
+        anim.loop              = true;
+        anim.destroyOnComplete = false;
+
+        return go;
     }
 
     // ── Recalculate ───────────────────────────────────────────────────

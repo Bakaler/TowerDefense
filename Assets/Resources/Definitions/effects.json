@@ -261,6 +261,20 @@
             "data": { "behaviorId": "rooted" }
         },
         {
+            "id": "root_damage",
+            "displayName": "Root Damage",
+            "type": "damage",
+            "chance": 1.0,
+            "data": { "damageBase": 15.0, "damageType": 2 }
+        },
+        {
+            "id": "root_hit",
+            "displayName": "Root Hit",
+            "type": "set",
+            "chance": 1.0,
+            "data": { "effectIds": ["root_damage", "root_impact"] }
+        },
+        {
             "id": "root_missile",
             "displayName": "Root Missile",
             "type": "launch_missile",
@@ -408,6 +422,58 @@
         "goldPerDrain": 1,
         "techPerDrain": 0
       }
+        },
+        {
+            "id": "sniper_damage",
+            "displayName": "Sniper Shot",
+            "type": "damage",
+            "chance": 1.0,
+            "data": {
+        "damageBase": 60.0,
+        "minimumDamage": 1.0,
+        "maximumDamage": 1000000.0,
+        "damageType": 3,
+        "shieldBonus": 0.0,
+        "criticalChance": 0.0,
+        "criticalDamageMultiplier": 2.0
+      }
+        },
+        {
+            "id": "beam_damage",
+            "displayName": "Beam Damage",
+            "type": "damage",
+            "chance": 1.0,
+            "data": {
+        "damageBase": 0.0,
+        "minimumDamage": 0.0,
+        "maximumDamage": 1000000.0,
+        "damageType": 1,
+        "shieldBonus": 0.0,
+        "criticalChance": 0.0,
+        "criticalDamageMultiplier": 2.0
+      }
+        },
+        {
+            "id": "drone_impact",
+            "displayName": "Drone Impact",
+            "type": "damage",
+            "chance": 1.0,
+            "data": {
+        "damageBase": 0.0,
+        "minimumDamage": 0.0,
+        "maximumDamage": 1000000.0,
+        "damageType": 2,
+        "shieldBonus": 0.0,
+        "criticalChance": 0.0,
+        "criticalDamageMultiplier": 2.0
+      }
+        },
+        {
+            "id": "root_set",
+            "displayName": "Root Set",
+            "type": "set",
+            "chance": 1.0,
+            "data": {}
         }
     ]
 }

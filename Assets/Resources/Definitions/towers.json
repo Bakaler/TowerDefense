@@ -253,7 +253,8 @@
             "droneColorB": 0.1,
             "bulletColorR": 1.0,
             "bulletColorG": 0.95,
-            "bulletColorB": 0.3
+            "bulletColorB": 0.3,
+            "effectId": "drone_impact"
           }
                 }
             ]
@@ -305,12 +306,12 @@
             "fireAbilityId": "root_tower_shot",
             "displayDamage": 0.0,
             "displayCooldown": 0.0,
-            "rotationSpeed": 0.0,
+            "rotationSpeed": 360.0,
             "animFps": 0.0,
-            "spritePath": "",
-            "turretSpritePath": "",
-            "spriteSheet": "Art/Towers/TowerSet1",
-            "spriteIndex": 2,
+            "spritePath": "Resources/Art/Towers/root_tower_T1",
+            "turretSpritePath": "Resources/Art/Towers/root_tower_turret_T1",
+            "spriteSheet": "",
+            "spriteIndex": 0,
             "scale": 1.5,
             "debugColor": {
                 "r": 0.6499999761581421,
@@ -319,9 +320,9 @@
                 "a": 1.0
             },
             "tintColor": {
-                "r": 0.6499999761581421,
-                "g": 0.20000000298023225,
-                "b": 0.8999999761581421,
+                "r": 1.0,
+                "g": 1.0,
+                "b": 1.0,
                 "a": 1.0
             },
             "maxTier": 5,
@@ -668,7 +669,8 @@
             "damageType": 1,
             "beamColorR": 1.0,
             "beamColorG": 0.25,
-            "beamColorB": 0.1
+            "beamColorB": 0.1,
+            "effectId": "beam_damage"
           }
                 }
             ]
@@ -717,7 +719,7 @@
             "placementRadius": 0.44999998807907107,
             "resourceCost": 8,
             "balanceType": "Physical",
-            "fireAbilityId": "",
+            "fireAbilityId": "sniper_shot",
             "displayDamage": 60.0,
             "displayCooldown": 2.0,
             "rotationSpeed": 0.0,
@@ -750,7 +752,7 @@
                 },
                 {
                     "key": "sniper_turrent",
-                    "data": { "damage": 60.0, "cooldown": 2.0 }
+                    "data": {}
                 }
             ]
         },

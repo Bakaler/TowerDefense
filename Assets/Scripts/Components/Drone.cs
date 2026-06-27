@@ -12,6 +12,7 @@ public class Drone : MonoBehaviour
     public float      range;
     public float      cooldown;
     public float      damage;
+    public Effect     impactEffect;
     public float      bulletSpeed;
     public float      bulletLifetime;
     public Color      bulletColor;
@@ -174,11 +175,12 @@ public class Drone : MonoBehaviour
         sr.sortingLayerName = "Units"; sr.sortingOrder = 10;
 
         var b = go.AddComponent<BeeBullet>();
-        b.target      = target;
-        b.moveSpeed   = bulletSpeed;
-        b.lifetime    = bulletLifetime;
-        b.damage      = swarm != null ? swarm.GetDamage() : damage;
-        b.originTower = swarm != null ? swarm.gameObject : null;
+        b.target        = target;
+        b.moveSpeed     = bulletSpeed;
+        b.lifetime      = bulletLifetime;
+        b.damage        = swarm != null ? swarm.GetDamage() : damage;
+        b.impactEffect  = impactEffect;
+        b.originTower   = swarm != null ? swarm.gameObject : null;
     }
 
     static Sprite _bulletSprite;

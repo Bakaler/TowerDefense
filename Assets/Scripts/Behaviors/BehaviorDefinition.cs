@@ -42,4 +42,17 @@ public class BehaviorDefinition
     /// The effect fires with the dying unit as the caster origin.
     /// </summary>
     public string onDeathEffectId = "";
+
+    // ── VFX ───────────────────────────────────────────────────────────
+    // Impact animation: plays once at the hit location when behavior is applied.
+    public string impactSheetPath  = "";
+    public int    impactFrameCount = 0;
+    public float  impactFps        = 12f;
+    public float  impactScale      = 1f;
+
+    // Duration animation: loops on the unit for the full behavior duration.
+    public string durationSheetPath  = "";
+    public int    durationFrameCount = 0;
+    public float  durationFps        = 8f;
+    public float  durationScale      = 1f;
 }

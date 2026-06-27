@@ -26,6 +26,12 @@ public class Ability_Effect : Ability
     [Header("Resource & Cooldown")]
     public AbilityCost cost;
 
+    // ── Attack animation (played on the tower's own SpriteRenderer) ──
+    public string attackSheetPath  = "";
+    public int    attackFrameCount = 0;
+    public float  attackFps        = 12f;
+    public float  attackScale      = 1f;
+
     // ── Resolved at runtime (set by AbilityLibrary) ──────────────────
 
     /// <summary>The actual Effect instance, resolved from effectId by AbilityLibrary.</summary>

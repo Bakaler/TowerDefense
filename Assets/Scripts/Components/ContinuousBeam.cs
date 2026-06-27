@@ -23,18 +23,21 @@ public class ContinuousBeam : MonoBehaviour, IFactoryInitializable
     private LineRenderer    _beam;
     private TowerInfo       _info;
     private Turrent         _turrent;
+    private Effect          _damageEffect;
+    private string          _pendingEffectId;
 
     [System.Serializable]
     class Data
     {
-        public float damagePerSecond   = 8f;
-        public float maxRampMultiplier = 5f;
-        public float rampDuration      = 4f;
-        public float beamWidth         = 0.06f;
-        public int   damageType        = 1;   // Arcane
-        public float beamColorR        = 1f;
-        public float beamColorG        = 0.25f;
-        public float beamColorB        = 0.1f;
+        public float  damagePerSecond   = 8f;
+        public float  maxRampMultiplier = 5f;
+        public float  rampDuration      = 4f;
+        public float  beamWidth         = 0.06f;
+        public int    damageType        = 1;   // Arcane
+        public float  beamColorR        = 1f;
+        public float  beamColorG        = 0.25f;
+        public float  beamColorB        = 0.1f;
+        public string effectId          = "beam_damage";
     }
 
     public void Initialize(string dataJson)
@@ -48,6 +51,10 @@ public class ContinuousBeam : MonoBehaviour, IFactoryInitializable
         beamWidth         = d.beamWidth;
         damageType        = (DamageType)d.damageType;
         beamColor         = new Color(d.beamColorR, d.beamColorG, d.beamColorB, 1f);
+
+        _pendingEffectId = d.effectId;
+        if (!string.IsNullOrEmpty(d.effectId) && EffectLibrary.Instance != null)
+            _damageEffect = EffectLibrary.Instance.GetEffect(d.effectId);
     }
 
     void Awake()
@@ -55,6 +62,13 @@ public class ContinuousBeam : MonoBehaviour, IFactoryInitializable
         _info    = GetComponent<TowerInfo>();
         _turrent = GetComponent<Turrent>();
         BuildBeam();
+    }
+
+    void Start()
+    {
+        // Retry effect lookup after all libraries are initialized
+        if (_damageEffect == null && !string.IsNullOrEmpty(_pendingEffectId) && EffectLibrary.Instance != null)
+            _damageEffect = EffectLibrary.Instance.GetEffect(_pendingEffectId);
     }
 
     void BuildBeam()
@@ -80,19 +94,31 @@ public class ContinuousBeam : MonoBehaviour, IFactoryInitializable
         if (target != _locked) { _locked = target; _lockTime = 0f; }
 
         _lockTime += Time.deltaTime;
-        float ramp  = Mathf.Lerp(1f, maxRampMultiplier, Mathf.Clamp01(_lockTime / rampDuration));
-        float mult  = _info != null ? _info.StatMultiplier * _info.ExtraMultiplier : 1f;
-        float dps   = damagePerSecond * ramp * mult;
+        float ramp    = Mathf.Lerp(1f, maxRampMultiplier, Mathf.Clamp01(_lockTime / rampDuration));
+        float rawDps  = damagePerSecond * ramp;   // towerMult applied by Effect_Damage
 
-        bool wasAlive = target.lifeCurrent > 0f;
-        target.TakeDamage(dps * Time.deltaTime, 0f, 0f, dps * 10f, damageType);
-
-        if (wasAlive && (target.lifeCurrent <= 0f || !target.isAlive))
+        if (_damageEffect != null)
         {
-            _info?.RegisterKill();
-            float physical = BalanceManager.Instance != null ? BalanceManager.Instance.Physical : 0f;
-            if (Random.value <= 0.15f + physical * 0.0025f)
-                BountyDrop.Spawn(target.transform.position, 1);
+            var context = new EffectContext
+            {
+                Target             = target,
+                OriginTower        = gameObject,
+                CasterTransform    = transform,
+                DamageOverride     = rawDps * Time.deltaTime,
+                DamageTypeOverride = damageType,
+                CustomData         = new System.Collections.Generic.Dictionary<string, object>(),
+            };
+            EffectExecutor.ExecuteEffect(_damageEffect, context);
+        }
+        else
+        {
+            // Fallback if effect not yet loaded
+            float mult = _info != null ? _info.StatMultiplier * _info.ExtraMultiplier : 1f;
+            target.TakeDamage(rawDps * mult * Time.deltaTime, 0f, 0f, rawDps * mult * 10f, damageType);
+        }
+
+        if (target.lifeCurrent <= 0f || !target.isAlive)
+        {
             BreakLock();
             return;
         }

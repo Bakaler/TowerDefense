@@ -79,6 +79,10 @@ public class AbilityLibrary : MonoBehaviour
             ability.range            = def.range;
             ability.fireArc          = def.fireArc;
             ability.cost             = new AbilityCost { cooldownDuration = def.cooldownDuration };
+            ability.attackSheetPath  = def.attackSheetPath;
+            ability.attackFrameCount = def.attackFrameCount;
+            ability.attackFps        = def.attackFps;
+            ability.attackScale      = def.attackScale;
 
             // Resolve effect reference
             if (!string.IsNullOrEmpty(def.effectId))
@@ -123,6 +127,10 @@ public class AbilityDefinition
     public float    cast_finish_time = 0f;
     public float    finish_time     = 0f;
     public string[] targetValidatorIds;
+    public string   attackSheetPath  = "";
+    public int      attackFrameCount = 0;
+    public float    attackFps        = 12f;
+    public float    attackScale      = 1f;
 }
 
 [Serializable]

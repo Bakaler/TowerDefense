@@ -112,6 +112,7 @@ public class TowerFactory : MonoBehaviour
 
         // ── 4. AbilityManager ─────────────────────────────────────
         var abilityManager = go.AddComponent<AbilityManager>();
+        go.AddComponent<TowerAnimator>();
 
         // ── 5. Turrent ────────────────────────────────────────────
         var turrent = go.AddComponent<Turrent>();

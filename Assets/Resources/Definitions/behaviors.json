@@ -7,7 +7,15 @@
       "duration": 1.0,
       "stackRule": "refresh",
       "moveSpeedMultiplier": 0.0,
-      "tintColor": { "r": 0.6, "g": 0.2, "b": 0.85, "a": 1.0 }
+      "tintColor": { "r": 1.0, "g": 1.0, "b": 1.0, "a": 1.0 },
+      "impactSheetPath": "Art/VFX/root_impact",
+      "impactFrameCount": 6,
+      "impactFps": 18.0,
+      "impactScale": 2.0,
+      "durationSheetPath": "Art/VFX/root_duration",
+      "durationFrameCount": 6,
+      "durationFps": 8.0,
+      "durationScale": 1.0
     },
     {
       "id": "slowed",
