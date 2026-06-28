@@ -18,6 +18,7 @@ public class Turrent : MonoBehaviour
 
     private AbilityManager   _abilityManager;
     private CircleCollider2D _rangeCollider;
+    public  Transform        RotatingPart => _rotatingPart;
     private Transform        _rotatingPart;   // child "Turret" if present, else self
 
     // Rotation speed from tower definition; arc from the ability
@@ -60,25 +61,23 @@ public class Turrent : MonoBehaviour
     void Update()
     {
         CleanUpDead();
-        target = GetLeadEnemy();
 
+        float arc = fireAbility != null ? fireAbility.fireArc : 360f;
+
+        target = GetLeadEnemy();
         if (target == null) return;
 
         Vector2 dir = ((Vector2)target.transform.position - (Vector2)transform.position).normalized;
 
         if (_rotationSpeed > 0f)
         {
-            // Rotate so _rotatingPart.up points at target (child turret or root)
             float targetAngle  = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg - 90f;
             float currentAngle = _rotatingPart.eulerAngles.z;
             float newAngle     = Mathf.MoveTowardsAngle(currentAngle, targetAngle, _rotationSpeed * Time.deltaTime);
             _rotatingPart.rotation = Quaternion.Euler(0f, 0f, newAngle);
         }
 
-        // Gate firing on arc — always passes for 360°
-        float arc      = fireAbility != null ? fireAbility.fireArc : 360f;
-        float aimAngle = Vector2.Angle(_rotatingPart.up, dir);
-        if (aimAngle <= arc * 0.5f)
+        if (Vector2.Angle(_rotatingPart.up, dir) <= arc * 0.5f)
             TryFire();
     }
 

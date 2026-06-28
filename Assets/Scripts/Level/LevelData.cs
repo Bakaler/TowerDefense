@@ -13,6 +13,8 @@ public class LevelData
     public string    backgroundSprite = "";   // Resources path, e.g. "Art/Backgrounds/bg_1"
     public float     backgroundX      = 0f;
     public float     backgroundY      = 0f;
+    /// <summary>Tower definition IDs available to buy in this level. Empty = all towers allowed.</summary>
+    public string[]          allowedTowers  = Array.Empty<string>();
     public PathData[]        paths         = Array.Empty<PathData>();
     public ZoneData[]        placementZones = Array.Empty<ZoneData>();
     public WaveDefinition[]  waves         = Array.Empty<WaveDefinition>();

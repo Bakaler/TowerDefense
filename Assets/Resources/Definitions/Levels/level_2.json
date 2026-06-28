@@ -3,6 +3,7 @@
     "displayName": "The Fork",
     "startGold": 60,
     "startLives": 20,
+    "allowedTowers": ["basic_tower", "slow_tower", "shotgun_tower", "poison_tower", "research_tower", "income_tower", "boomerang_tower", "chain_tower", "root_tower", "bee_tower", "siphon_tower", "speed_aura_tower", "damage_aura_tower"],
     "backgroundSprite": "Art/Maps/level_2",
     "backgroundX": -1.8700000047683716,
     "backgroundY": 0.0,

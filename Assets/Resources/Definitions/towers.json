@@ -200,7 +200,9 @@
             "upgradeStatMultiplier": 2.25,
             "towerTier": 1,
             "rangePerTier": 0.0,
-            "components": []
+            "components": [
+                { "key": "shotgun_orienter", "data": "{}" }
+            ]
         },
         {
             "id": "bee_tower",

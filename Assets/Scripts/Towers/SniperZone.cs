@@ -18,7 +18,7 @@ public class SniperZone : MonoBehaviour, IFactoryInitializable
     public float   ZoneAngle       { get; private set; }   // degrees
     public bool    IsRepositioning { get; private set; }
     private bool   _selected       = false;
-    private float  _outlineAlpha   = 0.75f;
+    private float  _outlineAlpha   = 0f;
     private Coroutine _fadeCoroutine;
 
     // ── Visuals ───────────────────────────────────────────────────────
@@ -57,7 +57,7 @@ public class SniperZone : MonoBehaviour, IFactoryInitializable
         float scroll = Input.GetAxis("Mouse ScrollWheel");
         if (Mathf.Abs(scroll) > 0.001f)
         {
-            ZoneAngle = (ZoneAngle + scroll * 18f) % 360f;
+            ZoneAngle = (ZoneAngle + scroll * 72f) % 360f;
             dirty = true;
         }
 

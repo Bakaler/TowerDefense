@@ -17,7 +17,9 @@ using UnityEngine.Rendering.Universal;
 /// </summary>
 public static class SceneBootstrap
 {
-    [MenuItem("TowerDefense/Setup Basic Wave Scene")]
+    [MenuItem("TowerDefense/Scene Generators (Wave)", false, 1)]
+    static void OpenWindow() => SceneGeneratorsWindow.Open();
+
     public static void SetupScene()
     {
         if (!EditorUtility.DisplayDialog(

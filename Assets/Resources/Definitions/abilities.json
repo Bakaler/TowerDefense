@@ -78,7 +78,7 @@
             "displayName": "Shotgun Shot",
             "effectId": "shotgun_shot",
             "cooldownDuration": 2.799999952316284,
-            "range": 1.5,
+            "range": 5.5,
             "fireArc": 60.0,
             "prepare_time": 0.0,
             "cast_start_time": 0.0,

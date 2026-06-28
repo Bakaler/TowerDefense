@@ -20,7 +20,9 @@ public class TowerDefinition
     public int   resourceCost    = 100;
 
     // ── Balance ───────────────────────────────────────────────────────
-    public string balanceType = "Physical";  // "Elemental" | "Arcane" | "Physical"
+    public string balanceType   = "Physical";  // "Elemental" | "Arcane" | "Physical"
+    /// <summary>Tower cost in the per-level balance budget. T1=1, T2=2, T3=4.</summary>
+    public int    balanceWeight = 1;
 
     // ── Ability ───────────────────────────────────────────────────────
     public string fireAbilityId;

@@ -3,6 +3,7 @@
     "displayName": "The Valley",
     "startGold": 50,
     "startLives": 20,
+    "allowedTowers": ["basic_tower", "slow_tower", "shotgun_tower", "poison_tower", "research_tower", "income_tower"],
     "backgroundSprite": "Art/Maps/level_1",
     "backgroundX": -1.8700000047683716,
     "backgroundY": 0.0,

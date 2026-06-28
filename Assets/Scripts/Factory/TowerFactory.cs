@@ -22,6 +22,13 @@ public class TowerFactory : MonoBehaviour
     {
         if (Instance != null && Instance != this) { Destroy(gameObject); return; }
         Instance = this;
+
+        // Defensive re-registration in case RuntimeInitializeOnLoadMethod fired before
+        // assemblies were fully initialized (e.g. with Domain Reload disabled).
+        if (!ComponentRegistry.Contains("shotgun_orienter"))
+            ComponentRegistry.Register("shotgun_orienter", typeof(ShotgunOrienter));
+        if (!ComponentRegistry.Contains("sniper_zone"))
+            ComponentRegistry.Register("sniper_zone", typeof(SniperZone));
     }
 
     // ── Public API ────────────────────────────────────────────────────
@@ -179,7 +186,7 @@ public class TowerFactory : MonoBehaviour
         for (int t = tier; t >= 1; t--)
         {
             string path = $"Art/Towers/{baseId}_T{t}";
-            if (Resources.Load<Sprite>(path) != null) return path;
+            if (LoadFirstSprite(path) != null) return path;
         }
         return !string.IsNullOrEmpty(fallbackPath) ? fallbackPath : null;
     }
@@ -188,14 +195,22 @@ public class TowerFactory : MonoBehaviour
     {
         for (int t = tier; t >= 1; t--)
         {
-            var sp = Resources.Load<Sprite>($"Art/Towers/{baseId}_T{t}");
+            var sp = LoadFirstSprite($"Art/Towers/{baseId}_T{t}");
             if (sp != null) return sp;
         }
         if (!string.IsNullOrEmpty(fallbackPath))
         {
-            var sp = Resources.Load<Sprite>(fallbackPath);
+            var sp = LoadFirstSprite(fallbackPath);
             if (sp != null) return sp;
         }
+        return null;
+    }
+
+    // Handles both single sprites and multi-sprite sheets.
+    static Sprite LoadFirstSprite(string path)
+    {
+        var sprites = Resources.LoadAll<Sprite>(path);
+        if (sprites != null && sprites.Length > 0) return sprites[0];
         return null;
     }
 

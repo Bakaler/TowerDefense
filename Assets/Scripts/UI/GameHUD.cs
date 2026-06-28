@@ -23,6 +23,7 @@ public class GameHUD : MonoBehaviour
     private Text   _goldText;
     private Text   _techText;
     private Text   _towerCountText;
+    private Text   _towerMilestoneText;
     private Text   _waveText;
     private Text   _livesText;
     private Button _waveButton;
@@ -161,11 +162,17 @@ public class GameHUD : MonoBehaviour
         TowerInfo.OnTowerKill    -= RefreshTowerPanel;
     }
 
+    void DeselectCurrentTower()
+    {
+        if (_selectedTower == null) return;
+        _selectedTower.GetComponent<SniperZone>()?.SetSelected(false);
+        _selectedTower.GetComponent<ShotgunOrienter>()?.SetSelected(false);
+        _selectedTower = null;
+    }
+
     void ShowTowerPanel(TowerInfo info)
     {
-        // Deselect previous sniper zone
-        if (_selectedTower != null)
-            _selectedTower.GetComponent<SniperZone>()?.SetSelected(false);
+        DeselectCurrentTower();
 
         if (info == null)
         {
@@ -177,6 +184,7 @@ public class GameHUD : MonoBehaviour
         _enemyPanel?.SetActive(false);
         _selectedTower = info;
         info.GetComponent<SniperZone>()?.SetSelected(true);
+        info.GetComponent<ShotgunOrienter>()?.SetSelected(true);
         HideResearchBody();
         RefreshTowerPanel(info);
         _towerPanel?.SetActive(true);
@@ -185,7 +193,7 @@ public class GameHUD : MonoBehaviour
     public void SelectEnemy(UnitManager unit)
     {
         if (unit == null || !unit.isAlive) return;
-        _selectedTower = null;
+        DeselectCurrentTower();
         _towerPanel?.SetActive(false);
         _selectedEnemy = unit;
         RefreshEnemyPanel();
@@ -270,6 +278,7 @@ public class GameHUD : MonoBehaviour
             if (zone != null && _tpMoveZoneLabel != null)
                 _tpMoveZoneLabel.text = zone.IsRepositioning ? "CONFIRMING..." : "MOVE ZONE";
         }
+
 
         if (_tpUpgradeBtn != null)
         {
@@ -638,7 +647,7 @@ public class GameHUD : MonoBehaviour
         var closeGO = MakeRect("CloseBtn", hdrGO, W - HDR_H, 0f, HDR_H, HDR_H);
         var cImg    = closeGO.AddComponent<Image>(); cImg.color = new Color(0.55f, 0.12f, 0.12f, 1f);
         var cBtn    = closeGO.AddComponent<Button>(); cBtn.targetGraphic = cImg;
-        cBtn.onClick.AddListener(() => { _towerPanel.SetActive(false); _selectedTower = null; TowerInfo.OnTowerClickedPublic(null); });
+        cBtn.onClick.AddListener(() => { _towerPanel.SetActive(false); DeselectCurrentTower(); TowerInfo.OnTowerClickedPublic(null); });
         MakeText(MakeRect("X", closeGO, 0f, 0f, HDR_H, HDR_H), "×", Color.white, 22, bold: true)
             .alignment = TextAnchor.MiddleCenter;
 
@@ -724,7 +733,7 @@ public class GameHUD : MonoBehaviour
             if (_selectedTower == null) return;
             _selectedTower.Sell(_rm);
             _towerPanel.SetActive(false);
-            _selectedTower = null;
+            DeselectCurrentTower();
         });
 
         // TARGET section pinned to bottom
@@ -791,7 +800,7 @@ public class GameHUD : MonoBehaviour
     {
         _towerPanel?.SetActive(false);
         _researchPanel?.SetActive(false);
-        _selectedTower = null;
+        DeselectCurrentTower();
         TowerInfo.OnTowerClickedPublic(null);
     }
 
@@ -800,7 +809,7 @@ public class GameHUD : MonoBehaviour
         _towerPanel?.SetActive(false);
         _enemyPanel?.SetActive(false);
         _researchPanel?.SetActive(false);
-        _selectedTower = null;
+        DeselectCurrentTower();
         _selectedEnemy = null;
         TowerInfo.OnTowerClickedPublic(null);
     }
@@ -1067,8 +1076,10 @@ public class GameHUD : MonoBehaviour
             if (_researchPanel != null)
                 _researchPanel.SetActive(!_researchPanel.activeSelf);
         });
-        _towerCountText = AddAbsLabel(bar, "TowerCount", LEFT + 475f, BAR_H - TOP_H, 180f, TOP_H,
+        _towerCountText = AddAbsLabel(bar, "TowerCount", LEFT + 475f, BAR_H - TOP_H, 220f, TOP_H * 0.55f,
             "Towers  0/8", new Color(0.75f, 0.75f, 0.85f), 14, TextAnchor.MiddleLeft);
+        _towerMilestoneText = AddAbsLabel(bar, "TowerMilestone", LEFT + 475f, BAR_H - TOP_H - TOP_H * 0.5f, 220f, TOP_H * 0.5f,
+            "", new Color(0.55f, 0.85f, 0.55f), 11, TextAnchor.MiddleLeft);
         _waveText  = AddAbsLabel(bar, "Wave",  0f, BAR_H - TOP_H, 0f,   TOP_H,
             "Ready", C_Wave,  22, TextAnchor.MiddleCenter, stretchX: true);
         _livesText = AddAbsLabel(bar, "Lives", 0f, BAR_H - TOP_H, 500f, TOP_H,
@@ -1359,6 +1370,20 @@ public class GameHUD : MonoBehaviour
                 ? new Color(1f, 0.35f, 0.35f)
                 : new Color(0.75f, 0.75f, 0.85f);
             _towerCountText.text = $"Towers  {bm.TowerCount}/{bm.MaxTowers}";
+
+            if (_towerMilestoneText != null)
+            {
+                float e = bm.Elemental, a = bm.Arcane, p = bm.Physical;
+                float total    = e + a + p;
+                float minScore = Mathf.Min(e, Mathf.Min(a, p));
+                int   curBonus = Mathf.FloorToInt(minScore * 4f);
+                // Next milestone: every 0.25 of min score adds one tower.
+                // We show total E+A+P / total needed if balanced, and how many towers that unlocks.
+                // Find the next min threshold and how many towers gained there.
+                float nextMin    = (curBonus + 1) / 4f;
+                float nextTotal  = nextMin * 3f;     // target total if all three types match next threshold
+                _towerMilestoneText.text = $"{total:0.0} / {nextTotal:0.0} (+1)";
+            }
         }
 
         // Lives
