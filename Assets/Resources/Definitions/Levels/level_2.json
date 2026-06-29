@@ -1,12 +1,36 @@
 {
     "id": "level_2",
-    "displayName": "The Fork",
+    "displayName": "Level Two",
     "startGold": 60,
     "startLives": 20,
-    "allowedTowers": ["basic_tower", "slow_tower", "shotgun_tower", "poison_tower", "research_tower", "income_tower", "boomerang_tower", "chain_tower", "root_tower", "bee_tower", "siphon_tower", "speed_aura_tower", "damage_aura_tower"],
+    "startTech": 0,
+    "startTier": 1,
     "backgroundSprite": "Art/Maps/level_2",
     "backgroundX": -1.8700000047683716,
     "backgroundY": 0.0,
+    "modifierColumns": [
+        {
+            "options": [
+                { "id": "gold_bonus", "displayName": "+25 Gold", "description": "Start with 25 extra gold.", "effectType": "StartingGold", "value": 25 },
+                { "id": "tech_bonus", "displayName": "+10 Tech", "description": "Start with 10 extra tech.", "effectType": "StartingTech", "value": 10 }
+            ]
+        }
+    ],
+    "allowedTowers": [
+        "basic_tower",
+        "slow_tower",
+        "shotgun_tower",
+        "poison_tower",
+        "research_tower",
+        "income_tower",
+        "boomerang_tower",
+        "chain_tower",
+        "root_tower",
+        "bee_tower",
+        "siphon_tower",
+        "speed_aura_tower",
+        "damage_aura_tower"
+    ],
     "paths": [
         {
             "spawnerIndex": 0,
@@ -63,24 +87,36 @@
     ],
     "placementZones": [
         {
+            "type": "circle",
             "x": -7.0,
             "y": 0.0,
-            "radius": 2.5
+            "radius": 2.5,
+            "width": 3.0,
+            "points": []
         },
         {
+            "type": "circle",
             "x": 0.0,
             "y": 3.5,
-            "radius": 2.0
+            "radius": 2.0,
+            "width": 3.0,
+            "points": []
         },
         {
+            "type": "circle",
             "x": 0.0,
             "y": -3.5,
-            "radius": 2.0
+            "radius": 2.0,
+            "width": 3.0,
+            "points": []
         },
         {
+            "type": "circle",
             "x": 7.0,
             "y": 0.0,
-            "radius": 2.5
+            "radius": 2.5,
+            "width": 3.0,
+            "points": []
         }
     ],
     "waves": [
@@ -89,17 +125,15 @@
                 {
                     "unitDefinitionId": "basic_enemy",
                     "count": 10,
-                    "spread": 0.4000000059604645,
                     "spawnInterval": 0.699999988079071,
-                    "groupDelay": 2.5,
+                    "startTime": 0.0,
                     "spawnerIndex": 0
                 },
                 {
                     "unitDefinitionId": "fast_enemy",
                     "count": 5,
-                    "spread": 0.5,
                     "spawnInterval": 0.5,
-                    "groupDelay": 2.0,
+                    "startTime": 0.0,
                     "spawnerIndex": 0
                 }
             ]
@@ -109,17 +143,15 @@
                 {
                     "unitDefinitionId": "basic_enemy",
                     "count": 10,
-                    "spread": 0.4000000059604645,
                     "spawnInterval": 0.6499999761581421,
-                    "groupDelay": 2.5,
+                    "startTime": 0.0,
                     "spawnerIndex": 0
                 },
                 {
                     "unitDefinitionId": "fast_enemy",
                     "count": 8,
-                    "spread": 0.5,
                     "spawnInterval": 0.44999998807907107,
-                    "groupDelay": 2.0,
+                    "startTime": 0.0,
                     "spawnerIndex": 0
                 }
             ]
@@ -129,25 +161,22 @@
                 {
                     "unitDefinitionId": "basic_enemy",
                     "count": 12,
-                    "spread": 0.4000000059604645,
                     "spawnInterval": 0.6000000238418579,
-                    "groupDelay": 2.5,
+                    "startTime": 0.0,
                     "spawnerIndex": 0
                 },
                 {
                     "unitDefinitionId": "fast_enemy",
                     "count": 6,
-                    "spread": 0.5,
                     "spawnInterval": 0.44999998807907107,
-                    "groupDelay": 2.5,
+                    "startTime": 0.0,
                     "spawnerIndex": 0
                 },
                 {
                     "unitDefinitionId": "armored_enemy",
                     "count": 2,
-                    "spread": 0.30000001192092898,
                     "spawnInterval": 1.7999999523162842,
-                    "groupDelay": 2.0,
+                    "startTime": 0.0,
                     "spawnerIndex": 0
                 }
             ]
@@ -157,25 +186,22 @@
                 {
                     "unitDefinitionId": "basic_enemy",
                     "count": 10,
-                    "spread": 0.4000000059604645,
                     "spawnInterval": 0.550000011920929,
-                    "groupDelay": 2.5,
+                    "startTime": 0.0,
                     "spawnerIndex": 0
                 },
                 {
                     "unitDefinitionId": "armored_enemy",
                     "count": 4,
-                    "spread": 0.30000001192092898,
                     "spawnInterval": 1.5,
-                    "groupDelay": 2.5,
+                    "startTime": 0.0,
                     "spawnerIndex": 0
                 },
                 {
                     "unitDefinitionId": "fast_enemy",
                     "count": 10,
-                    "spread": 0.5,
                     "spawnInterval": 0.4000000059604645,
-                    "groupDelay": 2.0,
+                    "startTime": 0.0,
                     "spawnerIndex": 0
                 }
             ]
@@ -185,25 +211,22 @@
                 {
                     "unitDefinitionId": "boss_enemy",
                     "count": 1,
-                    "spread": 0.0,
                     "spawnInterval": 1.0,
-                    "groupDelay": 3.0,
+                    "startTime": 0.0,
                     "spawnerIndex": 0
                 },
                 {
                     "unitDefinitionId": "basic_enemy",
                     "count": 10,
-                    "spread": 0.4000000059604645,
                     "spawnInterval": 0.5,
-                    "groupDelay": 2.5,
+                    "startTime": 0.0,
                     "spawnerIndex": 0
                 },
                 {
                     "unitDefinitionId": "fast_enemy",
                     "count": 8,
-                    "spread": 0.5,
                     "spawnInterval": 0.4000000059604645,
-                    "groupDelay": 2.0,
+                    "startTime": 0.0,
                     "spawnerIndex": 0
                 }
             ]

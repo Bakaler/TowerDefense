@@ -61,7 +61,8 @@ public class TowerInfo : MonoBehaviour
 
     // Total gold spent = base + all upgrade costs = resourceCost * (2^Tier - 1)
     public int TotalSpent  => resourceCost * ((1 << Tier) - 1);
-    public int SellRefund  => Mathf.RoundToInt(TotalSpent * 0.75f);
+    static bool FullRefundActive => ModifierSelection.Chosen.Exists(m => m.effectType == "FullRefund");
+    public int SellRefund  => Mathf.RoundToInt(TotalSpent * (FullRefundActive ? 1f : 0.75f));
 
     public void Sell(ResourceManagerScript rm)
     {

@@ -27,24 +27,33 @@ public class DroneSwarm : MonoBehaviour, IFactoryInitializable
     private Effect               _impactEffect;
     private string               _pendingEffectId;
 
+    public string droneSpritePath  = "";
+    public string bulletSpritePath = "";
+    public float  droneScale       = 1f;
+    public float  droneAnimFps     = 12f;
+
     [System.Serializable]
     class Data
     {
-        public int    droneCount     = 4;
-        public float  range          = 5f;
-        public float  cooldown       = 0.8f;
-        public float  damage         = 6f;
-        public float  bulletSpeed    = 14f;
-        public float  bulletLifetime = 0.6f;
-        public float  maxAwayTime    = 6f;
-        public float  restDuration   = 1f;
-        public float  droneColorR    = 1f;
-        public float  droneColorG    = 0.85f;
-        public float  droneColorB    = 0.1f;
-        public float  bulletColorR   = 1f;
-        public float  bulletColorG   = 0.95f;
-        public float  bulletColorB   = 0.3f;
-        public string effectId       = "drone_impact";
+        public int    droneCount      = 4;
+        public float  range           = 5f;
+        public float  cooldown        = 0.8f;
+        public float  damage          = 6f;
+        public float  bulletSpeed     = 14f;
+        public float  bulletLifetime  = 0.6f;
+        public float  maxAwayTime     = 6f;
+        public float  restDuration    = 1f;
+        public float  droneColorR     = 1f;
+        public float  droneColorG     = 0.85f;
+        public float  droneColorB     = 0.1f;
+        public float  bulletColorR    = 1f;
+        public float  bulletColorG    = 0.95f;
+        public float  bulletColorB    = 0.3f;
+        public string effectId        = "drone_impact";
+        public string droneSpritePath  = "";
+        public string bulletSpritePath = "";
+        public float  droneScale       = 1f;
+        public float  droneAnimFps     = 12f;
     }
 
     public void Initialize(string dataJson)
@@ -62,6 +71,10 @@ public class DroneSwarm : MonoBehaviour, IFactoryInitializable
         restDuration   = d.restDuration;
         droneColor     = new Color(d.droneColorR,  d.droneColorG,  d.droneColorB,  1f);
         bulletColor    = new Color(d.bulletColorR, d.bulletColorG, d.bulletColorB, 1f);
+        droneSpritePath  = d.droneSpritePath;
+        bulletSpritePath = d.bulletSpritePath;
+        droneScale       = d.droneScale;
+        droneAnimFps     = d.droneAnimFps;
         _pendingEffectId = d.effectId;
         if (!string.IsNullOrEmpty(d.effectId) && EffectLibrary.Instance != null)
             _impactEffect = EffectLibrary.Instance.GetEffect(d.effectId);
@@ -78,19 +91,27 @@ public class DroneSwarm : MonoBehaviour, IFactoryInitializable
 
     void SpawnDrones()
     {
+        Sprite[] frames = DroneFrames();
         for (int i = 0; i < droneCount; i++)
         {
             float a  = i * (360f / droneCount) * Mathf.Deg2Rad;
             var   go = new GameObject($"Drone_{i}");
             go.transform.position   = (Vector2)transform.position + new Vector2(Mathf.Cos(a), Mathf.Sin(a)) * 0.5f;
-            go.transform.localScale = Vector3.one * 0.125f;
+            go.transform.localScale = Vector3.one * droneScale;
             go.transform.SetParent(transform);
 
             var sr              = go.AddComponent<SpriteRenderer>();
-            sr.sprite           = DroneSprite();
-            sr.color            = droneColor;
-            sr.sortingLayerName = "Units";
-            sr.sortingOrder     = 15;
+            sr.sprite           = frames.Length > 0 ? frames[0] : DroneSprite();
+            sr.sortingLayerName = "Towers";
+            sr.sortingOrder     = 100;
+
+            if (frames.Length > 1)
+            {
+                float offset = i * (1f / droneAnimFps / droneCount);
+                var anim = go.AddComponent<SpriteAnimator>();
+                anim.Setup(frames, droneAnimFps);
+                anim.OffsetTime(offset);
+            }
 
             var drone            = go.AddComponent<Drone>();
             drone.swarm          = this;
@@ -101,6 +122,7 @@ public class DroneSwarm : MonoBehaviour, IFactoryInitializable
             drone.bulletSpeed    = bulletSpeed;
             drone.bulletLifetime = bulletLifetime;
             drone.bulletColor    = bulletColor;
+            drone.bulletSprite   = BulletSprite();
             drone.wanderRadius   = 0.8f;
             drone.noticeRange    = range;
             drone.maxAwayTime    = maxAwayTime + i * 0.5f;  // stagger returns so not all leave at once
@@ -113,10 +135,20 @@ public class DroneSwarm : MonoBehaviour, IFactoryInitializable
     // Returns raw damage; scaling is applied by Effect_Damage via OriginTower
     public float GetDamage() => damage;
 
-    static Sprite _droneSprite;
-    static Sprite DroneSprite()
+    Sprite[] DroneFrames()
     {
-        if (_droneSprite != null) return _droneSprite;
+        if (!string.IsNullOrEmpty(droneSpritePath))
+        {
+            var frames = Resources.LoadAll<Sprite>(droneSpritePath);
+            if (frames != null && frames.Length > 0) return frames;
+        }
+        return new Sprite[] { FallbackDroneSprite() };
+    }
+
+    Sprite DroneSprite() => DroneFrames()[0];
+
+    Sprite FallbackDroneSprite()
+    {
         const int S = 10;
         var tex = new Texture2D(S, S, TextureFormat.RGBA32, false);
         float cx = S / 2f, cy = S / 2f;
@@ -129,7 +161,16 @@ public class DroneSwarm : MonoBehaviour, IFactoryInitializable
             }
         tex.Apply();
         tex.filterMode = FilterMode.Point;
-        _droneSprite = Sprite.Create(tex, new Rect(0, 0, S, S), new Vector2(0.5f, 0.5f), S);
-        return _droneSprite;
+        return Sprite.Create(tex, new Rect(0, 0, S, S), new Vector2(0.5f, 0.5f), S);
+    }
+
+    Sprite BulletSprite()
+    {
+        if (!string.IsNullOrEmpty(bulletSpritePath))
+        {
+            var loaded = Resources.Load<Sprite>(bulletSpritePath);
+            if (loaded != null) return loaded;
+        }
+        return null;
     }
 }

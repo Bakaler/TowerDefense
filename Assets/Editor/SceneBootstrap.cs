@@ -117,14 +117,14 @@ public static class SceneBootstrap
         canvas.renderMode   = RenderMode.ScreenSpaceOverlay;
         canvas.sortingOrder = 5;
 
-        var scaler                = shopRoot.AddComponent<UnityEngine.UI.CanvasScaler>();
-        scaler.uiScaleMode        = UnityEngine.UI.CanvasScaler.ScaleMode.ScaleWithScreenSize;
+        var scaler                 = shopRoot.AddComponent<UnityEngine.UI.CanvasScaler>();
+        scaler.uiScaleMode         = UnityEngine.UI.CanvasScaler.ScaleMode.ScaleWithScreenSize;
         scaler.referenceResolution = new Vector2(1920f, 1080f);
         scaler.matchWidthOrHeight  = 0.5f;
 
         shopRoot.AddComponent<UnityEngine.UI.GraphicRaycaster>();
 
-        var panel   = new GameObject("ShopPanel");
+        var panel = new GameObject("ShopPanel");
         Undo.RegisterCreatedObjectUndo(panel, "Create ShopPanel");
         panel.transform.SetParent(shopRoot.transform, false);
 
@@ -139,90 +139,9 @@ public static class SceneBootstrap
         panelImg.color         = new Color(0.1f, 0.1f, 0.15f, 0.92f);
         panelImg.raycastTarget = false;
 
-        var columns = new (string id, string label, string cost)[][]
-        {
-            new[] {
-                ("basic_tower",    "Basic\nTower",    "3g"),
-                ("shotgun_tower",  "Shotgun\nTower",  "5g"),
-                ("research_tower", "Research\nTower", "6g"),
-                ("slow_tower",     "Slow\nTower",     "3g"),
-                ("income_tower",   "Income\nTower",   "5g"),
-            },
-            new[] {
-                ("boomerang_tower",   "Boomerang\nTower",   "5g"),
-                ("bee_tower",         "Bee\nTower",         "6g"),
-                ("damage_aura_tower", "Damage\nAura",       "7g"),
-                ("chain_tower",       "Chain\nTower",       "6g"),
-                ("speed_aura_tower",  "Speed\nAura",        "7g"),
-                ("entropy_tower",     "Entropy\nTower",     "8g"),
-                ("siphon_tower",      "Siphon\nTower",      "4g"),
-                ("poison_tower",      "Poison\nTower",      "6g"),
-                ("root_tower",        "Root\nTower",        "7g"),
-                ("sniper_tower",      "Sniper\nTower",      "8g"),
-            },
-            new[] {
-                ("mortar_tower",    "Mortar\nTower",    "7g"),
-                ("railgun_tower",   "Railgun\nTower",   "9g"),
-                ("laser_tower",     "Laser\nTower",     "7g"),
-                ("collector_tower", "Collector\nTower", "7g"),
-            },
-        };
-
-        const float btnW     = 85f;
-        const float btnH     = 80f;
-        const float stepY    = -86f;
-        const float startY   = -46f;
-        const float colStep  = 95f;
-        const float colStart = -colStep;
-
-        for (int col = 0; col < columns.Length; col++)
-        {
-            float xOff = colStart + colStep * col;
-            for (int row = 0; row < columns[col].Length; row++)
-            {
-                var (towerId, label, cost) = columns[col][row];
-
-                var btnGO = new GameObject($"Buy_{towerId}");
-                Undo.RegisterCreatedObjectUndo(btnGO, "Create TowerButton");
-                btnGO.transform.SetParent(panel.transform, false);
-
-                var rt              = btnGO.AddComponent<RectTransform>();
-                rt.anchorMin        = new Vector2(0.5f, 1f);
-                rt.anchorMax        = new Vector2(0.5f, 1f);
-                rt.pivot            = new Vector2(0.5f, 1f);
-                rt.anchoredPosition = new Vector2(xOff, startY + stepY * row);
-                rt.sizeDelta        = new Vector2(btnW, btnH);
-
-                var img   = btnGO.AddComponent<UnityEngine.UI.Image>();
-                img.color = new Color(0.18f, 0.20f, 0.28f, 1f);
-
-                var btn = btnGO.AddComponent<UnityEngine.UI.Button>();
-                btn.targetGraphic = img;
-                var cols = btn.colors;
-                cols.highlightedColor = new Color(0.28f, 0.32f, 0.44f, 1f);
-                cols.pressedColor     = new Color(0.12f, 0.14f, 0.20f, 1f);
-                btn.colors = cols;
-
-                var shopBtn     = btnGO.AddComponent<TowerShopButton>();
-                shopBtn.towerId = towerId;
-                UnityEventTools.AddPersistentListener(btn.onClick, shopBtn.OnButtonPress);
-
-                var labelGO = new GameObject("Label");
-                Undo.RegisterCreatedObjectUndo(labelGO, "Create Label");
-                labelGO.transform.SetParent(btnGO.transform, false);
-                var labelRT       = labelGO.AddComponent<RectTransform>();
-                labelRT.anchorMin = Vector2.zero;
-                labelRT.anchorMax = Vector2.one;
-                labelRT.offsetMin = Vector2.zero;
-                labelRT.offsetMax = Vector2.zero;
-                var labelTxt      = labelGO.AddComponent<UnityEngine.UI.Text>();
-                labelTxt.text      = $"{label}\n<size=13>({cost})</size>";
-                labelTxt.color     = Color.white;
-                labelTxt.font      = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-                labelTxt.fontSize  = 15;
-                labelTxt.alignment = TextAnchor.MiddleCenter;
-            }
-        }
+        // TowerShop builds buttons at runtime from the level's allowedTowers list
+        var shop       = shopRoot.AddComponent<TowerShop>();
+        shop.shopPanel = panelRT;
     }
 
     // ── Helpers ───────────────────────────────────────────────────────

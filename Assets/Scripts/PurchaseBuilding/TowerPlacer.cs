@@ -24,11 +24,15 @@ public class TowerPlacer : MonoBehaviour
     [Tooltip("Painted placement zones asset. If null, placement is allowed anywhere.")]
     public PlacementZones placementZones;
 
+    [Header("Rotation")]
+    public float rotateSpeed = 120f;
+
     // ── State ─────────────────────────────────────────────────────────
     private string        _selectedId;
     private GameObject    _ghost;
     private LineRenderer  _footprintCircle;
     private float         _footprintRadius;
+    private float         _ghostRotation;
     public bool           IsPlacing => !string.IsNullOrEmpty(_selectedId);
 
     // ── Lifecycle ─────────────────────────────────────────────────────
@@ -46,9 +50,16 @@ public class TowerPlacer : MonoBehaviour
 
         Vector2 worldPos = GetMouseWorldPos();
 
-        // Move ghost
+        // Rotate ghost with Q/E
+        if (Input.GetKey(KeyCode.Q)) _ghostRotation += rotateSpeed * Time.deltaTime;
+        if (Input.GetKey(KeyCode.E)) _ghostRotation -= rotateSpeed * Time.deltaTime;
+
+        // Move + orient ghost
         if (_ghost != null)
+        {
             _ghost.transform.position = worldPos;
+            _ghost.transform.rotation = Quaternion.Euler(0f, 0f, _ghostRotation);
+        }
 
         // Update footprint circle color: red = blocked, green = clear
         if (_footprintCircle != null)
@@ -102,6 +113,7 @@ public class TowerPlacer : MonoBehaviour
     {
         _selectedId      = null;
         _footprintCircle = null;
+        _ghostRotation   = 0f;
         if (_ghost != null) { Destroy(_ghost); _ghost = null; }
     }
 
@@ -152,7 +164,7 @@ public class TowerPlacer : MonoBehaviour
         }
 
         // Build real tower
-        var go = TowerFactory.Instance.Build(_selectedId, worldPos);
+        var go = TowerFactory.Instance.Build(_selectedId, worldPos, _ghostRotation);
         if (go == null) { Cancel(); return; }
 
         // Deduct cost

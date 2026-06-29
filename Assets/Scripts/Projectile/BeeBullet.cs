@@ -21,8 +21,10 @@ public class BeeBullet : MonoBehaviour
     {
         if (_hit) return;
         if (target == null || !target.isAlive) { Destroy(gameObject); return; }
-        transform.position = Vector2.MoveTowards(
-            transform.position, target.transform.position, moveSpeed * Time.deltaTime);
+        Vector2 dir = (Vector2)(target.transform.position - transform.position);
+        transform.position = Vector2.MoveTowards(transform.position, target.transform.position, moveSpeed * Time.deltaTime);
+        if (dir.sqrMagnitude > 0.001f)
+            transform.rotation = Quaternion.Euler(0f, 0f, Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg - 90f);
     }
 
     void OnTriggerEnter2D(Collider2D other)

@@ -33,7 +33,7 @@ public class TowerFactory : MonoBehaviour
 
     // ── Public API ────────────────────────────────────────────────────
 
-    public GameObject Build(string definitionId, Vector3 position)
+    public GameObject Build(string definitionId, Vector3 position, float rotationZ = 0f)
     {
         if (TowerDefinitionLibrary.Instance == null)
         {
@@ -47,16 +47,17 @@ public class TowerFactory : MonoBehaviour
             return null;
         }
 
-        return BuildFromDefinition(def, position);
+        return BuildFromDefinition(def, position, rotationZ);
     }
 
-    public GameObject BuildFromDefinition(TowerDefinition def, Vector3 position)
+    public GameObject BuildFromDefinition(TowerDefinition def, Vector3 position, float rotationZ = 0f)
     {
         if (def == null) return null;
 
         // ── 1. Create GameObject ───────────────────────────────────
         var go = new GameObject(def.displayName ?? def.id);
         go.transform.position = position;
+        go.transform.rotation = Quaternion.Euler(0f, 0f, rotationZ);
 
         // ── 2. Physics ────────────────────────────────────────────
         var rb = go.AddComponent<Rigidbody2D>();

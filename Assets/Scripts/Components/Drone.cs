@@ -16,6 +16,7 @@ public class Drone : MonoBehaviour
     public float      bulletSpeed;
     public float      bulletLifetime;
     public Color      bulletColor;
+    public Sprite     bulletSprite;
 
     public float moveSpeed    = 2.8f;
     public float engageSpeed  = 4.2f;
@@ -162,7 +163,7 @@ public class Drone : MonoBehaviour
     {
         var go = new GameObject("DroneBullet");
         go.transform.position   = transform.position;
-        go.transform.localScale = Vector3.one * 0.22f;
+        go.transform.localScale = Vector3.one * 0.5f;
 
         var rb = go.AddComponent<Rigidbody2D>();
         rb.bodyType = RigidbodyType2D.Kinematic; rb.gravityScale = 0f;
@@ -183,10 +184,10 @@ public class Drone : MonoBehaviour
         b.originTower   = swarm != null ? swarm.gameObject : null;
     }
 
-    static Sprite _bulletSprite;
-    static Sprite BulletSprite()
+    Sprite BulletSprite()
     {
-        if (_bulletSprite != null) return _bulletSprite;
+        if (bulletSprite != null) return bulletSprite;
+        // Fallback: generated circle
         const int S = 6;
         var tex = new Texture2D(S, S, TextureFormat.RGBA32, false);
         float c = S / 2f, r = S / 2f - 0.5f;
@@ -197,7 +198,6 @@ public class Drone : MonoBehaviour
                 tex.SetPixel(x, y, dx * dx + dy * dy <= r * r ? Color.white : Color.clear);
             }
         tex.Apply(); tex.filterMode = FilterMode.Point;
-        _bulletSprite = Sprite.Create(tex, new Rect(0, 0, S, S), new Vector2(0.5f, 0.5f), S);
-        return _bulletSprite;
+        return Sprite.Create(tex, new Rect(0, 0, S, S), new Vector2(0.5f, 0.5f), S);
     }
 }

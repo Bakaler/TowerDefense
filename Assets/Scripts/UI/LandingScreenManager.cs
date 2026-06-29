@@ -3,7 +3,7 @@ using UnityEngine.SceneManagement;
 
 public class LandingScreenManager : MonoBehaviour
 {
-    public string gameSceneName = "GameScene";
+    public string levelSelectSceneName = "LevelSelectionScene";
 
-    public void OnPlayPressed() => SceneManager.LoadScene(gameSceneName);
+    public void OnPlayPressed() => SceneManager.LoadScene(levelSelectSceneName);
 }

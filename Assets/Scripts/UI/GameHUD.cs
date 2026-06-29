@@ -143,8 +143,8 @@ public class GameHUD : MonoBehaviour
         BuildEnemyPanel(canvasGO);
         BuildResearchPanel(canvasGO);
         BuildDebugPanel(canvasGO);
-        _gameOverPanel = BuildOverlay(canvasGO, "GameOverPanel",  "GAME OVER", C_GameOver,  "Restart",    WaveManager.Restart);
-        _victoryPanel  = BuildOverlay(canvasGO, "VictoryPanel",   "VICTORY",   C_Victory,   "Play Again", WaveManager.Restart);
+        _gameOverPanel = BuildOverlay(canvasGO, "GameOverPanel", "GAME OVER", C_GameOver, isVictory: false);
+        _victoryPanel  = BuildOverlay(canvasGO, "VictoryPanel",  "VICTORY",   C_Victory,  isVictory: true);
 
         _gameOverPanel.SetActive(false);
         _victoryPanel.SetActive(false);
@@ -1177,9 +1177,7 @@ public class GameHUD : MonoBehaviour
 
     // ── Overlay builder ───────────────────────────────────────────────
 
-    GameObject BuildOverlay(GameObject root, string goName,
-        string title, Color titleColor, string btnText,
-        UnityEngine.Events.UnityAction onBtn)
+    GameObject BuildOverlay(GameObject root, string goName, string title, Color titleColor, bool isVictory)
     {
         var panel = new GameObject(goName);
         panel.transform.SetParent(root.transform, false);
@@ -1196,57 +1194,73 @@ public class GameHUD : MonoBehaviour
         var titleGO = new GameObject("Title");
         titleGO.transform.SetParent(panel.transform, false);
         var tRT = titleGO.AddComponent<RectTransform>();
-        tRT.anchorMin        = new Vector2(0.5f, 0.5f);
-        tRT.anchorMax        = new Vector2(0.5f, 0.5f);
-        tRT.pivot            = new Vector2(0.5f, 0.5f);
-        tRT.anchoredPosition = new Vector2(0f, 80f);
+        tRT.anchorMin = tRT.anchorMax = tRT.pivot = new Vector2(0.5f, 0.5f);
+        tRT.anchoredPosition = new Vector2(0f, 100f);
         tRT.sizeDelta        = new Vector2(900f, 120f);
-
         var tTxt = titleGO.AddComponent<Text>();
-        tTxt.text      = title;
-        tTxt.color     = titleColor;
-        tTxt.font      = GetFont();
-        tTxt.fontSize  = 80;
-        tTxt.fontStyle = FontStyle.Bold;
+        tTxt.text = title; tTxt.color = titleColor; tTxt.font = GetFont();
+        tTxt.fontSize = 80; tTxt.fontStyle = FontStyle.Bold;
         tTxt.alignment = TextAnchor.MiddleCenter;
 
         // Subtitle
         var subGO = new GameObject("Sub");
         subGO.transform.SetParent(panel.transform, false);
         var sRT = subGO.AddComponent<RectTransform>();
-        sRT.anchorMin        = new Vector2(0.5f, 0.5f);
-        sRT.anchorMax        = new Vector2(0.5f, 0.5f);
-        sRT.pivot            = new Vector2(0.5f, 0.5f);
-        sRT.anchoredPosition = new Vector2(0f, 10f);
+        sRT.anchorMin = sRT.anchorMax = sRT.pivot = new Vector2(0.5f, 0.5f);
+        sRT.anchoredPosition = new Vector2(0f, 20f);
         sRT.sizeDelta        = new Vector2(700f, 60f);
-
         var subTxt = subGO.AddComponent<Text>();
-        subTxt.text      = goName == "GameOverPanel" ? "Your base has been breached." : "All waves repelled.";
+        subTxt.text      = isVictory ? "All waves repelled!" : "Your base has been breached.";
         subTxt.color     = new Color(0.8f, 0.8f, 0.85f, 1f);
-        subTxt.font      = GetFont();
-        subTxt.fontSize  = 28;
+        subTxt.font      = GetFont(); subTxt.fontSize = 28;
         subTxt.alignment = TextAnchor.MiddleCenter;
 
-        // Button
-        var bGO = new GameObject("RestartButton");
-        bGO.transform.SetParent(panel.transform, false);
-        var bRT = bGO.AddComponent<RectTransform>();
-        bRT.anchorMin        = new Vector2(0.5f, 0.5f);
-        bRT.anchorMax        = new Vector2(0.5f, 0.5f);
-        bRT.pivot            = new Vector2(0.5f, 0.5f);
-        bRT.anchoredPosition = new Vector2(0f, -80f);
-        bRT.sizeDelta        = new Vector2(280f, 62f);
+        // Three buttons: Restart / Next Level (victory only) / Main Menu
+        float btnY    = -70f;
+        float btnGap  = 80f;
 
-        var bImg = bGO.AddComponent<Image>();
-        bImg.color = C_BtnRestart;
-        var btn = bGO.AddComponent<Button>();
-        btn.targetGraphic = bImg;
-        btn.onClick.AddListener(onBtn);
+        MakeOverlayBtn(panel, "RestartBtn",  new Vector2(0f, btnY),
+            isVictory ? "Play Again" : "Restart", C_BtnRestart, WaveManager.Restart);
 
-        AddLabel(bGO, "Label", Vector2.zero, Vector2.one,
-            btnText, Color.white, 26, TextAnchor.MiddleCenter, bold: true);
+        if (isVictory)
+        {
+            MakeOverlayBtn(panel, "NextBtn", new Vector2(0f, btnY - btnGap),
+                "Next Level", new Color(0.18f, 0.65f, 0.28f, 1f), GoNextLevel);
+            btnY -= btnGap;
+        }
+
+        MakeOverlayBtn(panel, "MenuBtn", new Vector2(0f, btnY - btnGap),
+            "Main Menu", new Color(0.30f, 0.30f, 0.36f, 1f),
+            () => UnityEngine.SceneManagement.SceneManager.LoadScene("LandingScene"));
 
         return panel;
+    }
+
+    void MakeOverlayBtn(GameObject parent, string name, Vector2 pos, string label, Color color,
+        UnityEngine.Events.UnityAction onClick)
+    {
+        var go = new GameObject(name);
+        go.transform.SetParent(parent.transform, false);
+        var bRT = go.AddComponent<RectTransform>();
+        bRT.anchorMin = bRT.anchorMax = bRT.pivot = new Vector2(0.5f, 0.5f);
+        bRT.anchoredPosition = pos;
+        bRT.sizeDelta        = new Vector2(280f, 62f);
+        var img = go.AddComponent<Image>(); img.color = color;
+        var btn = go.AddComponent<Button>(); btn.targetGraphic = img;
+        btn.onClick.AddListener(onClick);
+        AddLabel(go, "Label", Vector2.zero, Vector2.one, label, Color.white, 26, TextAnchor.MiddleCenter, bold: true);
+    }
+
+    static void GoNextLevel()
+    {
+        int next = LevelSelection.SelectedLevel + 1;
+        var ta = Resources.Load<TextAsset>($"Definitions/Levels/level_{next}");
+        if (ta == null) { UnityEngine.SceneManagement.SceneManager.LoadScene("LevelSelectionScene"); return; }
+        LevelSelection.SelectedLevel = next;
+        ModifierSelection.Clear();
+        var data = JsonUtility.FromJson<LevelData>(ta.text);
+        bool hasMods = data?.modifierColumns != null && data.modifierColumns.Length > 0;
+        UnityEngine.SceneManagement.SceneManager.LoadScene(hasMods ? "ModifierSelectScene" : "GameScene");
     }
 
     // ── Update ────────────────────────────────────────────────────────
@@ -1374,15 +1388,13 @@ public class GameHUD : MonoBehaviour
             if (_towerMilestoneText != null)
             {
                 float e = bm.Elemental, a = bm.Arcane, p = bm.Physical;
-                float total    = e + a + p;
-                float minScore = Mathf.Min(e, Mathf.Min(a, p));
-                int   curBonus = Mathf.FloorToInt(minScore * 4f);
-                // Next milestone: every 0.25 of min score adds one tower.
-                // We show total E+A+P / total needed if balanced, and how many towers that unlocks.
-                // Find the next min threshold and how many towers gained there.
-                float nextMin    = (curBonus + 1) / 4f;
-                float nextTotal  = nextMin * 3f;     // target total if all three types match next threshold
-                _towerMilestoneText.text = $"{total:0.0} / {nextTotal:0.0} (+1)";
+                float total = e + a + p;
+                int[] thresholds = { 12, 36, 80 };
+                int   iTotal     = Mathf.FloorToInt(total);
+                int   next       = -1;
+                foreach (int t in thresholds) if (iTotal < t) { next = t; break; }
+                string nextStr = next >= 0 ? next.ToString() : "max";
+                _towerMilestoneText.text = $"{iTotal} / {nextStr}";
             }
         }
 

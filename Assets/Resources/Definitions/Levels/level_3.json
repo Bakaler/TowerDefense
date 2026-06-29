@@ -1,12 +1,55 @@
 {
     "id": "level_3",
-    "displayName": "The Gauntlet",
-    "startGold": 75,
-    "startLives": 20,
-    "allowedTowers": ["basic_tower", "slow_tower", "shotgun_tower", "poison_tower", "research_tower", "income_tower", "boomerang_tower", "chain_tower", "root_tower", "bee_tower", "siphon_tower", "speed_aura_tower", "damage_aura_tower", "sniper_tower", "entropy_tower", "mortar_tower", "railgun_tower", "laser_tower", "collector_tower"],
+    "displayName": "The Tree Line",
+    "startGold": 125,
+    "startLives": 100,
+    "startTech": 50,
+    "startTier": 2,
     "backgroundSprite": "Art/Maps/level_3",
     "backgroundX": -1.8700000047683716,
     "backgroundY": 0.0,
+    "modifierColumns": [
+        {
+            "options": [
+                { "id": "gold_10",     "displayName": "+10 Gold",     "description": "Start with 10 extra gold.",     "effectType": "StartingGold",  "value": 10 },
+                { "id": "research_10", "displayName": "+10 Research",  "description": "Start with 10 extra research.", "effectType": "StartingTech",  "value": 10 }
+            ]
+        },
+        {
+            "options": [
+                { "id": "lives_10",     "displayName": "+10 Lives",       "description": "Start with 10 extra lives.",            "effectType": "StartingLives",  "value": 10 },
+                { "id": "full_refund",  "displayName": "Full Refunds",    "description": "All towers are sold at 100% value.",     "effectType": "FullRefund",     "value": 1 }
+            ]
+        },
+        {
+            "options": [
+                { "id": "speed_up",  "displayName": "Swift Towers", "description": "All towers fire 15% faster.",      "effectType": "TowerSpeedMult",  "value": 0.15 },
+                { "id": "range_up",  "displayName": "Far Sight",    "description": "All towers have 20% more range.",  "effectType": "TowerRangeMult",  "value": 0.20 },
+                { "id": "damage_up", "displayName": "Heavy Shots",  "description": "All towers deal 20% more damage.", "effectType": "TowerDamageMult", "value": 0.20 }
+            ]
+        }
+    ],
+    "allowedTowers": [
+        "basic_tower",
+        "slow_tower",
+        "shotgun_tower",
+        "poison_tower",
+        "research_tower",
+        "income_tower",
+        "boomerang_tower",
+        "chain_tower",
+        "root_tower",
+        "bee_tower",
+        "siphon_tower",
+        "speed_aura_tower",
+        "damage_aura_tower",
+        "sniper_tower",
+        "entropy_tower",
+        "mortar_tower",
+        "railgun_tower",
+        "laser_tower",
+        "collector_tower"
+    ],
     "paths": [
         {
             "spawnerIndex": 1,

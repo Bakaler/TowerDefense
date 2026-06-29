@@ -19,7 +19,21 @@ public class LevelEditorWindow : EditorWindow
     readonly Dictionary<int, bool> _waveFoldouts = new();
 
     WaveCollection _waveData;
-    string[]       _unitIds = System.Array.Empty<string>();
+    string[]       _unitIds   = System.Array.Empty<string>();
+    string[]       _towerIds  = System.Array.Empty<string>();
+
+    // Level settings (editable in the window, saved via button)
+    string              _editName   = "";
+    int                 _editGold   = 25;
+    int                 _editLives  = 20;
+    int                 _editTech   = 0;
+    int                 _editTier   = 1;
+    HashSet<string>     _allowedSet = new();
+    bool                _settingsFoldout = true;
+
+    // Modifier columns editor state
+    List<List<ModifierDef>> _modColumns = new List<List<ModifierDef>>();
+    bool _modifiersFoldout = false;
 
     // Group drag-reorder state (within a wave)
     int                           _dragGroupWave = -1;
@@ -72,6 +86,11 @@ public class LevelEditorWindow : EditorWindow
 
         _scroll = GUILayout.BeginScrollView(_scroll);
         GUILayout.Space(6);
+
+        // ── Settings ──────────────────────────────────────────────────
+        DrawSettings();
+
+        GUILayout.Space(8);
 
         // ── Background ────────────────────────────────────────────────
         GUILayout.Label("Background", EditorStyles.miniBoldLabel);
@@ -148,6 +167,102 @@ public class LevelEditorWindow : EditorWindow
 
         GUILayout.Space(8);
         GUILayout.EndScrollView();
+    }
+
+    // ── Settings section ──────────────────────────────────────────────
+
+    void DrawSettings()
+    {
+        _settingsFoldout = EditorGUILayout.Foldout(_settingsFoldout, "Level Settings", true, EditorStyles.foldoutHeader);
+        if (!_settingsFoldout) return;
+
+        EditorGUI.indentLevel++;
+
+        _editName  = EditorGUILayout.TextField("Display Name",    _editName);
+        _editGold  = EditorGUILayout.IntField ("Start Gold",      _editGold);
+        _editLives = EditorGUILayout.IntField ("Start Lives",     _editLives);
+        _editTech  = EditorGUILayout.IntField ("Start Tech",      _editTech);
+        _editTier  = EditorGUILayout.IntField ("Start Tier",      _editTier);
+
+        GUILayout.Space(4);
+        GUILayout.Label("Allowed Towers  (unchecked = all allowed)", EditorStyles.miniLabel);
+
+        if (_towerIds.Length == 0)
+            GUILayout.Label("  No towers.json found.", EditorStyles.miniLabel);
+        else
+        {
+            foreach (var id in _towerIds)
+            {
+                bool was = _allowedSet.Contains(id);
+                bool now = EditorGUILayout.ToggleLeft(id, was);
+                if (now != was) { if (now) _allowedSet.Add(id); else _allowedSet.Remove(id); }
+            }
+        }
+
+        GUILayout.Space(6);
+        _modifiersFoldout = EditorGUILayout.Foldout(_modifiersFoldout, "Modifier Columns", true);
+        if (_modifiersFoldout)
+        {
+            EditorGUI.indentLevel++;
+            for (int ci = 0; ci < _modColumns.Count; ci++)
+            {
+                GUILayout.BeginHorizontal();
+                GUILayout.Label($"Column {ci + 1}", EditorStyles.boldLabel);
+                if (GUILayout.Button("+ Option", GUILayout.Width(70)))
+                    _modColumns[ci].Add(new ModifierDef());
+                GUI.color = Color.red;
+                if (GUILayout.Button("✕ Col", GUILayout.Width(54))) { _modColumns.RemoveAt(ci); break; }
+                GUI.color = Color.white;
+                GUILayout.EndHorizontal();
+
+                var col = _modColumns[ci];
+                for (int oi = 0; oi < col.Count; oi++)
+                {
+                    var m = col[oi];
+                    EditorGUI.indentLevel++;
+                    m.displayName = EditorGUILayout.TextField("Name",        m.displayName);
+                    m.description = EditorGUILayout.TextField("Description", m.description);
+                    m.effectType  = EditorGUILayout.TextField("Effect Type", m.effectType);
+                    m.value       = EditorGUILayout.FloatField("Value",      m.value);
+                    m.id          = m.effectType.ToLower() + "_" + oi;
+                    GUI.color = Color.red;
+                    if (GUILayout.Button("Remove Option", GUILayout.Width(120))) { col.RemoveAt(oi); break; }
+                    GUI.color = Color.white;
+                    EditorGUI.indentLevel--;
+                    GUILayout.Space(2);
+                }
+            }
+
+            if (GUILayout.Button("+ Add Column", GUILayout.Width(120)))
+                _modColumns.Add(new List<ModifierDef>());
+            EditorGUI.indentLevel--;
+        }
+
+        EditorGUI.indentLevel--;
+
+        GUILayout.Space(4);
+        GUI.backgroundColor = new Color(1f, 0.85f, 0.4f);
+        if (GUILayout.Button("Save Settings  →  JSON", GUILayout.Height(30)))
+            SaveSettings(_activeLevel);
+        GUI.backgroundColor = Color.white;
+    }
+
+    void SaveSettings(int levelNumber)
+    {
+        var data = ReadJSON(levelNumber) ?? MakeBlank(levelNumber);
+        data.displayName   = _editName;
+        data.startGold     = _editGold;
+        data.startLives    = _editLives;
+        data.startTech     = _editTech;
+        data.startTier     = _editTier;
+        data.allowedTowers = _allowedSet.Count > 0
+            ? new List<string>(_allowedSet).ToArray()
+            : System.Array.Empty<string>();
+        data.modifierColumns = _modColumns.Count > 0
+            ? _modColumns.ConvertAll(col => new ModifierColumn { options = col.ToArray() }).ToArray()
+            : System.Array.Empty<ModifierColumn>();
+        WriteJSON(levelNumber, data);
+        EditorUtility.DisplayDialog("Saved", $"Level {levelNumber} settings saved.", "OK");
     }
 
     // ── Path list ─────────────────────────────────────────────────────
@@ -602,7 +717,20 @@ public class LevelEditorWindow : EditorWindow
         WaveGraphWindow.Refresh(_waveData, _unitIds);
 
         // Unit IDs for dropdown
-        _unitIds = LoadUnitIds();
+        _unitIds  = LoadUnitIds();
+        _towerIds = LoadTowerIds();
+
+        // Populate settings fields
+        _editName   = data.displayName;
+        _editGold   = data.startGold;
+        _editLives  = data.startLives;
+        _editTech   = data.startTech;
+        _editTier   = data.startTier;
+        _allowedSet  = new HashSet<string>(data.allowedTowers ?? System.Array.Empty<string>());
+        _modColumns  = new List<List<ModifierDef>>();
+        if (data.modifierColumns != null)
+            foreach (var col in data.modifierColumns)
+                _modColumns.Add(new List<ModifierDef>(col.options ?? System.Array.Empty<ModifierDef>()));
 
         _activeLevel = levelNumber;
         SessionState.SetInt(SessionKey, levelNumber);
@@ -1119,6 +1247,17 @@ public class LevelEditorWindow : EditorWindow
         return null;
     }
 
+    string[] LoadTowerIds()
+    {
+        var ta = Resources.Load<TextAsset>("Definitions/towers");
+        if (ta == null) return System.Array.Empty<string>();
+        var col = JsonUtility.FromJson<TowerDefCollection>(ta.text);
+        if (col?.towers == null || col.towers.Count == 0) return System.Array.Empty<string>();
+        var ids = new string[col.towers.Count];
+        for (int i = 0; i < col.towers.Count; i++) ids[i] = col.towers[i].id;
+        return ids;
+    }
+
     string[] LoadUnitIds()
     {
         var ta = Resources.Load<TextAsset>("Definitions/units");
@@ -1130,8 +1269,10 @@ public class LevelEditorWindow : EditorWindow
         return ids;
     }
 
-    [System.Serializable] class UnitDefCollection { public List<UnitDefStub> units; }
-    [System.Serializable] class UnitDefStub       { public string id; }
+    [System.Serializable] class UnitDefCollection  { public List<UnitDefStub>  units; }
+    [System.Serializable] class UnitDefStub        { public string id; }
+    [System.Serializable] class TowerDefCollection { public List<TowerDefStub> towers; }
+    [System.Serializable] class TowerDefStub       { public string id; }
 
     // ── JSON helpers ──────────────────────────────────────────────────
 

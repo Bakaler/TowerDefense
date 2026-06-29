@@ -11,9 +11,11 @@ using UnityEngine.Rendering.Universal;
 /// </summary>
 public class SceneGeneratorsWindow : EditorWindow
 {
-    static readonly string[] _tabs = { "Wave Scene", "Landing Scene" };
+    static readonly string[] _tabs = { "Wave Scene", "Landing Scene", "Level Select Scene", "Modifier Select Scene" };
     int    _tab;
-    string _gameSceneName = "GameScene";
+    string _levelSelectSceneName   = "LevelSelectionScene";
+    string _modifierSelectSceneName = "ModifierSelectScene";
+    string _gameSceneName          = "GameScene";
 
     [MenuItem("TowerDefense/Scene Generators")]
     public static void Open() => GetWindow<SceneGeneratorsWindow>("Scene Generators");
@@ -23,8 +25,10 @@ public class SceneGeneratorsWindow : EditorWindow
         _tab = GUILayout.Toolbar(_tab, _tabs);
         GUILayout.Space(10);
 
-        if (_tab == 0) DrawWaveScene();
-        else           DrawLandingScene();
+        if      (_tab == 0) DrawWaveScene();
+        else if (_tab == 1) DrawLandingScene();
+        else if (_tab == 2) DrawLevelSelectScene();
+        else                DrawModifierSelectScene();
     }
 
     // ── Tab 0: Wave Scene ─────────────────────────────────────────────
@@ -53,7 +57,7 @@ public class SceneGeneratorsWindow : EditorWindow
             MessageType.Info);
 
         GUILayout.Space(8);
-        _gameSceneName = EditorGUILayout.TextField("Game Scene Name", _gameSceneName);
+        _levelSelectSceneName = EditorGUILayout.TextField("Level Select Scene Name", _levelSelectSceneName);
         GUILayout.Space(8);
 
         if (GUILayout.Button("Generate Landing Scene", GUILayout.Height(36)))
@@ -102,8 +106,8 @@ public class SceneGeneratorsWindow : EditorWindow
         // ── LandingManager ────────────────────────────────────────────
         var mgr    = new GameObject("[LandingManager]");
         Undo.RegisterCreatedObjectUndo(mgr, "Create LandingManager");
-        var lsm              = mgr.AddComponent<LandingScreenManager>();
-        lsm.gameSceneName    = _gameSceneName;
+        var lsm                    = mgr.AddComponent<LandingScreenManager>();
+        lsm.levelSelectSceneName   = _levelSelectSceneName;
 
         // ── Canvas ────────────────────────────────────────────────────
         var canvasGO = new GameObject("--- LANDING UI ---");
@@ -121,6 +125,8 @@ public class SceneGeneratorsWindow : EditorWindow
         canvasGO.AddComponent<UnityEngine.UI.GraphicRaycaster>();
 
         // ── EventSystem (required for UI button clicks) ───────────────
+        foreach (var existing in Object.FindObjectsByType<UnityEngine.EventSystems.EventSystem>(FindObjectsSortMode.None))
+            Undo.DestroyObjectImmediate(existing.gameObject);
         var esGO = new GameObject("EventSystem");
         Undo.RegisterCreatedObjectUndo(esGO, "Create EventSystem");
         esGO.AddComponent<UnityEngine.EventSystems.EventSystem>();
@@ -186,6 +192,144 @@ public class SceneGeneratorsWindow : EditorWindow
         EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
 
         Debug.Log($"[SceneGenerators] Landing scene built. Play button loads \"{_gameSceneName}\".");
+    }
+
+    // ── Tab 2: Level Select Scene ─────────────────────────────────────
+
+    void DrawLevelSelectScene()
+    {
+        EditorGUILayout.HelpBox(
+            "Generates a level-select scene that reads level_N.json files at runtime.\n" +
+            "Run this in a blank scene saved as LevelSelectScene.",
+            MessageType.Info);
+
+        GUILayout.Space(8);
+        _gameSceneName = EditorGUILayout.TextField("Game Scene Name", _gameSceneName);
+        GUILayout.Space(8);
+
+        if (GUILayout.Button("Generate Level Select Scene", GUILayout.Height(36)))
+            GenerateLevelSelectScene();
+    }
+
+    void GenerateLevelSelectScene()
+    {
+        if (!EditorUtility.DisplayDialog(
+            "Generate Level Select Scene",
+            "This will reset the active scene and build a level-select screen.\nProceed?",
+            "Yes", "Cancel"))
+            return;
+
+        Undo.SetCurrentGroupName("Generate Level Select Scene");
+        int undoGroup = Undo.GetCurrentGroup();
+
+        foreach (string n in new[] { "--- GLOBAL LIGHT ---", "[LevelSelectManager]", "EventSystem" })
+        {
+            var e = GameObject.Find(n);
+            if (e != null) Undo.DestroyObjectImmediate(e);
+        }
+
+        // Global light
+        var lightRoot = new GameObject("--- GLOBAL LIGHT ---");
+        Undo.RegisterCreatedObjectUndo(lightRoot, "Create Global Light");
+        var light      = lightRoot.AddComponent<UnityEngine.Rendering.Universal.Light2D>();
+        light.lightType = UnityEngine.Rendering.Universal.Light2D.LightType.Global;
+        light.intensity = 1f;
+
+        // Camera
+        var cam = Camera.main;
+        if (cam != null)
+        {
+            cam.transform.position = new Vector3(0f, 0f, -10f);
+            cam.orthographic       = true;
+            cam.orthographicSize   = 7f;
+            cam.backgroundColor    = new Color(0.05f, 0.05f, 0.10f, 1f);
+        }
+
+        // LevelSelectManager — builds all UI at runtime
+        var mgr = new GameObject("[LevelSelectManager]");
+        Undo.RegisterCreatedObjectUndo(mgr, "Create LevelSelectManager");
+        var lsm = mgr.AddComponent<LevelSelectManager>();
+        lsm.gameSceneName = _gameSceneName;
+
+        // EventSystem
+        foreach (var existing in Object.FindObjectsByType<UnityEngine.EventSystems.EventSystem>(FindObjectsSortMode.None))
+            Undo.DestroyObjectImmediate(existing.gameObject);
+        var esGO = new GameObject("EventSystem");
+        Undo.RegisterCreatedObjectUndo(esGO, "Create EventSystem");
+        esGO.AddComponent<UnityEngine.EventSystems.EventSystem>();
+        esGO.AddComponent<UnityEngine.EventSystems.StandaloneInputModule>();
+
+        Undo.CollapseUndoOperations(undoGroup);
+        EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
+
+        Debug.Log("[SceneGenerators] Level select scene built.");
+    }
+
+    // ── Tab 3: Modifier Select Scene ──────────────────────────────────
+
+    void DrawModifierSelectScene()
+    {
+        EditorGUILayout.HelpBox(
+            "Generates the modifier selection scene shown between level select and the game.\n" +
+            "Run this in a blank scene saved as ModifierSelectScene.",
+            MessageType.Info);
+
+        GUILayout.Space(8);
+        _gameSceneName = EditorGUILayout.TextField("Game Scene Name", _gameSceneName);
+        GUILayout.Space(8);
+
+        if (GUILayout.Button("Generate Modifier Select Scene", GUILayout.Height(36)))
+            GenerateModifierSelectScene();
+    }
+
+    void GenerateModifierSelectScene()
+    {
+        if (!EditorUtility.DisplayDialog(
+            "Generate Modifier Select Scene",
+            "This will reset the active scene and build a modifier-select screen.\nProceed?",
+            "Yes", "Cancel"))
+            return;
+
+        Undo.SetCurrentGroupName("Generate Modifier Select Scene");
+        int undoGroup = Undo.GetCurrentGroup();
+
+        foreach (string n in new[] { "--- GLOBAL LIGHT ---", "[ModifierSelectManager]", "EventSystem" })
+        {
+            var e = GameObject.Find(n);
+            if (e != null) Undo.DestroyObjectImmediate(e);
+        }
+
+        var lightRoot   = new GameObject("--- GLOBAL LIGHT ---");
+        Undo.RegisterCreatedObjectUndo(lightRoot, "Create Global Light");
+        var light       = lightRoot.AddComponent<UnityEngine.Rendering.Universal.Light2D>();
+        light.lightType = UnityEngine.Rendering.Universal.Light2D.LightType.Global;
+        light.intensity = 1f;
+
+        var cam = Camera.main;
+        if (cam != null)
+        {
+            cam.transform.position = new Vector3(0f, 0f, -10f);
+            cam.orthographic       = true;
+            cam.orthographicSize   = 7f;
+            cam.backgroundColor    = new Color(0.05f, 0.05f, 0.10f, 1f);
+        }
+
+        var mgr = new GameObject("[ModifierSelectManager]");
+        Undo.RegisterCreatedObjectUndo(mgr, "Create ModifierSelectManager");
+        var msm = mgr.AddComponent<ModifierSelectManager>();
+        msm.gameSceneName = _gameSceneName;
+
+        foreach (var existing in Object.FindObjectsByType<UnityEngine.EventSystems.EventSystem>(FindObjectsSortMode.None))
+            Undo.DestroyObjectImmediate(existing.gameObject);
+        var esGO = new GameObject("EventSystem");
+        Undo.RegisterCreatedObjectUndo(esGO, "Create EventSystem");
+        esGO.AddComponent<UnityEngine.EventSystems.EventSystem>();
+        esGO.AddComponent<UnityEngine.EventSystems.StandaloneInputModule>();
+
+        Undo.CollapseUndoOperations(undoGroup);
+        EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
+
+        Debug.Log("[SceneGenerators] Modifier select scene built.");
     }
 
     // ── Helpers ───────────────────────────────────────────────────────

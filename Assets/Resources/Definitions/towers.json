@@ -213,13 +213,13 @@
             "resourceCost": 6,
             "balanceType": "Physical",
             "fireAbilityId": "",
-            "displayDamage": 0.0,
-            "displayCooldown": 0.0,
+            "displayDamage": 6.0,
+            "displayCooldown": 0.8,
             "rotationSpeed": 0.0,
             "animFps": 0.0,
-            "spritePath": "",
+            "spritePath": "Art/Towers/bee_tower_T1",
             "turretSpritePath": "",
-            "spriteSheet": "Art/Towers/TowerSet1",
+            "spriteSheet": "",
             "spriteIndex": 0,
             "scale": 1.5,
             "debugColor": {
@@ -230,8 +230,8 @@
             },
             "tintColor": {
                 "r": 1.0,
-                "g": 0.8500000238418579,
-                "b": 0.10000000149011612,
+                "g": 1.0,
+                "b": 1.0,
                 "a": 1.0
             },
             "maxTier": 5,
@@ -256,7 +256,10 @@
             "bulletColorR": 1.0,
             "bulletColorG": 0.95,
             "bulletColorB": 0.3,
-            "effectId": "drone_impact"
+            "effectId": "drone_impact",
+            "droneSpritePath": "Art/Towers/bee_T1",
+            "bulletSpritePath": "Art/Towers/bee_missile_T1",
+            "droneScale": 1.0
           }
                 }
             ]

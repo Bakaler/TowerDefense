@@ -28,7 +28,7 @@ public class LevelManager : MonoBehaviour
         Instance = this;
     }
 
-    void Start() => LoadLevel(1);
+    void Start() => LoadLevel(LevelSelection.SelectedLevel);
 
     void Update()
     {
@@ -62,12 +62,44 @@ public class LevelManager : MonoBehaviour
         // ── Reset managers ───────────────────────────────────────────
         FindFirstObjectByType<ResourceManagerScript>()?.ResetToStart(data.startGold);
         FindFirstObjectByType<LogicManager>()?.ResetToStart(data.startLives);
-        TechManager.Instance?.ResetAll();
+        TechManager.Instance?.ResetAll(data.startTech, data.startTier);
         ResearchManager.Instance?.ResetAll();
         WaveManager.Instance?.ResetForLevel(data.waves, spawners);
+        TowerShop.Instance?.Rebuild(data.allowedTowers);
+        ApplyModifiers();
         GameHUD.Instance?.ResetForLevelLoad();
 
         Debug.Log($"[LevelManager] Level {levelNumber} loaded: {data.displayName}");
+    }
+
+    // ── Modifiers ─────────────────────────────────────────────────────
+
+    void ApplyModifiers()
+    {
+        foreach (var mod in ModifierSelection.Chosen)
+        {
+            switch (mod.effectType)
+            {
+                case "StartingGold":
+                    FindFirstObjectByType<ResourceManagerScript>()?.ChangeResourceOne((int)mod.value);
+                    break;
+                case "StartingLives":
+                    FindFirstObjectByType<LogicManager>()?.UpdateLives(mod.value);
+                    break;
+                case "StartingTech":
+                    TechManager.Instance?.AddTech((int)mod.value);
+                    break;
+                case "TowerSpeedMult":
+                case "TowerRangeMult":
+                case "TowerDamageMult":
+                case "FullRefund":
+                    // Stored globally — read from ModifierSelection.Chosen at runtime
+                    break;
+                default:
+                    Debug.LogWarning($"[LevelManager] Unknown modifier effectType '{mod.effectType}'");
+                    break;
+            }
+        }
     }
 
     // ── Data loading ──────────────────────────────────────────────────

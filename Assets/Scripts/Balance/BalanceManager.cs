@@ -16,6 +16,8 @@ public class BalanceManager : MonoBehaviour
     public int   MaxTowers  { get; private set; } = 8;
     public int   TowerCount { get; private set; }
 
+    static readonly int[] Thresholds = { 12, 36, 80 };
+
     void Awake()
     {
         if (Instance != null && Instance != this) { Destroy(gameObject); return; }
@@ -68,7 +70,10 @@ public class BalanceManager : MonoBehaviour
         Elemental   = e;
         Arcane      = a;
         Physical    = p;
-        MaxTowers   = 8 + Mathf.FloorToInt(Mathf.Min(e, Mathf.Min(a, p)) * 4f);
+        int total = Mathf.FloorToInt(e + a + p);
+        int slots = 0;
+        foreach (int t in Thresholds) if (total >= t) slots++;
+        MaxTowers   = 8 + slots * 4;
         TowerCount  = 0;
         foreach (var t in towers)
             if (!t.isGhost) TowerCount++;

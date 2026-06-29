@@ -36,13 +36,13 @@ public class TechManager : MonoBehaviour
 
     public int techAmount => Tech;
 
-    public void ResetAll()
+    public void ResetAll(int startTech = 0, int startTier = 1)
     {
-        Tech       = 0;
-        T2Unlocked = false;
-        T3Unlocked = false;
-        T4Unlocked = false;
-        T5Unlocked = false;
+        Tech       = startTech;
+        T2Unlocked = startTier >= 2;
+        T3Unlocked = startTier >= 3;
+        T4Unlocked = startTier >= 4;
+        T5Unlocked = startTier >= 5;
     }
 
     public bool TryUnlockT2()

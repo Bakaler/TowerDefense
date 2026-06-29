@@ -26,6 +26,8 @@ public class SpriteAnimator : MonoBehaviour
             _sr.sprite = _walkFrames[0];
     }
 
+    public void OffsetTime(float seconds) { _timer = seconds % (1f / (_walkFps > 0f ? _walkFps : 8f)); }
+
     public void PlayDeath()
     {
         if (_deathFrames == null || _deathFrames.Length == 0) { Destroy(gameObject); return; }
