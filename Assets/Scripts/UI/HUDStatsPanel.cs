@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
@@ -179,7 +179,7 @@ public class HUDStatsPanel : MonoBehaviour
         _objectivesRowRoot.GetComponent<RectTransform>().sizeDelta = new Vector2(0f, -y);
     }
 
-    void Start() => _rm = FindFirstObjectByType<ResourceManagerScript>();
+    void Start() => _rm = ResourceManagerScript.Instance;
 
     void Update()
     {
@@ -200,9 +200,8 @@ public class HUDStatsPanel : MonoBehaviour
             {
                 float total = bm.Elemental + bm.Arcane + bm.Physical;
                 int   iTotal = Mathf.FloorToInt(total);
-                int[] thresholds = { 12, 36, 80 };
                 int   next = -1;
-                foreach (int t in thresholds) if (iTotal < t) { next = t; break; }
+                foreach (int t in BalanceManager.Thresholds) if (iTotal < t) { next = t; break; }
                 _towerMilestoneText.text = $"{iTotal} / {(next >= 0 ? next.ToString() : "max")}";
             }
         }

@@ -20,18 +20,8 @@ public class AbilityManager : MonoBehaviour
         if (_towerInfo == null) _towerInfo = GetComponent<TowerInfo>();
 
         float speedMult = _towerInfo != null ? _towerInfo.AuraSpeedMultiplier : 1f;
-        if (_towerInfo != null)
-        {
-            switch (_towerInfo.balanceType)
-            {
-                case BalanceType.Arcane:
-                    speedMult *= 1f + ModifierSelection.GetFloat("ArcaneSpdMult");
-                    break;
-                case BalanceType.Elemental:
-                    speedMult *= 1f + ModifierSelection.GetFloat("ElementalSpdMult");
-                    break;
-            }
-        }
+        if (_towerInfo != null && _towerInfo._buffHandler != null)
+            speedMult *= 1f + _towerInfo._buffHandler.FireRateMult;
         Tick(Time.deltaTime * speedMult);
     }
 

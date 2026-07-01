@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -67,7 +67,7 @@ public class IncomeTower : MonoBehaviour, IFactoryInitializable
 
     void Start()
     {
-        _rm = FindFirstObjectByType<ResourceManagerScript>();
+        _rm = ResourceManagerScript.Instance;
         if (!string.IsNullOrEmpty(orbSpritePath))
             _orbSheet = new[] { Resources.Load<Sprite>(orbSpritePath) };
         else if (!string.IsNullOrEmpty(orbSpriteSheet))

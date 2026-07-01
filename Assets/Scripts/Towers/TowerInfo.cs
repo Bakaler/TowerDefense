@@ -29,6 +29,17 @@ public class TowerInfo : MonoBehaviour
     public float StatMultiplier       { get; private set; } = 1f;
     public float ExtraMultiplier      { get; set; }         = 1f;
 
+    // Cached — set by TowerBuffHandler.GetOrAdd so it's always available
+    [System.NonSerialized] public TowerBuffHandler _buffHandler;
+
+    /// <summary>Total damage multiplier: StatMultiplier × aura × tower buffs.</summary>
+    public float EffectiveDamageMult =>
+        StatMultiplier * ExtraMultiplier * AuraDamageMultiplier
+        * (1f + (_buffHandler != null ? _buffHandler.DamageMult : 0f));
+
+    /// <summary>True when the FullRefund modifier is active (set as a buff at level load).</summary>
+    public bool FullRefundActive => _buffHandler != null && _buffHandler.HasBuff("mod_full_refund");
+
     // ── Aura buffs ────────────────────────────────────────────────────
     private Dictionary<object, (float dmg, float spd)> _auraBuffs;
     public float AuraDamageMultiplier { get; private set; } = 1f;
@@ -61,7 +72,6 @@ public class TowerInfo : MonoBehaviour
 
     // Total gold spent = base + all upgrade costs = resourceCost * (2^Tier - 1)
     public int TotalSpent  => resourceCost * ((1 << Tier) - 1);
-    static bool FullRefundActive => ModifierSelection.Chosen.Exists(m => m.effectType == "FullRefund");
     public int SellRefund  => Mathf.RoundToInt(TotalSpent * (FullRefundActive ? 1f : 0.75f));
 
     public void Sell(ResourceManagerScript rm)
@@ -277,8 +287,21 @@ public class TowerInfo : MonoBehaviour
         OnTowerKill?.Invoke(this);
     }
 
-    void OnEnable()  => OnTowerClicked += HandleTowerClicked;
-    void OnDisable() => OnTowerClicked -= HandleTowerClicked;
+    // ── Tower registry ────────────────────────────────────────────────
+    public static readonly System.Collections.Generic.HashSet<TowerInfo> All
+        = new System.Collections.Generic.HashSet<TowerInfo>();
+
+    void OnEnable()
+    {
+        OnTowerClicked += HandleTowerClicked;
+        if (!isGhost) All.Add(this);
+    }
+
+    void OnDisable()
+    {
+        OnTowerClicked -= HandleTowerClicked;
+        All.Remove(this);
+    }
 
     void HandleTowerClicked(TowerInfo clicked)
     {

@@ -16,10 +16,12 @@ public class BalanceManager : MonoBehaviour
     public int   MaxTowers  { get; private set; } = 8;
     public int   TowerCount { get; private set; }
 
-    private int _levelCap = -1;
-    public void SetLevelCap(int cap) => _levelCap = cap;
+    private int _levelCap   = -1;
+    private int _bonusSlots = 0;
+    public void SetLevelCap(int cap) { _levelCap = cap; _bonusSlots = 0; }
+    public void AddBonusSlots(int n) => _bonusSlots += n;
 
-    static readonly int[] Thresholds = { 12, 36, 80 };
+    public static readonly int[] Thresholds = { 12, 36, 80 };
 
     void Awake()
     {
@@ -29,7 +31,7 @@ public class BalanceManager : MonoBehaviour
 
     public void Recalculate()
     {
-        var towers = FindObjectsByType<TowerInfo>(FindObjectsSortMode.None);
+        var towers = TowerInfo.All;
 
         // Count how many of each tower ID exist, grouped by balance type
         var idCounts   = new Dictionary<string, int>();
@@ -40,9 +42,9 @@ public class BalanceManager : MonoBehaviour
             { BalanceType.Physical,  0 },
         };
 
+        // Registry only contains non-ghost towers
         foreach (var t in towers)
         {
-            if (t.isGhost) continue;
             if (!idCounts.ContainsKey(t.definitionId)) idCounts[t.definitionId] = 0;
             idCounts[t.definitionId]++;
         }
@@ -50,7 +52,6 @@ public class BalanceManager : MonoBehaviour
         // Worst decay within a type = highest single-ID count of that type
         foreach (var t in towers)
         {
-            if (t.isGhost) continue;
             int cnt = idCounts[t.definitionId];
             if (cnt > typeMaxCount[t.balanceType])
                 typeMaxCount[t.balanceType] = cnt;
@@ -60,7 +61,6 @@ public class BalanceManager : MonoBehaviour
         float e = 0f, a = 0f, p = 0f;
         foreach (var t in towers)
         {
-            if (t.isGhost) continue;
             float ratio = BalanceRatio(typeMaxCount[t.balanceType]) * t.balanceMultiplier;
             switch (t.balanceType)
             {
@@ -70,17 +70,16 @@ public class BalanceManager : MonoBehaviour
             }
         }
 
-        Elemental   = e;
-        Arcane      = a;
-        Physical    = p;
-        int total = Mathf.FloorToInt(e + a + p);
-        int slots = 0;
+        Elemental  = e;
+        Arcane     = a;
+        Physical   = p;
+        int total  = Mathf.FloorToInt(e + a + p);
+        int slots  = 0;
         foreach (int t in Thresholds) if (total >= t) slots++;
         int balanced = 8 + slots * 4;
-        MaxTowers = _levelCap > 0 ? Mathf.Min(balanced, _levelCap) : balanced;
-        TowerCount  = 0;
-        foreach (var t in towers)
-            if (!t.isGhost) TowerCount++;
+        int cap = _levelCap > 0 ? Mathf.Min(balanced, _levelCap) : balanced;
+        MaxTowers  = cap + _bonusSlots;
+        TowerCount = towers.Count;
     }
 
     static float BalanceRatio(int count)

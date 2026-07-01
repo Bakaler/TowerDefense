@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -46,8 +46,8 @@ public class WaveManager : MonoBehaviour
 
     void Start()
     {
-        _logic     = FindFirstObjectByType<LogicManager>();
-        _resources = FindFirstObjectByType<ResourceManagerScript>();
+        _logic     = LogicManager.Instance;
+        _resources = ResourceManagerScript.Instance;
     }
 
     void Update()

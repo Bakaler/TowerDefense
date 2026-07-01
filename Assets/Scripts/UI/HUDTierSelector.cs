@@ -79,11 +79,27 @@ public class HUDTierSelector : MonoBehaviour
     void Apply()
     {
         if (TowerShop.Instance == null || _tiers.Length == 0) return;
-        int tier = _tiers[_tierIdx];
-        TowerShop.Instance.SetVisibleTier(tier);
-        if (_tierLabel != null) _tierLabel.text = $"T{tier}";
-        if (_prevLabel != null) _prevLabel.text = "◀";
-        if (_nextLabel != null) _nextLabel.text = "▶";
+        int tier     = _tiers[_tierIdx];
+        bool unlocked = StarManager.Instance != null && StarManager.Instance.IsColumnUnlocked(tier);
+
+        if (unlocked)
+            TowerShop.Instance.SetVisibleTier(tier);
+
+        if (_tierLabel != null)
+        {
+            if (unlocked)
+                _tierLabel.text  = $"C{tier}";
+            else
+            {
+                int need = StarManager.ThresholdFor(tier);
+                int have = StarManager.Instance?.TotalStars ?? 0;
+                _tierLabel.text  = $"C{tier}\n<size=10>🔒 {have}/{need}★</size>";
+            }
+            _tierLabel.color = unlocked
+                ? new Color(0.90f, 0.80f, 1f)
+                : new Color(0.55f, 0.45f, 0.65f);
+        }
+
         if (_prevBtn != null) _prevBtn.interactable = _tiers.Length > 1;
         if (_nextBtn != null) _nextBtn.interactable = _tiers.Length > 1;
     }

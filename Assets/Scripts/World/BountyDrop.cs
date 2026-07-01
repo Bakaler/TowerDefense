@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.EventSystems;
 
 /// <summary>
@@ -33,7 +33,7 @@ public class BountyDrop : MonoBehaviour
         var orb = GetComponent<IncomeOrb>();
         if (orb != null) orb.Pop();
 
-        var rm = FindFirstObjectByType<ResourceManagerScript>();
+        var rm = ResourceManagerScript.Instance;
         if (rm != null) rm.ChangeResourceOne(goldValue);
         FloatingText.Spawn($"+{goldValue}g", transform.position, new Color(1f, 0.85f, 0.25f));
 

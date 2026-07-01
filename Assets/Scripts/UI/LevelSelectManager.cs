@@ -151,7 +151,7 @@ public class LevelSelectManager : MonoBehaviour
                         LevelSelection.EnemySpeedMult = diff.enemySpeedMult;
                         LevelSelection.GoldMult       = diff.goldMult;
                         LevelSelection.BountyMult     = diff.bountyMult;
-                        bool hasModifiers = data.modifierColumns != null && data.modifierColumns.Length > 0;
+                        bool hasModifiers = HasModifiers(data);
                         ModifierSelection.Clear();
                         SceneManager.LoadScene(hasModifiers ? modifierSelectSceneName : gameSceneName);
                     });
@@ -215,6 +215,12 @@ public class LevelSelectManager : MonoBehaviour
         var sprites = Resources.LoadAll<Sprite>(path);
         if (sprites != null && sprites.Length > 0) return sprites[0];
         return Resources.Load<Sprite>(path);
+    }
+
+    static bool HasModifiers(LevelData data)
+    {
+        if (data?.modifierColumns != null && data.modifierColumns.Length > 0) return true;
+        return Resources.Load<TextAsset>("Definitions/modifier_columns") != null;
     }
 
     static GameObject MakeRect(string name, GameObject parent, float x, float y, float w, float h, bool fullStretch = false)

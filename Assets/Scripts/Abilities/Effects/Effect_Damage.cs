@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "NewEffect_Damage", menuName = "Effect/Damage")]
@@ -8,7 +8,6 @@ public class Effect_Damage : Effect
     static void Register() => EffectRegistry.Register("damage", typeof(Effect_Damage));
 
     public float damageBase = 0f;
-    public List<Accumulators_Constant> damageAccumulators;
 
     [Tooltip("Effect executed just before damage is dealt (after chance roll)")]
     public Effect preDamageEffect;
@@ -36,22 +35,10 @@ public class Effect_Damage : Effect
         TowerInfo towerInfo = context.OriginTower != null
             ? context.OriginTower.GetComponent<TowerInfo>()
             : null;
-        float towerMult = towerInfo != null
-            ? towerInfo.StatMultiplier * towerInfo.ExtraMultiplier * towerInfo.AuraDamageMultiplier
-            : 1f;
+        float towerMult = towerInfo != null ? towerInfo.EffectiveDamageMult : 1f;
 
-        // Balance-type damage multipliers from modifiers
         if (towerInfo != null)
         {
-            switch (towerInfo.balanceType)
-            {
-                case BalanceType.Physical:
-                    towerMult *= 1f + ModifierSelection.GetFloat("PhysicalDamageMult");
-                    break;
-                case BalanceType.Elemental:
-                    towerMult *= 1f + ModifierSelection.GetFloat("ElementalDamageMult");
-                    break;
-            }
             // LastStand: at 1 life, towers deal 2× damage
             if (ModifierSelection.HasEffect("LastStand") && LogicManager.Instance != null && LogicManager.Instance.lives <= 1f)
                 towerMult *= 2f;
@@ -76,7 +63,7 @@ public class Effect_Damage : Effect
 
             float bonusBounty = ModifierSelection.GetFloat("BountyPerKill");
             if (bonusBounty >= 1f)
-                Object.FindFirstObjectByType<ResourceManagerScript>()?.ChangeResourceOne((int)bonusBounty);
+                ResourceManagerScript.Instance?.ChangeResourceOne((int)bonusBounty);
         }
     }
 }

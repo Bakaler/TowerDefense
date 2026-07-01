@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
@@ -65,14 +65,16 @@ public class LevelManager : MonoBehaviour
         var    waves   = diff != null ? FilterWaves(data.waves, diff.disabledGroups) : data.waves;
 
         // ── Reset managers ───────────────────────────────────────────
-        FindFirstObjectByType<ResourceManagerScript>()?.ResetToStart(gold);
-        FindFirstObjectByType<LogicManager>()?.ResetToStart(lives);
+        ResourceManagerScript.Instance?.ResetToStart(gold);
+        LogicManager.Instance?.ResetToStart(lives);
         TechManager.Instance?.ResetAll(tech, tier);
         ResearchManager.Instance?.ResetAll();
         WaveManager.Instance?.ResetForLevel(waves, spawners);
         BalanceManager.Instance?.SetLevelCap(cap);
         TowerShop.Instance?.Rebuild(towers);
+        TowerPlacer.Instance?.ResetFreeBasicTower();
         ApplyModifiers();
+        EnsureModifierBuffApplicator().ApplyAll();
         ObjectiveTracker.Load(objs);
         GameHUD.Instance?.ResetForLevelLoad();
 
@@ -111,6 +113,13 @@ public class LevelManager : MonoBehaviour
 
     // ── Modifiers ─────────────────────────────────────────────────────
 
+    ModifierBuffApplicator EnsureModifierBuffApplicator()
+    {
+        var existing = FindFirstObjectByType<ModifierBuffApplicator>();
+        if (existing != null) return existing;
+        return new GameObject("[ModifierBuffApplicator]").AddComponent<ModifierBuffApplicator>();
+    }
+
     void ApplyModifiers()
     {
         foreach (var mod in ModifierSelection.Chosen)
@@ -118,13 +127,16 @@ public class LevelManager : MonoBehaviour
             switch (mod.effectType)
             {
                 case "StartingGold":
-                    FindFirstObjectByType<ResourceManagerScript>()?.ChangeResourceOne((int)mod.value);
+                    ResourceManagerScript.Instance?.ChangeResourceOne((int)mod.value);
                     break;
                 case "StartingLives":
-                    FindFirstObjectByType<LogicManager>()?.UpdateLives(mod.value);
+                    LogicManager.Instance?.UpdateLives(mod.value);
                     break;
                 case "StartingTech":
                     TechManager.Instance?.AddTech((int)mod.value);
+                    break;
+                case "BonusTowerSlots":
+                    BalanceManager.Instance?.AddBonusSlots((int)mod.value);
                     break;
                 // Runtime modifiers — read from ModifierSelection at the point of effect
                 case "FullRefund":
@@ -147,6 +159,9 @@ public class LevelManager : MonoBehaviour
                 case "BasicDoubleTap":
                 case "GoldPerWave":
                 case "LivesDrainPerWave":
+                case "BasicTowerDamageMult":
+                case "BasicTowerFireRateMult":
+                case "FreeFirstBasicTower":
                     break;
                 default:
                     Debug.LogWarning($"[LevelManager] Unknown modifier effectType '{mod.effectType}'");

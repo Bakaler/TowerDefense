@@ -6,6 +6,14 @@ using UnityEngine;
 /// </summary>
 public class ResourceManagerScript : MonoBehaviour
 {
+    public static ResourceManagerScript Instance { get; private set; }
+
+    void Awake()
+    {
+        if (Instance != null && Instance != this) { Destroy(gameObject); return; }
+        Instance = this;
+    }
+
     [Header("Starting Values")]
     public int   resourceOne = 25;   // Gold
     public int   research    = 0;

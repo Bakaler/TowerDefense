@@ -79,8 +79,13 @@ public class TowerShop : MonoBehaviour
         var tiers = new List<int>(byTier.Keys);
         AvailableTiers = tiers.ToArray();
 
-        // Default to first available tier
+        // Default to first unlocked tier (or tier 1 if StarManager not ready)
         _visibleTier = tiers.Count > 0 ? tiers[0] : 1;
+        foreach (int t in tiers)
+        {
+            if (StarManager.Instance != null && StarManager.Instance.IsColumnUnlocked(t))
+                { _visibleTier = t; break; }
+        }
         ApplyTierVisibility();
     }
 

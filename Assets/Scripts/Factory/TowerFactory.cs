@@ -33,7 +33,7 @@ public class TowerFactory : MonoBehaviour
 
     // ── Public API ────────────────────────────────────────────────────
 
-    public GameObject Build(string definitionId, Vector3 position, float rotationZ = 0f)
+    public GameObject Build(string definitionId, Vector3 position, float rotationZ = 0f, bool isGhost = false)
     {
         if (TowerDefinitionLibrary.Instance == null)
         {
@@ -47,10 +47,10 @@ public class TowerFactory : MonoBehaviour
             return null;
         }
 
-        return BuildFromDefinition(def, position, rotationZ);
+        return BuildFromDefinition(def, position, rotationZ, isGhost);
     }
 
-    public GameObject BuildFromDefinition(TowerDefinition def, Vector3 position, float rotationZ = 0f)
+    public GameObject BuildFromDefinition(TowerDefinition def, Vector3 position, float rotationZ = 0f, bool isGhost = false)
     {
         if (def == null) return null;
 
@@ -172,6 +172,13 @@ public class TowerFactory : MonoBehaviour
             string data = key != null && dataOverrides.TryGetValue(key, out var d) ? d : null;
             init.Initialize(data);
         }
+
+        // Mark ghost before applying buffs so ApplyToTower's guard fires correctly
+        var towerInfo = go.GetComponent<TowerInfo>();
+        if (isGhost && towerInfo != null) towerInfo.isGhost = true;
+
+        // Apply any active modifier buffs to the new tower
+        ModifierBuffApplicator.Instance?.ApplyToTower(towerInfo);
 
         return go;
     }

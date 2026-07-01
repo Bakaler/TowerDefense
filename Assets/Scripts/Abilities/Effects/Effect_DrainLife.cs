@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 /// <summary>
 /// Deals minor damage to a target and deposits a small amount of gold/tech.
@@ -29,7 +29,7 @@ public class Effect_DrainLife : Effect
 
         if (goldPerDrain > 0)
         {
-            var rm = Object.FindFirstObjectByType<ResourceManagerScript>();
+            var rm = ResourceManagerScript.Instance;
             rm?.ChangeResourceOne(goldPerDrain);
         }
         if (techPerDrain > 0)

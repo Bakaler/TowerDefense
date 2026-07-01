@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 /// <summary>
 /// Debug cheat codes. Active in Editor and Development builds only.
@@ -18,7 +18,7 @@ public class CheatManager : MonoBehaviour
 
     static void CheatMoney()
     {
-        var rm = FindFirstObjectByType<ResourceManagerScript>();
+        var rm = ResourceManagerScript.Instance;
         if (rm == null) return;
         rm.ChangeResourceOne(9999);
         Debug.Log("[Cheat] +9999 gold");

@@ -30,6 +30,9 @@ public class GameHUD : MonoBehaviour
 
     void BuildHUD()
     {
+        if (StarManager.Instance == null)
+            new GameObject("[StarManager]").AddComponent<StarManager>();
+
         // Root canvas
         var canvasGO = new GameObject("[GameHUD]");
         canvasGO.transform.SetParent(transform, false);

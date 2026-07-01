@@ -42,9 +42,6 @@ public class UnitParentClass : MonoBehaviour
     public List<AbilityParentClass> abilities = new List<AbilityParentClass>();
     public List<int> commandCard = new List<int>();
 
-    // Behaviors
-    public List<BehaviorParentClass> behaviors = new List<BehaviorParentClass>();
-
     // Cost
     public int resourceOne = 0;
     public int resourceTwo = 0;
@@ -53,9 +50,6 @@ public class UnitParentClass : MonoBehaviour
     // Effects
     public EffectParentClass birthEffect;
     public EffectParentClass deathEffect;
-
-    // Weapon
-    public WeaponParentClass weapon;
 
     // Information
     public string unitName = "";

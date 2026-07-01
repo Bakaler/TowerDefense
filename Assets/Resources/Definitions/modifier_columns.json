@@ -1,0 +1,197 @@
+{
+    "modifierColumns": [
+        {
+            "options": [
+                {
+                    "id": "c1_gold",
+                    "displayName": "+5 Gold",
+                    "description": "Start with 5 extra gold.",
+                    "effectType": "StartingGold",
+                    "value": 5.0,
+                    "subEffects": []
+                },
+                {
+                    "id": "c1_research",
+                    "displayName": "+15 Research",
+                    "description": "Start with 15 extra tech.",
+                    "effectType": "StartingTech",
+                    "value": 15.0,
+                    "subEffects": []
+                },
+                {
+                    "id": "c1_slots",
+                    "displayName": "+2 Tower Slots",
+                    "description": "Gain 2 extra tower placement slots.",
+                    "effectType": "BonusTowerSlots",
+                    "value": 2.0,
+                    "subEffects": []
+                },
+                {
+                    "id": "c1_basic_dmg",
+                    "displayName": "+25% Dmg / +15% AS + Free Tower",
+                    "description": "Basic towers deal 25% more damage and attack 15% faster. Your first Basic Tower is free.",
+                    "effectType": "compound",
+                    "value": 0.0,
+                    "subEffects": [
+                        {
+                            "id": "c1_basic_dmg_sub",
+                            "displayName": "",
+                            "description": "",
+                            "effectType": "BasicTowerDamageMult",
+                            "value": 0.25
+                        },
+                        {
+                            "id": "c1_basic_spd_sub",
+                            "displayName": "",
+                            "description": "",
+                            "effectType": "BasicTowerFireRateMult",
+                            "value": 0.15
+                        },
+                        {
+                            "id": "c1_free_basic_sub",
+                            "displayName": "",
+                            "description": "",
+                            "effectType": "FreeFirstBasicTower",
+                            "value": 1.0
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "options": [
+                {
+                    "id": "c2_physical",
+                    "displayName": "Physical +25% Dmg",
+                    "description": "All Physical towers deal 25% more damage.",
+                    "effectType": "PhysicalDamageMult",
+                    "value": 0.25,
+                    "subEffects": []
+                },
+                {
+                    "id": "c2_arcane",
+                    "displayName": "Arcane +25% Atk Speed",
+                    "description": "All Arcane towers attack 25% faster.",
+                    "effectType": "ArcaneSpdMult",
+                    "value": 0.25,
+                    "subEffects": []
+                },
+                {
+                    "id": "c2_elemental",
+                    "displayName": "Elemental +10% Dmg & AS",
+                    "description": "All Elemental towers deal 10% more damage and attack 10% faster.",
+                    "effectType": "compound",
+                    "value": 0.0,
+                    "subEffects": [
+                        {
+                            "id": "c2_el_dmg",
+                            "displayName": "",
+                            "description": "",
+                            "effectType": "ElementalDamageMult",
+                            "value": 0.10
+                        },
+                        {
+                            "id": "c2_el_spd",
+                            "displayName": "",
+                            "description": "",
+                            "effectType": "ElementalSpdMult",
+                            "value": 0.10
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "options": [
+                {
+                    "id": "c3_radius",
+                    "displayName": "Aura Radius +15%",
+                    "description": "All aura towers have 15% larger range.",
+                    "effectType": "AuraRadiusMult",
+                    "value": 0.15,
+                    "subEffects": []
+                },
+                {
+                    "id": "c3_mult",
+                    "displayName": "Aura Effect x1.25",
+                    "description": "All aura bonuses are 25% stronger.",
+                    "effectType": "AuraMult",
+                    "value": 0.25,
+                    "subEffects": []
+                },
+                {
+                    "id": "c3_slow",
+                    "displayName": "Auras Slow Enemies 2.5%",
+                    "description": "Enemies in an aura are slowed 2.5% per aura (stacking).",
+                    "effectType": "AuraSlowEnemies",
+                    "value": 0.025,
+                    "subEffects": []
+                }
+            ]
+        },
+        {
+            "options": [
+                {
+                    "id": "c4_lives",
+                    "displayName": "+10 Lives",
+                    "description": "Start with 10 extra lives.",
+                    "effectType": "StartingLives",
+                    "value": 10.0,
+                    "subEffects": []
+                },
+                {
+                    "id": "c4_forgive",
+                    "displayName": "Forgive First Leak",
+                    "description": "The first enemy to leak each wave deals no life damage.",
+                    "effectType": "ForgiveFirstLeak",
+                    "value": 1.0,
+                    "subEffects": []
+                },
+                {
+                    "id": "c4_reduce",
+                    "displayName": "Leaks Deal -1 Life",
+                    "description": "Leaking enemies deal 1 less life damage (minimum 1).",
+                    "effectType": "LeakDamageReduction",
+                    "value": 1.0,
+                    "subEffects": []
+                },
+                {
+                    "id": "c4_laststand",
+                    "displayName": "Last Stand",
+                    "description": "At 1 life remaining, all towers permanently deal 2x damage.",
+                    "effectType": "LastStand",
+                    "value": 1.0,
+                    "subEffects": []
+                }
+            ]
+        },
+        {
+            "options": [
+                {
+                    "id": "c5_drones",
+                    "displayName": "+2 Bee Drones",
+                    "description": "Bee towers spawn 2 extra drones.",
+                    "effectType": "BonusDrones",
+                    "value": 2.0,
+                    "subEffects": []
+                },
+                {
+                    "id": "c5_shotgun",
+                    "displayName": "+5 Shotgun Pellets",
+                    "description": "Shotgun towers fire 5 additional pellets.",
+                    "effectType": "BonusShotgunBullets",
+                    "value": 5.0,
+                    "subEffects": []
+                },
+                {
+                    "id": "c5_doubletap",
+                    "displayName": "Double Tap",
+                    "description": "Basic towers fire a second shot 0.15s after the first.",
+                    "effectType": "BasicDoubleTap",
+                    "value": 1.0,
+                    "subEffects": []
+                }
+            ]
+        }
+    ]
+}

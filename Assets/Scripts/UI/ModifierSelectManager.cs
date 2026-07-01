@@ -17,19 +17,75 @@ public class ModifierSelectManager : MonoBehaviour
     const float CARD_H     = 90f;
     const float CARD_GAP   = 12f;
 
-    ModifierDef[] _picks;   // one slot per column, null = nothing chosen yet
+    ModifierDef[]  _picks;
+    ModifierColumn[] _columns;
+    bool           _cheatUnlocked;
+
+    // Type "STARS" to unlock all columns for this run
+    static readonly KeyCode[] CheatSequence = { KeyCode.S, KeyCode.T, KeyCode.A, KeyCode.R, KeyCode.S };
+    int _cheatProgress;
 
     void Start()
     {
         var data = LoadLevelData();
-        if (data == null || data.modifierColumns == null || data.modifierColumns.Length == 0)
+        var cols = data?.modifierColumns != null && data.modifierColumns.Length > 0
+            ? data.modifierColumns
+            : LoadSharedColumns();
+
+        if (cols == null || cols.Length == 0)
         {
             SceneManager.LoadScene(gameSceneName);
             return;
         }
 
-        _picks = new ModifierDef[data.modifierColumns.Length];
-        BuildUI(data.modifierColumns);
+        _columns = cols;
+        _picks   = new ModifierDef[_columns.Length];
+        BuildUI(_columns);
+    }
+
+    static ModifierColumn[] LoadSharedColumns()
+    {
+        var ta = Resources.Load<TextAsset>("Definitions/modifier_columns");
+        if (ta == null) return null;
+        var wrapper = JsonUtility.FromJson<SharedColumnsWrapper>(ta.text);
+        return wrapper?.modifierColumns;
+    }
+
+    [System.Serializable]
+    class SharedColumnsWrapper { public ModifierColumn[] modifierColumns; }
+
+    void Update()
+    {
+        if (_cheatUnlocked) return;
+        foreach (KeyCode kc in System.Enum.GetValues(typeof(KeyCode)))
+        {
+            if (!Input.GetKeyDown(kc)) continue;
+            if (kc == CheatSequence[_cheatProgress])
+            {
+                _cheatProgress++;
+                if (_cheatProgress >= CheatSequence.Length)
+                {
+                    _cheatUnlocked = true;
+                    _cheatProgress = 0;
+                    RebuildWithCheat();
+                }
+            }
+            else
+            {
+                _cheatProgress = kc == CheatSequence[0] ? 1 : 0;
+            }
+            break;
+        }
+    }
+
+    void RebuildWithCheat()
+    {
+        // Destroy existing canvas and rebuild with all columns unlocked
+        var existing = GameObject.Find("ModifierCanvas");
+        if (existing != null) Destroy(existing);
+        _picks = new ModifierDef[_columns.Length];
+        _cheatUnlocked = true;
+        BuildUI(_columns);
     }
 
     void BuildUI(ModifierColumn[] columns)
@@ -59,25 +115,45 @@ public class ModifierSelectManager : MonoBehaviour
         _cardImages = new Image[columns.Length][];
         _passImages = new Image[columns.Length];
 
+        int totalStars   = SaveManager.TotalStarsAllLevels();
+        int[] thresholds = StarManager.ColumnThresholds;
+
         for (int ci = 0; ci < columns.Length; ci++)
         {
-            int colIdx = ci;
-            var col    = columns[ci];
-            float x    = startX + ci * (COL_W + COL_GAP);
+            int colIdx    = ci;
+            var col       = columns[ci];
+            float x       = startX + ci * (COL_W + COL_GAP);
+            int threshold = ci < thresholds.Length ? thresholds[ci] : int.MaxValue;
+            bool unlocked = _cheatUnlocked || totalStars >= threshold;
 
             var colGO  = MakeRect($"Col{ci}", canvasGO, x, 0f, COL_W, COL_H);
-            colGO.AddComponent<Image>().color = new Color(0.08f, 0.10f, 0.15f, 1f);
+            colGO.AddComponent<Image>().color = unlocked
+                ? new Color(0.08f, 0.10f, 0.15f, 1f)
+                : new Color(0.06f, 0.06f, 0.08f, 1f);
 
-            float slotH     = CARD_H + CARD_GAP;
+            if (!unlocked)
+            {
+                // Lock overlay
+                var lockGO  = MakeRect("Lock", colGO, 0, 0, COL_W, COL_H);
+                lockGO.AddComponent<Image>().color = new Color(0f, 0f, 0f, 0.55f);
+                AddText(MakeRect("LockLbl", colGO, 0, 0, COL_W - 20f, 80f),
+                    $"🔒\n{totalStars}/{threshold}★\nto unlock",
+                    new Color(0.65f, 0.65f, 0.75f, 1f), 16, bold: true, stretchToParent: false);
+                _cardImages[ci] = new Image[col.options.Length];
+                _picks[ci] = null;
+                continue;
+            }
+
+            float slotH      = CARD_H + CARD_GAP;
             int   totalCards = col.options.Length + 1; // +1 for Pass
-            float startY    = (totalCards - 1) * slotH * 0.5f;
+            float startY     = (totalCards - 1) * slotH * 0.5f;
 
             // Pass card (default selected)
             var passGO  = MakeRect("Pass", colGO, 0, startY, COL_W - 20f, CARD_H);
             var passImg = passGO.AddComponent<Image>();
             passImg.color      = COL_PASS_SEL;
             _passImages[ci]    = passImg;
-            _picks[ci]         = null;  // Pass = no modifier
+            _picks[ci]         = null;
 
             var passBtn = passGO.AddComponent<Button>();
             passBtn.targetGraphic = passImg;
@@ -111,13 +187,10 @@ public class ModifierSelectManager : MonoBehaviour
                 btnCols.normalColor      = Color.white;
                 btn.colors = btnCols;
 
-                // Name
-                AddText(MakeRect("Name", cardGO, 0, 18f, COL_W - 30f, 30f),
-                    opt.displayName, Color.white, 18, bold: true);
-
-                // Description
-                AddText(MakeRect("Desc", cardGO, 0, -12f, COL_W - 30f, 40f),
-                    opt.description, new Color(0.75f, 0.80f, 0.90f, 1f), 13, bold: false);
+                AddText(MakeRect("Name", cardGO, 0, 16f, COL_W - 30f, 44f),
+                    opt.displayName, Color.white, 15, bold: true);
+                AddText(MakeRect("Desc", cardGO, 0, -18f, COL_W - 30f, 38f),
+                    opt.description, new Color(0.75f, 0.80f, 0.90f, 1f), 12, bold: false);
 
                 btn.onClick.AddListener(() => OnPick(colIdx, optIdx, columns[colIdx].options[optIdx]));
             }

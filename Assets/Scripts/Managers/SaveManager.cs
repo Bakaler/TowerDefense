@@ -82,6 +82,16 @@ public static class SaveManager
         }
 
         Write();
+        StarManager.Instance?.Refresh();
+    }
+
+    /// <summary>Sum of highest stars earned across every level.</summary>
+    public static int TotalStarsAllLevels()
+    {
+        EnsureLoaded();
+        int total = 0;
+        foreach (var e in _data.starsPerLevel) total += e.stars;
+        return total;
     }
 
     public static void UnlockAllLevels(int maxLevel = 20)

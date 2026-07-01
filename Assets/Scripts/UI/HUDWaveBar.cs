@@ -106,7 +106,7 @@ public class HUDWaveBar : MonoBehaviour
     }
 
     LogicManager _lm;
-    void Start() => _lm = FindFirstObjectByType<LogicManager>();
+    void Start() => _lm = LogicManager.Instance;
 
     void Update()
     {

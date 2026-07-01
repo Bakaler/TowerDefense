@@ -121,7 +121,8 @@ public class HUDOverlays : MonoBehaviour
         LevelSelection.SelectedLevel = next;
         ModifierSelection.Clear();
         var data    = JsonUtility.FromJson<LevelData>(ta.text);
-        bool hasMods = data?.modifierColumns != null && data.modifierColumns.Length > 0;
+        bool hasMods = (data?.modifierColumns != null && data.modifierColumns.Length > 0)
+                    || Resources.Load<TextAsset>("Definitions/modifier_columns") != null;
         UnityEngine.SceneManagement.SceneManager.LoadScene(hasMods ? "ModifierSelectScene" : "GameScene");
     }
 }

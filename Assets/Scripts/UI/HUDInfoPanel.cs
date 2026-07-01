@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -383,7 +383,7 @@ public class HUDInfoPanel : MonoBehaviour
 
         if (_tpDamage != null)
         {
-            float baseDmg = info.damage * info.StatMultiplier;
+            float baseDmg = info.damage * info.EffectiveDamageMult;
             string dmgStr = baseDmg > 0f ? $"Damage   {baseDmg:0.#}" : "Damage   —";
             if (baseDmg > 0f && info.AuraDamageMultiplier > 1.001f)
                 dmgStr += $"  <color=#4DFF73>(+{baseDmg * (info.AuraDamageMultiplier - 1f):0.#})</color>";
@@ -392,12 +392,17 @@ public class HUDInfoPanel : MonoBehaviour
 
         if (_tpFireRate != null)
         {
-            var turrent = info.GetComponent<Turrent>();
-            float cd    = turrent?.fireAbility?.cost?.cooldownDuration ?? (info.cooldown > 0f ? info.cooldown : 0f);
-            float fr    = cd > 0f ? 1f / cd : 0f;
-            string rateStr = fr > 0f ? $"Fire Rate  {fr:0.##}/s" : "Fire Rate  —";
-            if (fr > 0f && info.AuraSpeedMultiplier > 1.001f)
-                rateStr += $"  <color=#4DFF73>(+{fr * info.AuraSpeedMultiplier - fr:0.##})</color>";
+            var turrent   = info.GetComponent<Turrent>();
+            float baseCd  = turrent?.fireAbility?.cost?.cooldownDuration ?? (info.cooldown > 0f ? info.cooldown : 0f);
+            float speedMult = info.AuraSpeedMultiplier;
+            var buffHandler = info.GetComponent<TowerBuffHandler>();
+            if (buffHandler != null) speedMult *= 1f + buffHandler.FireRateMult;
+            float effectiveCd = baseCd > 0f ? baseCd / speedMult : 0f;
+            float baseFr      = baseCd > 0f ? 1f / baseCd : 0f;
+            float fr          = effectiveCd > 0f ? 1f / effectiveCd : baseFr;
+            string rateStr = baseFr > 0f ? $"Fire Rate  {baseFr:0.##}/s" : "Fire Rate  —";
+            if (fr > baseFr + 0.001f)
+                rateStr += $"  <color=#4DFF73>(+{fr - baseFr:0.##})</color>";
             _tpFireRate.text = rateStr;
         }
 
@@ -421,7 +426,7 @@ public class HUDInfoPanel : MonoBehaviour
     void RefreshUpgradeButton(TowerInfo info)
     {
         if (_tpUpgradeBtn == null) return;
-        _rm ??= FindFirstObjectByType<ResourceManagerScript>();
+        _rm ??= ResourceManagerScript.Instance;
         bool canTier   = info.CanUpgrade;
         bool hasRes    = info.HasResearchForUpgrade;
         bool hasGold   = _rm != null && _rm.resourceOne >= info.UpgradeCost;
@@ -478,14 +483,14 @@ public class HUDInfoPanel : MonoBehaviour
 
     void OnUpgradeClicked()
     {
-        _rm ??= FindFirstObjectByType<ResourceManagerScript>();
+        _rm ??= ResourceManagerScript.Instance;
         if (_selectedTower == null) return;
         if (_selectedTower.TryUpgrade(_rm)) RefreshTower(_selectedTower);
     }
 
     void OnSellClicked()
     {
-        _rm ??= FindFirstObjectByType<ResourceManagerScript>();
+        _rm ??= ResourceManagerScript.Instance;
         if (_selectedTower == null) return;
         _selectedTower.Sell(_rm);
         DeselectCurrentTower();

@@ -15,6 +15,22 @@ public class SniperTurrent : MonoBehaviour, IFactoryInitializable
     private AbilityManager _abilityManager;
     private Ability_Effect _fireAbility;
 
+    // Units currently inside the sniper zone — maintained via trigger callbacks
+    private readonly System.Collections.Generic.HashSet<UnitManager> _inRange
+        = new System.Collections.Generic.HashSet<UnitManager>();
+
+    void OnTriggerEnter2D(Collider2D other)
+    {
+        var u = other.GetComponent<UnitManager>();
+        if (u != null) _inRange.Add(u);
+    }
+
+    void OnTriggerExit2D(Collider2D other)
+    {
+        var u = other.GetComponent<UnitManager>();
+        if (u != null) _inRange.Remove(u);
+    }
+
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
     static void Register() => ComponentRegistry.Register("sniper_turrent", typeof(SniperTurrent));
 
@@ -61,7 +77,9 @@ public class SniperTurrent : MonoBehaviour, IFactoryInitializable
         UnitManager best         = null;
         float       bestProgress = -1f;
 
-        foreach (var unit in FindObjectsByType<UnitManager>(FindObjectsSortMode.None))
+        // Clean destroyed entries, then pick furthest-along live unit in zone
+        _inRange.RemoveWhere(u => u == null);
+        foreach (var unit in _inRange)
         {
             if (!unit.isAlive) continue;
             if (!_zone.Contains(unit.transform.position)) continue;

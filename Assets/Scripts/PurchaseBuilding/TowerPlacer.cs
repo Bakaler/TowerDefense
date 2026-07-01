@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.EventSystems;
 
 /// <summary>
@@ -34,6 +34,10 @@ public class TowerPlacer : MonoBehaviour
     private float         _footprintRadius;
     private float         _ghostRotation;
     public bool           IsPlacing => !string.IsNullOrEmpty(_selectedId);
+
+    // Tracks whether the free-first-basic-tower modifier has been consumed this level
+    private bool _freeBasicTowerUsed;
+    public void ResetFreeBasicTower() => _freeBasicTowerUsed = false;
 
     // ── Lifecycle ─────────────────────────────────────────────────────
 
@@ -127,9 +131,13 @@ public class TowerPlacer : MonoBehaviour
             Cancel(); return;
         }
 
-        // Cost check
-        var rm = FindFirstObjectByType<ResourceManagerScript>();
-        if (rm != null && rm.resourceOne < def.resourceCost)
+        // Cost check (free first basic tower modifier bypasses the cost)
+        bool freeThisPlace = !_freeBasicTowerUsed
+            && _selectedId == "basic_tower"
+            && ModifierSelection.HasEffect("FreeFirstBasicTower");
+
+        var rm = ResourceManagerScript.Instance;
+        if (!freeThisPlace && rm != null && rm.resourceOne < def.resourceCost)
         {
             Debug.Log($"[TowerPlacer] Not enough resources. Need {def.resourceCost}, have {rm.resourceOne}.");
             return; // keep placement mode active so player can wait / rethink
@@ -168,7 +176,9 @@ public class TowerPlacer : MonoBehaviour
         if (go == null) { Cancel(); return; }
 
         // Deduct cost
-        if (rm != null)
+        if (freeThisPlace)
+            _freeBasicTowerUsed = true;
+        else if (rm != null)
             rm.ChangeResourceOne(-def.resourceCost);
 
         ObjectiveTracker.NotifyBuild(_selectedId);
@@ -181,14 +191,10 @@ public class TowerPlacer : MonoBehaviour
     {
         if (TowerFactory.Instance == null) return;
 
-        // Build off-screen as ghost preview, then strip it down to visuals only
-        _ghost = TowerFactory.Instance.Build(definitionId, Vector3.one * 9999f);
+        // Build off-screen as ghost preview (isGhost=true so buffs are skipped inside factory)
+        _ghost = TowerFactory.Instance.Build(definitionId, Vector3.one * 9999f, 0f, isGhost: true);
         if (_ghost == null) return;
         _ghost.name = $"[Ghost] {_ghost.name}";
-
-        // Mark as ghost so balance counts ignore it
-        var ghostInfo = _ghost.GetComponent<TowerInfo>();
-        if (ghostInfo != null) ghostInfo.isGhost = true;
 
         // Disable all logic components — ghost is visual only
         // (SpriteRenderer is a Renderer, not MonoBehaviour, so it's unaffected here)
