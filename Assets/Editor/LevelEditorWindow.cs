@@ -763,7 +763,7 @@ public class LevelEditorWindow : EditorWindow
         var root = new GameObject(RootName);
         Undo.RegisterCreatedObjectUndo(root, "Load Level");
 
-        // Background
+        // Background — apply same scale logic as LevelManager so editor matches game
         if (!string.IsNullOrEmpty(data.backgroundSprite))
         {
             var bgGO = new GameObject("[Background]");
@@ -773,7 +773,11 @@ public class LevelEditorWindow : EditorWindow
             var sr = bgGO.AddComponent<SpriteRenderer>();
             sr.sortingOrder = -100;
             var sp = LoadSpriteAnywhere(data.backgroundSprite);
-            if (sp != null) sr.sprite = sp;
+            if (sp != null)
+            {
+                sr.sprite = sp;
+                ScaleBgToFillCamera(bgGO, sr);
+            }
             else Debug.LogWarning($"[LevelEditor] Sprite not found: {data.backgroundSprite}");
         }
 
@@ -1918,6 +1922,18 @@ public class LevelEditorWindow : EditorWindow
 
     static LevelData MakeBlank(int n) => new LevelData { id = $"level_{n}", displayName = $"Level {n}" };
     static float Round(float v) => Mathf.Round(v * 100f) / 100f;
+
+    static void ScaleBgToFillCamera(GameObject go, SpriteRenderer sr, float scaleX = 0.82f, float scaleY = 0.82f)
+    {
+        var cam = Camera.main;
+        if (cam == null || sr.sprite == null) return;
+        float camH    = cam.orthographicSize * 2f;
+        float camW    = camH * cam.aspect;
+        float sprW    = sr.sprite.bounds.size.x;
+        float sprH    = sr.sprite.bounds.size.y;
+        float baseScale = Mathf.Max(camW / sprW, camH / sprH);
+        go.transform.localScale = new Vector3(baseScale * scaleX, baseScale * scaleY, 1f);
+    }
 
     GameObject FindRoot()            => GameObject.Find(RootName);
     Transform  FindZonesRoot(GameObject root) => root.transform.Find(ZonesName);

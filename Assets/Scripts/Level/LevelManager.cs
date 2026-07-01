@@ -177,7 +177,7 @@ public class LevelManager : MonoBehaviour
     void BuildBackground(string spritePath, float x = 0f, float y = 0f, float scaleX = .82f, float scaleY = .82f)
     {
         var go = new GameObject("[Background]");
-        go.transform.position = new Vector3(0, 1.125f, 0f);
+        go.transform.position = new Vector3(x, y, 0f);
         var sr = go.AddComponent<SpriteRenderer>();
         sr.sortingLayerName = "Background";
         sr.sortingOrder     = -100;

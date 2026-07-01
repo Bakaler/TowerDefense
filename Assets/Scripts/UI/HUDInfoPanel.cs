@@ -131,52 +131,53 @@ public class HUDInfoPanel : MonoBehaviour
         rt.anchoredPosition = Vector2.zero;
         rt.sizeDelta = new Vector2(W, H);
 
-        const float ROW = 33f;
-        float topY = H - HDR_H - PAD - ROW;   // top of first content row
+        const float ROW  = 26f;
+        const float BTNH = 34f;
+        const float TPAD = 8f;   // tighter internal padding
+        float topY = H - HDR_H - TPAD - ROW;
 
         float y = topY;
-        _tpBalance     = HUDHelpers.MakeText(HUDHelpers.MakeRect("Balance",     _towerBody, C0, y, COL_W, ROW), "", new Color(0.6f, 0.9f, 0.6f),   16); y -= ROW;
-        _tpBalanceDist = HUDHelpers.MakeText(HUDHelpers.MakeRect("BalanceDist", _towerBody, C0, y, COL_W, ROW), "", new Color(0.75f, 0.75f, 0.85f), 15); y -= ROW;
-        _tpKills       = HUDHelpers.MakeText(HUDHelpers.MakeRect("Kills",       _towerBody, C0, y, COL_W, ROW), "", new Color(0.95f, 0.5f, 0.5f),   15);
-        _tpAura        = HUDHelpers.MakeText(HUDHelpers.MakeRect("Aura",        _towerBody, C0, y - ROW, COL_W, ROW), "", new Color(0.3f, 1f, 0.45f), 13);
+        _tpBalance     = HUDHelpers.MakeText(HUDHelpers.MakeRect("Balance",     _towerBody, C0, y, COL_W, ROW), "", new Color(0.6f, 0.9f, 0.6f),   14); y -= ROW;
+        _tpBalanceDist = HUDHelpers.MakeText(HUDHelpers.MakeRect("BalanceDist", _towerBody, C0, y, COL_W, ROW), "", new Color(0.75f, 0.75f, 0.85f), 13); y -= ROW;
+        _tpKills       = HUDHelpers.MakeText(HUDHelpers.MakeRect("Kills",       _towerBody, C0, y, COL_W, ROW), "", new Color(0.95f, 0.5f, 0.5f),   13);
+        _tpAura        = HUDHelpers.MakeText(HUDHelpers.MakeRect("Aura",        _towerBody, C0, y - ROW, COL_W, ROW), "", new Color(0.3f, 1f, 0.45f), 11);
 
         // C1: Damage / FireRate / MoveZone
         y = topY;
-        _tpDamage   = HUDHelpers.MakeText(HUDHelpers.MakeRect("Damage",  _towerBody, C1, y, COL_W, ROW), "", new Color(0.9f, 0.9f, 0.9f), 16); y -= ROW;
-        _tpFireRate = HUDHelpers.MakeText(HUDHelpers.MakeRect("FireRate", _towerBody, C1, y, COL_W, ROW), "", new Color(0.9f, 0.9f, 0.9f), 16); y -= ROW + 4f;
+        _tpDamage   = HUDHelpers.MakeText(HUDHelpers.MakeRect("Damage",  _towerBody, C1, y, COL_W, ROW), "", new Color(0.9f, 0.9f, 0.9f), 14); y -= ROW;
+        _tpFireRate = HUDHelpers.MakeText(HUDHelpers.MakeRect("FireRate", _towerBody, C1, y, COL_W, ROW), "", new Color(0.9f, 0.9f, 0.9f), 14); y -= ROW + 4f;
 
-        var mzGO  = HUDHelpers.MakeRect("MoveZoneBtn", _towerBody, C1, y - 4f, COL_W, 36f);
+        var mzGO  = HUDHelpers.MakeRect("MoveZoneBtn", _towerBody, C1, y - 4f, COL_W, 30f);
         var mzImg = mzGO.AddComponent<Image>(); mzImg.color = new Color(0.2f, 0.45f, 0.65f, 1f);
         _tpMoveZoneBtn = mzGO.AddComponent<Button>(); _tpMoveZoneBtn.targetGraphic = mzImg;
-        _tpMoveZoneLabel = HUDHelpers.MakeText(HUDHelpers.MakeRect("L", mzGO, 0f, 0f, COL_W, 36f), "MOVE ZONE", Color.white, 12, bold: true);
+        _tpMoveZoneLabel = HUDHelpers.MakeText(HUDHelpers.MakeRect("L", mzGO, 0f, 0f, COL_W, 30f), "MOVE ZONE", Color.white, 11, bold: true);
         _tpMoveZoneLabel.alignment = TextAnchor.MiddleCenter;
         _tpMoveZoneBtn.onClick.AddListener(OnMoveZoneClicked);
         mzGO.SetActive(false);
 
-        // C2: Upgrade / Research / Sell buttons
+        // C2: Upgrade / Research / Sell buttons (stacked from top)
         y = topY;
-        const float BTNH = 44f;
-        var (upgBtn, upgLbl) = HUDHelpers.MakeBtn(_towerBody, "UpgradeBtn", C2, y - BTNH + ROW, COL_W, BTNH, new Color(0.15f,0.55f,0.25f,1f), "UPGRADE", 14, true);
+        var (upgBtn, upgLbl) = HUDHelpers.MakeBtn(_towerBody, "UpgradeBtn", C2, y - BTNH + ROW, COL_W, BTNH, new Color(0.15f,0.55f,0.25f,1f), "UPGRADE", 12, true);
         _tpUpgradeBtn = upgBtn; _tpUpgradeBtnLabel = upgLbl;
         var uc = _tpUpgradeBtn.colors; uc.highlightedColor = new Color(0.2f,0.7f,0.3f); uc.disabledColor = new Color(0.22f,0.22f,0.22f); _tpUpgradeBtn.colors = uc;
         _tpUpgradeBtn.onClick.AddListener(OnUpgradeClicked);
 
-        float resBY = y - BTNH + ROW - BTNH - 6f;
-        var (resBtn, _) = HUDHelpers.MakeBtn(_towerBody, "TwrResBtn", C2, resBY, COL_W, BTNH, new Color(0.15f,0.30f,0.60f,1f), "RESEARCH", 14, true);
+        float resBY = y - BTNH + ROW - BTNH - 5f;
+        var (resBtn, _) = HUDHelpers.MakeBtn(_towerBody, "TwrResBtn", C2, resBY, COL_W, BTNH, new Color(0.15f,0.30f,0.60f,1f), "RESEARCH", 12, true);
         var rc = resBtn.colors; rc.highlightedColor = new Color(0.2f,0.4f,0.8f); resBtn.colors = rc;
         resBtn.onClick.AddListener(ShowTowerResBody);
 
-        float sellBY = resBY - BTNH - 6f;
-        var (sellBtn, sellLbl) = HUDHelpers.MakeBtn(_towerBody, "SellBtn", C2, sellBY, COL_W, BTNH, new Color(0.55f,0.10f,0.10f,1f), "SELL", 14, true);
+        float sellBY = resBY - BTNH - 5f;
+        var (sellBtn, sellLbl) = HUDHelpers.MakeBtn(_towerBody, "SellBtn", C2, sellBY, COL_W, BTNH, new Color(0.55f,0.10f,0.10f,1f), "SELL", 12, true);
         _tpSellBtn = sellBtn; _tpSellBtnLabel = sellLbl;
         var sc = _tpSellBtn.colors; sc.highlightedColor = new Color(0.75f,0.15f,0.15f); _tpSellBtn.colors = sc;
         _tpSellBtn.onClick.AddListener(OnSellClicked);
 
         // C3: Targeting
-        float tgtBtnY = PAD;
+        float tgtBtnY = TPAD;
         HUDHelpers.MakeText(
-            HUDHelpers.MakeRect("TargetLabel", _towerBody, C3, tgtBtnY + 36f + 6f, COL_W, 22f),
-            "TARGET", new Color(0.6f, 0.6f, 0.7f), 11, bold: true);
+            HUDHelpers.MakeRect("TargetLabel", _towerBody, C3, tgtBtnY + 30f + 5f, COL_W, 20f),
+            "TARGET", new Color(0.6f, 0.6f, 0.7f), 10, bold: true);
 
         string[] modes = { "Furthest", "Closest", "Lowest" };
         float mBtnW = (COL_W - 8f) / 3f;
@@ -185,10 +186,10 @@ public class HUDInfoPanel : MonoBehaviour
         for (int i = 0; i < 3; i++)
         {
             float xOff = C3 + i * (mBtnW + 4f);
-            var bGO  = HUDHelpers.MakeRect($"Target_{modes[i]}", _towerBody, xOff, tgtBtnY, mBtnW, 36f);
+            var bGO  = HUDHelpers.MakeRect($"Target_{modes[i]}", _towerBody, xOff, tgtBtnY, mBtnW, 30f);
             var bImg = bGO.AddComponent<Image>(); bImg.color = new Color(0.18f, 0.18f, 0.28f, 1f);
             var btn  = bGO.AddComponent<Button>(); btn.targetGraphic = bImg;
-            HUDHelpers.MakeText(HUDHelpers.MakeRect("L", bGO, 0f, 0f, mBtnW, 36f), modes[i], Color.white, 11, bold: true)
+            HUDHelpers.MakeText(HUDHelpers.MakeRect("L", bGO, 0f, 0f, mBtnW, 30f), modes[i], Color.white, 10, bold: true)
                 .alignment = TextAnchor.MiddleCenter;
             int idx = i;
             btn.onClick.AddListener(() => SetTargetingMode((TargetingMode)idx));
@@ -225,28 +226,25 @@ public class HUDInfoPanel : MonoBehaviour
         rt.anchoredPosition = Vector2.zero;
         rt.sizeDelta = new Vector2(W, H);
 
-        // Two columns across full width
+        // Enemy name goes in the header title; stats fill two columns
         float colW = (W - PAD * 3f) * 0.5f;
-        const float ROW = 34f;
-        float y = H - HDR_H - PAD - ROW;
+        const float ROW = 26f;
+        float y = H - HDR_H - 8f - ROW;
 
-        _epName = HUDHelpers.MakeText(
-            HUDHelpers.MakeRect("EName", _enemyBody, PAD, y, W - PAD * 2f, ROW),
-            "", new Color(0.95f, 0.4f, 0.4f), 19, bold: true);
-        y -= ROW + 4f;
+        _epName = null;   // shown in header title instead
 
-        _epHp         = HUDHelpers.MakeText(HUDHelpers.MakeRect("HP",    _enemyBody, PAD,                y, colW, ROW), "", Color.white, 16);
-        _epArmor      = HUDHelpers.MakeText(HUDHelpers.MakeRect("Armor", _enemyBody, PAD + colW + PAD,   y, colW, ROW), "", new Color(0.8f,0.8f,0.8f), 16); y -= ROW + 4f;
-        _epSpeed      = HUDHelpers.MakeText(HUDHelpers.MakeRect("Spd",   _enemyBody, PAD,                y, colW, ROW), "", Color.white, 16);
-        _epResistance = HUDHelpers.MakeText(HUDHelpers.MakeRect("Res",   _enemyBody, PAD + colW + PAD,   y, colW, ROW), "", new Color(0.4f,0.85f,1f), 16); y -= ROW + 4f;
-        _epDeathBlow  = HUDHelpers.MakeText(HUDHelpers.MakeRect("DB",    _enemyBody, PAD,                y, colW, ROW), "", new Color(0.95f,0.4f,0.4f), 16);
-        _epFortitude  = HUDHelpers.MakeText(HUDHelpers.MakeRect("Fort",  _enemyBody, PAD + colW + PAD,   y, colW, ROW), "", new Color(0.85f,0.6f,1f), 16); y -= ROW + 10f;
+        _epHp         = HUDHelpers.MakeText(HUDHelpers.MakeRect("HP",    _enemyBody, PAD,              y, colW, ROW), "", Color.white, 14);
+        _epArmor      = HUDHelpers.MakeText(HUDHelpers.MakeRect("Armor", _enemyBody, PAD + colW + PAD, y, colW, ROW), "", new Color(0.8f,0.8f,0.8f), 14); y -= ROW + 3f;
+        _epSpeed      = HUDHelpers.MakeText(HUDHelpers.MakeRect("Spd",   _enemyBody, PAD,              y, colW, ROW), "", Color.white, 14);
+        _epResistance = HUDHelpers.MakeText(HUDHelpers.MakeRect("Res",   _enemyBody, PAD + colW + PAD, y, colW, ROW), "", new Color(0.4f,0.85f,1f), 14); y -= ROW + 3f;
+        _epDeathBlow  = HUDHelpers.MakeText(HUDHelpers.MakeRect("DB",    _enemyBody, PAD,              y, colW, ROW), "", new Color(0.95f,0.4f,0.4f), 14);
+        _epFortitude  = HUDHelpers.MakeText(HUDHelpers.MakeRect("Fort",  _enemyBody, PAD + colW + PAD, y, colW, ROW), "", new Color(0.85f,0.6f,1f), 14); y -= ROW + 8f;
 
-        HUDHelpers.MakeRect("Div", _enemyBody, PAD, y + 6f, W - PAD * 2f, 1f)
+        HUDHelpers.MakeRect("Div", _enemyBody, PAD, y + 4f, W - PAD * 2f, 1f)
             .AddComponent<Image>().color = new Color(1f, 1f, 1f, 0.12f);
         _epDescription = HUDHelpers.MakeText(
-            HUDHelpers.MakeRect("Desc", _enemyBody, PAD, PAD, W - PAD * 2f, y),
-            "", new Color(0.75f, 0.75f, 0.75f), 14);
+            HUDHelpers.MakeRect("Desc", _enemyBody, PAD, 6f, W - PAD * 2f, y - 4f),
+            "", new Color(0.75f, 0.75f, 0.75f), 12);
         _epDescription.alignment         = TextAnchor.UpperLeft;
         _epDescription.horizontalOverflow = HorizontalWrapMode.Wrap;
         _epDescription.verticalOverflow   = VerticalWrapMode.Overflow;
@@ -318,7 +316,7 @@ public class HUDInfoPanel : MonoBehaviour
         {
             case Mode.Tower:        if (_headerTitle != null) _headerTitle.text = "TOWER INFO";    break;
             case Mode.TowerResearch:if (_headerTitle != null) _headerTitle.text = "TOWER RESEARCH";break;
-            case Mode.Enemy:        if (_headerTitle != null) _headerTitle.text = "ENEMY INFO";    break;
+            case Mode.Enemy:        /* header title set by RefreshEnemy */                         break;
             case Mode.TierResearch: if (_headerTitle != null) _headerTitle.text = "RESEARCH";
                                     RefreshTierRes();                                              break;
             case Mode.None:         if (_headerTitle != null) _headerTitle.text = "";              break;
@@ -564,7 +562,7 @@ public class HUDInfoPanel : MonoBehaviour
             desc = def.description ?? "";
         }
 
-        if (_epName       != null) _epName.text       = name.ToUpper();
+        if (_headerTitle  != null) _headerTitle.text = name.ToUpper();
         if (_epHp         != null) _epHp.text         = $"HP        {u.lifeCurrent:0}/{u.lifeMax:0}";
         if (_epSpeed      != null) _epSpeed.text      = $"Speed     {u.speedMax:0.##}";
         if (_epDeathBlow  != null) _epDeathBlow.text  = $"End dmg   {u.deathBlow}";

@@ -1,36 +1,241 @@
 {
     "id": "level_4",
     "displayName": "Level 4",
-    "startGold": 3,
-    "startLives": 10,
-    "startTech": 15,
+    "startGold": 125,
+    "startLives": 100,
+    "startTech": 50,
     "startTier": 2,
-    "backgroundSprite": "Art/Maps/level_1",
-    "backgroundX": -1.8700000047683716,
-    "backgroundY": 0.0,
-    "maxTowers": 4,
+    "backgroundSprite": "Art/Maps/level_3",
+    "backgroundX": 0.019999999552965165,
+    "backgroundY": 1.059999942779541,
+    "maxTowers": -1,
     "allowedTowers": [
-        "basic_tower"
+        "basic_tower",
+        "income_tower",
+        "research_tower",
+        "chain_tower",
+        "slow_tower",
+        "sniper_tower",
+        "siphon_tower",
+        "mortar_tower",
+        "laser_tower",
+        "damage_aura_tower",
+        "speed_aura_tower",
+        "railgun_tower",
+        "collector_tower",
+        "poison_tower",
+        "entropy_tower",
+        "root_tower",
+        "boomerang_tower",
+        "bee_tower",
+        "shotgun_tower"
     ],
-    "modifierColumns": [],
+    "modifierColumns": [
+        {
+            "options": [
+                {
+                    "id": "c1_gold_tech",
+                    "displayName": "+15 Gold, +10 Tech",
+                    "description": "Start with 15 extra gold and 10 extra tech.",
+                    "effectType": "compound",
+                    "value": 0.0,
+                    "subEffects": [
+                        {
+                            "id": "c1_gold",
+                            "displayName": "",
+                            "description": "",
+                            "effectType": "StartingGold",
+                            "value": 15.0
+                        },
+                        {
+                            "id": "c1_tech",
+                            "displayName": "",
+                            "description": "",
+                            "effectType": "StartingTech",
+                            "value": 10.0
+                        }
+                    ]
+                },
+                {
+                    "id": "c1_bounty",
+                    "displayName": "+1 Bounty Per Kill",
+                    "description": "Each enemy killed awards 1 extra gold.",
+                    "effectType": "BountyPerKill",
+                    "value": 1.0,
+                    "subEffects": []
+                },
+                {
+                    "id": "c1_refund",
+                    "displayName": "Full Refunds",
+                    "description": "All towers sell at 100% of their total cost.",
+                    "effectType": "FullRefund",
+                    "value": 1.0,
+                    "subEffects": []
+                },
+                {
+                    "id": "c1_drain",
+                    "displayName": "-2HP/Wave, +10G/Wave",
+                    "description": "Lose 2 lives but gain 10 gold at the end of each wave.",
+                    "effectType": "compound",
+                    "value": 0.0,
+                    "subEffects": [
+                        {
+                            "id": "c1_drain_lives",
+                            "displayName": "",
+                            "description": "",
+                            "effectType": "LivesDrainPerWave",
+                            "value": 2.0
+                        },
+                        {
+                            "id": "c1_drain_gold",
+                            "displayName": "",
+                            "description": "",
+                            "effectType": "GoldPerWave",
+                            "value": 10.0
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "options": [
+                {
+                    "id": "c2_physical",
+                    "displayName": "Physical +25% Dmg",
+                    "description": "All Physical towers deal 25% more damage.",
+                    "effectType": "PhysicalDamageMult",
+                    "value": 0.25,
+                    "subEffects": []
+                },
+                {
+                    "id": "c2_arcane",
+                    "displayName": "Arcane +25% Atk Speed",
+                    "description": "All Arcane towers attack 25% faster.",
+                    "effectType": "ArcaneSpdMult",
+                    "value": 0.25,
+                    "subEffects": []
+                },
+                {
+                    "id": "c2_elemental",
+                    "displayName": "Elemental +10% Dmg & AS",
+                    "description": "All Elemental towers deal 10% more damage and attack 10% faster.",
+                    "effectType": "compound",
+                    "value": 0.0,
+                    "subEffects": [
+                        {
+                            "id": "c2_el_dmg",
+                            "displayName": "",
+                            "description": "",
+                            "effectType": "ElementalDamageMult",
+                            "value": 0.10000000149011612
+                        },
+                        {
+                            "id": "c2_el_spd",
+                            "displayName": "",
+                            "description": "",
+                            "effectType": "ElementalSpdMult",
+                            "value": 0.10000000149011612
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "options": [
+                {
+                    "id": "c3_radius",
+                    "displayName": "Aura Radius +15%",
+                    "description": "All aura towers have 15% larger range.",
+                    "effectType": "AuraRadiusMult",
+                    "value": 0.15000000596046449,
+                    "subEffects": []
+                },
+                {
+                    "id": "c3_mult",
+                    "displayName": "Aura Effect ×1.25",
+                    "description": "All aura bonuses are 25% stronger.",
+                    "effectType": "AuraMult",
+                    "value": 0.25,
+                    "subEffects": []
+                },
+                {
+                    "id": "c3_slow",
+                    "displayName": "Auras Slow Enemies 2.5%",
+                    "description": "Enemies in an aura are slowed 2.5% per aura (stacking).",
+                    "effectType": "AuraSlowEnemies",
+                    "value": 0.02500000037252903,
+                    "subEffects": []
+                }
+            ]
+        },
+        {
+            "options": [
+                {
+                    "id": "c4_lives",
+                    "displayName": "+10 Lives",
+                    "description": "Start with 10 extra lives.",
+                    "effectType": "StartingLives",
+                    "value": 10.0,
+                    "subEffects": []
+                },
+                {
+                    "id": "c4_forgive",
+                    "displayName": "Forgive First Leak",
+                    "description": "The first enemy to leak each wave deals no life damage.",
+                    "effectType": "ForgiveFirstLeak",
+                    "value": 1.0,
+                    "subEffects": []
+                },
+                {
+                    "id": "c4_reduce",
+                    "displayName": "Leaks Deal -1 Life",
+                    "description": "Leaking enemies deal 1 less life damage (minimum 1).",
+                    "effectType": "LeakDamageReduction",
+                    "value": 1.0,
+                    "subEffects": []
+                },
+                {
+                    "id": "c4_laststand",
+                    "displayName": "Last Stand",
+                    "description": "At 1 life remaining, all towers permanently deal 2× damage.",
+                    "effectType": "LastStand",
+                    "value": 1.0,
+                    "subEffects": []
+                }
+            ]
+        },
+        {
+            "options": [
+                {
+                    "id": "c5_drones",
+                    "displayName": "+2 Bee Drones",
+                    "description": "Bee towers spawn 2 extra drones.",
+                    "effectType": "BonusDrones",
+                    "value": 2.0,
+                    "subEffects": []
+                },
+                {
+                    "id": "c5_shotgun",
+                    "displayName": "+5 Shotgun Pellets",
+                    "description": "Shotgun towers fire 5 additional pellets.",
+                    "effectType": "BonusShotgunBullets",
+                    "value": 5.0,
+                    "subEffects": []
+                },
+                {
+                    "id": "c5_doubletap",
+                    "displayName": "Double Tap",
+                    "description": "Basic towers fire a second shot 0.15s after the first.",
+                    "effectType": "BasicDoubleTap",
+                    "value": 1.0,
+                    "subEffects": []
+                }
+            ]
+        }
+    ],
     "difficulties": [
         {
             "label": "Easy",
-            "enemyHpMult": 0.3499999940395355,
-            "enemySpeedMult": 1.0,
-            "goldMult": 1.0,
-            "bountyMult": 1.0,
-            "startGold": -1,
-            "startLives": -1,
-            "startTech": -1,
-            "startTier": -1,
-            "maxTowers": -1,
-            "allowedTowers": [],
-            "disabledGroups": [],
-            "objectives": []
-        },
-        {
-            "label": "Medium",
             "enemyHpMult": 0.75,
             "enemySpeedMult": 1.0,
             "goldMult": 1.0,
@@ -45,8 +250,23 @@
             "objectives": []
         },
         {
-            "label": "Hard",
+            "label": "Medium",
             "enemyHpMult": 1.0,
+            "enemySpeedMult": 1.0,
+            "goldMult": 1.0,
+            "bountyMult": 1.0,
+            "startGold": -1,
+            "startLives": -1,
+            "startTech": -1,
+            "startTier": -1,
+            "maxTowers": -1,
+            "allowedTowers": [],
+            "disabledGroups": [],
+            "objectives": []
+        },
+        {
+            "label": "Hard",
+            "enemyHpMult": 1.75,
             "enemySpeedMult": 1.0,
             "goldMult": 1.0,
             "bountyMult": 1.0,
@@ -60,130 +280,157 @@
             "objectives": []
         }
     ],
-    "objectives": [
-        {
-            "id": "build_basics",
-            "description": "Build 4 Basic Towers",
-            "type": "BuildTower",
-            "targetId": "basic_tower",
-            "count": 4,
-            "required": true
-        },
-        {
-            "id": "upgrade_basics",
-            "description": "Upgrade 4 Basic Towers",
-            "type": "UpgradeTower",
-            "targetId": "basic_tower",
-            "count": 4,
-            "required": false
-        }
-    ],
+    "objectives": [],
     "paths": [
-        {
-            "spawnerIndex": 0,
-            "nodes": [
-                {
-                    "id": "n0",
-                    "x": -11.609999656677246,
-                    "y": -0.75,
-                    "next": [
-                        "n1"
-                    ]
-                },
-                {
-                    "id": "n1",
-                    "x": -6.119999885559082,
-                    "y": 0.8299999833106995,
-                    "next": [
-                        "n2"
-                    ]
-                },
-                {
-                    "id": "n2",
-                    "x": -2.299999952316284,
-                    "y": 1.2200000286102296,
-                    "next": [
-                        "n3"
-                    ]
-                },
-                {
-                    "id": "n3",
-                    "x": 1.4299999475479127,
-                    "y": 0.6399999856948853,
-                    "next": [
-                        "n4"
-                    ]
-                },
-                {
-                    "id": "n4",
-                    "x": 4.460000038146973,
-                    "y": -0.5699999928474426,
-                    "next": [
-                        "n4_post",
-                        "n4_post"
-                    ]
-                },
-                {
-                    "id": "n4_post",
-                    "x": 8.420000076293946,
-                    "y": -1.8300000429153443,
-                    "next": []
-                },
-                {
-                    "id": "n4_post",
-                    "x": 8.279999732971192,
-                    "y": -2.7300000190734865,
-                    "next": []
-                }
-            ]
-        },
         {
             "spawnerIndex": 1,
             "nodes": [
                 {
                     "id": "n0",
-                    "x": -11.619999885559082,
-                    "y": -2.0,
+                    "x": -9.920000076293946,
+                    "y": 0.550000011920929,
                     "next": [
                         "n1"
                     ]
                 },
                 {
                     "id": "n1",
-                    "x": -7.090000152587891,
-                    "y": -0.3799999952316284,
+                    "x": -6.840000152587891,
+                    "y": 2.440000057220459,
                     "next": [
                         "n2"
                     ]
                 },
                 {
                     "id": "n2",
-                    "x": -4.380000114440918,
-                    "y": 0.4699999988079071,
+                    "x": -2.8299999237060549,
+                    "y": 4.300000190734863,
                     "next": [
                         "n3"
                     ]
                 },
                 {
                     "id": "n3",
-                    "x": -1.0199999809265137,
-                    "y": 0.7699999809265137,
+                    "x": 0.8199999928474426,
+                    "y": 5.25,
                     "next": [
                         "n4"
                     ]
                 },
                 {
                     "id": "n4",
-                    "x": 3.2699999809265138,
-                    "y": 0.2199999988079071,
+                    "x": 7.920000076293945,
+                    "y": 6.949999809265137,
+                    "next": []
+                }
+            ]
+        },
+        {
+            "spawnerIndex": 0,
+            "nodes": [
+                {
+                    "id": "n0",
+                    "x": -8.989999771118164,
+                    "y": -4.739999771118164,
+                    "next": [
+                        "n1"
+                    ]
+                },
+                {
+                    "id": "n1",
+                    "x": -5.739999771118164,
+                    "y": -2.3399999141693117,
+                    "next": [
+                        "n2"
+                    ]
+                },
+                {
+                    "id": "n2",
+                    "x": -3.0299999713897707,
+                    "y": -1.3600000143051148,
+                    "next": [
+                        "n3"
+                    ]
+                },
+                {
+                    "id": "n3",
+                    "x": 1.4500000476837159,
+                    "y": -1.0700000524520875,
+                    "next": [
+                        "n4"
+                    ]
+                },
+                {
+                    "id": "n4",
+                    "x": 5.349999904632568,
+                    "y": 0.05999999865889549,
                     "next": [
                         "n5"
                     ]
                 },
                 {
                     "id": "n5",
-                    "x": 8.279999732971192,
-                    "y": -1.0099999904632569,
+                    "x": 10.289999961853028,
+                    "y": 1.7699999809265137,
+                    "next": []
+                }
+            ]
+        },
+        {
+            "spawnerIndex": 2,
+            "nodes": [
+                {
+                    "id": "n0",
+                    "x": -9.8100004196167,
+                    "y": 4.099999904632568,
+                    "next": [
+                        "n1"
+                    ]
+                },
+                {
+                    "id": "n1",
+                    "x": -6.480000019073486,
+                    "y": 5.130000114440918,
+                    "next": [
+                        "n2"
+                    ]
+                },
+                {
+                    "id": "n2",
+                    "x": -1.0700000524520875,
+                    "y": 5.710000038146973,
+                    "next": [
+                        "n3"
+                    ]
+                },
+                {
+                    "id": "n3",
+                    "x": 0.6100000143051148,
+                    "y": 5.769999980926514,
+                    "next": [
+                        "n4"
+                    ]
+                },
+                {
+                    "id": "n4",
+                    "x": 3.450000047683716,
+                    "y": 4.980000019073486,
+                    "next": [
+                        "n5"
+                    ]
+                },
+                {
+                    "id": "n5",
+                    "x": 7.039999961853027,
+                    "y": 5.349999904632568,
+                    "next": [
+                        "n6"
+                    ]
+                },
+                {
+                    "id": "n6",
+                    "x": 10.649999618530274,
+                    "y": 5.889999866485596,
                     "next": []
                 }
             ]
@@ -198,124 +445,28 @@
             "width": 0.25,
             "points": [
                 {
-                    "x": -11.539999961853028,
-                    "y": -3.6700000762939455,
+                    "x": -0.12999999523162843,
+                    "y": 0.28999999165534975,
                     "width": 0.25
                 },
                 {
-                    "x": -6.349999904632568,
-                    "y": -1.2599999904632569,
+                    "x": 2.1500000953674318,
+                    "y": 0.20000000298023225,
                     "width": 0.25
                 },
                 {
-                    "x": -1.090000033378601,
-                    "y": 0.36000001430511477,
-                    "width": 0.25
-                }
-            ]
-        },
-        {
-            "type": "lane",
-            "x": 0.0,
-            "y": 0.0,
-            "radius": 2.0,
-            "width": 0.25,
-            "points": [
-                {
-                    "x": -5.789999961853027,
-                    "y": -2.2699999809265138,
+                    "x": 5.900000095367432,
+                    "y": 1.1299999952316285,
                     "width": 0.25
                 },
                 {
-                    "x": 1.409999966621399,
-                    "y": -0.05000000074505806,
-                    "width": 0.25
-                }
-            ]
-        },
-        {
-            "type": "lane",
-            "x": 0.0,
-            "y": 0.0,
-            "radius": 2.0,
-            "width": 0.44999998807907107,
-            "points": [
-                {
-                    "x": -1.4800000190734864,
-                    "y": -2.049999952316284,
-                    "width": 0.44999998807907107
-                },
-                {
-                    "x": 2.640000104904175,
-                    "y": -0.8299999833106995,
-                    "width": 0.25
-                }
-            ]
-        },
-        {
-            "type": "lane",
-            "x": 0.0,
-            "y": 0.0,
-            "radius": 2.0,
-            "width": 0.44999998807907107,
-            "points": [
-                {
-                    "x": -11.470000267028809,
-                    "y": 1.8799999952316285,
-                    "width": 0.44999998807907107
-                },
-                {
-                    "x": -9.359999656677246,
-                    "y": 2.950000047683716,
-                    "width": 0.44999998807907107
-                },
-                {
-                    "x": -7.28000020980835,
-                    "y": 3.240000009536743,
-                    "width": 0.44999998807907107
-                },
-                {
-                    "x": -5.480000019073486,
-                    "y": 3.0999999046325685,
-                    "width": 0.3499999940395355
-                },
-                {
-                    "x": -2.740000009536743,
-                    "y": 2.8399999141693117,
-                    "width": 0.3499999940395355
-                },
-                {
-                    "x": 0.9399999976158142,
-                    "y": 2.8399999141693117,
-                    "width": 0.3499999940395355
-                },
-                {
-                    "x": 4.579999923706055,
-                    "y": 3.819999933242798,
-                    "width": 0.3499999940395355
-                }
-            ]
-        },
-        {
-            "type": "lane",
-            "x": 0.0,
-            "y": 0.0,
-            "radius": 2.0,
-            "width": 0.25,
-            "points": [
-                {
-                    "x": 1.6699999570846558,
-                    "y": 1.0800000429153443,
+                    "x": 8.479999542236329,
+                    "y": 2.1500000953674318,
                     "width": 0.25
                 },
                 {
-                    "x": 4.53000020980835,
-                    "y": 1.909999966621399,
-                    "width": 0.25
-                },
-                {
-                    "x": 7.800000190734863,
-                    "y": 2.299999952316284,
+                    "x": 9.979999542236329,
+                    "y": 2.9600000381469728,
                     "width": 0.25
                 }
             ]
@@ -328,13 +479,13 @@
             "width": 0.25,
             "points": [
                 {
-                    "x": 3.859999895095825,
-                    "y": 0.6800000071525574,
+                    "x": -6.28000020980835,
+                    "y": -0.07000000029802323,
                     "width": 0.25
                 },
                 {
-                    "x": 5.96999979019165,
-                    "y": 1.0499999523162842,
+                    "x": -3.7899999618530275,
+                    "y": 1.0700000524520875,
                     "width": 0.25
                 }
             ]
@@ -347,13 +498,13 @@
             "width": 0.25,
             "points": [
                 {
-                    "x": -7.559999942779541,
-                    "y": -4.880000114440918,
+                    "x": 1.4299999475479127,
+                    "y": 2.430000066757202,
                     "width": 0.25
                 },
                 {
-                    "x": -6.53000020980835,
-                    "y": -4.210000038146973,
+                    "x": 3.450000047683716,
+                    "y": 2.7200000286102297,
                     "width": 0.25
                 }
             ]
@@ -366,28 +517,13 @@
             "width": 0.25,
             "points": [
                 {
-                    "x": -6.789999961853027,
-                    "y": -5.409999847412109,
+                    "x": -10.279999732971192,
+                    "y": -2.809999942779541,
                     "width": 0.25
                 },
                 {
-                    "x": -5.769999980926514,
-                    "y": -4.119999885559082,
-                    "width": 0.25
-                },
-                {
-                    "x": -3.9700000286102297,
-                    "y": -3.5,
-                    "width": 0.25
-                },
-                {
-                    "x": -1.0,
-                    "y": -3.6500000953674318,
-                    "width": 0.25
-                },
-                {
-                    "x": 0.6399999856948853,
-                    "y": -3.2699999809265138,
+                    "x": -8.050000190734864,
+                    "y": -1.399999976158142,
                     "width": 0.25
                 }
             ]
@@ -400,13 +536,176 @@
             "width": 0.25,
             "points": [
                 {
-                    "x": 2.819999933242798,
-                    "y": -2.7300000190734865,
+                    "x": -7.53000020980835,
+                    "y": -1.7599999904632569,
                     "width": 0.25
                 },
                 {
-                    "x": 4.360000133514404,
-                    "y": -2.259999990463257,
+                    "x": -5.610000133514404,
+                    "y": -1.090000033378601,
+                    "width": 0.25
+                },
+                {
+                    "x": -3.259999990463257,
+                    "y": -1.0,
+                    "width": 0.25
+                }
+            ]
+        },
+        {
+            "type": "lane",
+            "x": 0.0,
+            "y": 0.0,
+            "radius": 2.0,
+            "width": 0.25,
+            "points": [
+                {
+                    "x": -1.190000057220459,
+                    "y": -1.1100000143051148,
+                    "width": 0.25
+                },
+                {
+                    "x": 2.3399999141693117,
+                    "y": -1.8600000143051148,
+                    "width": 0.25
+                },
+                {
+                    "x": 4.460000038146973,
+                    "y": -1.7999999523162842,
+                    "width": 0.25
+                },
+                {
+                    "x": 5.75,
+                    "y": -1.4800000190734864,
+                    "width": 0.25
+                }
+            ]
+        },
+        {
+            "type": "lane",
+            "x": 0.0,
+            "y": 0.0,
+            "radius": 2.0,
+            "width": 0.25,
+            "points": [
+                {
+                    "x": 6.769999980926514,
+                    "y": -1.0099999904632569,
+                    "width": 0.25
+                },
+                {
+                    "x": 9.979999542236329,
+                    "y": 0.3700000047683716,
+                    "width": 0.25
+                }
+            ]
+        },
+        {
+            "type": "lane",
+            "x": 0.0,
+            "y": 0.0,
+            "radius": 2.0,
+            "width": 0.25,
+            "points": [
+                {
+                    "x": -4.800000190734863,
+                    "y": -4.360000133514404,
+                    "width": 0.25
+                },
+                {
+                    "x": -2.380000114440918,
+                    "y": -3.2100000381469728,
+                    "width": 0.25
+                },
+                {
+                    "x": 1.7000000476837159,
+                    "y": -2.559999942779541,
+                    "width": 0.25
+                }
+            ]
+        },
+        {
+            "type": "lane",
+            "x": 0.0,
+            "y": 0.0,
+            "radius": 2.0,
+            "width": 0.25,
+            "points": [
+                {
+                    "x": -3.859999895095825,
+                    "y": -4.519999980926514,
+                    "width": 0.25
+                },
+                {
+                    "x": -2.4600000381469728,
+                    "y": -3.940000057220459,
+                    "width": 0.25
+                }
+            ]
+        },
+        {
+            "type": "lane",
+            "x": 0.0,
+            "y": 0.0,
+            "radius": 2.0,
+            "width": 0.25,
+            "points": [
+                {
+                    "x": -0.23000000417232514,
+                    "y": -3.619999885559082,
+                    "width": 0.25
+                },
+                {
+                    "x": 5.409999847412109,
+                    "y": -2.7200000286102297,
+                    "width": 0.25
+                },
+                {
+                    "x": 8.729999542236329,
+                    "y": -1.4700000286102296,
+                    "width": 0.25
+                },
+                {
+                    "x": 10.050000190734864,
+                    "y": -0.6399999856948853,
+                    "width": 0.25
+                }
+            ]
+        },
+        {
+            "type": "lane",
+            "x": 0.0,
+            "y": 0.0,
+            "radius": 2.0,
+            "width": 0.25,
+            "points": [
+                {
+                    "x": 5.309999942779541,
+                    "y": -3.859999895095825,
+                    "width": 0.25
+                },
+                {
+                    "x": 10.100000381469727,
+                    "y": -2.2799999713897707,
+                    "width": 0.25
+                }
+            ]
+        },
+        {
+            "type": "lane",
+            "x": 0.0,
+            "y": 0.0,
+            "radius": 2.0,
+            "width": 0.25,
+            "points": [
+                {
+                    "x": 5.599999904632568,
+                    "y": -4.53000020980835,
+                    "width": 0.25
+                },
+                {
+                    "x": 7.900000095367432,
+                    "y": -3.8299999237060549,
                     "width": 0.25
                 }
             ]
@@ -417,55 +716,66 @@
             "groups": [
                 {
                     "unitDefinitionId": "basic_enemy",
-                    "count": 3,
-                    "spawnInterval": 3.0,
+                    "count": 13,
+                    "spawnInterval": 1.0,
                     "startTime": 0.0,
                     "spawnerIndex": 0,
                     "dropConfig": {
-                        "mode": "always",
+                        "mode": "chance",
                         "fallbackChance": -1.0,
                         "pattern": [],
                         "repeat": true
                     }
-                }
-            ]
-        },
-        {
-            "groups": [
+                },
                 {
-                    "unitDefinitionId": "basic_enemy",
-                    "count": 6,
-                    "spawnInterval": 2.5,
-                    "startTime": 0.0,
+                    "unitDefinitionId": "fast_enemy",
+                    "count": 8,
+                    "spawnInterval": 1.5,
+                    "startTime": 1.0,
                     "spawnerIndex": 0,
                     "dropConfig": {
-                        "mode": "pattern",
+                        "mode": "chance",
                         "fallbackChance": -1.0,
-                        "pattern": [
-                            1,
-                            0
-                        ],
+                        "pattern": [],
                         "repeat": true
                     }
-                }
-            ]
-        },
-        {
-            "groups": [
+                },
                 {
-                    "unitDefinitionId": "basic_enemy",
-                    "count": 9,
-                    "spawnInterval": 2.25,
-                    "startTime": 0.0,
+                    "unitDefinitionId": "fast_enemy",
+                    "count": 8,
+                    "spawnInterval": 1.5,
+                    "startTime": 1.25,
                     "spawnerIndex": 0,
                     "dropConfig": {
-                        "mode": "pattern",
+                        "mode": "chance",
                         "fallbackChance": -1.0,
-                        "pattern": [
-                            1,
-                            0,
-                            0
-                        ],
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "fast_enemy",
+                    "count": 8,
+                    "spawnInterval": 1.5,
+                    "startTime": 1.5,
+                    "spawnerIndex": 0,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "armored_enemy",
+                    "count": 6,
+                    "spawnInterval": 2.0,
+                    "startTime": 2.0,
+                    "spawnerIndex": 0,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
                         "repeat": true
                     }
                 }
@@ -480,65 +790,18 @@
                     "startTime": 0.0,
                     "spawnerIndex": 0,
                     "dropConfig": {
-                        "mode": "always",
-                        "fallbackChance": -1.0,
-                        "pattern": [],
-                        "repeat": true
-                    }
-                }
-            ]
-        },
-        {
-            "groups": [
-                {
-                    "unitDefinitionId": "basic_enemy",
-                    "count": 10,
-                    "spawnInterval": 1.850000023841858,
-                    "startTime": 0.0,
-                    "spawnerIndex": 0,
-                    "dropConfig": {
-                        "mode": "always",
-                        "fallbackChance": -1.0,
-                        "pattern": [],
-                        "repeat": true
-                    }
-                },
-                {
-                    "unitDefinitionId": "fast_enemy",
-                    "count": 5,
-                    "spawnInterval": 3.1500000953674318,
-                    "startTime": 1.25,
-                    "spawnerIndex": 1,
-                    "dropConfig": {
                         "mode": "chance",
                         "fallbackChance": -1.0,
                         "pattern": [],
                         "repeat": true
                     }
-                }
-            ]
-        },
-        {
-            "groups": [
+                },
                 {
                     "unitDefinitionId": "basic_enemy",
                     "count": 10,
-                    "spawnInterval": 1.7999999523162842,
-                    "startTime": 0.0,
+                    "spawnInterval": 2.0,
+                    "startTime": 0.25,
                     "spawnerIndex": 0,
-                    "dropConfig": {
-                        "mode": "always",
-                        "fallbackChance": -1.0,
-                        "pattern": [],
-                        "repeat": true
-                    }
-                },
-                {
-                    "unitDefinitionId": "fast_enemy",
-                    "count": 5,
-                    "spawnInterval": 3.5999999046325685,
-                    "startTime": 1.25,
-                    "spawnerIndex": 1,
                     "dropConfig": {
                         "mode": "chance",
                         "fallbackChance": -1.0,
@@ -548,23 +811,131 @@
                 },
                 {
                     "unitDefinitionId": "basic_enemy",
+                    "count": 5,
+                    "spawnInterval": 4.0,
+                    "startTime": 0.0,
+                    "spawnerIndex": 0,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "armored_enemy",
+                    "count": 2,
+                    "spawnInterval": 10.0,
+                    "startTime": 6.0,
+                    "spawnerIndex": 0,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "armored_enemy",
+                    "count": 5,
+                    "spawnInterval": 4.0,
+                    "startTime": 2.0,
+                    "spawnerIndex": 0,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "fast_enemy",
+                    "count": 3,
+                    "spawnInterval": 5.0,
+                    "startTime": 1.0,
+                    "spawnerIndex": 1,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "fast_enemy",
+                    "count": 3,
+                    "spawnInterval": 5.0,
+                    "startTime": 1.25,
+                    "spawnerIndex": 1,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "fast_enemy",
                     "count": 3,
                     "spawnInterval": 5.0,
-                    "startTime": 5.0,
+                    "startTime": 1.5,
+                    "spawnerIndex": 1,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                }
+            ]
+        },
+        {
+            "groups": [
+                {
+                    "unitDefinitionId": "basic_enemy",
+                    "count": 30,
+                    "spawnInterval": 1.0,
+                    "startTime": 0.0,
                     "spawnerIndex": 0,
                     "dropConfig": {
-                        "mode": "always",
+                        "mode": "chance",
                         "fallbackChance": -1.0,
                         "pattern": [],
                         "repeat": true
                     }
                 },
                 {
-                    "unitDefinitionId": "fast_enemy",
-                    "count": 3,
-                    "spawnInterval": 6.0,
-                    "startTime": 5.0,
+                    "unitDefinitionId": "basic_enemy",
+                    "count": 15,
+                    "spawnInterval": 2.0,
+                    "startTime": 1.0,
                     "spawnerIndex": 0,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "basic_enemy",
+                    "count": 10,
+                    "spawnInterval": 3.0,
+                    "startTime": 0.0,
+                    "spawnerIndex": 0,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "armored_enemy",
+                    "count": 3,
+                    "spawnInterval": 10.0,
+                    "startTime": 5.0,
+                    "spawnerIndex": 1,
                     "dropConfig": {
                         "mode": "chance",
                         "fallbackChance": -1.0,
