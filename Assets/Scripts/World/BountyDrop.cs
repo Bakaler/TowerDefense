@@ -43,6 +43,69 @@ public class BountyDrop : MonoBehaviour
 
     // ── Factory ───────────────────────────────────────────────────────
 
+    /// <summary>
+    /// Evaluate the unit's spawn group DropConfig and spawn a bounty if warranted.
+    /// </summary>
+    public static void TrySpawn(Vector3 worldPos, UnitManager unit = null)
+    {
+        var cfg        = unit?.SpawnDropConfig;
+        int spawnIndex = unit?.SpawnIndex ?? 0;
+
+        if (EvaluateDrop(cfg, spawnIndex))
+            Spawn(worldPos, 1);
+    }
+
+    static bool EvaluateDrop(DropConfig cfg, int killIndex)
+    {
+        if (cfg == null || cfg.mode == "chance")
+            return RollBalanceChance();
+
+        switch (cfg.mode)
+        {
+            case "always":
+                return true;
+
+            case "never":
+                return false;
+
+            case "first_only":
+                return killIndex == 0;
+
+            case "alternating":
+                return killIndex % 2 == 0 ? true : RollFallback(cfg);
+
+            case "pattern":
+                if (cfg.pattern == null || cfg.pattern.Length == 0)
+                    return RollBalanceChance();
+
+                int idx = cfg.repeat
+                    ? killIndex % cfg.pattern.Length
+                    : killIndex;
+
+                if (idx >= cfg.pattern.Length)
+                    return RollFallback(cfg);
+
+                return cfg.pattern[idx] switch
+                {
+                    1 => true,
+                    0 => false,
+                    _ => RollBalanceChance()   // 2 or any other value = chance
+                };
+
+            default:
+                return RollBalanceChance();
+        }
+    }
+
+    static bool RollFallback(DropConfig cfg) =>
+        cfg.fallbackChance >= 0f ? Random.value <= cfg.fallbackChance : RollBalanceChance();
+
+    static bool RollBalanceChance()
+    {
+        float physical = BalanceManager.Instance != null ? BalanceManager.Instance.Physical : 0f;
+        return Random.value <= 0.15f + physical * 0.0025f;
+    }
+
     public static BountyDrop Spawn(Vector3 worldPos, int value)
     {
         var go = new GameObject("BountyDrop");

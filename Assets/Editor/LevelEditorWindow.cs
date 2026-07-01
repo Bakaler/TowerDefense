@@ -9,7 +9,9 @@ public class LevelEditorWindow : EditorWindow
     const string RootName   = "[LevelEditor]";
     const string ZonesName  = "Zones";
     const string SessionKey = "LevelEditorWindow_ActiveLevel";
-    const int    MaxLevels  = 3;
+
+    // Copy-from dropdown state
+    int _copySourceIdx = 0;
 
     int     _activeLevel;
     Vector2 _scroll;
@@ -23,17 +25,40 @@ public class LevelEditorWindow : EditorWindow
     string[]       _towerIds  = System.Array.Empty<string>();
 
     // Level settings (editable in the window, saved via button)
-    string              _editName   = "";
-    int                 _editGold   = 25;
-    int                 _editLives  = 20;
-    int                 _editTech   = 0;
-    int                 _editTier   = 1;
-    HashSet<string>     _allowedSet = new();
+    string              _editName      = "";
+    int                 _editGold      = 25;
+    int                 _editLives     = 20;
+    int                 _editTech      = 0;
+    int                 _editTier      = 1;
+    int                 _editMaxTowers = -1;
+    HashSet<string>     _allowedSet    = new();
     bool                _settingsFoldout = true;
 
     // Modifier columns editor state
     List<List<ModifierDef>> _modColumns = new List<List<ModifierDef>>();
     bool _modifiersFoldout = false;
+
+    // Objectives editor state
+    List<ObjectiveDef> _objectives     = new List<ObjectiveDef>();
+    bool _objectivesFoldout            = false;
+
+    // Difficulties editor state
+    List<DifficultyDef> _difficulties    = new List<DifficultyDef>();
+    bool                _diffFoldout     = false;
+    readonly bool[]     _diffExpanded    = new bool[3];
+    // Per-difficulty disabled-group sets: key = diffIdx, value = HashSet<"wi,gi">
+    readonly Dictionary<int, HashSet<string>> _diffDisabled = new();
+
+    static readonly string[] ObjectiveTypes = {
+        "BuildTower", "UpgradeTower", "KillEnemy", "ReachWave", "SurviveWithLives"
+    };
+    static readonly string[] DropModes = { "chance", "always", "never", "pattern" };
+
+    // Wave drag-reorder state
+    int   _dragWaveIdx = -1;
+    int   _dropWaveIdx = -1;
+    float _waveDropY   = 0f;
+    readonly List<float> _waveTopYs = new();
 
     // Group drag-reorder state (within a wave)
     int                           _dragGroupWave = -1;
@@ -56,14 +81,81 @@ public class LevelEditorWindow : EditorWindow
 
         // ── Level buttons ─────────────────────────────────────────────
         GUILayout.Label("Load Level", EditorStyles.miniBoldLabel);
-        GUILayout.BeginHorizontal();
-        for (int i = 1; i <= MaxLevels; i++)
+        int levelCount  = CountExistingLevels();
+        int levelToDelete = -1;
+        int levelSwapWith = -1;   // swap (i) with (i+1)
+
+        for (int i = 1; i <= levelCount; i++)
         {
             bool current = _activeLevel == i && FindRoot() != null;
+            GUILayout.BeginHorizontal();
+
+            // Load button — show display name if available
+            string levelLabel = $"Level {i}";
+            var levelData = ReadJSON(i);
+            if (levelData != null && !string.IsNullOrEmpty(levelData.displayName) && levelData.displayName != levelLabel)
+                levelLabel = $"Level {i}  —  {levelData.displayName}";
+
             GUI.backgroundColor = current ? new Color(0.35f, 0.9f, 0.35f) : Color.white;
-            if (GUILayout.Button($"Level {i}", GUILayout.Height(36))) LoadLevel(i);
+            if (GUILayout.Button(levelLabel, GUILayout.Height(28)))
+                LoadLevel(i);
+            GUI.backgroundColor = Color.white;
+
+            // ← move earlier (swap with i-1)
+            GUI.enabled = i > 1;
+            GUI.backgroundColor = new Color(0.8f, 0.85f, 1f);
+            if (GUILayout.Button("◀", GUILayout.Height(28), GUILayout.Width(26))) levelSwapWith = i - 1;
+
+            // → move later (swap with i+1 = swap i with i+1 recorded as i)
+            GUI.enabled = i < levelCount;
+            if (GUILayout.Button("▶", GUILayout.Height(28), GUILayout.Width(26))) levelSwapWith = i;
+            GUI.enabled = true;
+            GUI.backgroundColor = Color.white;
+
+            // Delete
+            GUI.backgroundColor = new Color(1f, 0.4f, 0.4f);
+            if (GUILayout.Button("✕", GUILayout.Height(28), GUILayout.Width(24))) levelToDelete = i;
+            GUI.backgroundColor = Color.white;
+
+            GUILayout.EndHorizontal();
+            GUILayout.Space(2);
         }
+
+        if (levelToDelete > 0)
+        {
+            bool confirmed = EditorUtility.DisplayDialog(
+                "Delete Level",
+                levelCount > levelToDelete
+                    ? $"Delete Level {levelToDelete} and renumber Level {levelToDelete + 1}–{levelCount} down by one?"
+                    : $"Delete Level {levelToDelete}? This cannot be undone.",
+                "Delete", "Cancel");
+            if (confirmed) DeleteLevel(levelToDelete, levelCount);
+        }
+
+        if (levelSwapWith > 0)
+            SwapLevels(levelSwapWith, levelSwapWith + 1);
+
+        // ── Add / Copy level ──────────────────────────────────────────
+        GUILayout.BeginHorizontal();
+        GUI.backgroundColor = new Color(0.55f, 0.85f, 1f);
+        if (GUILayout.Button($"+ Add Level {levelCount + 1}", GUILayout.Height(26)))
+            CreateLevel(levelCount + 1, null);
         GUI.backgroundColor = Color.white;
+
+        if (levelCount > 0)
+        {
+            GUILayout.Label("Copy from", EditorStyles.miniLabel, GUILayout.Width(58));
+            string[] levelLabels = new string[levelCount];
+            for (int i = 0; i < levelCount; i++) levelLabels[i] = $"Level {i + 1}";
+            _copySourceIdx = EditorGUILayout.Popup(_copySourceIdx, levelLabels, GUILayout.Width(72));
+            GUI.backgroundColor = new Color(0.75f, 0.55f, 1f);
+            if (GUILayout.Button($"→ Level {levelCount + 1}", GUILayout.Height(26)))
+            {
+                var src = ReadJSON(_copySourceIdx + 1);
+                CreateLevel(levelCount + 1, src);
+            }
+            GUI.backgroundColor = Color.white;
+        }
         GUILayout.EndHorizontal();
 
         GUILayout.Space(10);
@@ -156,6 +248,38 @@ public class LevelEditorWindow : EditorWindow
         GUILayout.Space(4);
         DrawWaveList();
 
+        GUILayout.Space(8);
+
+        // ── Objectives ────────────────────────────────────────────────
+        GUILayout.Label("Objectives", EditorStyles.miniBoldLabel);
+
+        GUILayout.BeginHorizontal();
+        GUI.backgroundColor = new Color(0.4f, 1f, 0.5f);
+        if (GUILayout.Button("Save Objectives  →  JSON", GUILayout.Height(30)))
+            SaveSettings(_activeLevel);
+        GUI.backgroundColor = new Color(0.7f, 0.9f, 1f);
+        if (GUILayout.Button("+ Objective", GUILayout.Height(30), GUILayout.Width(90)))
+            _objectives.Add(new ObjectiveDef { type = "BuildTower", count = 1, required = true });
+        GUI.backgroundColor = Color.white;
+        GUILayout.EndHorizontal();
+
+        GUILayout.Space(4);
+        DrawObjectiveList();
+
+        GUILayout.Space(8);
+
+        // ── Difficulties ─────────────────────────────────────────────
+        GUILayout.BeginHorizontal();
+        _diffFoldout = EditorGUILayout.Foldout(_diffFoldout, "Difficulties", true, EditorStyles.foldoutHeader);
+        GUI.backgroundColor = new Color(0.4f, 1f, 0.5f);
+        if (GUILayout.Button("Save Difficulties → JSON", GUILayout.Height(20), GUILayout.Width(180)))
+            SaveSettings(_activeLevel);
+        GUI.backgroundColor = Color.white;
+        GUILayout.EndHorizontal();
+
+        if (_diffFoldout)
+            DrawDifficultiesSection();
+
         GUILayout.Space(12);
 
         // ── Discard ───────────────────────────────────────────────────
@@ -178,11 +302,12 @@ public class LevelEditorWindow : EditorWindow
 
         EditorGUI.indentLevel++;
 
-        _editName  = EditorGUILayout.TextField("Display Name",    _editName);
-        _editGold  = EditorGUILayout.IntField ("Start Gold",      _editGold);
-        _editLives = EditorGUILayout.IntField ("Start Lives",     _editLives);
-        _editTech  = EditorGUILayout.IntField ("Start Tech",      _editTech);
-        _editTier  = EditorGUILayout.IntField ("Start Tier",      _editTier);
+        _editName      = EditorGUILayout.TextField("Display Name",         _editName);
+        _editGold      = EditorGUILayout.IntField ("Start Gold",           _editGold);
+        _editLives     = EditorGUILayout.IntField ("Start Lives",          _editLives);
+        _editTech      = EditorGUILayout.IntField ("Start Tech",           _editTech);
+        _editTier      = EditorGUILayout.IntField ("Start Tier",           _editTier);
+        _editMaxTowers = EditorGUILayout.IntField ("Max Towers (-1 = auto)", _editMaxTowers);
 
         GUILayout.Space(4);
         GUILayout.Label("Allowed Towers  (unchecked = all allowed)", EditorStyles.miniLabel);
@@ -258,9 +383,18 @@ public class LevelEditorWindow : EditorWindow
         data.allowedTowers = _allowedSet.Count > 0
             ? new List<string>(_allowedSet).ToArray()
             : System.Array.Empty<string>();
+        data.maxTowers = _editMaxTowers;
         data.modifierColumns = _modColumns.Count > 0
             ? _modColumns.ConvertAll(col => new ModifierColumn { options = col.ToArray() }).ToArray()
             : System.Array.Empty<ModifierColumn>();
+        data.objectives = _objectives.ToArray();
+        // Write back disabled groups from editor sets into each difficulty
+        for (int di = 0; di < _difficulties.Count; di++)
+        {
+            if (_diffDisabled.TryGetValue(di, out var set))
+                _difficulties[di].disabledGroups = new List<string>(set).ToArray();
+        }
+        data.difficulties = _difficulties.ToArray();
         WriteJSON(levelNumber, data);
         EditorUtility.DisplayDialog("Saved", $"Level {levelNumber} settings saved.", "OK");
     }
@@ -592,7 +726,7 @@ public class LevelEditorWindow : EditorWindow
             Vector3 pos = pts.Count > 0
                 ? pts[pts.Count - 1].transform.position + Vector3.right
                 : pendingAddPointZone.transform.position;
-            float lastWidth = pts.Count > 0 ? pts[pts.Count - 1].width : 3f;
+            float lastWidth = pts.Count > 0 ? pts[pts.Count - 1].width : 0.25f;
             Undo.RegisterFullObjectHierarchyUndo(pendingAddPointZone.gameObject, "Add Lane Point");
             var newPt = pendingAddPointZone.AddPoint(pos, lastWidth);
             EditorApplication.delayCall += () =>
@@ -721,16 +855,34 @@ public class LevelEditorWindow : EditorWindow
         _towerIds = LoadTowerIds();
 
         // Populate settings fields
-        _editName   = data.displayName;
-        _editGold   = data.startGold;
-        _editLives  = data.startLives;
-        _editTech   = data.startTech;
-        _editTier   = data.startTier;
-        _allowedSet  = new HashSet<string>(data.allowedTowers ?? System.Array.Empty<string>());
+        _editName      = data.displayName;
+        _editGold      = data.startGold;
+        _editLives     = data.startLives;
+        _editTech      = data.startTech;
+        _editTier      = data.startTier;
+        _editMaxTowers = data.maxTowers;
+        _allowedSet    = new HashSet<string>(data.allowedTowers ?? System.Array.Empty<string>());
         _modColumns  = new List<List<ModifierDef>>();
         if (data.modifierColumns != null)
             foreach (var col in data.modifierColumns)
                 _modColumns.Add(new List<ModifierDef>(col.options ?? System.Array.Empty<ModifierDef>()));
+
+        _objectives   = new List<ObjectiveDef>(data.objectives ?? System.Array.Empty<ObjectiveDef>());
+
+        _difficulties = new List<DifficultyDef>(data.difficulties ?? System.Array.Empty<DifficultyDef>());
+        // Ensure always 3 difficulties (Easy/Medium/Hard)
+        string[] defaultLabels = { "Easy", "Normal", "Hard" };
+        while (_difficulties.Count < 3)
+        {
+            int i = _difficulties.Count;
+            _difficulties.Add(new DifficultyDef { label = defaultLabels[i] });
+        }
+        _diffDisabled.Clear();
+        for (int di = 0; di < _difficulties.Count; di++)
+        {
+            var d = _difficulties[di];
+            _diffDisabled[di] = new HashSet<string>(d.disabledGroups ?? System.Array.Empty<string>());
+        }
 
         _activeLevel = levelNumber;
         SessionState.SetInt(SessionKey, levelNumber);
@@ -866,12 +1018,14 @@ public class LevelEditorWindow : EditorWindow
 
         if (zoneType == LevelEditorZone.ZoneType.Lane)
         {
-            zone.AddPoint(new Vector3(-2f, 0f, 0f), 3f);
-            zone.AddPoint(new Vector3( 2f, 0f, 0f), 3f);
+            zone.AddPoint(new Vector3(-2f, 0f, 0f), 0.25f);
+            zone.AddPoint(new Vector3( 2f, 0f, 0f), 0.25f);
         }
         else
             zone.radius = 2f;
 
+        // Collapse all existing zones, open only the new one
+        for (int zi = 0; zi < idx - 1; zi++) _zoneFoldouts[zi] = false;
         _zoneFoldouts[idx - 1] = true;
         EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
         Selection.activeGameObject = zGO;
@@ -947,6 +1101,9 @@ public class LevelEditorWindow : EditorWindow
         (int wave, int grp) groupToDelete = (-1, -1);
         bool dataChanged = false;
 
+        // Ensure top-Y list has enough entries
+        while (_waveTopYs.Count < _waveData.waves.Count) _waveTopYs.Add(0f);
+
         for (int wi = 0; wi < _waveData.waves.Count; wi++)
         {
             var wave = _waveData.waves[wi];
@@ -956,12 +1113,47 @@ public class LevelEditorWindow : EditorWindow
             foreach (var g in wave.groups)
                 waveEndTime = Mathf.Max(waveEndTime, g.EndTime);
 
+            // Capture top Y for wave drag
+            GUILayout.Space(0);
+            if (isRepaint && wi < _waveTopYs.Count)
+                _waveTopYs[wi] = GUILayoutUtility.GetLastRect().yMax;
+
+            // Drop indicator above this wave
+            if (_dragWaveIdx >= 0 && _dropWaveIdx == wi && isRepaint && wi < _waveTopYs.Count)
+                EditorGUI.DrawRect(new Rect(0, _waveTopYs[wi] - 1f, EditorGUIUtility.currentViewWidth, 2f), DropLineColor);
+
+            bool isWaveDragging = _dragWaveIdx == wi;
+
             // ── Wave header ───────────────────────────────────────────
             GUILayout.BeginHorizontal();
-            _waveFoldouts[wi] = EditorGUILayout.Foldout(
-                _waveFoldouts[wi],
-                $"Wave {wi + 1}  ({wave.groups.Count} group{(wave.groups.Count == 1 ? "" : "s")})  ends {waveEndTime:F1}s",
-                true);
+
+            // Wave drag handle
+            var wHandleStyle = new GUIStyle(EditorStyles.label);
+            wHandleStyle.normal.textColor = isWaveDragging ? new Color(0.3f, 0.7f, 1f) : new Color(0.55f, 0.55f, 0.55f);
+            var wHandleRect = GUILayoutUtility.GetRect(new GUIContent("≡"), wHandleStyle, GUILayout.Width(16), GUILayout.Height(16));
+            EditorGUIUtility.AddCursorRect(wHandleRect, MouseCursor.Pan);
+            if (isRepaint) GUI.Label(wHandleRect, "≡", wHandleStyle);
+            if (evt.type == EventType.MouseDown && wHandleRect.Contains(evt.mousePosition))
+            {
+                _dragWaveIdx = wi;
+                _dropWaveIdx = wi;
+                evt.Use();
+            }
+
+            if (isWaveDragging)
+            {
+                var dimStyle = new GUIStyle(EditorStyles.boldLabel);
+                dimStyle.normal.textColor = new Color(0.4f, 0.4f, 0.4f);
+                GUILayout.Label($"Wave {wi + 1}  (dragging…)", dimStyle);
+            }
+            else
+            {
+                _waveFoldouts[wi] = EditorGUILayout.Foldout(
+                    _waveFoldouts[wi],
+                    $"Wave {wi + 1}  ({wave.groups.Count} group{(wave.groups.Count == 1 ? "" : "s")})  ends {waveEndTime:F1}s",
+                    true);
+            }
+
             GUI.backgroundColor = new Color(0.7f, 0.9f, 1f);
             if (GUILayout.Button("+Group", EditorStyles.miniButton, GUILayout.Width(54)))
                 addGroupToWave = wi;
@@ -1071,7 +1263,15 @@ public class LevelEditorWindow : EditorWindow
 
                         var endStyle = new GUIStyle(EditorStyles.miniLabel);
                         endStyle.normal.textColor = new Color(0.55f, 0.85f, 0.55f);
-                        GUILayout.Label($"→{g.EndTime:F1}s", endStyle, GUILayout.Width(44));
+                        GUILayout.Label($"→{g.EndTime:F1}s", endStyle, GUILayout.Width(40));
+
+                        // Drop mode — always visible inline
+                        if (g.dropConfig == null) { g.dropConfig = new DropConfig(); dataChanged = true; }
+                        GUILayout.Label("Drop", EditorStyles.miniLabel, GUILayout.Width(28));
+                        int dmIdx = System.Array.IndexOf(DropModes, g.dropConfig.mode);
+                        if (dmIdx < 0) dmIdx = 0;
+                        int newDmIdx = EditorGUILayout.Popup(dmIdx, DropModes, GUILayout.Width(64));
+                        if (newDmIdx != dmIdx) { g.dropConfig.mode = DropModes[newDmIdx]; dataChanged = true; }
 
                         bool wasExp = _groupExpanded[key];
                         _groupExpanded[key] = GUILayout.Toggle(wasExp, "▾", EditorStyles.miniButton, GUILayout.Width(20));
@@ -1084,9 +1284,51 @@ public class LevelEditorWindow : EditorWindow
 
                     GUILayout.EndHorizontal();
 
-                    // Timestamp expand list
+                    // Timestamp + drop config expand list
                     if (!isDragging && _groupExpanded[key])
                     {
+                        var dc = g.dropConfig ?? new DropConfig();
+
+                        // Show extra fields for chance override or pattern
+                        if (dc.mode == "chance" || dc.mode == "pattern")
+                        {
+                            GUILayout.BeginHorizontal();
+                            GUILayout.Space(36);
+                            if (dc.mode == "chance")
+                            {
+                                GUILayout.Label("Override chance (0–1):", EditorStyles.miniLabel, GUILayout.Width(140));
+                                float newChance = EditorGUILayout.FloatField(dc.fallbackChance, GUILayout.Width(46));
+                                if (!Mathf.Approximately(newChance, dc.fallbackChance)) { dc.fallbackChance = Mathf.Clamp(newChance, -1f, 1f); dataChanged = true; }
+                                var hintStyle = new GUIStyle(EditorStyles.miniLabel);
+                                hintStyle.normal.textColor = new Color(0.5f, 0.5f, 0.5f);
+                                GUILayout.Label("(-1 = balance-based)", hintStyle);
+                            }
+                            else
+                            {
+                                GUILayout.Label("Repeat", EditorStyles.miniLabel, GUILayout.Width(44));
+                                bool newRepeat = EditorGUILayout.Toggle(dc.repeat, GUILayout.Width(16));
+                                if (newRepeat != dc.repeat) { dc.repeat = newRepeat; dataChanged = true; }
+
+                                GUILayout.Label("Pattern", EditorStyles.miniLabel, GUILayout.Width(48));
+                                string patStr = string.Join(",", dc.pattern ?? System.Array.Empty<int>());
+                                string newPatStr = EditorGUILayout.TextField(patStr, GUILayout.MinWidth(100));
+                                if (newPatStr != patStr)
+                                {
+                                    var parts = newPatStr.Split(',');
+                                    var parsed = new System.Collections.Generic.List<int>();
+                                    foreach (var p in parts)
+                                        if (int.TryParse(p.Trim(), out int v)) parsed.Add(v);
+                                    dc.pattern = parsed.ToArray();
+                                    dataChanged = true;
+                                }
+                                var hintStyle = new GUIStyle(EditorStyles.miniLabel);
+                                hintStyle.normal.textColor = new Color(0.5f, 0.5f, 0.5f);
+                                GUILayout.Label("0=never 1=always 2=chance", hintStyle);
+                            }
+                            GUILayout.EndHorizontal();
+                        }
+
+                        // Spawn timestamps
                         for (int si = 0; si < g.count; si++)
                         {
                             float t = g.startTime + si * g.spawnInterval;
@@ -1142,6 +1384,42 @@ public class LevelEditorWindow : EditorWindow
             GUILayout.Space(4);
         }
 
+        // Drop indicator at the end of the wave list (drop after last wave)
+        if (_dragWaveIdx >= 0 && _dropWaveIdx == _waveData.waves.Count && isRepaint)
+        {
+            GUILayout.Space(0);
+            float botY = GUILayoutUtility.GetLastRect().yMax;
+            EditorGUI.DrawRect(new Rect(0, botY, EditorGUIUtility.currentViewWidth, 2f), DropLineColor);
+        }
+
+        // ── Wave drag events ──────────────────────────────────────────
+        if (_dragWaveIdx >= 0)
+        {
+            if (evt.type == EventType.MouseDrag)
+            {
+                _dropWaveIdx = ComputeWaveDropIdx(evt.mousePosition.y);
+                Repaint();
+                evt.Use();
+            }
+            else if (evt.type == EventType.MouseUp)
+            {
+                int from = _dragWaveIdx;
+                int to   = _dropWaveIdx;
+                if (from >= 0 && to >= 0 && from != to && to <= _waveData.waves.Count)
+                {
+                    var moved = _waveData.waves[from];
+                    _waveData.waves.RemoveAt(from);
+                    int insertAt = to > from ? to - 1 : to;
+                    _waveData.waves.Insert(insertAt, moved);
+                    dataChanged = true;
+                }
+                _dragWaveIdx = -1;
+                _dropWaveIdx = -1;
+                Repaint();
+                evt.Use();
+            }
+        }
+
         // ── Deferred mutations ────────────────────────────────────────
         if (waveToDelete >= 0 && waveToDelete < _waveData.waves.Count)
         {
@@ -1184,6 +1462,18 @@ public class LevelEditorWindow : EditorWindow
 
         if (dataChanged)
             WaveGraphWindow.Refresh(_waveData, _unitIds);
+    }
+
+    int ComputeWaveDropIdx(float mouseY)
+    {
+        int count = _waveData.waves.Count;
+        for (int i = 0; i < count; i++)
+        {
+            float topY = i < _waveTopYs.Count ? _waveTopYs[i] : float.MaxValue;
+            float botY = i + 1 < _waveTopYs.Count ? _waveTopYs[i + 1] : float.MaxValue;
+            if (mouseY < (topY + botY) * 0.5f) return i;
+        }
+        return count;
     }
 
     int ComputeGroupDropIdx(int waveIdx, float mouseY)
@@ -1269,12 +1559,362 @@ public class LevelEditorWindow : EditorWindow
         return ids;
     }
 
+    // ── Objective list ────────────────────────────────────────────────
+
+    void DrawObjectiveList()
+    {
+        if (_objectives.Count == 0)
+        {
+            GUILayout.Label("  No objectives — click + Objective above.", EditorStyles.miniLabel);
+            return;
+        }
+
+        int toRemove = -1;
+
+        for (int oi = 0; oi < _objectives.Count; oi++)
+        {
+            var obj = _objectives[oi];
+
+            GUILayout.BeginHorizontal();
+            GUILayout.Space(8);
+
+            string badge = obj.required ? "Required" : "Optional";
+            var badgeStyle = new GUIStyle(EditorStyles.miniLabel);
+            badgeStyle.normal.textColor = obj.required
+                ? new Color(1f, 0.7f, 0.3f)
+                : new Color(0.5f, 0.9f, 0.5f);
+            GUILayout.Label(badge, badgeStyle, GUILayout.Width(52));
+
+            obj.required = EditorGUILayout.Toggle(obj.required, GUILayout.Width(14));
+
+            int typeIdx = System.Array.IndexOf(ObjectiveTypes, obj.type);
+            if (typeIdx < 0) typeIdx = 0;
+            int newType = EditorGUILayout.Popup(typeIdx, ObjectiveTypes, GUILayout.Width(110));
+            obj.type = ObjectiveTypes[newType];
+
+            bool needsTarget = obj.type == "BuildTower" || obj.type == "UpgradeTower" || obj.type == "KillEnemy";
+            if (needsTarget)
+            {
+                GUILayout.Label("id", EditorStyles.miniLabel, GUILayout.Width(12));
+                obj.targetId = EditorGUILayout.TextField(obj.targetId, GUILayout.Width(90));
+            }
+            else
+                GUILayout.Space(106);
+
+            GUILayout.Label("x", EditorStyles.miniLabel, GUILayout.Width(10));
+            obj.count = EditorGUILayout.IntField(obj.count, GUILayout.Width(30));
+
+            GUI.backgroundColor = new Color(1f, 0.45f, 0.45f);
+            if (GUILayout.Button("✕", EditorStyles.miniButton, GUILayout.Width(22))) toRemove = oi;
+            GUI.backgroundColor = Color.white;
+            GUILayout.EndHorizontal();
+
+            GUILayout.BeginHorizontal();
+            GUILayout.Space(74);
+            var descStyle = new GUIStyle(EditorStyles.miniTextField);
+            string newDesc = EditorGUILayout.TextField(obj.description, descStyle);
+            if (newDesc != obj.description) obj.description = newDesc;
+            GUILayout.Space(26);
+            GUILayout.EndHorizontal();
+
+            GUILayout.Space(2);
+        }
+
+        if (toRemove >= 0) _objectives.RemoveAt(toRemove);
+    }
+
+    // ── Difficulties section ──────────────────────────────────────────
+
+    static readonly Color[] DiffColors = {
+        new Color(0.25f, 0.65f, 0.25f),   // Easy  — green
+        new Color(0.70f, 0.55f, 0.10f),   // Normal — amber
+        new Color(0.75f, 0.20f, 0.20f),   // Hard   — red
+    };
+
+    void DrawDifficultiesSection()
+    {
+        for (int di = 0; di < _difficulties.Count; di++)
+        {
+            var d     = _difficulties[di];
+            var col   = di < DiffColors.Length ? DiffColors[di] : DiffColors[DiffColors.Length - 1];
+            var oldBg = GUI.backgroundColor;
+
+            // ── Tier header ───────────────────────────────────────────
+            GUILayout.BeginHorizontal();
+            GUI.backgroundColor = col;
+            _diffExpanded[di] = EditorGUILayout.Foldout(_diffExpanded[di], "", true);
+            GUI.backgroundColor = oldBg;
+            d.label = EditorGUILayout.TextField(d.label, GUILayout.Width(80));
+            GUILayout.EndHorizontal();
+
+            if (!_diffExpanded[di]) continue;
+
+            GUILayout.BeginHorizontal();
+            GUILayout.Space(16);
+            GUILayout.BeginVertical();
+
+            // ── Multipliers ───────────────────────────────────────────
+            var hdr = new GUIStyle(EditorStyles.miniBoldLabel);
+            hdr.normal.textColor = col;
+
+            GUILayout.Label("── Enemy ─────────────────────────────", hdr);
+            GUILayout.BeginHorizontal();
+            GUILayout.Label("HP×",    EditorStyles.miniLabel, GUILayout.Width(28));
+            d.enemyHpMult    = EditorGUILayout.FloatField(d.enemyHpMult,    GUILayout.Width(46));
+            GUILayout.Label("Spd×",   EditorStyles.miniLabel, GUILayout.Width(30));
+            d.enemySpeedMult = EditorGUILayout.FloatField(d.enemySpeedMult, GUILayout.Width(46));
+            GUILayout.EndHorizontal();
+
+            GUILayout.Label("── Economy ───────────────────────────", hdr);
+            GUILayout.BeginHorizontal();
+            GUILayout.Label("Gold×",   EditorStyles.miniLabel, GUILayout.Width(36));
+            d.goldMult   = EditorGUILayout.FloatField(d.goldMult,   GUILayout.Width(46));
+            GUILayout.Label("Bounty×", EditorStyles.miniLabel, GUILayout.Width(46));
+            d.bountyMult = EditorGUILayout.FloatField(d.bountyMult, GUILayout.Width(46));
+            GUILayout.EndHorizontal();
+
+            GUILayout.Label("── Start Overrides  (-1 = use level default) ─", hdr);
+            GUILayout.BeginHorizontal();
+            GUILayout.Label("Gold",  EditorStyles.miniLabel, GUILayout.Width(28));
+            d.startGold  = EditorGUILayout.IntField(d.startGold,  GUILayout.Width(40));
+            GUILayout.Label("Lives", EditorStyles.miniLabel, GUILayout.Width(30));
+            d.startLives = EditorGUILayout.IntField(d.startLives, GUILayout.Width(40));
+            GUILayout.Label("Tech",  EditorStyles.miniLabel, GUILayout.Width(28));
+            d.startTech  = EditorGUILayout.IntField(d.startTech,  GUILayout.Width(40));
+            GUILayout.Label("Tier",  EditorStyles.miniLabel, GUILayout.Width(28));
+            d.startTier  = EditorGUILayout.IntField(d.startTier,  GUILayout.Width(40));
+            GUILayout.Label("Cap",   EditorStyles.miniLabel, GUILayout.Width(24));
+            d.maxTowers  = EditorGUILayout.IntField(d.maxTowers,  GUILayout.Width(40));
+            GUILayout.EndHorizontal();
+
+            // ── Allowed towers ────────────────────────────────────────
+            GUILayout.Label("── Allowed Towers  (empty = inherit level list) ─", hdr);
+            var diffAllowed = new HashSet<string>(d.allowedTowers ?? System.Array.Empty<string>());
+            bool diffTowerChanged = false;
+            const int TowersPerRow = 4;
+            for (int ti = 0; ti < _towerIds.Length; ti++)
+            {
+                if (ti % TowersPerRow == 0) { GUILayout.BeginHorizontal(); GUILayout.Space(4); }
+                bool had = diffAllowed.Contains(_towerIds[ti]);
+                bool now = GUILayout.Toggle(had, _towerIds[ti], EditorStyles.miniButton, GUILayout.Width(110));
+                if (now != had) { if (now) diffAllowed.Add(_towerIds[ti]); else diffAllowed.Remove(_towerIds[ti]); diffTowerChanged = true; }
+                if ((ti + 1) % TowersPerRow == 0 || ti + 1 == _towerIds.Length) GUILayout.EndHorizontal();
+            }
+            if (diffTowerChanged)
+                d.allowedTowers = new List<string>(diffAllowed).ToArray();
+
+            // ── Objectives ────────────────────────────────────────────
+            GUILayout.Label("── Objectives  (empty = inherit level objectives) ─", hdr);
+            var diffObjs = new List<ObjectiveDef>(d.objectives ?? System.Array.Empty<ObjectiveDef>());
+            GUILayout.BeginHorizontal();
+            GUI.backgroundColor = new Color(0.7f, 0.9f, 1f);
+            if (GUILayout.Button("+ Objective", EditorStyles.miniButton, GUILayout.Width(80)))
+                diffObjs.Add(new ObjectiveDef { type = "BuildTower", count = 1, required = true });
+            GUI.backgroundColor = Color.white;
+            GUILayout.EndHorizontal();
+
+            int objToRemove = -1;
+            for (int oi = 0; oi < diffObjs.Count; oi++)
+            {
+                var obj = diffObjs[oi];
+                GUILayout.BeginHorizontal();
+                GUILayout.Space(4);
+                obj.required = EditorGUILayout.Toggle(obj.required, GUILayout.Width(14));
+                int typeIdx = System.Array.IndexOf(ObjectiveTypes, obj.type);
+                if (typeIdx < 0) typeIdx = 0;
+                obj.type = ObjectiveTypes[EditorGUILayout.Popup(typeIdx, ObjectiveTypes, GUILayout.Width(110))];
+                bool needsTarget = obj.type == "BuildTower" || obj.type == "UpgradeTower" || obj.type == "KillEnemy";
+                if (needsTarget)
+                {
+                    GUILayout.Label("id", EditorStyles.miniLabel, GUILayout.Width(12));
+                    obj.targetId = EditorGUILayout.TextField(obj.targetId ?? "any", GUILayout.Width(80));
+                }
+                GUILayout.Label("×", EditorStyles.miniLabel, GUILayout.Width(10));
+                obj.count = EditorGUILayout.IntField(obj.count, GUILayout.Width(36));
+                GUI.backgroundColor = new Color(1f, 0.45f, 0.45f);
+                if (GUILayout.Button("✕", EditorStyles.miniButton, GUILayout.Width(22))) objToRemove = oi;
+                GUI.backgroundColor = Color.white;
+                obj.description = EditorGUILayout.TextField(obj.description ?? "", GUILayout.MinWidth(80));
+                GUILayout.EndHorizontal();
+            }
+            if (objToRemove >= 0) diffObjs.RemoveAt(objToRemove);
+            d.objectives = diffObjs.ToArray();
+
+            // ── Wave group toggles ────────────────────────────────────
+            GUILayout.Label("── Wave Groups  (✓ = active for this difficulty) ─", hdr);
+            if (!_diffDisabled.ContainsKey(di)) _diffDisabled[di] = new HashSet<string>();
+            var disabled = _diffDisabled[di];
+
+            if (_waveData != null)
+            {
+                for (int wi = 0; wi < _waveData.waves.Count; wi++)
+                {
+                    var wave = _waveData.waves[wi];
+                    GUILayout.BeginHorizontal();
+                    GUILayout.Space(4);
+                    var wLbl = new GUIStyle(EditorStyles.miniBoldLabel);
+                    wLbl.normal.textColor = new Color(0.7f, 0.85f, 1f);
+                    GUILayout.Label($"Wave {wi + 1}", wLbl, GUILayout.Width(52));
+                    for (int gi = 0; gi < wave.groups.Count; gi++)
+                    {
+                        string key    = $"{wi},{gi}";
+                        bool   active = !disabled.Contains(key);
+                        var    g      = wave.groups[gi];
+                        bool   nowOn  = GUILayout.Toggle(active, $"G{gi + 1} {g.unitDefinitionId} ×{g.count}", EditorStyles.miniButton, GUILayout.Width(130));
+                        if (nowOn != active)
+                        {
+                            if (nowOn) disabled.Remove(key);
+                            else       disabled.Add(key);
+                        }
+                    }
+                    GUILayout.EndHorizontal();
+                }
+            }
+
+            GUILayout.EndVertical();
+            GUILayout.EndHorizontal();
+            GUILayout.Space(6);
+        }
+    }
+
     [System.Serializable] class UnitDefCollection  { public List<UnitDefStub>  units; }
     [System.Serializable] class UnitDefStub        { public string id; }
     [System.Serializable] class TowerDefCollection { public List<TowerDefStub> towers; }
     [System.Serializable] class TowerDefStub       { public string id; }
 
     // ── JSON helpers ──────────────────────────────────────────────────
+
+    // ── Level creation / deletion ─────────────────────────────────────
+
+    int CountExistingLevels()
+    {
+        string dir = Path.Combine(Application.dataPath, "Resources", "Definitions", "Levels");
+        if (!Directory.Exists(dir)) return 0;
+        int count = 0;
+        while (File.Exists(Path.Combine(dir, $"level_{count + 1}.json"))) count++;
+        return count;
+    }
+
+    void DeleteLevel(int n, int total)
+    {
+        string dir = Path.Combine(Application.dataPath, "Resources", "Definitions", "Levels");
+
+        // If deleting the currently active level, clear the editor first
+        if (_activeLevel == n) ClearRoot();
+
+        // Delete the target file
+        string target = Path.Combine(dir, $"level_{n}.json");
+        if (File.Exists(target)) File.Delete(target);
+
+        // Also delete any companion waves file
+        string waves = Path.Combine(dir, $"waves_{n}.json");
+        if (File.Exists(waves)) File.Delete(waves);
+
+        // Shift every higher-numbered level down by 1
+        for (int i = n + 1; i <= total; i++)
+        {
+            string srcJson  = Path.Combine(dir, $"level_{i}.json");
+            string dstJson  = Path.Combine(dir, $"level_{i - 1}.json");
+            string srcWaves = Path.Combine(dir, $"waves_{i}.json");
+            string dstWaves = Path.Combine(dir, $"waves_{i - 1}.json");
+
+            if (File.Exists(srcJson))
+            {
+                // Re-stamp the id inside the JSON
+                var data = JsonUtility.FromJson<LevelData>(File.ReadAllText(srcJson));
+                data.id          = $"level_{i - 1}";
+                data.displayName = data.displayName == $"Level {i}" ? $"Level {i - 1}" : data.displayName;
+                File.WriteAllText(dstJson, JsonUtility.ToJson(data, true));
+                File.Delete(srcJson);
+            }
+
+            if (File.Exists(srcWaves))
+            {
+                File.Move(srcWaves, dstWaves);
+            }
+        }
+
+        // If the active level was above the deleted one, adjust its index
+        if (_activeLevel > n)
+        {
+            _activeLevel--;
+            SessionState.SetInt(SessionKey, _activeLevel);
+        }
+
+        AssetDatabase.Refresh();
+        Repaint();
+    }
+
+    void SwapLevels(int a, int b)
+    {
+        // If either level is currently loaded, unload first
+        if (_activeLevel == a || _activeLevel == b) ClearRoot();
+
+        string dir  = Path.Combine(Application.dataPath, "Resources", "Definitions", "Levels");
+        string fileA = Path.Combine(dir, $"level_{a}.json");
+        string fileB = Path.Combine(dir, $"level_{b}.json");
+        string tmpFile = Path.Combine(dir, "level_swap_tmp.json");
+        string tmpWave = Path.Combine(dir, "waves_swap_tmp.json");
+
+        // Read display names before touching files so we preserve them
+        string nameA = File.Exists(fileA)
+            ? (JsonUtility.FromJson<LevelData>(File.ReadAllText(fileA))?.displayName ?? $"Level {a}")
+            : $"Level {a}";
+        string nameB = File.Exists(fileB)
+            ? (JsonUtility.FromJson<LevelData>(File.ReadAllText(fileB))?.displayName ?? $"Level {b}")
+            : $"Level {b}";
+
+        // Swap JSONs: A → tmp, B → A (keep B's name), tmp → B (keep A's name)
+        MoveLevel(fileA, tmpFile,  $"level_swap_tmp", nameA);
+        MoveLevel(fileB, fileA,    $"level_{a}",      nameB);
+        MoveLevel(tmpFile, fileB,  $"level_{b}",      nameA);
+
+        // Swap companion wave files
+        string wA = Path.Combine(dir, $"waves_{a}.json");
+        string wB = Path.Combine(dir, $"waves_{b}.json");
+        if (File.Exists(wA)) File.Move(wA, tmpWave);
+        if (File.Exists(wB)) File.Move(wB, wA);
+        if (File.Exists(tmpWave)) File.Move(tmpWave, wB);
+
+        AssetDatabase.Refresh();
+        Repaint();
+    }
+
+    // Re-stamps id inside a level JSON and moves it to dstFile.
+    static void MoveLevel(string srcFile, string dstFile, string newId, string newDisplayName)
+    {
+        if (!File.Exists(srcFile)) return;
+        var data = JsonUtility.FromJson<LevelData>(File.ReadAllText(srcFile));
+        data.id          = newId;
+        data.displayName = newDisplayName;
+        File.WriteAllText(dstFile, JsonUtility.ToJson(data, true));
+        if (srcFile != dstFile) File.Delete(srcFile);
+    }
+
+    void CreateLevel(int n, LevelData source)
+    {
+        LevelData data;
+        if (source != null)
+        {
+            // Deep-copy via JSON round-trip then re-stamp identity fields
+            string json = JsonUtility.ToJson(source, true);
+            data = JsonUtility.FromJson<LevelData>(json);
+            data.id          = $"level_{n}";
+            data.displayName = $"Level {n}";
+        }
+        else
+        {
+            data = MakeBlank(n);
+        }
+
+        WriteJSON(n, data);
+        EditorUtility.DisplayDialog("Level Created",
+            source != null
+                ? $"level_{n}.json created as a copy of Level {source.displayName}."
+                : $"level_{n}.json created (blank).",
+            "OK");
+        LoadLevel(n);
+    }
 
     static LevelData MakeBlank(int n) => new LevelData { id = $"level_{n}", displayName = $"Level {n}" };
     static float Round(float v) => Mathf.Round(v * 100f) / 100f;

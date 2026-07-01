@@ -1,84 +1,334 @@
 {
     "id": "level_2",
-    "displayName": "Level Two",
-    "startGold": 60,
-    "startLives": 20,
+    "displayName": "Beginners Trail",
+    "startGold": 3,
+    "startLives": 10,
     "startTech": 0,
-    "startTier": 1,
+    "startTier": 2,
     "backgroundSprite": "Art/Maps/level_2",
     "backgroundX": -1.8700000047683716,
     "backgroundY": 0.0,
-    "modifierColumns": [
-        {
-            "options": [
-                { "id": "gold_bonus", "displayName": "+25 Gold", "description": "Start with 25 extra gold.", "effectType": "StartingGold", "value": 25 },
-                { "id": "tech_bonus", "displayName": "+10 Tech", "description": "Start with 10 extra tech.", "effectType": "StartingTech", "value": 10 }
-            ]
-        }
-    ],
+    "maxTowers": -1,
     "allowedTowers": [
         "basic_tower",
         "slow_tower",
-        "shotgun_tower",
-        "poison_tower",
-        "research_tower",
-        "income_tower",
-        "boomerang_tower",
-        "chain_tower",
-        "root_tower",
-        "bee_tower",
-        "siphon_tower",
-        "speed_aura_tower",
-        "damage_aura_tower"
+        "income_tower"
     ],
+    "modifierColumns": [
+        {
+            "options": [
+                {
+                    "id": "c1_gold_tech",
+                    "displayName": "+15 Gold, +10 Tech",
+                    "description": "Start with 15 extra gold and 10 extra tech.",
+                    "effectType": "compound",
+                    "value": 0.0,
+                    "subEffects": [
+                        {
+                            "id": "c1_gold",
+                            "displayName": "",
+                            "description": "",
+                            "effectType": "StartingGold",
+                            "value": 15.0,
+                            "subEffects": []
+                        },
+                        {
+                            "id": "c1_tech",
+                            "displayName": "",
+                            "description": "",
+                            "effectType": "StartingTech",
+                            "value": 10.0,
+                            "subEffects": []
+                        }
+                    ]
+                },
+                {
+                    "id": "c1_bounty",
+                    "displayName": "+1 Bounty Per Kill",
+                    "description": "Each enemy killed awards 1 extra gold.",
+                    "effectType": "BountyPerKill",
+                    "value": 1.0,
+                    "subEffects": []
+                },
+                {
+                    "id": "c1_refund",
+                    "displayName": "Full Refunds",
+                    "description": "All towers sell at 100% of their total cost.",
+                    "effectType": "FullRefund",
+                    "value": 1.0,
+                    "subEffects": []
+                },
+                {
+                    "id": "c1_drain",
+                    "displayName": "-2HP/Wave, +10G/Wave",
+                    "description": "Lose 2 lives but gain 10 gold at the end of each wave.",
+                    "effectType": "compound",
+                    "value": 0.0,
+                    "subEffects": [
+                        {
+                            "id": "c1_drain_lives",
+                            "displayName": "",
+                            "description": "",
+                            "effectType": "LivesDrainPerWave",
+                            "value": 2.0,
+                            "subEffects": []
+                        },
+                        {
+                            "id": "c1_drain_gold",
+                            "displayName": "",
+                            "description": "",
+                            "effectType": "GoldPerWave",
+                            "value": 10.0,
+                            "subEffects": []
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "options": [
+                {
+                    "id": "c2_physical",
+                    "displayName": "Physical +25% Dmg",
+                    "description": "All Physical towers deal 25% more damage.",
+                    "effectType": "PhysicalDamageMult",
+                    "value": 0.25,
+                    "subEffects": []
+                },
+                {
+                    "id": "c2_arcane",
+                    "displayName": "Arcane +25% Atk Speed",
+                    "description": "All Arcane towers attack 25% faster.",
+                    "effectType": "ArcaneSpdMult",
+                    "value": 0.25,
+                    "subEffects": []
+                },
+                {
+                    "id": "c2_elemental",
+                    "displayName": "Elemental +10% Dmg & AS",
+                    "description": "All Elemental towers deal 10% more damage and attack 10% faster.",
+                    "effectType": "compound",
+                    "value": 0.0,
+                    "subEffects": [
+                        {
+                            "id": "c2_el_dmg",
+                            "displayName": "",
+                            "description": "",
+                            "effectType": "ElementalDamageMult",
+                            "value": 0.10000000149011612,
+                            "subEffects": []
+                        },
+                        {
+                            "id": "c2_el_spd",
+                            "displayName": "",
+                            "description": "",
+                            "effectType": "ElementalSpdMult",
+                            "value": 0.10000000149011612,
+                            "subEffects": []
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "options": [
+                {
+                    "id": "c3_radius",
+                    "displayName": "Aura Radius +15%",
+                    "description": "All aura towers have 15% larger range.",
+                    "effectType": "AuraRadiusMult",
+                    "value": 0.15000000596046449,
+                    "subEffects": []
+                },
+                {
+                    "id": "c3_mult",
+                    "displayName": "Aura Effect ×1.25",
+                    "description": "All aura bonuses are 25% stronger.",
+                    "effectType": "AuraMult",
+                    "value": 0.25,
+                    "subEffects": []
+                },
+                {
+                    "id": "c3_slow",
+                    "displayName": "Auras Slow Enemies 2.5%",
+                    "description": "Enemies in an aura are slowed 2.5% per aura (stacking).",
+                    "effectType": "AuraSlowEnemies",
+                    "value": 0.02500000037252903,
+                    "subEffects": []
+                }
+            ]
+        },
+        {
+            "options": [
+                {
+                    "id": "c4_lives",
+                    "displayName": "+10 Lives",
+                    "description": "Start with 10 extra lives.",
+                    "effectType": "StartingLives",
+                    "value": 10.0,
+                    "subEffects": []
+                },
+                {
+                    "id": "c4_forgive",
+                    "displayName": "Forgive First Leak",
+                    "description": "The first enemy to leak each wave deals no life damage.",
+                    "effectType": "ForgiveFirstLeak",
+                    "value": 1.0,
+                    "subEffects": []
+                },
+                {
+                    "id": "c4_reduce",
+                    "displayName": "Leaks Deal -1 Life",
+                    "description": "Leaking enemies deal 1 less life damage (minimum 1).",
+                    "effectType": "LeakDamageReduction",
+                    "value": 1.0,
+                    "subEffects": []
+                },
+                {
+                    "id": "c4_laststand",
+                    "displayName": "Last Stand",
+                    "description": "At 1 life remaining, all towers permanently deal 2× damage.",
+                    "effectType": "LastStand",
+                    "value": 1.0,
+                    "subEffects": []
+                }
+            ]
+        },
+        {
+            "options": [
+                {
+                    "id": "c5_drones",
+                    "displayName": "+2 Bee Drones",
+                    "description": "Bee towers spawn 2 extra drones.",
+                    "effectType": "BonusDrones",
+                    "value": 2.0,
+                    "subEffects": []
+                },
+                {
+                    "id": "c5_shotgun",
+                    "displayName": "+5 Shotgun Pellets",
+                    "description": "Shotgun towers fire 5 additional pellets.",
+                    "effectType": "BonusShotgunBullets",
+                    "value": 5.0,
+                    "subEffects": []
+                },
+                {
+                    "id": "c5_doubletap",
+                    "displayName": "Double Tap",
+                    "description": "Basic towers fire a second shot 0.15s after the first.",
+                    "effectType": "BasicDoubleTap",
+                    "value": 1.0,
+                    "subEffects": []
+                }
+            ]
+        }
+    ],
+    "difficulties": [
+        {
+            "label": "Easy",
+            "enemyHpMult": 0.75,
+            "enemySpeedMult": 1.0,
+            "goldMult": 1.0,
+            "bountyMult": 1.0,
+            "startGold": -1,
+            "startLives": -1,
+            "startTech": -1,
+            "startTier": -1,
+            "maxTowers": -1,
+            "allowedTowers": [],
+            "disabledGroups": [],
+            "objectives": []
+        },
+        {
+            "label": "Medium",
+            "enemyHpMult": 1.0,
+            "enemySpeedMult": 1.0,
+            "goldMult": 1.0,
+            "bountyMult": 1.0,
+            "startGold": -1,
+            "startLives": -1,
+            "startTech": -1,
+            "startTier": -1,
+            "maxTowers": -1,
+            "allowedTowers": [],
+            "disabledGroups": [],
+            "objectives": []
+        },
+        {
+            "label": "Hard",
+            "enemyHpMult": 1.600000023841858,
+            "enemySpeedMult": 1.0,
+            "goldMult": 1.0,
+            "bountyMult": 1.0,
+            "startGold": -1,
+            "startLives": -1,
+            "startTech": -1,
+            "startTier": -1,
+            "maxTowers": -1,
+            "allowedTowers": [],
+            "disabledGroups": [],
+            "objectives": []
+        }
+    ],
+    "objectives": [],
     "paths": [
         {
             "spawnerIndex": 0,
             "nodes": [
                 {
                     "id": "n0",
-                    "x": -9.0,
-                    "y": 2.5,
+                    "x": -11.449999809265137,
+                    "y": -5.320000171661377,
                     "next": [
                         "n1"
                     ]
                 },
                 {
                     "id": "n1",
-                    "x": -5.0,
-                    "y": 2.5,
+                    "x": -7.769999980926514,
+                    "y": -3.3399999141693117,
                     "next": [
                         "n2"
                     ]
                 },
                 {
                     "id": "n2",
-                    "x": -1.0,
-                    "y": 0.0,
+                    "x": -3.430000066757202,
+                    "y": 0.7400000095367432,
                     "next": [
-                        "n3",
-                        "n4"
+                        "n3"
                     ]
                 },
                 {
                     "id": "n3",
-                    "x": 3.0,
-                    "y": 2.5,
+                    "x": -0.75,
+                    "y": 1.840000033378601,
                     "next": [
-                        "n5"
+                        "n4"
                     ]
                 },
                 {
                     "id": "n4",
-                    "x": 3.0,
-                    "y": -2.5,
+                    "x": 2.390000104904175,
+                    "y": 1.7599999904632569,
                     "next": [
                         "n5"
                     ]
                 },
                 {
                     "id": "n5",
-                    "x": 9.0,
+                    "x": 7.800000190734863,
+                    "y": -0.7300000190734863,
+                    "next": []
+                }
+            ]
+        },
+        {
+            "spawnerIndex": 1,
+            "nodes": [
+                {
+                    "id": "n1",
+                    "x": 3.0,
                     "y": 0.0,
                     "next": []
                 }
@@ -87,36 +337,424 @@
     ],
     "placementZones": [
         {
-            "type": "circle",
-            "x": -7.0,
-            "y": 0.0,
-            "radius": 2.5,
-            "width": 3.0,
-            "points": []
-        },
-        {
-            "type": "circle",
+            "type": "lane",
             "x": 0.0,
-            "y": 3.5,
-            "radius": 2.0,
-            "width": 3.0,
-            "points": []
-        },
-        {
-            "type": "circle",
-            "x": 0.0,
-            "y": -3.5,
-            "radius": 2.0,
-            "width": 3.0,
-            "points": []
-        },
-        {
-            "type": "circle",
-            "x": 7.0,
             "y": 0.0,
-            "radius": 2.5,
-            "width": 3.0,
-            "points": []
+            "radius": 2.0,
+            "width": 0.25,
+            "points": [
+                {
+                    "x": -11.470000267028809,
+                    "y": -2.9000000953674318,
+                    "width": 0.25
+                },
+                {
+                    "x": -10.350000381469727,
+                    "y": -3.1500000953674318,
+                    "width": 0.25
+                },
+                {
+                    "x": -8.8100004196167,
+                    "y": -2.369999885559082,
+                    "width": 0.25
+                },
+                {
+                    "x": -5.690000057220459,
+                    "y": 1.3600000143051148,
+                    "width": 0.25
+                },
+                {
+                    "x": -2.049999952316284,
+                    "y": 3.359999895095825,
+                    "width": 0.25
+                },
+                {
+                    "x": -0.8100000023841858,
+                    "y": 3.359999895095825,
+                    "width": 0.25
+                },
+                {
+                    "x": 0.8199999928474426,
+                    "y": 3.9700000286102297,
+                    "width": 0.25
+                },
+                {
+                    "x": 2.9600000381469728,
+                    "y": 5.389999866485596,
+                    "width": 0.25
+                }
+            ]
+        },
+        {
+            "type": "lane",
+            "x": 0.0,
+            "y": 0.0,
+            "radius": 2.0,
+            "width": 0.25,
+            "points": [
+                {
+                    "x": -3.2699999809265138,
+                    "y": 4.21999979019165,
+                    "width": 0.25
+                },
+                {
+                    "x": -2.130000114440918,
+                    "y": 3.299999952316284,
+                    "width": 0.25
+                }
+            ]
+        },
+        {
+            "type": "lane",
+            "x": 0.0,
+            "y": 0.0,
+            "radius": 2.0,
+            "width": 0.25,
+            "points": [
+                {
+                    "x": -8.970000267028809,
+                    "y": -5.21999979019165,
+                    "width": 0.25
+                },
+                {
+                    "x": -7.340000152587891,
+                    "y": -3.869999885559082,
+                    "width": 0.25
+                },
+                {
+                    "x": -3.640000104904175,
+                    "y": -2.299999952316284,
+                    "width": 0.25
+                },
+                {
+                    "x": -2.2100000381469728,
+                    "y": -1.3799999952316285,
+                    "width": 0.25
+                },
+                {
+                    "x": -1.1399999856948853,
+                    "y": 0.03999999910593033,
+                    "width": 0.25
+                }
+            ]
+        },
+        {
+            "type": "lane",
+            "x": 0.0,
+            "y": 0.0,
+            "radius": 2.0,
+            "width": 0.25,
+            "points": [
+                {
+                    "x": -1.2699999809265137,
+                    "y": -0.8100000023841858,
+                    "width": 0.25
+                },
+                {
+                    "x": -0.23999999463558198,
+                    "y": 0.4300000071525574,
+                    "width": 0.25
+                },
+                {
+                    "x": 1.5099999904632569,
+                    "y": 0.9599999785423279,
+                    "width": 0.25
+                },
+                {
+                    "x": 2.549999952316284,
+                    "y": 0.5099999904632568,
+                    "width": 0.25
+                },
+                {
+                    "x": 2.549999952316284,
+                    "y": -0.6399999856948853,
+                    "width": 0.25
+                }
+            ]
+        },
+        {
+            "type": "lane",
+            "x": 0.0,
+            "y": 0.0,
+            "radius": 2.0,
+            "width": 0.25,
+            "points": [
+                {
+                    "x": 3.6700000762939455,
+                    "y": 0.7300000190734863,
+                    "width": 0.25
+                },
+                {
+                    "x": 2.9000000953674318,
+                    "y": -0.550000011920929,
+                    "width": 0.25
+                },
+                {
+                    "x": 3.6700000762939455,
+                    "y": -1.809999942779541,
+                    "width": 0.25
+                },
+                {
+                    "x": 4.989999771118164,
+                    "y": -2.0399999618530275,
+                    "width": 0.25
+                },
+                {
+                    "x": 6.25,
+                    "y": -1.4600000381469727,
+                    "width": 0.25
+                },
+                {
+                    "x": 7.25,
+                    "y": -1.9500000476837159,
+                    "width": 0.25
+                }
+            ]
+        },
+        {
+            "type": "lane",
+            "x": 0.0,
+            "y": 0.0,
+            "radius": 2.0,
+            "width": 0.44999998807907107,
+            "points": [
+                {
+                    "x": 7.829999923706055,
+                    "y": 3.369999885559082,
+                    "width": 0.44999998807907107
+                },
+                {
+                    "x": 5.050000190734863,
+                    "y": 2.259999990463257,
+                    "width": 0.25
+                },
+                {
+                    "x": 4.389999866485596,
+                    "y": 1.7300000190734864,
+                    "width": 0.25
+                }
+            ]
+        },
+        {
+            "type": "lane",
+            "x": 0.0,
+            "y": 0.0,
+            "radius": 2.0,
+            "width": 0.25,
+            "points": [
+                {
+                    "x": 5.889999866485596,
+                    "y": 2.430000066757202,
+                    "width": 0.25
+                },
+                {
+                    "x": 5.989999771118164,
+                    "y": 1.7899999618530274,
+                    "width": 0.25
+                },
+                {
+                    "x": 6.840000152587891,
+                    "y": 1.3600000143051148,
+                    "width": 0.25
+                },
+                {
+                    "x": 7.820000171661377,
+                    "y": 1.850000023841858,
+                    "width": 0.25
+                }
+            ]
+        },
+        {
+            "type": "lane",
+            "x": 0.0,
+            "y": 0.0,
+            "radius": 2.0,
+            "width": 0.25,
+            "points": [
+                {
+                    "x": -11.5,
+                    "y": 4.0,
+                    "width": 0.25
+                },
+                {
+                    "x": -10.65999984741211,
+                    "y": 2.6700000762939455,
+                    "width": 0.25
+                },
+                {
+                    "x": -9.399999618530274,
+                    "y": 2.1600000858306886,
+                    "width": 0.25
+                },
+                {
+                    "x": -8.0600004196167,
+                    "y": 2.180000066757202,
+                    "width": 0.25
+                }
+            ]
+        },
+        {
+            "type": "lane",
+            "x": 0.0,
+            "y": 0.0,
+            "radius": 2.0,
+            "width": 0.25,
+            "points": [
+                {
+                    "x": -7.480000019073486,
+                    "y": 2.569999933242798,
+                    "width": 0.25
+                },
+                {
+                    "x": -6.980000019073486,
+                    "y": 2.8399999141693117,
+                    "width": 0.25
+                }
+            ]
+        },
+        {
+            "type": "lane",
+            "x": 0.0,
+            "y": 0.0,
+            "radius": 2.0,
+            "width": 0.25,
+            "points": [
+                {
+                    "x": -10.1899995803833,
+                    "y": 4.340000152587891,
+                    "width": 0.25
+                },
+                {
+                    "x": -9.529999732971192,
+                    "y": 3.509999990463257,
+                    "width": 0.25
+                },
+                {
+                    "x": -8.170000076293946,
+                    "y": 3.5999999046325685,
+                    "width": 0.25
+                }
+            ]
+        },
+        {
+            "type": "lane",
+            "x": 0.0,
+            "y": 0.0,
+            "radius": 2.0,
+            "width": 0.25,
+            "points": [
+                {
+                    "x": -8.050000190734864,
+                    "y": 4.730000019073486,
+                    "width": 0.25
+                },
+                {
+                    "x": -7.96999979019165,
+                    "y": 4.360000133514404,
+                    "width": 0.25
+                }
+            ]
+        },
+        {
+            "type": "lane",
+            "x": 0.0,
+            "y": 0.0,
+            "radius": 2.0,
+            "width": 0.25,
+            "points": [
+                {
+                    "x": -3.0899999141693117,
+                    "y": -5.110000133514404,
+                    "width": 0.25
+                },
+                {
+                    "x": -3.630000114440918,
+                    "y": -5.480000019073486,
+                    "width": 0.25
+                }
+            ]
+        },
+        {
+            "type": "lane",
+            "x": 0.0,
+            "y": 0.0,
+            "radius": 2.0,
+            "width": 0.25,
+            "points": [
+                {
+                    "x": 1.0399999618530274,
+                    "y": 3.549999952316284,
+                    "width": 0.25
+                },
+                {
+                    "x": 4.25,
+                    "y": 4.429999828338623,
+                    "width": 0.25
+                },
+                {
+                    "x": 5.400000095367432,
+                    "y": 5.440000057220459,
+                    "width": 0.25
+                }
+            ]
+        },
+        {
+            "type": "lane",
+            "x": 0.0,
+            "y": 0.0,
+            "radius": 2.0,
+            "width": 0.25,
+            "points": [
+                {
+                    "x": 4.010000228881836,
+                    "y": 3.8299999237060549,
+                    "width": 0.25
+                },
+                {
+                    "x": 5.809999942779541,
+                    "y": 4.340000152587891,
+                    "width": 0.25
+                },
+                {
+                    "x": 7.070000171661377,
+                    "y": 4.699999809265137,
+                    "width": 0.25
+                },
+                {
+                    "x": 7.769999980926514,
+                    "y": 4.71999979019165,
+                    "width": 0.25
+                }
+            ]
+        },
+        {
+            "type": "lane",
+            "x": 0.0,
+            "y": 0.0,
+            "radius": 2.0,
+            "width": 0.25,
+            "points": [
+                {
+                    "x": 2.809999942779541,
+                    "y": -5.449999809265137,
+                    "width": 0.25
+                },
+                {
+                    "x": 3.450000047683716,
+                    "y": -4.869999885559082,
+                    "width": 0.25
+                },
+                {
+                    "x": 6.699999809265137,
+                    "y": -4.960000038146973,
+                    "width": 0.25
+                },
+                {
+                    "x": 7.809999942779541,
+                    "y": -4.639999866485596,
+                    "width": 0.25
+                }
+            ]
         }
     ],
     "waves": [
@@ -124,17 +762,16 @@
             "groups": [
                 {
                     "unitDefinitionId": "basic_enemy",
-                    "count": 10,
-                    "spawnInterval": 0.699999988079071,
-                    "startTime": 0.0,
-                    "spawnerIndex": 0
-                },
-                {
-                    "unitDefinitionId": "fast_enemy",
                     "count": 5,
-                    "spawnInterval": 0.5,
+                    "spawnInterval": 3.0,
                     "startTime": 0.0,
-                    "spawnerIndex": 0
+                    "spawnerIndex": 0,
+                    "dropConfig": {
+                        "mode": "always",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
                 }
             ]
         },
@@ -142,92 +779,39 @@
             "groups": [
                 {
                     "unitDefinitionId": "basic_enemy",
-                    "count": 10,
-                    "spawnInterval": 0.6499999761581421,
+                    "count": 5,
+                    "spawnInterval": 3.0,
                     "startTime": 0.0,
-                    "spawnerIndex": 0
-                },
-                {
-                    "unitDefinitionId": "fast_enemy",
-                    "count": 8,
-                    "spawnInterval": 0.44999998807907107,
-                    "startTime": 0.0,
-                    "spawnerIndex": 0
+                    "spawnerIndex": 0,
+                    "dropConfig": {
+                        "mode": "pattern",
+                        "fallbackChance": -1.0,
+                        "pattern": [
+                            1,
+                            0,
+                            1,
+                            0,
+                            1
+                        ],
+                        "repeat": true
+                    }
                 }
             ]
         },
         {
             "groups": [
-                {
-                    "unitDefinitionId": "basic_enemy",
-                    "count": 12,
-                    "spawnInterval": 0.6000000238418579,
-                    "startTime": 0.0,
-                    "spawnerIndex": 0
-                },
-                {
-                    "unitDefinitionId": "fast_enemy",
-                    "count": 6,
-                    "spawnInterval": 0.44999998807907107,
-                    "startTime": 0.0,
-                    "spawnerIndex": 0
-                },
                 {
                     "unitDefinitionId": "armored_enemy",
-                    "count": 2,
-                    "spawnInterval": 1.7999999523162842,
-                    "startTime": 0.0,
-                    "spawnerIndex": 0
-                }
-            ]
-        },
-        {
-            "groups": [
-                {
-                    "unitDefinitionId": "basic_enemy",
-                    "count": 10,
-                    "spawnInterval": 0.550000011920929,
-                    "startTime": 0.0,
-                    "spawnerIndex": 0
-                },
-                {
-                    "unitDefinitionId": "armored_enemy",
-                    "count": 4,
-                    "spawnInterval": 1.5,
-                    "startTime": 0.0,
-                    "spawnerIndex": 0
-                },
-                {
-                    "unitDefinitionId": "fast_enemy",
-                    "count": 10,
-                    "spawnInterval": 0.4000000059604645,
-                    "startTime": 0.0,
-                    "spawnerIndex": 0
-                }
-            ]
-        },
-        {
-            "groups": [
-                {
-                    "unitDefinitionId": "boss_enemy",
-                    "count": 1,
+                    "count": 3,
                     "spawnInterval": 1.0,
-                    "startTime": 0.0,
-                    "spawnerIndex": 0
-                },
-                {
-                    "unitDefinitionId": "basic_enemy",
-                    "count": 10,
-                    "spawnInterval": 0.5,
-                    "startTime": 0.0,
-                    "spawnerIndex": 0
-                },
-                {
-                    "unitDefinitionId": "fast_enemy",
-                    "count": 8,
-                    "spawnInterval": 0.4000000059604645,
-                    "startTime": 0.0,
-                    "spawnerIndex": 0
+                    "startTime": 0.25,
+                    "spawnerIndex": 0,
+                    "dropConfig": {
+                        "mode": "always",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
                 }
             ]
         }

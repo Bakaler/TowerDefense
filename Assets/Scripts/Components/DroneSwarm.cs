@@ -91,10 +91,11 @@ public class DroneSwarm : MonoBehaviour, IFactoryInitializable
 
     void SpawnDrones()
     {
-        Sprite[] frames = DroneFrames();
-        for (int i = 0; i < droneCount; i++)
+        Sprite[] frames    = DroneFrames();
+        int      totalCount = droneCount + (int)ModifierSelection.GetFloat("BonusDrones");
+        for (int i = 0; i < totalCount; i++)
         {
-            float a  = i * (360f / droneCount) * Mathf.Deg2Rad;
+            float a  = i * (360f / totalCount) * Mathf.Deg2Rad;
             var   go = new GameObject($"Drone_{i}");
             go.transform.position   = (Vector2)transform.position + new Vector2(Mathf.Cos(a), Mathf.Sin(a)) * 0.5f;
             go.transform.localScale = Vector3.one * droneScale;

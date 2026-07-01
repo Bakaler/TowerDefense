@@ -20,6 +20,15 @@ public class UnitManager : UnitParentClass
     private Color          _baseColor = Color.white;
     private Coroutine      _flashCoroutine;
 
+    // ── Drop config (stamped by UnitSpawner at spawn time) ───────────
+    public DropConfig SpawnDropConfig { get; set; } = new DropConfig();
+    public int        SpawnIndex      { get; set; }
+
+    // ── Aura slow ─────────────────────────────────────────────────────
+    private int _auraSlowCount;
+    public void AddAuraSlow()    { _auraSlowCount++; }
+    public void RemoveAuraSlow() { _auraSlowCount = Mathf.Max(0, _auraSlowCount - 1); }
+
     // ── Route ─────────────────────────────────────────────────────────
     private RouteFollower _follower;
 
@@ -111,7 +120,7 @@ public class UnitManager : UnitParentClass
             Move();
 
             if (lifeCurrent < 0)
-                Die();
+                Die(killedByDamage: true);
         }
         else
         {
@@ -129,7 +138,9 @@ public class UnitManager : UnitParentClass
         if (_follower == null || !_follower.HasRoute)
             return;
 
-        float speed = (speedMax <= 0f) ? speedCurrent : Mathf.Max(0f, speedCurrent);
+        float slowFrac  = Mathf.Clamp01(_auraSlowCount * ModifierSelection.GetFloat("AuraSlowEnemies"));
+        float baseSpeed = (speedMax <= 0f) ? speedCurrent : Mathf.Max(0f, speedCurrent);
+        float speed     = baseSpeed * (1f - slowFrac);
         _follower.SetSpeed(speed);
 
         // Flip sprite to face movement direction
@@ -144,10 +155,20 @@ public class UnitManager : UnitParentClass
 
         if (reachedEnd)
         {
-            LogicManager logic = GameObject.FindGameObjectWithTag("Logic")?.GetComponent<LogicManager>();
-            if (logic != null)
-                logic.UpdateLives(deathBlow * -1);
-
+            if (WaveManager.ForgiveNextLeak)
+            {
+                WaveManager.ForgiveNextLeak = false;
+            }
+            else
+            {
+                LogicManager logic = LogicManager.Instance
+                    ?? GameObject.FindGameObjectWithTag("Logic")?.GetComponent<LogicManager>();
+                if (logic != null)
+                {
+                    int dmg = Mathf.Max(1, deathBlow - (int)ModifierSelection.GetFloat("LeakDamageReduction"));
+                    logic.UpdateLives(dmg * -1);
+                }
+            }
             Die();
         }
     }
@@ -162,11 +183,14 @@ public class UnitManager : UnitParentClass
 
     // ── Death ─────────────────────────────────────────────────────────
 
-    public void Die()
+    public void Die(bool killedByDamage = false)
     {
         isAlive = false;
         if (myCollider != null)
             myCollider.enabled = false;
+
+        if (killedByDamage)
+            ObjectiveTracker.NotifyKill(definitionId);
 
         GetComponent<BehaviorHandler>()?.TriggerDeathEffects(gameObject);
 

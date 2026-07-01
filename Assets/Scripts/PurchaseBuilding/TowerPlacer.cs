@@ -171,6 +171,8 @@ public class TowerPlacer : MonoBehaviour
         if (rm != null)
             rm.ChangeResourceOne(-def.resourceCost);
 
+        ObjectiveTracker.NotifyBuild(_selectedId);
+
         // Exit placement mode — one click, one tower
         Cancel();
     }

@@ -7,6 +7,8 @@ using UnityEngine;
 /// </summary>
 public class LogicManager : MonoBehaviour
 {
+    public static LogicManager Instance { get; private set; }
+
     [Header("Config")]
     public int startingLives = 20;
 
@@ -16,10 +18,18 @@ public class LogicManager : MonoBehaviour
 
     // ── Lifecycle ─────────────────────────────────────────────────────
 
+    void Awake()
+    {
+        if (Instance != null && Instance != this) { Destroy(gameObject); return; }
+        Instance = this;
+    }
+
     void Start()
     {
         lives = startingLives;
     }
+
+    void OnDestroy() { if (Instance == this) Instance = null; }
 
     public void ResetToStart(int overrideLives = -1)
     {

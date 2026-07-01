@@ -123,12 +123,14 @@ public class UnitFactory : MonoBehaviour
         var unit = go.AddComponent<UnitManager>();
         unit.myCollider      = col;
         unit.definitionId    = def.id;
-        unit.lifeMax         = def.life;
-        unit.lifeCurrent     = def.life;
-        unit.speedMax        = def.speed;
-        unit.speedCurrent    = def.speed;
+        float hp             = def.life * LevelSelection.EnemyHpMult;
+        unit.lifeMax         = hp;
+        unit.lifeCurrent     = hp;
+        float spd            = def.speed * LevelSelection.EnemySpeedMult;
+        unit.speedMax        = spd;
+        unit.speedCurrent    = spd;
         unit.physicalDefense = def.physicalDefense;
-        unit.bounty          = def.bounty;
+        unit.bounty          = Mathf.RoundToInt(def.bounty * LevelSelection.BountyMult);
         unit.deathBlow       = def.deathBlow;
         unit.isAlive         = true;
 

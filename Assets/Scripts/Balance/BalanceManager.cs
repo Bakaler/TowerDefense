@@ -16,6 +16,9 @@ public class BalanceManager : MonoBehaviour
     public int   MaxTowers  { get; private set; } = 8;
     public int   TowerCount { get; private set; }
 
+    private int _levelCap = -1;
+    public void SetLevelCap(int cap) => _levelCap = cap;
+
     static readonly int[] Thresholds = { 12, 36, 80 };
 
     void Awake()
@@ -73,7 +76,8 @@ public class BalanceManager : MonoBehaviour
         int total = Mathf.FloorToInt(e + a + p);
         int slots = 0;
         foreach (int t in Thresholds) if (total >= t) slots++;
-        MaxTowers   = 8 + slots * 4;
+        int balanced = 8 + slots * 4;
+        MaxTowers = _levelCap > 0 ? Mathf.Min(balanced, _levelCap) : balanced;
         TowerCount  = 0;
         foreach (var t in towers)
             if (!t.isGhost) TowerCount++;

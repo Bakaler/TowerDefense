@@ -13,9 +13,11 @@ public class ProjectileFollow : MonoBehaviour
     public bool piercing = false;   // if true, passes through ShieldBubble
 
     private const float HitThreshold = 0.15f;
+    private bool _hit;
 
     void Update()
     {
+        if (_hit) return;
         if (target == null)
         {
             Destroy(gameObject);
@@ -31,6 +33,9 @@ public class ProjectileFollow : MonoBehaviour
 
     void OnReachTarget()
     {
+        if (_hit) return;
+        _hit = true;
+
         if (impactEffect != null && originContext != null)
         {
             UnitParentClass hitUnit = target.GetComponent<UnitParentClass>();
@@ -54,6 +59,7 @@ public class ProjectileFollow : MonoBehaviour
 
     void OnCollisionEnter2D(Collision2D collision)
     {
+        if (_hit) return;
         if (collision.gameObject.layer != 10) return;
 
         if (!piercing)
@@ -65,6 +71,7 @@ public class ProjectileFollow : MonoBehaviour
         UnitParentClass unit = collision.gameObject.GetComponent<UnitParentClass>();
         if (unit == null) return;
 
+        _hit = true;
         if (impactEffect != null && originContext != null)
         {
             var ctx = originContext.CloneForNewTarget(unit);

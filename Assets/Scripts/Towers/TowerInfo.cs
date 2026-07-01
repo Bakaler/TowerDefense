@@ -204,6 +204,7 @@ public class TowerInfo : MonoBehaviour
         rm.ChangeResourceOne(-cost);
         Tier++;
         StatMultiplier    = Mathf.Pow(upgradeStatMultiplier, Tier - 1);
+        ObjectiveTracker.NotifyUpgrade(definitionId);
         balanceMultiplier *= 2f;   // each tier doubles this tower's balance contribution
         RebuildTierRings();
         RefreshSprite();

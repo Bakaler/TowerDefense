@@ -22,14 +22,6 @@ public class Effect_Damage : Effect
     public float criticalChance = 0f;
     public float criticalDamageMultiplier = 2f;
 
-    static void TrySpawnBounty(Vector3 pos)
-    {
-        float physical = BalanceManager.Instance != null ? BalanceManager.Instance.Physical : 0f;
-        float chance   = 0.15f + physical * 0.0025f;
-        if (Random.value <= chance)
-            BountyDrop.Spawn(pos, 1);
-    }
-
     public override void Execute(EffectContext context)
     {
         if (!PassesValidators(context)) return;
@@ -48,6 +40,23 @@ public class Effect_Damage : Effect
             ? towerInfo.StatMultiplier * towerInfo.ExtraMultiplier * towerInfo.AuraDamageMultiplier
             : 1f;
 
+        // Balance-type damage multipliers from modifiers
+        if (towerInfo != null)
+        {
+            switch (towerInfo.balanceType)
+            {
+                case BalanceType.Physical:
+                    towerMult *= 1f + ModifierSelection.GetFloat("PhysicalDamageMult");
+                    break;
+                case BalanceType.Elemental:
+                    towerMult *= 1f + ModifierSelection.GetFloat("ElementalDamageMult");
+                    break;
+            }
+            // LastStand: at 1 life, towers deal 2× damage
+            if (ModifierSelection.HasEffect("LastStand") && LogicManager.Instance != null && LogicManager.Instance.lives <= 1f)
+                towerMult *= 2f;
+        }
+
         float rawBase = context.DamageOverride > 0f ? context.DamageOverride : damageBase;
         float damage  = rawBase * towerMult;
         DamageType type = context.DamageTypeOverride ?? damageType;
@@ -63,7 +72,11 @@ public class Effect_Damage : Effect
         {
             if (context.OriginTower != null)
                 context.OriginTower.GetComponent<TowerInfo>()?.RegisterKill();
-            TrySpawnBounty(target.transform.position);
+            BountyDrop.TrySpawn(target.transform.position, target.GetComponent<UnitManager>());
+
+            float bonusBounty = ModifierSelection.GetFloat("BountyPerKill");
+            if (bonusBounty >= 1f)
+                Object.FindFirstObjectByType<ResourceManagerScript>()?.ChangeResourceOne((int)bonusBounty);
         }
     }
 }

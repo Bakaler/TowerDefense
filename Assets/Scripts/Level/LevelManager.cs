@@ -30,13 +30,6 @@ public class LevelManager : MonoBehaviour
 
     void Start() => LoadLevel(LevelSelection.SelectedLevel);
 
-    void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.Alpha1)) LoadLevel(1);
-        if (Input.GetKeyDown(KeyCode.Alpha2)) LoadLevel(2);
-        if (Input.GetKeyDown(KeyCode.Alpha3)) LoadLevel(3);
-    }
-
     // ── Public API ────────────────────────────────────────────────────
 
     public void LoadLevel(int levelNumber)
@@ -59,17 +52,61 @@ public class LevelManager : MonoBehaviour
         PathGraph.Instance?.ScanScene();
         FindFirstObjectByType<PathVisualizer>()?.RebuildLines();
 
+        // ── Apply difficulty overrides ───────────────────────────────
+        var diff = ResolveDifficulty(data);
+
+        int    gold    = diff != null && diff.startGold  > 0  ? Mathf.RoundToInt(diff.startGold  * diff.goldMult) : Mathf.RoundToInt(data.startGold * LevelSelection.GoldMult);
+        int    lives   = diff != null && diff.startLives > 0  ? diff.startLives  : data.startLives;
+        int    tech    = diff != null && diff.startTech  >= 0 ? diff.startTech   : data.startTech;
+        int    tier    = diff != null && diff.startTier  > 0  ? diff.startTier   : data.startTier;
+        int    cap     = diff != null && diff.maxTowers  > 0  ? diff.maxTowers   : data.maxTowers;
+        var    towers  = diff != null && diff.allowedTowers.Length > 0 ? diff.allowedTowers : data.allowedTowers;
+        var    objs    = diff != null && diff.objectives.Length   > 0 ? diff.objectives    : data.objectives;
+        var    waves   = diff != null ? FilterWaves(data.waves, diff.disabledGroups) : data.waves;
+
         // ── Reset managers ───────────────────────────────────────────
-        FindFirstObjectByType<ResourceManagerScript>()?.ResetToStart(data.startGold);
-        FindFirstObjectByType<LogicManager>()?.ResetToStart(data.startLives);
-        TechManager.Instance?.ResetAll(data.startTech, data.startTier);
+        FindFirstObjectByType<ResourceManagerScript>()?.ResetToStart(gold);
+        FindFirstObjectByType<LogicManager>()?.ResetToStart(lives);
+        TechManager.Instance?.ResetAll(tech, tier);
         ResearchManager.Instance?.ResetAll();
-        WaveManager.Instance?.ResetForLevel(data.waves, spawners);
-        TowerShop.Instance?.Rebuild(data.allowedTowers);
+        WaveManager.Instance?.ResetForLevel(waves, spawners);
+        BalanceManager.Instance?.SetLevelCap(cap);
+        TowerShop.Instance?.Rebuild(towers);
         ApplyModifiers();
+        ObjectiveTracker.Load(objs);
         GameHUD.Instance?.ResetForLevelLoad();
 
         Debug.Log($"[LevelManager] Level {levelNumber} loaded: {data.displayName}");
+    }
+
+    // ── Difficulty helpers ────────────────────────────────────────────
+
+    DifficultyDef ResolveDifficulty(LevelData data)
+    {
+        if (data.difficulties == null || data.difficulties.Length == 0) return null;
+        int idx = Mathf.Clamp(LevelSelection.SelectedDifficulty, 0, data.difficulties.Length - 1);
+        return data.difficulties[idx];
+    }
+
+    WaveDefinition[] FilterWaves(WaveDefinition[] src, string[] disabledGroups)
+    {
+        if (src == null) return src;
+        if (disabledGroups == null || disabledGroups.Length == 0) return src;
+
+        var disabled = new System.Collections.Generic.HashSet<string>(disabledGroups);
+        var result   = new WaveDefinition[src.Length];
+        for (int wi = 0; wi < src.Length; wi++)
+        {
+            var orig   = src[wi];
+            var groups = new System.Collections.Generic.List<WaveEntry>();
+            for (int gi = 0; gi < orig.groups.Count; gi++)
+            {
+                if (!disabled.Contains($"{wi},{gi}"))
+                    groups.Add(orig.groups[gi]);
+            }
+            result[wi] = new WaveDefinition { groups = groups };
+        }
+        return result;
     }
 
     // ── Modifiers ─────────────────────────────────────────────────────
@@ -89,11 +126,27 @@ public class LevelManager : MonoBehaviour
                 case "StartingTech":
                     TechManager.Instance?.AddTech((int)mod.value);
                     break;
+                // Runtime modifiers — read from ModifierSelection at the point of effect
+                case "FullRefund":
                 case "TowerSpeedMult":
                 case "TowerRangeMult":
                 case "TowerDamageMult":
-                case "FullRefund":
-                    // Stored globally — read from ModifierSelection.Chosen at runtime
+                case "PhysicalDamageMult":
+                case "ElementalDamageMult":
+                case "ArcaneSpdMult":
+                case "ElementalSpdMult":
+                case "AuraRadiusMult":
+                case "AuraMult":
+                case "AuraSlowEnemies":
+                case "BountyPerKill":
+                case "ForgiveFirstLeak":
+                case "LeakDamageReduction":
+                case "LastStand":
+                case "BonusDrones":
+                case "BonusShotgunBullets":
+                case "BasicDoubleTap":
+                case "GoldPerWave":
+                case "LivesDrainPerWave":
                     break;
                 default:
                     Debug.LogWarning($"[LevelManager] Unknown modifier effectType '{mod.effectType}'");
@@ -121,10 +174,10 @@ public class LevelManager : MonoBehaviour
 
     // ── Background ────────────────────────────────────────────────────
 
-    void BuildBackground(string spritePath, float x = 0f, float y = 0f)
+    void BuildBackground(string spritePath, float x = 0f, float y = 0f, float scaleX = .82f, float scaleY = .82f)
     {
         var go = new GameObject("[Background]");
-        go.transform.position = new Vector3(x, y, 0f);
+        go.transform.position = new Vector3(0, 1.125f, 0f);
         var sr = go.AddComponent<SpriteRenderer>();
         sr.sortingLayerName = "Background";
         sr.sortingOrder     = -100;
@@ -132,11 +185,31 @@ public class LevelManager : MonoBehaviour
         if (!string.IsNullOrEmpty(spritePath))
         {
             var sp = Resources.Load<Sprite>(spritePath);
-            if (sp != null) sr.sprite = sp;
+            if (sp != null)
+            {
+                sr.sprite = sp;
+                ScaleBgToFillCamera(go, sr, scaleX, scaleY);
+            }
             else Debug.LogWarning($"[LevelManager] Background sprite not found: {spritePath}");
         }
 
         _built.Add(go);
+    }
+
+    static void ScaleBgToFillCamera(GameObject go, SpriteRenderer sr, float scaleX = 1f, float scaleY = 1f)
+    {
+        var cam = Camera.main;
+        if (cam == null || sr.sprite == null) return;
+
+        float camH = cam.orthographicSize * 2f;
+        float camW = camH * cam.aspect;
+
+        float sprW = sr.sprite.bounds.size.x;
+        float sprH = sr.sprite.bounds.size.y;
+
+        // Base cover scale, then apply per-axis multipliers for manual stretch
+        float baseScale = Mathf.Max(camW / sprW, camH / sprH);
+        go.transform.localScale = new Vector3(baseScale * scaleX, baseScale * scaleY, 1f);
     }
 
     // ── Paths ─────────────────────────────────────────────────────────

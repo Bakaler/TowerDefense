@@ -1,306 +1,266 @@
-# Tower Defense - Game Design Document
+# Tower Defense — Game Design Document
+
+> Last updated: 2026-06-29
+
+---
+
+## Table of Contents
+1. [Overview](#overview)
+2. [Core Loop](#core-loop)
+3. [Balance System](#balance-system)
+4. [Tech & Tier System](#tech--tier-system)
+5. [Towers](#towers)
+6. [Enemies](#enemies)
+7. [Levels & Modifiers](#levels--modifiers)
+8. [Abilities & Effects](#abilities--effects)
+9. [Status Effects / Behaviors](#status-effects--behaviors)
+10. [UI Systems](#ui-systems)
+11. [Missing / TODO](#missing--todo)
 
 ---
 
 ## Overview
 
-A tower defense game built in Unity 2D. The player places towers along a path to stop waves of enemies from reaching the end. The core loop is built around strategic tower variety, passive income management, a balance system that punishes over-reliance on any single tower type, and an active ability bar that rewards player attention during waves.
+2D top-down tower defense. JSON-driven definitions for towers, enemies, abilities, and levels. Core tension: a **balance system** that rewards building across three tower archetypes (Physical, Arcane, Elemental) rather than spamming one. Tower slot cap expands as your cumulative balance score grows.
 
-All towers, units, abilities, and effects are fully data-driven via JSON. No prefabs. Players can create custom units and towers by editing definition files.
+**Engine:** Unity 6, 2D  
+**Scenes:** MainMenuScene → LevelSelectionScene → (ModifierSelectScene) → GameScene
 
 ---
 
 ## Core Loop
 
-1. A wave of enemies spawns and follows a spline-based path toward the exit.
-2. The player spends gold to place towers before and between waves.
-3. Towers autocast their basic attacks. Player activates cooldown abilities from the ability bar.
-4. Kills generate bounty drops (gold or tech, randomly). Ability kills drop tech. Normal kills drop gold.
-5. After each wave, Balance score is distributed into resource pools by damage type.
-6. Players spend those pools on income tower upgrades, research unlocks, and tower leveling.
+1. Player enters level, optionally picks modifiers (per-level columns)
+2. Place towers in designated placement zones before/between waves
+3. Start wave — enemies walk a fixed path, player loses lives per leak
+4. Kill enemies → earn gold + bounty drops → buy/upgrade towers
+5. Research Tower generates tech → unlock higher upgrade tiers
+6. Victory screen: Play Again / Next Level / Main Menu
+7. Loss screen: Restart / Main Menu
 
----
-
-## Economy
-
-### Gold
-
-Gold is the primary resource used to place towers.
-
-**Starting gold:** 150
-
-**Sources:**
-- Income towers (primary, player-activated)
-- Bounty drops from normal kills (supplement, never sustaining)
-
-**Tower costs:**
-
-| Tower | Cost | Balance Type |
-|---|---|---|
-| Basic Tower | 3 | Physical |
-| Income Tower | 5 | Elemental |
-| Boomerang Tower | 5 | Physical |
-| Chain Tower | 8 | Arcane |
-
-### Income Towers
-
-The income tower uses a PvZ-style orb collection mechanic. Orbs accumulate in four slots above the tower. The player clicks the tower body to collect all orbs at once.
-
-**Orb spawn rate:** one orb every 8 seconds, maximum 4 orbs. Multiple income towers stagger their spawn timers automatically.
-
-**Payout table:**
-
-| Orbs held | Gold earned |
-|---|---|
-| 1 | 1 |
-| 2 | 3 |
-| 3 | 5 |
-| 4 | 8 |
-
-Collecting at full capacity rewards patience. Early collection is always a net loss per second. Elemental balance increases orb spawn rate, making income towers more productive without changing the patience decision.
-
-### Bounty Drops
-
-Each kill has a chance to drop a resource. Bounty is a supplement, never a primary income source. Drop rates are intentionally low.
-
-**Drop types:**
-- Normal kills (basic attack) drop gold
-- Ability kills (any cooldown ability, whether player-activated or autocasting) drop tech
-
-**Drop chance:** base rate is low. Physical balance increases drop chance slightly. Even at maximum Physical investment, bounty should feel like a bonus, not a plan.
-
-**Drop size:** small. One or two gold or one tech point per drop. Value comes from frequency over a long wave.
-
----
-
-## Damage and Resistance System
-
-### Damage Types
-
-There are six damage types split into two groups.
-
-**Standard damage types** interact with the resistance and amplification system:
-
-| Damage Type | Reduced By | Amplified By | Balance Pool |
-|---|---|---|---|
-| Elemental | Fortitude | Spirit | Income |
-| Arcane | Resilience | Potential | Research |
-| Physical | Armor | Vigor | Drop Chance |
-
-**Bypass damage types** ignore standard resistances and can only be reduced by specific buffs:
-
-| Damage Type | Notes |
-|---|---|
-| Poison | Bypass. Resistable only by dedicated buffs. |
-| Pure | Bypass. Resistable only by dedicated buffs. |
-| Piercing | Bypass. Resistable only by dedicated buffs. |
-
-### Resistance Stats
-
-**Fortitude** reduces Elemental damage taken.
-**Resilience** reduces Arcane damage taken.
-**Armor** reduces Physical damage taken.
-
-### Amplification Stats
-
-**Spirit** increases Elemental damage dealt.
-**Potential** increases Arcane damage dealt.
-**Vigor** increases Physical damage dealt.
+**Next Level routing:** If the next level has modifier columns, routes through ModifierSelectScene first.
 
 ---
 
 ## Balance System
 
-### Concept
+Each tower has a **balanceType**: Physical, Arcane, or Elemental.
 
-Each tower contributes Balance score every round. Balance flows into pools determined by the tower's damage type. The system rewards tower variety and penalizes stacking identical types, while leveling increases each tower's individual output value.
+**Score calculation:**
+- Each type scores based on tower counts with quadratic decay above 4 of any single tower ID
+- `count ≤ 4` = full contribution; `count > 4` = `(4/count)²` penalty
+- Encourages spreading across tower types AND across different tower IDs within a type
 
-### Balance Output Formula
+**Tower slot thresholds (cumulative score):**
 
-    Output = Level Value × Type Ratio
+| Total Balance | Max Towers |
+|--------------|------------|
+| 0            | 8          |
+| 12           | 12         |
+| 36           | 16         |
+| 80           | 20         |
 
-Each tower's individual contribution is `1 × ratio`, where ratio depends on how many towers of the same definition ID exist. The cumulative Balance for a type displayed in the HUD is the sum of all individual tower contributions.
-
-**Level Value** doubles each level:
-
-| Level | Value |
-|---|---|
-| L1 | 1 |
-| L2 | 2 |
-| L3 | 4 |
-| L4 | 8 |
-| L5 | 16 |
-
-**Type Ratio** is based on how many towers of the same definition ID are placed. All levels of a type share one count:
-
-| Count of same ID | Ratio |
-|---|---|
-| 1 to 4 | 1.00 (100%) |
-| 5 | 0.64 |
-| 6 | 0.44 |
-| 8 | 0.25 |
-| 10 | 0.16 |
-
-The formula for count > 4 is `(4 / count)²`.
-
-### Grouping Rules
-
-- Uniqueness is per tower definition ID, not per tier or damage type.
-- All levels of a tower type share one count. A Basic Tower L1 and a Basic Tower L4 are both counted as Basic Tower.
-- A T1 Physical tower and a T2 Physical tower are different types and tracked independently.
-- 4x Basic Tower at any level mix plus 4x Sniper Tower at any level mix means both types sit at 100%.
-
-### Why Leveling Matters
-
-Leveling does not widen Balance diversity but dramatically increases output at the same percentage. Four L4 Basic Towers at 100% contribute 32 Balance. Four L1 Basic Towers contribute 4. A fifth Basic Tower at any level reduces the percentage for all of them, making the high level multiplier suddenly costly.
-
-### Balance Pools
-
-**Elemental Balance feeds Income**
-Increases orb spawn rate on income towers. More Elemental investment means more frequent collection opportunities.
-
-**Arcane Balance feeds Research**
-Generates tech points used to unlock tower batches. See Tower Tiers and Research.
-
-**Physical Balance feeds Drop Chance**
-Slightly increases the chance that kills drop gold or tech. Never the primary source of either, just a meaningful combat bonus for players who invest in Physical towers.
+**HUD display:** `currentScore / nextThreshold` (shows "max" when at cap)
 
 ---
 
-## Tower Tiers and Research
+## Tech & Tier System
 
-### Tier Structure
+**Tech** is generated by Research Towers. Spending tech unlocks upgrade tiers globally.
 
-| Tier | Towers per damage type | Total unique types |
-|---|---|---|
-| T1 | 1 | 3 |
-| T2 | 2 | 6 |
+| Tier | Unlock Cost | Prerequisite |
+|------|------------|--------------|
+| T2   | 15 tech    | —            |
+| T3   | 30 tech    | T2           |
+| T4   | 70 tech    | T3           |
+| T5   | 150 tech   | T4           |
 
-T1 towers are available from the start. Higher tiers are unlocked by spending tech earned from ability kills and Arcane Balance.
+**Tower upgrade cost formula:** `resourceCost × (2^tier - 1)` cumulative  
+**Research Tower orb values:**
+- Catch mid-air = 2 tech
+- Let it arrive = 1 tech
+- Spawn interval reduced by Arcane balance (min 4 sec, base 12 sec)
 
-### Unlocking
-
-T2 unlocks are organized into 3 batches, one per damage type, unlockable in any order with no prerequisites. Unlocking a batch makes all towers in it immediately buildable.
-
-### Tower Levels
-
-Any placed tower can be leveled up. Leveling increases Balance output value (doubling each level) and combat effectiveness. All levels of the same tower type share one Balance group count.
-
----
-
-## Ability System
-
-### Overview
-
-Towers have two categories of abilities:
-
-**Autocasting and passive abilities** fire automatically or apply constant effects. The player does not interact with them directly. The basic attack missile is an example. Kills from autocasting abilities still count as ability kills for tech drop purposes.
-
-**Player-activated abilities** appear on the ability bar and require the player to trigger them manually.
-
-### Ability Bar
-
-A persistent UI bar showing the player's available activated abilities during a wave. Each ability on the bar comes from a tower type the player has placed. Building a Sniper Tower adds its snipe ability to the bar.
-
-**Charges** equal the number of towers of that type that are currently ready (not on cooldown). 4 Sniper Towers means up to 4 snipe charges. If 2 are on cooldown, 2 charges are available. The bar is a live dashboard of combat readiness.
-
-### Casting
-
-1. Player presses an ability on the bar.
-2. Game enters targeting mode. Only valid targets within range of at least one ready tower of that type are selectable. Out of range targets cannot be clicked.
-3. Player clicks a valid target.
-4. The closest ready tower of that type with the target in range fires the ability.
-5. That specific tower goes on cooldown. Other towers of the same type keep their charges.
-
-If a tower is selected when the player activates an ability, that specific tower fires instead of the closest one, provided it has the target in range and is not on cooldown.
-
-### Tower Placement and Ability Coverage
-
-A tower can only contribute its ability to a target it has range on. Four Sniper Towers in the back of the map cannot snipe targets near the entrance. Tower placement determines not just autocast coverage but ability reach, making positioning a deeper decision.
+**Per-level overrides:** Levels can set `startTech` and `startTier` to begin with unlocked tiers.
 
 ---
 
-## Kill Economy Summary
+## Towers
 
-| Kill type | Drop | Physical balance effect |
-|---|---|---|
-| Normal kill (basic attack) | Chance to drop gold | Increases drop chance |
-| Ability kill (any ability) | Chance to drop tech | Increases drop chance |
+### Tier 1 — Always Available
+
+| Tower | Type | Cost | Notes |
+|-------|------|------|-------|
+| Basic Tower | Physical | 3 | Standard ranged DPS, upgrades T1→T5 |
+| Slow Tower | Elemental | 3 | 60% slow for 2 sec |
+| Shotgun Tower | Arcane | 5 | Cone spray, fast pellets |
+| Poison Tower | Elemental | 6 | DoT splash on impact |
+| Income Tower | Elemental | 5 | PvZ-style orbs (Fibonacci payout: 1/3/5/8 gold), orb slots scale with tier |
+| Research Tower | Arcane | 6 | Generates tech orbs, interval scales with Arcane balance |
+
+### Tier 2
+
+| Tower | Type | Cost | Notes |
+|-------|------|------|-------|
+| Chain Tower | Arcane | 6 | Chains to 4 enemies |
+| Boomerang Tower | Physical | 5 | Arc sweep, returns |
+| Bee Tower | Physical | 6 | 4 drones (animated), 6 dmg / 0.8 sec, `maxAwayTime` 6 sec, `restDuration` 1 sec |
+| Root Tower | Elemental | 7 | Roots 1 sec, won't retarget rooted |
+| Entropy Tower | Arcane | 8 | +4% dmg per kill stack, max 50 stacks (StackOnKill component) |
+| Speed Aura | Arcane | 7 | +30% attack speed to nearby towers (T1 only, no upgrades) |
+| Damage Aura | Physical | 7 | +30% damage to nearby towers (T1 only, no upgrades) |
+| Sniper Tower | Physical | 8 | Unlimited range, hitscan to furthest enemy in repositionable zone |
+| Laser Tower | Arcane | 7 | Continuous beam, damage ramps 5x over 4 sec |
+| Mortar Tower | Physical | 7 | Arcs to last-known position, massive AoE, 4 sec cooldown |
+| Siphon Tower | Elemental | 4 | Drains enemy HP → gold (T1 only) |
+
+### Tier 3
+
+| Tower | Type | Cost | Notes |
+|-------|------|------|-------|
+| Collector Tower | Elemental | 7 | Grabs income orbs + bounty drops, prioritizes full towers (T1 only) |
+| Railgun Tower | Physical | 9 | Piercing beam across full map (range 22), hits all enemies in path |
+
+**Balance distribution:** Physical ~6, Elemental ~6, Arcane ~11
 
 ---
 
 ## Enemies
 
-Enemies follow a Catmull-Rom spline path between PathNodes. At junctions the path branches and a random edge is chosen. At the terminus the enemy deals a death blow to player lives and is destroyed.
-
-| ID | Life | Speed | Defense | Bounty | Death Blow |
-|---|---|---|---|---|---|
-| basic_enemy | 100 | 3.0 | 0 | 10 | 1 |
-| fast_enemy | 50 | 6.0 | 0 | 15 | 1 |
-| armored_enemy | 200 | 1.5 | 20 | 25 | 1 |
-| boss_enemy | 1000 | 1.0 | 30 | 150 | 3 |
-
----
-
-## Technical Architecture
-
-### Data-Driven Design
-
-All gameplay objects are defined in JSON and built entirely in code. No prefabs.
-
-| Definition file | Controls |
-|---|---|
-| units.json | Enemy stats, sprite, collider, scale |
-| towers.json | Tower cost, sprite, components, ability reference |
-| abilities.json | Cooldown, range, effect reference |
-| effects.json | Effect type, damage values, missile config, cross-references |
-
-### Ability and Effect System
-
-Abilities reference effects by string ID. Effects reference other effects by string ID. All cross-references are resolved at runtime by EffectLibrary and AbilityLibrary. No ScriptableObject direct references are serialized.
-
-**Effect types implemented:**
-- `damage` — applies damage with crit, min/max clamping, and damage type
-- `launch_missile` — spawns a homing ProjectileUnit, applies impactEffect on hit; supports custom color tint
-- `search_area` — area-of-effect search with arc and max target filtering; used for chain lightning bounces
-- `set` — executes a list of effects in sequence on the same context
-- `launch_boomerang` — fires a projectile in a full 360° arc; pierces and multi-hits; clears hit list at 180° to allow re-hits on the return leg
-
-### Tower Info Panel
-
-Clicking a placed tower opens a panel showing:
-- **Name** — tower display name
-- **Balance** — balance type initial + individual contribution: `P  1 (0.85)` (value = 1, ratio in parens)
-- **Damage** — base damage per hit resolved from the effect chain
-- **Fire Rate** — shots per second
-- **Kills** — lifetime kill count for that specific tower instance
-
-### HUD Header Balance Bar
-
-A second row in the top bar shows cumulative Balance per type:
-- `E  {sum}` `A  {sum}` `P  {sum}`
-- Each value is the sum of all non-ghost tower contributions for that type: `count × ratio`
-- Ghost preview towers are excluded from all counts
-
-### Path System
-
-Paths are directed graphs of PathNode MonoBehaviours. PathGraph walks the graph and samples a Catmull-Rom spline between nodes. RouteFollower moves enemies along the pre-built waypoint list and exposes a Progress value (0 to 1) for tower targeting.
-
-### Tower Targeting
-
-Turrets detect enemies via a trigger CircleCollider2D sized to the ability range. Every frame the turret picks the enemy with the highest RouteFollower.Progress (closest to the exit) and fires at them. Target is re-evaluated every frame.
+| Enemy | HP | Speed | Armor | Bounty | Special |
+|-------|----|-------|-------|--------|---------|
+| Basic | 65 | 1.75 | 0 | 10 | — |
+| Fast | 28 | 2.25 | 0 | 15 | Thin, quick |
+| Armored | 220 | 0.6 | 55 | 25 | Armor reduces Physical dmg; use Arcane/Piercing |
+| Boss | 900 | 0.35 | 20 | 150 | 3x deathblow |
+| Resilient | 80 | 1.5 | 0 | — | First hit: clears debuffs + 3x speed for 1.5 sec |
+| Splitter | 120 | 1.0 | 0 | — | Splits into 4 mini-units on death |
+| Splitter Mini | 20 | 1.8 | 0 | 5 | Spawned by Splitter |
+| Phantom | 70 | 2.1 | 0 | — | Immune to slows and roots |
+| Charger | 90 | 1.6 | 0 | — | Nearby Charger death = permanent speed boost |
+| Priest | 55 | 1.3 | 0 | — | Periodically cleanses allies (range 3.5, 3 sec CD) |
+| Shielder | 110 | 1.1 | 5 | — | Grants 40 HP shields to self + allies (range 3.5, 8 sec CD) |
 
 ---
 
-## Open Questions
+## Levels & Modifiers
 
-- Balance ratio curve is `(4/count)²` — may need tuning as more tower types are added
-- Tower level cap
-- How tech accumulates and exact Research costs per tier batch
-- Ability bar slot limit, whether building too many tower types forces the player to choose
-- Whether autocasting ability kills count the same as player-activated ability kills for tech drops (current assumption: yes)
-- Lives system and lose condition
-- Win condition and campaign structure
-- Wave structure beyond the demo wave
-- Whether bypass damage types have any counter-play beyond dedicated buffs
-- T3 and beyond: tier count, batch structure
+### Level 1 — The Valley
+- Gold: 50 | Lives: 20 | Tech: 0 | Start Tier: 1
+- Towers: T1 only (Basic, Slow, Shotgun, Poison, Income, Research)
+- 1 path, 8 placement zones
+- 5 waves: 5→8→12→15→14 enemies, mixed basic/fast
+
+### Level 2 — Level Two
+- Gold: 60 | Lives: 20 | Tech: 0 | Start Tier: 1
+- **1 modifier column:** +25 Gold OR +10 Tech
+- Towers: T1-2 (no Auras, Collector, Railgun, Laser, Sniper, Mortar, Entropy)
+- 1 forking path (2 branches), 4 placement zones
+- 5 waves, ends with boss
+
+### Level 3 — The Tree Line
+- Gold: 125 | Lives: 100 | Tech: 50 | Start Tier: 2
+- **3 modifier columns:**
+  - C1: +10 Gold OR +10 Research
+  - C2: +10 Lives OR Full Refunds (100% sell value)
+  - C3: Swift Towers (+15% fire rate) OR Far Sight (+20% range) OR Heavy Shots (+20% damage)
+- All 23 towers available
+- 3 parallel paths, 3 spawners, 12 placement zones
+- 3 waves with staggered multi-spawner patterns
+
+### Modifier Types (Implemented)
+
+| effectType | Effect |
+|------------|--------|
+| StartingGold | +N gold before wave 1 |
+| StartingLives | +N lives |
+| StartingTech | +N tech |
+| TowerSpeedMult | All towers fire N% faster |
+| TowerRangeMult | All towers +N% range |
+| TowerDamageMult | All towers +N% damage |
+| FullRefund | Sell towers for 100% instead of 75% |
+
+---
+
+## Abilities & Effects
+
+Defined in `abilities.json`. Each tower's `fireAbilityId` points to an entry.
+
+| Ability | Cooldown | Range | Notes |
+|---------|----------|-------|-------|
+| basic_tower_shot | 1.24s | 3.5 | 60° arc |
+| shotgun_tower_shot | 2.8s | 5.5 | 60° arc, multi-pellet |
+| boomerang_shot | 2.2s | 3 | 90° arc, returns |
+| chain_lightning_shot | 2.5s | 4 | 360°, chains 4 targets |
+| poison_tower_shot | 2.5s | 3.5 | Won't retarget poisoned |
+| root_tower_shot | 2.0s | 2.5 | Won't retarget rooted |
+| entropy_tower_shot | 1.6s | 4 | 360° |
+| slow_tower_shot | 1.5s | 4 | 360° |
+| railgun_shot | 4.0s | 22 | 360°, full-map pierce |
+| mortar_shot | 4.0s | 7 | 360°, AoE on last position |
+| sniper_shot | 2.0s | 999 | 360°, furthest in zone |
+
+---
+
+## Status Effects / Behaviors
+
+| Behavior | Duration | Effect | Stack Rule |
+|----------|----------|--------|------------|
+| Rooted | 1 sec | 0% move speed | Refresh |
+| Slowed | 6.5 sec | 40% move speed | Refresh |
+| Poisoned | 4 sec | 4 dmg / 0.75 sec (Elemental) | Refresh |
+| phantom_immunity | Permanent | Immune to Slowed + Rooted | — |
+| charger_death_rage | Permanent | Speed boost on nearby Charger death | — |
+
+---
+
+## UI Systems
+
+**HUD Top Bar:** Gold | Wave counter | Lives
+
+**Balance Panel:** E / A / P scores with bonus/penalty indicators
+
+**Research Panel:** T2/T3/T4/T5 unlock buttons, costs shown, gated by prerequisites
+
+**Tower Info Panel (on select):**
+- Name, type, balance contribution
+- Damage, fire rate, kill count
+- Upgrade button (gated by tier unlock + gold)
+- Sell button (75% refund or 100% with FullRefund modifier)
+- Target priority selectors
+- Move Zone button (Sniper only)
+
+**Game Over / Victory Overlays:**
+- Victory: Play Again | Next Level | Main Menu
+- Loss: Restart | Main Menu
+
+**Bottom:** Start Wave button | Tower count / max towers (e.g. `5 / 12`)
+
+**Ghost tower preview:** Q/E = continuous rotation, placement preserves rotation angle
+
+---
+
+## Missing / TODO
+
+### High Priority
+- [ ] **Research upgrades** — only 2 defined (`basic_firerate_1`, `shotgun_bullets_1`), no UI integration to buy/apply them. Needs a research shop panel
+- [ ] **Pause button** — `Time.timeScale` exists but no UI button
+- [ ] **Audio** — no sound effects or music anywhere in the game
+- [ ] **More levels** — only 3 exist; no campaign progression gates or unlock system
+
+### Medium Priority
+- [ ] **Persistent progression** — no save system, level unlocks, or run history
+- [ ] **Difficulty modes** — no hard mode or dynamic wave scaling
+- [ ] **Aura buff visualization** — no indicator on towers currently being buffed by an aura
+- [ ] **Sell animation** — no visual feedback when a tower is sold/upgraded
+- [ ] **Balance tooltip** — no explanation of threshold mechanic for new players
+- [ ] **Tutorial / tooltips** — nothing guiding first-time players
+
+### Low Priority / Nice to Have
+- [ ] **More research upgrades** — each tower should have 2-3 per tier
+- [ ] **Enemy intro briefs** — warning when a new enemy type appears for the first time
+- [ ] **Wave cancel** — the 5-sec auto-start countdown can't be cancelled mid-count
+- [ ] **Stats / achievements** — kills, leaderboard, personal bests
+- [ ] **More modifier types** — enemy speed reduction, starting with a free tower, etc.
+- [ ] **More enemy types** — stun-immune, damage-reflection, splitting boss variants
+- [ ] **Tower synergy combos** — explicit bonuses for mixing specific tower pairs

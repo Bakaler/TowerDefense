@@ -19,7 +19,8 @@ public class TowerAura : MonoBehaviour, IFactoryInitializable
     private TowerInfo        _info;
     private const float      PULSE  = 0.5f;
     private float            _timer;
-    private readonly HashSet<TowerInfo> _inRange = new();
+    private readonly HashSet<TowerInfo>   _inRange     = new();
+    private readonly HashSet<UnitManager> _slowedUnits = new();
 
     [System.Serializable]
     class Data
@@ -55,34 +56,56 @@ public class TowerAura : MonoBehaviour, IFactoryInitializable
         if (_timer >= PULSE) { _timer = 0f; Pulse(); }
     }
 
-    void OnDestroy() => ClearAura();
-    void OnDisable() => ClearAura();
+    void OnDestroy() { ClearAura(); ClearSlow(); }
+    void OnDisable() { ClearAura(); ClearSlow(); }
     void OnEnable()  { foreach (var t in _inRange) if (t) ApplyTo(t); }
 
     void Pulse()
     {
-        float statMult    = _info != null ? _info.StatMultiplier : 1f;
-        float effectiveDmg = 1f + (damageMultiplier      - 1f) * statMult;
-        float effectiveSpd = 1f + (attackSpeedMultiplier - 1f) * statMult;
+        float statMult  = _info != null ? _info.StatMultiplier : 1f;
+        float auraMult  = 1f + ModifierSelection.GetFloat("AuraMult");
+        float effRange  = range * (1f + ModifierSelection.GetFloat("AuraRadiusMult"));
 
-        var hits    = Physics2D.OverlapCircleAll(transform.position, range);
-        var nowSet  = new HashSet<TowerInfo>();
+        float effectiveDmg = 1f + (damageMultiplier      - 1f) * statMult * auraMult;
+        float effectiveSpd = 1f + (attackSpeedMultiplier - 1f) * statMult * auraMult;
+
+        var hits    = Physics2D.OverlapCircleAll(transform.position, effRange);
+        var nowTowers = new HashSet<TowerInfo>();
+        var nowUnits  = new HashSet<UnitManager>();
+
+        float slowAmount = ModifierSelection.GetFloat("AuraSlowEnemies");
 
         foreach (var col in hits)
         {
             var t = col.GetComponent<TowerInfo>();
-            if (t == null || t == _info || t.isGhost) continue;
-            nowSet.Add(t);
+            if (t != null && t != _info && !t.isGhost) { nowTowers.Add(t); continue; }
+
+            if (slowAmount > 0f)
+            {
+                var u = col.GetComponent<UnitManager>();
+                if (u != null && u.isAlive) nowUnits.Add(u);
+            }
         }
 
         foreach (var t in _inRange)
-            if (!nowSet.Contains(t) && t) t.RemoveAura(this);
+            if (!nowTowers.Contains(t) && t) t.RemoveAura(this);
 
-        foreach (var t in nowSet)
+        foreach (var t in nowTowers)
             if (t) t.ApplyAura(this, effectiveDmg, effectiveSpd);
 
         _inRange.Clear();
-        foreach (var t in nowSet) _inRange.Add(t);
+        foreach (var t in nowTowers) _inRange.Add(t);
+
+        // Aura slow on enemies
+        if (slowAmount > 0f)
+        {
+            foreach (var u in _slowedUnits)
+                if (u != null && !nowUnits.Contains(u)) u.RemoveAuraSlow();
+            foreach (var u in nowUnits)
+                if (!_slowedUnits.Contains(u)) u.AddAuraSlow();
+            _slowedUnits.Clear();
+            foreach (var u in nowUnits) _slowedUnits.Add(u);
+        }
     }
 
     void ApplyTo(TowerInfo t)
@@ -98,6 +121,13 @@ public class TowerAura : MonoBehaviour, IFactoryInitializable
         foreach (var t in _inRange)
             if (t) t.RemoveAura(this);
         _inRange.Clear();
+    }
+
+    void ClearSlow()
+    {
+        foreach (var u in _slowedUnits)
+            if (u != null) u.RemoveAuraSlow();
+        _slowedUnits.Clear();
     }
 
     void BuildAuraRing()

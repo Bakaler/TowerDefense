@@ -13,11 +13,25 @@ public class AbilityManager : MonoBehaviour
 
     private TowerInfo _towerInfo;
 
-    void Awake() => _towerInfo = GetComponent<TowerInfo>();
+    void Awake() { }   // TowerInfo is added after AbilityManager by TowerFactory — resolve lazily
 
     private void Update()
     {
+        if (_towerInfo == null) _towerInfo = GetComponent<TowerInfo>();
+
         float speedMult = _towerInfo != null ? _towerInfo.AuraSpeedMultiplier : 1f;
+        if (_towerInfo != null)
+        {
+            switch (_towerInfo.balanceType)
+            {
+                case BalanceType.Arcane:
+                    speedMult *= 1f + ModifierSelection.GetFloat("ArcaneSpdMult");
+                    break;
+                case BalanceType.Elemental:
+                    speedMult *= 1f + ModifierSelection.GetFloat("ElementalSpdMult");
+                    break;
+            }
+        }
         Tick(Time.deltaTime * speedMult);
     }
 
@@ -56,6 +70,13 @@ public class AbilityManager : MonoBehaviour
         return true;
     }
 
+    private IEnumerator DelayedFire(Effect effect, EffectContext context, float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        if (context.Target != null && context.Target.isAlive)
+            EffectExecutor.ExecuteEffect(effect, context);
+    }
+
     private IEnumerator ExecuteAbilityCoroutine(Ability_Effect ability, EffectContext context)
     {
         isPreparing = true;
@@ -77,6 +98,11 @@ public class AbilityManager : MonoBehaviour
         {
             Debug.Log($"[AbilityManager] Firing effect '{ability.effect.name}' on '{context.Target?.name}'");
             EffectExecutor.ExecuteEffect(ability.effect, context);
+
+            // BasicDoubleTap: fire a second shot 0.15s later on basic_tower
+            if (_towerInfo != null && _towerInfo.definitionId == "basic_tower"
+                && ModifierSelection.HasEffect("BasicDoubleTap"))
+                StartCoroutine(DelayedFire(ability.effect, context, 0.15f));
         }
         else
         {

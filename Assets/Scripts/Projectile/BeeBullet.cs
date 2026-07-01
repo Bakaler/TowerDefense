@@ -56,9 +56,7 @@ public class BeeBullet : MonoBehaviour
             if (wasAlive && (unit.lifeCurrent <= 0f || !unit.isAlive))
             {
                 originTower?.GetComponent<TowerInfo>()?.RegisterKill();
-                float physical = BalanceManager.Instance != null ? BalanceManager.Instance.Physical : 0f;
-                if (Random.value <= 0.15f + physical * 0.0025f)
-                    BountyDrop.Spawn(unit.transform.position, 1);
+                BountyDrop.TrySpawn(unit.transform.position, unit as UnitManager);
             }
         }
 

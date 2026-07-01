@@ -24,12 +24,17 @@ public class WaveManager : MonoBehaviour
     public float AutoStartCountdown    { get; set; } = -1f;
     public bool  IsCountingDown        => AutoStartCountdown >= 0f;
 
+    // ── Per-wave modifier flags ───────────────────────────────────────
+    public static bool ForgiveNextLeak { get; set; }
+
     // ── Private ───────────────────────────────────────────────────────
-    private List<WaveDefinition> _waveDefs    = new();
-    private List<UnitSpawner>    _spawners    = new();
-    private List<UnitManager>    _aliveUnits  = new();
-    private LogicManager         _logic;
-    private int                  _activeSpawnGroups;
+    private List<WaveDefinition>  _waveDefs    = new();
+    private List<UnitSpawner>     _spawners    = new();
+    private List<UnitManager>     _aliveUnits  = new();
+    private LogicManager          _logic;
+    private ResourceManagerScript _resources;
+    private int                   _activeSpawnGroups;
+    private bool                  _waveSchedulingDone;
 
     // ── Lifecycle ─────────────────────────────────────────────────────
 
@@ -39,7 +44,11 @@ public class WaveManager : MonoBehaviour
         Instance = this;
     }
 
-    void Start() => _logic = FindFirstObjectByType<LogicManager>();
+    void Start()
+    {
+        _logic     = FindFirstObjectByType<LogicManager>();
+        _resources = FindFirstObjectByType<ResourceManagerScript>();
+    }
 
     void Update()
     {
@@ -69,9 +78,11 @@ public class WaveManager : MonoBehaviour
     {
         if (!CanStartWave) return;
         CurrentWave++;
-        IsWaveActive       = true;
-        _activeSpawnGroups = 0;
-        StartCoroutine(RunWave(_waveDefs[CurrentWave - 1]));
+        IsWaveActive          = true;
+        _activeSpawnGroups    = 0;
+        _waveSchedulingDone   = false;
+        var def               = _waveDefs[CurrentWave - 1];
+        StartCoroutine(RunWave(def));
         Debug.Log($"[WaveManager] Wave {CurrentWave}/{TotalWaves} started.");
     }
 
@@ -103,6 +114,7 @@ public class WaveManager : MonoBehaviour
                 elapsed += Time.deltaTime;
             }
         }
+        _waveSchedulingDone = true;
     }
 
     IEnumerator SpawnGroupTracked(UnitSpawner spawner, WaveEntry entry, int waveNumber)
@@ -121,6 +133,7 @@ public class WaveManager : MonoBehaviour
 
     void CheckWaveClear()
     {
+        if (!_waveSchedulingDone) return;
         _aliveUnits.RemoveAll(u => u == null || !u.isAlive);
         if (_activeSpawnGroups <= 0 && _aliveUnits.Count == 0)
             OnWaveClear();
@@ -130,6 +143,18 @@ public class WaveManager : MonoBehaviour
     {
         IsWaveActive = false;
         Debug.Log($"[WaveManager] Wave {CurrentWave} cleared.");
+
+        ObjectiveTracker.NotifyWaveReached(CurrentWave);
+
+        // Per-wave modifier effects
+        float goldPerWave  = ModifierSelection.GetFloat("GoldPerWave");
+        float livesDrain   = ModifierSelection.GetFloat("LivesDrainPerWave");
+        if (goldPerWave > 0f)  _resources?.ChangeResourceOne((int)goldPerWave);
+        if (livesDrain  > 0f)  _logic?.UpdateLives(-livesDrain);
+
+        // Reset forgive flag for next wave
+        ForgiveNextLeak = ModifierSelection.HasEffect("ForgiveFirstLeak");
+
         if (CurrentWave >= TotalWaves) Victory();
         else AutoStartCountdown = AutoStartDelay;
     }
@@ -165,11 +190,13 @@ public class WaveManager : MonoBehaviour
         if (spawners != null)
             foreach (var s in spawners) if (s != null) _spawners.Add(s);
 
-        CurrentWave        = 0;
-        IsWaveActive       = false;
-        IsVictory          = false;
-        IsGameOver         = false;
-        AutoStartCountdown = -1f;
+        CurrentWave           = 0;
+        IsWaveActive          = false;
+        IsVictory             = false;
+        IsGameOver            = false;
+        AutoStartCountdown    = -1f;
+        ForgiveNextLeak       = false;
+        _waveSchedulingDone   = false;
 
         _waveDefs  = waveDefs != null ? new List<WaveDefinition>(waveDefs) : new();
         TotalWaves = _waveDefs.Count;

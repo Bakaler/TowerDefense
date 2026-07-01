@@ -52,7 +52,7 @@ public class Effect_Launch_Shotgun : Effect
 
         Vector2 toTarget = (context.Target.transform.position - spawnTransform.position).normalized;
 
-        int   count = Mathf.Max(1, pelletCount);
+        int   count = Mathf.Max(1, pelletCount + (int)ModifierSelection.GetFloat("BonusShotgunBullets"));
         float half  = spreadAngle * 0.5f;
 
         for (int i = 0; i < count; i++)

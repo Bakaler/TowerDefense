@@ -10,13 +10,16 @@ using UnityEngine;
 [Serializable]
 public class WaveEntry
 {
-    public string unitDefinitionId = "basic_enemy";
-    public int    count            = 5;
-    public float  spawnInterval    = 1.0f;
-    public float  startTime        = 0f;
+    public string     unitDefinitionId = "basic_enemy";
+    public int        count            = 5;
+    public float      spawnInterval    = 1.0f;
+    public float      startTime        = 0f;
 
     [Tooltip("-1 = all spawners, 0/1/2 = specific spawner by pathIndex")]
-    public int spawnerIndex = 0;
+    public int        spawnerIndex = 0;
+
+    /// <summary>Controls when kills from this spawn group produce a BountyDrop.</summary>
+    public DropConfig dropConfig = new DropConfig();
 
     // ── Computed helpers ──────────────────────────────────────────────
     public float EndTime  => count <= 1 ? startTime : startTime + (count - 1) * spawnInterval;
@@ -45,7 +48,7 @@ public class UnitSpawner : MonoBehaviour
     {
         for (int i = 0; i < entry.count; i++)
         {
-            SpawnUnit(entry, waveNumber);
+            SpawnUnit(entry, waveNumber, i);
             if (i < entry.count - 1)
                 yield return new WaitForSeconds(entry.spawnInterval);
         }
@@ -53,7 +56,7 @@ public class UnitSpawner : MonoBehaviour
 
     // ── Internal ──────────────────────────────────────────────────────
 
-    void SpawnUnit(WaveEntry entry, int waveNumber)
+    void SpawnUnit(WaveEntry entry, int waveNumber, int spawnIndex)
     {
         if (UnitFactory.Instance == null) return;
 
@@ -69,17 +72,22 @@ public class UnitSpawner : MonoBehaviour
         }
 
         var unit = unitGO.GetComponent<UnitManager>();
-        if (unit != null && PathGraph.Instance != null)
-        {
-            var head = headNode ?? GetNearestHead();
-            if (head != null)
-                unit.AssignRoute(PathGraph.Instance.BuildRoute(head));
-            else
-                Debug.LogWarning("[UnitSpawner] No head PathNode — unit will not move.");
-        }
-
         if (unit != null)
+        {
+            unit.SpawnDropConfig = entry.dropConfig ?? new DropConfig();
+            unit.SpawnIndex      = spawnIndex;
+
+            if (PathGraph.Instance != null)
+            {
+                var head = headNode ?? GetNearestHead();
+                if (head != null)
+                    unit.AssignRoute(PathGraph.Instance.BuildRoute(head));
+                else
+                    Debug.LogWarning("[UnitSpawner] No head PathNode — unit will not move.");
+            }
+
             WaveManager.Instance?.RegisterUnit(unit);
+        }
     }
 
     PathNode GetNearestHead()

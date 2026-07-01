@@ -26,5 +26,5 @@ MonoBehaviour:
   maximumDamage: 50
   damageType: 0
   shieldBonus: 0
-  criticalChance: 0.1
+  criticalChance: 0
   criticalDamageMultiplier: 2

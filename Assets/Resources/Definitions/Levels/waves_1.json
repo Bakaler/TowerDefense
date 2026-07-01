@@ -1,33 +1,165 @@
 {
-  "waves": [
-    {
-      "groups": [
-        { "unitDefinitionId": "basic_enemy", "count": 5, "spawnInterval": 1.0, "startTime": 0.0, "spawnerIndex": 0 }
-      ]
-    },
-    {
-      "groups": [
-        { "unitDefinitionId": "basic_enemy", "count": 8, "spawnInterval": 0.9, "startTime": 0.0, "spawnerIndex": 0 }
-      ]
-    },
-    {
-      "groups": [
-        { "unitDefinitionId": "basic_enemy", "count": 8, "spawnInterval": 0.8, "startTime": 0.0, "spawnerIndex": 0 },
-        { "unitDefinitionId": "fast_enemy",  "count": 4, "spawnInterval": 0.6, "startTime": 8.1, "spawnerIndex": 0 }
-      ]
-    },
-    {
-      "groups": [
-        { "unitDefinitionId": "basic_enemy", "count": 10, "spawnInterval": 0.7, "startTime": 0.0, "spawnerIndex": 0 },
-        { "unitDefinitionId": "fast_enemy",  "count": 5,  "spawnInterval": 0.5, "startTime": 8.8, "spawnerIndex": 0 }
-      ]
-    },
-    {
-      "groups": [
-        { "unitDefinitionId": "basic_enemy",   "count": 6, "spawnInterval": 0.65, "startTime": 0.0,  "spawnerIndex": 0 },
-        { "unitDefinitionId": "fast_enemy",    "count": 6, "spawnInterval": 0.45, "startTime": 5.75, "spawnerIndex": 0 },
-        { "unitDefinitionId": "armored_enemy", "count": 2, "spawnInterval": 1.8,  "startTime": 10.5, "spawnerIndex": 0 }
-      ]
-    }
-  ]
+    "waves": [
+        {
+            "groups": [
+                {
+                    "unitDefinitionId": "basic_enemy",
+                    "count": 3,
+                    "spawnInterval": 3.0,
+                    "startTime": 0.0,
+                    "spawnerIndex": 0,
+                    "dropConfig": {
+                        "mode": "always",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                }
+            ]
+        },
+        {
+            "groups": [
+                {
+                    "unitDefinitionId": "basic_enemy",
+                    "count": 6,
+                    "spawnInterval": 2.5,
+                    "startTime": 0.0,
+                    "spawnerIndex": 0,
+                    "dropConfig": {
+                        "mode": "pattern",
+                        "fallbackChance": -1.0,
+                        "pattern": [
+                            1,
+                            0
+                        ],
+                        "repeat": true
+                    }
+                }
+            ]
+        },
+        {
+            "groups": [
+                {
+                    "unitDefinitionId": "basic_enemy",
+                    "count": 9,
+                    "spawnInterval": 2.25,
+                    "startTime": 0.0,
+                    "spawnerIndex": 0,
+                    "dropConfig": {
+                        "mode": "pattern",
+                        "fallbackChance": -1.0,
+                        "pattern": [
+                            1,
+                            0,
+                            0
+                        ],
+                        "repeat": true
+                    }
+                }
+            ]
+        },
+        {
+            "groups": [
+                {
+                    "unitDefinitionId": "basic_enemy",
+                    "count": 10,
+                    "spawnInterval": 2.0,
+                    "startTime": 0.0,
+                    "spawnerIndex": 0,
+                    "dropConfig": {
+                        "mode": "always",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                }
+            ]
+        },
+        {
+            "groups": [
+                {
+                    "unitDefinitionId": "basic_enemy",
+                    "count": 10,
+                    "spawnInterval": 1.850000023841858,
+                    "startTime": 0.0,
+                    "spawnerIndex": 0,
+                    "dropConfig": {
+                        "mode": "always",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "fast_enemy",
+                    "count": 5,
+                    "spawnInterval": 3.1500000953674318,
+                    "startTime": 1.25,
+                    "spawnerIndex": 1,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                }
+            ]
+        },
+        {
+            "groups": [
+                {
+                    "unitDefinitionId": "basic_enemy",
+                    "count": 10,
+                    "spawnInterval": 1.7999999523162842,
+                    "startTime": 0.0,
+                    "spawnerIndex": 0,
+                    "dropConfig": {
+                        "mode": "always",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "fast_enemy",
+                    "count": 5,
+                    "spawnInterval": 3.5999999046325685,
+                    "startTime": 1.25,
+                    "spawnerIndex": 1,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "basic_enemy",
+                    "count": 3,
+                    "spawnInterval": 5.0,
+                    "startTime": 5.0,
+                    "spawnerIndex": 0,
+                    "dropConfig": {
+                        "mode": "always",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "fast_enemy",
+                    "count": 3,
+                    "spawnInterval": 6.0,
+                    "startTime": 5.0,
+                    "spawnerIndex": 0,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                }
+            ]
+        }
+    ]
 }

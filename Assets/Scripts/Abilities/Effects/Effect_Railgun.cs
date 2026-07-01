@@ -64,20 +64,12 @@ public class Effect_Railgun : Effect
             if (killed)
             {
                 towerInfo?.RegisterKill();
-                TrySpawnBounty(unit.transform.position);
+                BountyDrop.TrySpawn(unit.transform.position, unit as UnitManager);
             }
         }
 
         // Spawn fade visual — find actual end point at last hit or full range
         SpawnBeam(start, end);
-    }
-
-    static void TrySpawnBounty(Vector3 pos)
-    {
-        float physical = BalanceManager.Instance != null ? BalanceManager.Instance.Physical : 0f;
-        float chance   = 0.15f + physical * 0.0025f;
-        if (Random.value <= chance)
-            BountyDrop.Spawn(pos, 1);
     }
 
     void SpawnBeam(Vector2 start, Vector2 end)

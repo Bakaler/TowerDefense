@@ -57,6 +57,7 @@ public class ModifierSelectManager : MonoBehaviour
         float startX = -totalW * 0.5f + COL_W * 0.5f;
 
         _cardImages = new Image[columns.Length][];
+        _passImages = new Image[columns.Length];
 
         for (int ci = 0; ci < columns.Length; ci++)
         {
@@ -67,8 +68,27 @@ public class ModifierSelectManager : MonoBehaviour
             var colGO  = MakeRect($"Col{ci}", canvasGO, x, 0f, COL_W, COL_H);
             colGO.AddComponent<Image>().color = new Color(0.08f, 0.10f, 0.15f, 1f);
 
-            float slotH  = CARD_H + CARD_GAP;
-            float startY = (col.options.Length - 1) * slotH * 0.5f;
+            float slotH     = CARD_H + CARD_GAP;
+            int   totalCards = col.options.Length + 1; // +1 for Pass
+            float startY    = (totalCards - 1) * slotH * 0.5f;
+
+            // Pass card (default selected)
+            var passGO  = MakeRect("Pass", colGO, 0, startY, COL_W - 20f, CARD_H);
+            var passImg = passGO.AddComponent<Image>();
+            passImg.color      = COL_PASS_SEL;
+            _passImages[ci]    = passImg;
+            _picks[ci]         = null;  // Pass = no modifier
+
+            var passBtn = passGO.AddComponent<Button>();
+            passBtn.targetGraphic = passImg;
+            var passBtnCols = passBtn.colors;
+            passBtnCols.highlightedColor = COL_PASS_SEL + new Color(0.05f, 0.05f, 0.05f, 0f);
+            passBtnCols.pressedColor     = COL_PASS;
+            passBtnCols.normalColor      = Color.white;
+            passBtn.colors = passBtnCols;
+            AddText(MakeRect("Label", passGO, 0, 0, COL_W - 30f, CARD_H),
+                "PASS", new Color(0.70f, 0.85f, 0.80f, 1f), 20, bold: true, stretchToParent: true);
+            passBtn.onClick.AddListener(() => OnPass(colIdx));
 
             _cardImages[ci] = new Image[col.options.Length];
 
@@ -76,7 +96,7 @@ public class ModifierSelectManager : MonoBehaviour
             {
                 int       optIdx = oi;
                 ModifierDef opt  = col.options[oi];
-                float     y      = startY - oi * slotH;
+                float     y      = startY - (oi + 1) * slotH;
 
                 var cardGO  = MakeRect($"Opt{oi}", colGO, 0, y, COL_W - 20f, CARD_H);
                 var cardImg = cardGO.AddComponent<Image>();
@@ -88,7 +108,7 @@ public class ModifierSelectManager : MonoBehaviour
                 var btnCols = btn.colors;
                 btnCols.highlightedColor = new Color(0.22f, 0.28f, 0.42f, 1f);
                 btnCols.pressedColor     = new Color(0.08f, 0.10f, 0.16f, 1f);
-                btnCols.normalColor      = Color.white;  // tint multiplied with image color
+                btnCols.normalColor      = Color.white;
                 btn.colors = btnCols;
 
                 // Name
@@ -122,17 +142,33 @@ public class ModifierSelectManager : MonoBehaviour
 
     // All card images grouped by column for highlight management
     Image[][] _cardImages;
+    Image[]   _passImages;
 
     static readonly Color COL_DEFAULT  = new Color(0.14f, 0.17f, 0.26f, 1f);
     static readonly Color COL_SELECTED = new Color(0.15f, 0.50f, 0.25f, 1f);
+    static readonly Color COL_PASS     = new Color(0.22f, 0.22f, 0.30f, 1f);
+    static readonly Color COL_PASS_SEL = new Color(0.18f, 0.45f, 0.42f, 1f);
 
     void OnPick(int colIdx, int optIdx, ModifierDef mod)
     {
         _picks[colIdx] = mod;
 
-        // Reset all cards in column, highlight chosen one
+        if (_passImages != null && _passImages[colIdx] != null)
+            _passImages[colIdx].color = COL_PASS;
+
         for (int i = 0; i < _cardImages[colIdx].Length; i++)
             _cardImages[colIdx][i].color = i == optIdx ? COL_SELECTED : COL_DEFAULT;
+    }
+
+    void OnPass(int colIdx)
+    {
+        _picks[colIdx] = null;
+
+        if (_passImages != null && _passImages[colIdx] != null)
+            _passImages[colIdx].color = COL_PASS_SEL;
+
+        for (int i = 0; i < _cardImages[colIdx].Length; i++)
+            _cardImages[colIdx][i].color = COL_DEFAULT;
     }
 
     void OnConfirm()
