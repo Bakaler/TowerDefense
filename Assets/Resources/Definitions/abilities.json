@@ -120,7 +120,7 @@
             "effectId": "railgun_beam",
             "cooldownDuration": 4.0,
             "range": 22.0,
-            "fireArc": 360.0,
+            "fireArc": 10.0,
             "prepare_time": 0.0,
             "cast_start_time": 0.0,
             "cast_finish_time": 0.0,

@@ -1,8 +1,8 @@
 using UnityEngine;
 
 /// <summary>
-/// Attached to a child GO on a shielded unit. Intercepts non-piercing projectiles.
-/// Piercing projectiles (ShotgunPellet.piercing, ProjectileFollow.piercing) pass through.
+/// Attached to a child GO on a shielded unit. Intercepts projectiles whose definition
+/// has blockedByShields (projectiles.json); the shield absorbs def.shieldAbsorb damage.
 /// </summary>
 public class ShieldBubble : MonoBehaviour
 {

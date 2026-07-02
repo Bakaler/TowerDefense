@@ -296,10 +296,10 @@ public class HUDInfoPanel : MonoBehaviour
         _resT4Btn = btns[2]; _resT4Lbl = lbls[2];
         _resT5Btn = btns[3]; _resT5Lbl = lbls[3];
 
-        _resT2Btn.onClick.AddListener(() => { TechManager.Instance?.TryUnlockT2(); RefreshTierRes(); });
-        _resT3Btn.onClick.AddListener(() => { TechManager.Instance?.TryUnlockT3(); RefreshTierRes(); });
-        _resT4Btn.onClick.AddListener(() => { TechManager.Instance?.TryUnlockT4(); RefreshTierRes(); });
-        _resT5Btn.onClick.AddListener(() => { TechManager.Instance?.TryUnlockT5(); RefreshTierRes(); });
+        _resT2Btn.onClick.AddListener(() => { if (TechManager.Instance?.TryUnlockT2() == true) HUDTierSelector.Instance?.SyncWithShop(jumpToTier: 2); RefreshTierRes(); });
+        _resT3Btn.onClick.AddListener(() => { if (TechManager.Instance?.TryUnlockT3() == true) HUDTierSelector.Instance?.SyncWithShop(jumpToTier: 3); RefreshTierRes(); });
+        _resT4Btn.onClick.AddListener(() => { if (TechManager.Instance?.TryUnlockT4() == true) HUDTierSelector.Instance?.SyncWithShop(jumpToTier: 4); RefreshTierRes(); });
+        _resT5Btn.onClick.AddListener(() => { if (TechManager.Instance?.TryUnlockT5() == true) HUDTierSelector.Instance?.SyncWithShop(jumpToTier: 5); RefreshTierRes(); });
     }
 
     // ── Mode switching ─────────────────────────────────────────────────

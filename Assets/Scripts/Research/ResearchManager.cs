@@ -90,14 +90,14 @@ public class ResearchManager : MonoBehaviour
     {
         if (EffectLibrary.Instance == null) return;
         var effect = EffectLibrary.Instance.GetEffect(def.effectId);
-        if (effect is Effect_Launch_Shotgun shotgun)
+        if (effect is Effect_Launch launch)
         {
-            shotgun.pelletCount += Mathf.RoundToInt(def.effectValue);
-            Debug.Log($"[Research] BulletCountBonus: pelletCount → {shotgun.pelletCount}");
+            launch.count += Mathf.RoundToInt(def.effectValue);
+            Debug.Log($"[Research] BulletCountBonus: count → {launch.count}");
         }
         else
         {
-            Debug.LogWarning($"[ResearchManager] Effect '{def.effectId}' is not Effect_Launch_Shotgun.");
+            Debug.LogWarning($"[ResearchManager] Effect '{def.effectId}' is not Effect_Launch.");
         }
     }
 }

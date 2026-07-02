@@ -26,6 +26,7 @@ public class Effect_Search_Area : Effect
 
     // ── JSON-driven single area (populated by ApplyData) ─────────────
     private bool _searchFromTarget;
+    private bool _excludePrimaryTarget = true;
 
     public override void ApplyData(string dataJson, EffectLibrary library)
     {
@@ -34,7 +35,17 @@ public class Effect_Search_Area : Effect
         var d = JsonUtility.FromJson<SearchAreaData>(dataJson);
         if (d == null) return;
 
-        _searchFromTarget = d.searchFromTarget;
+        _searchFromTarget       = d.searchFromTarget;
+        _excludePrimaryTarget   = d.excludePrimaryTarget;
+        _visualSpritePath    = d.visualSpritePath;
+        _visualSpriteSheet   = d.visualSpriteSheet;
+        _visualSpriteIndex   = d.visualSpriteIndex;
+        _visualColor         = d.visualColor;
+        _visualWidth         = d.visualWidth;
+        _visualLength        = d.visualLength;
+        _visualFadeDuration  = d.visualFadeDuration;
+        _visualAnimFps          = d.visualAnimFps;
+        _visualRotationOffset   = d.visualRotationOffset;
 
         var effect = library.GetEffect(d.effectId);
         if (effect == null)
@@ -83,8 +94,7 @@ public class Effect_Search_Area : Effect
             Collider2D[] hits      = Physics2D.OverlapCircleAll(offsetOrigin, finalRadius);
             var          alreadyHit = new HashSet<UnitParentClass>();
 
-            // Exclude the current context target so the search doesn't re-hit them
-            if (context.Target != null)
+            if (_excludePrimaryTarget && context.Target != null)
                 alreadyHit.Add(context.Target);
 
             int targetsHit = 0;
@@ -117,17 +127,111 @@ public class Effect_Search_Area : Effect
                 area.effect.Execute(jumpCtx);
                 targetsHit++;
             }
+
+            if (!string.IsNullOrEmpty(_visualSpritePath) || !string.IsNullOrEmpty(_visualSpriteSheet))
+                SpawnVisual(offsetOrigin, forward2D, finalRadius, area.horizontalArc);
         }
+    }
+
+    // ── Optional beam/circle visual ──────────────────────────────────
+    private string   _visualSpritePath   = "";
+    private string   _visualSpriteSheet  = "";
+    private int      _visualSpriteIndex  = -1;
+    private Color    _visualColor        = Color.white;
+    private float    _visualWidth        = 0.18f;
+    private float    _visualLength       = 0f;
+    private float    _visualFadeDuration = 0.3f;
+    private float    _visualAnimFps           = 0f;
+    private float    _visualRotationOffset    = 0f;
+
+    void SpawnVisual(Vector2 origin, Vector2 forward, float radius, float arc)
+    {
+        Sprite[] allFrames = LoadVisualSheet();
+        if (allFrames == null || allFrames.Length == 0)
+        {
+            Debug.LogWarning($"[Effect_Search_Area] Visual sprite not found — path:'{_visualSpritePath}' sheet:'{_visualSpriteSheet}'");
+            return;
+        }
+
+        var go = new GameObject("[SearchAreaVisual]");
+        var sr = go.AddComponent<SpriteRenderer>();
+        sr.sprite           = allFrames[0];
+        sr.color            = _visualColor;
+        sr.sortingLayerName = "Units";
+        sr.sortingOrder     = 9;
+
+        // Natural world size of the sprite (accounts for pixelsPerUnit)
+        var   s0       = allFrames[0];
+        float naturalW = s0.rect.width  / s0.pixelsPerUnit;
+        float naturalH = s0.rect.height / s0.pixelsPerUnit;
+
+        if (arc < 30f)
+        {
+            // Beam: bottom edge at tower origin, extends along forward direction.
+            // Divide by natural size so localScale maps to exact world units.
+            float length = _visualLength > 0f ? _visualLength : radius;
+            float angle  = Mathf.Atan2(forward.y, forward.x) * Mathf.Rad2Deg - 90f + _visualRotationOffset;
+            go.transform.position   = (Vector3)(origin + forward.normalized * length * 0.5f);
+            go.transform.rotation   = Quaternion.Euler(0f, 0f, angle);
+            go.transform.localScale = new Vector3(_visualWidth / naturalW, length / naturalH, 1f);
+        }
+        else
+        {
+            // Circle: uniform scale so inscribed circle matches radius
+            float diameter = radius * 2f;
+            go.transform.position   = origin;
+            go.transform.localScale = new Vector3(diameter / naturalW, diameter / naturalH, 1f);
+        }
+
+        go.AddComponent<VisualFader>().Setup(_visualFadeDuration, allFrames, _visualAnimFps);
+    }
+
+    Sprite LoadVisualSprite()
+    {
+        if (!string.IsNullOrEmpty(_visualSpritePath))
+            return Resources.Load<Sprite>(_visualSpritePath);
+
+        if (!string.IsNullOrEmpty(_visualSpriteSheet) && _visualSpriteIndex >= 0)
+        {
+            var sheet = Resources.LoadAll<Sprite>(_visualSpriteSheet);
+            if (sheet != null && _visualSpriteIndex < sheet.Length)
+                return sheet[_visualSpriteIndex];
+        }
+
+        return null;
+    }
+
+    // Returns all frames from the sheet, or a single-element array for a path sprite.
+    Sprite[] LoadVisualSheet()
+    {
+        if (!string.IsNullOrEmpty(_visualSpriteSheet))
+        {
+            var sheet = Resources.LoadAll<Sprite>(_visualSpriteSheet);
+            if (sheet != null && sheet.Length > 0) return sheet;
+        }
+
+        var single = LoadVisualSprite();
+        return single != null ? new[] { single } : null;
     }
 
     [Serializable]
     class SearchAreaData
     {
-        public string effectId       = "";
-        public float  radius         = 4f;
-        public int    maxTargets     = -1;
-        public float  horizontalArc  = 360f;
-        public float  startingDepth  = 0f;
-        public bool   searchFromTarget = false;
+        public string effectId          = "";
+        public float  radius            = 4f;
+        public int    maxTargets        = -1;
+        public float  horizontalArc     = 360f;
+        public float  startingDepth     = 0f;
+        public bool   searchFromTarget      = false;
+        public bool   excludePrimaryTarget  = true;
+        public string visualSpritePath  = "";
+        public string visualSpriteSheet = "";
+        public int    visualSpriteIndex = -1;
+        public Color  visualColor        = new Color(1f, 1f, 1f, 1f);
+        public float  visualWidth        = 0.18f;
+        public float  visualLength       = 0f;
+        public float  visualFadeDuration = 0.3f;
+        public float  visualAnimFps           = 0f;
+        public float  visualRotationOffset    = 0f;
     }
 }

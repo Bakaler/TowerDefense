@@ -146,7 +146,7 @@ public class SceneGeneratorsWindow : EditorWindow
         // ── Title ─────────────────────────────────────────────────────
         var title    = MakeRect("Title", canvasGO, 0f, 160f, 900f, 160f);
         var titleTxt = title.AddComponent<UnityEngine.UI.Text>();
-        titleTxt.text      = "Another Tower Defense Game";
+        titleTxt.text      = "Zen TD";
         titleTxt.font      = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
         titleTxt.fontSize  = 96;
         titleTxt.fontStyle = FontStyle.Bold;
@@ -156,7 +156,7 @@ public class SceneGeneratorsWindow : EditorWindow
         // ── Subtitle ──────────────────────────────────────────────────
         var sub    = MakeRect("Subtitle", canvasGO, 0f, 60f, 600f, 50f);
         var subTxt = sub.AddComponent<UnityEngine.UI.Text>();
-        subTxt.text      = "Battle Between Two";
+        subTxt.text      = "Balance";
         subTxt.font      = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
         subTxt.fontSize  = 28;
         subTxt.alignment = TextAnchor.MiddleCenter;

@@ -32,31 +32,21 @@
         {
             "id": "boomerang_throw",
             "displayName": "Boomerang Throw",
-            "type": "launch_boomerang",
+            "type": "launch",
             "chance": 1.0,
             "data": {
-        "impactEffectId": "boomerang_impact",
-        "arcRadius": 1.0,
-        "sweepSpeed": 500.0,
-        "hitRadius": 0.45,
-        "boomerangScale": 1.35,
-        "boomerangSpritePath": "Art/Towers/Bullet2",
-        "boomerangColor": {"r": 1.0, "g": 1.0, "b": 1.0, "a": 1.0},
-        "spinSpeed": 720.0
+        "projectileId": "boomerang",
+        "impactEffectId": "boomerang_impact"
       }
         },
         {
             "id": "basic_shot",
             "displayName": "Basic Shot",
-            "type": "launch_missile",
+            "type": "launch",
             "chance": 1.0,
             "data": {
-        "impactEffectId": "basic_impact",
-        "missileSpeed": 10.0,
-        "missileScale": 1.0,
-        "missileLifetime": 7.0,
-        "missileSpritePath": "Art/Towers/T8Bullet",
-        "faceDirection": true
+        "projectileId": "basic_missile",
+        "impactEffectId": "basic_impact"
       }
         },
         {
@@ -76,17 +66,11 @@
         {
             "id": "chain_shot",
             "displayName": "Chain Shot",
-            "type": "launch_missile",
+            "type": "launch",
             "chance": 1.0,
             "data": {
-        "impactEffectId": "chain_impact",
-        "missileSpeed": 64.0,
-        "missileScale": 0.4,
-        "missileLifetime": 5.0,
-        "missileSpriteSheet": "Art/Towers/TowerSet1",
-        "missileSpriteIndex": 1,
-        "drawLine": true,
-        "missileColor": {"r": 0.2, "g": 0.6, "b": 1.0, "a": 1.0}
+        "projectileId": "chain_bolt",
+        "impactEffectId": "chain_impact"
       }
         },
         {
@@ -115,17 +99,11 @@
         {
             "id": "chain_bounce_1_missile",
             "displayName": "Chain Bounce 1",
-            "type": "launch_missile",
+            "type": "launch",
             "chance": 1.0,
             "data": {
-        "impactEffectId": "chain_bounce_1_impact",
-        "missileSpeed": 12.0,
-        "missileScale": 0.35,
-        "missileLifetime": 3.0,
-        "missileSpriteSheet": "Art/Towers/TowerSet1",
-        "missileSpriteIndex": 1,
-        "drawLine": true,
-        "missileColor": {"r": 0.2, "g": 0.6, "b": 1.0, "a": 1.0}
+        "projectileId": "chain_bounce_1_bolt",
+        "impactEffectId": "chain_bounce_1_impact"
       }
         },
         {
@@ -154,17 +132,11 @@
         {
             "id": "chain_bounce_2_missile",
             "displayName": "Chain Bounce 2",
-            "type": "launch_missile",
+            "type": "launch",
             "chance": 1.0,
             "data": {
-        "impactEffectId": "chain_damage",
-        "missileSpeed": 12.0,
-        "missileScale": 0.3,
-        "missileLifetime": 3.0,
-        "missileSpriteSheet": "Art/Towers/TowerSet1",
-        "missileSpriteIndex": 1,
-        "drawLine": true,
-        "missileColor": {"r": 0.2, "g": 0.6, "b": 1.0, "a": 1.0}
+        "projectileId": "chain_bounce_2_bolt",
+        "impactEffectId": "chain_damage"
       }
         },
         {
@@ -197,16 +169,11 @@
         {
             "id": "poison_missile",
             "displayName": "Poison Missile",
-            "type": "launch_missile",
+            "type": "launch",
             "chance": 1.0,
             "data": {
-        "impactEffectId": "poison_impact",
-        "missileSpeed": 7.0,
-        "missileScale": 0.55,
-        "missileLifetime": 6.0,
-        "missileSpriteSheet": "Art/Towers/TowerSet1",
-        "missileSpriteIndex": 1,
-        "missileColor": { "r": 0.4, "g": 1.0, "b": 0.3, "a": 1.0 }
+        "projectileId": "poison_bolt",
+        "impactEffectId": "poison_impact"
       }
         },
         {
@@ -240,17 +207,11 @@
         {
             "id": "slow_missile",
             "displayName": "Slow Missile",
-            "type": "launch_missile",
+            "type": "launch",
             "chance": 1.0,
             "data": {
-        "impactEffectId": "slow_impact_set",
-        "missileSpeed": 11.0,
-        "missileScale": 1.5,
-        "missileLifetime": 6.0,
-        "missileSpriteSheet": "Art/Towers/TowerSet1",
-        "missileSpriteIndex": 1,
-        "missileColor": { "r": 0.4, "g": 0.8, "b": 1.0, "a": 1.0 },
-        "faceDirection": true
+        "projectileId": "slow_bolt",
+        "impactEffectId": "slow_impact_set"
       }
         },
         {
@@ -277,16 +238,11 @@
         {
             "id": "root_missile",
             "displayName": "Root Missile",
-            "type": "launch_missile",
+            "type": "launch",
             "chance": 1.0,
             "data": {
-        "impactEffectId": "root_impact",
-        "missileSpeed": 9.0,
-        "missileScale": 0.5,
-        "missileLifetime": 6.0,
-        "missileSpriteSheet": "Art/Towers/TowerSet1",
-        "missileSpriteIndex": 1,
-        "missileColor": { "r": 0.65, "g": 0.2, "b": 0.9, "a": 1.0 }
+        "projectileId": "root_bolt",
+        "impactEffectId": "root_impact"
       }
         },
         {
@@ -306,16 +262,17 @@
         {
             "id": "shotgun_shot",
             "displayName": "Shotgun Shot",
-            "type": "launch_shotgun",
+            "type": "launch",
             "chance": 1.0,
             "data": {
+        "projectileId": "shotgun_pellet",
         "impactEffectId": "shotgun_pellet_impact",
-        "pelletCount": 10,
+        "count": 10,
         "spreadAngle": 70.0,
-        "missileSpeed": 22.0,
-        "missileScale": 1.25,
-        "missileLifetime": 0.15,
-        "missileSpritePath": "Art/Towers/Bullet7"
+        "speedJitter": 0.4,
+        "lifetimeJitter": 0.5,
+        "scaleJitter": 0.35,
+        "bonusCountKey": "BonusShotgunBullets"
       }
         },
         {
@@ -335,31 +292,45 @@
         {
             "id": "entropy_shot",
             "displayName": "Entropy Shot",
-            "type": "launch_missile",
+            "type": "launch",
             "chance": 1.0,
             "data": {
-        "impactEffectId": "entropy_impact",
-        "missileSpeed": 10.0,
-        "missileScale": 0.45,
-        "missileLifetime": 6.0,
-        "missileSpriteSheet": "Art/Towers/TowerSet1",
-        "missileSpriteIndex": 1,
-        "missileColor": { "r": 0.9, "g": 0.4, "b": 0.1, "a": 1.0 }
+        "projectileId": "entropy_bolt",
+        "impactEffectId": "entropy_impact"
       }
+        },
+        {
+            "id": "railgun_damage",
+            "displayName": "Railgun Damage",
+            "type": "damage",
+            "chance": 1.0,
+            "data": {
+                "damageBase": 90.0,
+                "damageType": 2,
+                "minimumDamage": 0.0,
+                "maximumDamage": 524287.0
+            }
         },
         {
             "id": "railgun_beam",
             "displayName": "Railgun Beam",
-            "type": "railgun",
+            "type": "search_area",
             "chance": 1.0,
             "data": {
-        "damageBase": 90.0,
-        "beamRange": 22.0,
-        "beamWidth": 0.18,
-        "beamFadeDuration": 0.3,
-        "damageType": 2,
-        "beamColor": { "r": 0.4, "g": 0.9, "b": 1.0, "a": 1.0 }
-      }
+                "effectId": "railgun_damage",
+                "radius": 22.0,
+                "maxTargets": -1,
+                "horizontalArc": 10.0,
+                "startingDepth": 0.0,
+                "excludePrimaryTarget": false,
+                "visualSpriteSheet": "Art/Effects/railgun_beam",
+                "visualColor": { "r": 1.0, "g": 1.0, "b": 1.0, "a": 0.85 },
+                "visualWidth": 0.3,
+                "visualLength": 35.0,
+                "visualFadeDuration": 0.3,
+                "visualAnimFps": 12.0,
+                "visualRotationOffset": 0.0
+            }
         },
         {
             "id": "charger_rage_buff",
@@ -399,17 +370,11 @@
         {
             "id": "mortar_shell",
             "displayName": "Mortar Shell",
-            "type": "launch_missile",
+            "type": "launch",
             "chance": 1.0,
             "data": {
-        "impactEffectId": "mortar_explosion",
-        "missileSpeed": 5.5,
-        "missileScale": 0.6,
-        "missileLifetime": 6.0,
-        "homing": false,
-        "arcFlight": true,
-        "piercing": false,
-        "missileColor": { "r": 0.9, "g": 0.6, "b": 0.2, "a": 1.0 }
+        "projectileId": "mortar_shell",
+        "impactEffectId": "mortar_explosion"
       }
         },
         {

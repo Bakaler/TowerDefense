@@ -6,13 +6,13 @@ using UnityEditor;
 using UnityEngine;
 
 /// <summary>
-/// Editor window for towers.json, abilities.json, and effects.json.
-/// Three-tab layout: list panel on left, detail form on right.
+/// Editor window for towers.json, abilities.json, effects.json, projectiles.json,
+/// units.json, and minions.json. Tab layout: list panel on left, detail form on right.
 /// </summary>
 public class TowerAbilityEditorWindow : EditorWindow
 {
     // ── Tabs ──────────────────────────────────────────────────────────────
-    enum Tab { Towers, Abilities, Effects }
+    enum Tab { Towers, Abilities, Effects, Projectiles, Units, Minions }
     Tab _tab;
 
     // ── Tower state ───────────────────────────────────────────────────────
@@ -28,6 +28,18 @@ public class TowerAbilityEditorWindow : EditorWindow
     readonly List<EffectDefinition> _effects = new();
     int _eIdx = -1;
 
+    // ── Projectile state ──────────────────────────────────────────────────
+    readonly List<ProjectileDefinition> _projectiles = new();
+    int _pIdx = -1;
+
+    // ── Unit state ────────────────────────────────────────────────────────
+    readonly List<UnitDefinition> _units = new();
+    int _uIdx = -1;
+
+    // ── Minion state ──────────────────────────────────────────────────────
+    readonly List<MinionDefinition> _minions = new();
+    int _mIdx = -1;
+
     // ── Scroll positions ──────────────────────────────────────────────────
     Vector2 _listScroll, _detailScroll;
 
@@ -40,10 +52,10 @@ public class TowerAbilityEditorWindow : EditorWindow
     static readonly string[] BalanceOptions  = { "Physical", "Elemental", "Arcane" };
     static readonly string[] EffectTypeOptions =
     {
-        "damage", "launch_missile", "launch_shotgun", "launch_boomerang",
-        "search_area", "set", "apply_behavior", "apply_permanent_speed_buff",
-        "railgun", "drain_life"
+        "damage", "launch", "search_area", "set", "apply_behavior",
+        "apply_permanent_speed_buff", "drain_life"
     };
+    static readonly string[] MovementOptions = { "straight", "homing", "arc", "orbit" };
 
     // ── Open ──────────────────────────────────────────────────────────────
 
@@ -65,6 +77,9 @@ public class TowerAbilityEditorWindow : EditorWindow
         LoadTowers();
         LoadAbilities();
         LoadEffects();
+        LoadProjectiles();
+        LoadUnits();
+        LoadMinions();
     }
 
     void LoadTowers()
@@ -101,6 +116,33 @@ public class TowerAbilityEditorWindow : EditorWindow
         if (col?.effects != null) _effects.AddRange(col.effects);
     }
 
+    void LoadProjectiles()
+    {
+        _projectiles.Clear(); _pIdx = -1;
+        string text = ReadFile("projectiles");
+        if (text == null) return;
+        var col = JsonUtility.FromJson<ProjectileDefinitionCollection>(text);
+        if (col?.projectiles != null) _projectiles.AddRange(col.projectiles);
+    }
+
+    void LoadUnits()
+    {
+        _units.Clear(); _uIdx = -1;
+        string text = ReadFile("units");
+        if (text == null) return;
+        var col = JsonUtility.FromJson<UnitDefinitionCollection>(Preprocess(text));
+        if (col?.units != null) _units.AddRange(col.units);
+    }
+
+    void LoadMinions()
+    {
+        _minions.Clear(); _mIdx = -1;
+        string text = ReadFile("minions");
+        if (text == null) return;
+        var col = JsonUtility.FromJson<MinionDefinitionCollection>(text);
+        if (col?.minions != null) _minions.AddRange(col.minions);
+    }
+
     // ── Saving ────────────────────────────────────────────────────────────
 
     void SaveTowers()
@@ -121,6 +163,24 @@ public class TowerAbilityEditorWindow : EditorWindow
     {
         var col = new EffectDefinitionCollection { effects = _effects.ToArray() };
         WriteFile("effects", Deprocess(JsonUtility.ToJson(col, true)));
+    }
+
+    void SaveProjectiles()
+    {
+        var col = new ProjectileDefinitionCollection { projectiles = _projectiles.ToArray() };
+        WriteFile("projectiles", JsonUtility.ToJson(col, true));
+    }
+
+    void SaveUnits()
+    {
+        var col = new UnitDefinitionCollection { units = _units.ToArray() };
+        WriteFile("units", Deprocess(JsonUtility.ToJson(col, true)));
+    }
+
+    void SaveMinions()
+    {
+        var col = new MinionDefinitionCollection { minions = _minions.ToArray() };
+        WriteFile("minions", JsonUtility.ToJson(col, true));
     }
 
     // ── File I/O ──────────────────────────────────────────────────────────
@@ -158,9 +218,12 @@ public class TowerAbilityEditorWindow : EditorWindow
     {
         EditorGUILayout.BeginHorizontal(EditorStyles.toolbar);
 
-        if (GUILayout.Toggle(_tab == Tab.Towers,    "Towers",    EditorStyles.toolbarButton, GUILayout.Width(70)))  _tab = Tab.Towers;
-        if (GUILayout.Toggle(_tab == Tab.Abilities, "Abilities", EditorStyles.toolbarButton, GUILayout.Width(70)))  _tab = Tab.Abilities;
-        if (GUILayout.Toggle(_tab == Tab.Effects,   "Effects",   EditorStyles.toolbarButton, GUILayout.Width(70)))  _tab = Tab.Effects;
+        if (GUILayout.Toggle(_tab == Tab.Towers,      "Towers",      EditorStyles.toolbarButton, GUILayout.Width(70)))  _tab = Tab.Towers;
+        if (GUILayout.Toggle(_tab == Tab.Abilities,   "Abilities",   EditorStyles.toolbarButton, GUILayout.Width(70)))  _tab = Tab.Abilities;
+        if (GUILayout.Toggle(_tab == Tab.Effects,     "Effects",     EditorStyles.toolbarButton, GUILayout.Width(70)))  _tab = Tab.Effects;
+        if (GUILayout.Toggle(_tab == Tab.Projectiles, "Projectiles", EditorStyles.toolbarButton, GUILayout.Width(80)))  _tab = Tab.Projectiles;
+        if (GUILayout.Toggle(_tab == Tab.Units,       "Units",       EditorStyles.toolbarButton, GUILayout.Width(70)))  _tab = Tab.Units;
+        if (GUILayout.Toggle(_tab == Tab.Minions,     "Minions",     EditorStyles.toolbarButton, GUILayout.Width(70)))  _tab = Tab.Minions;
 
         GUILayout.FlexibleSpace();
         if (GUILayout.Button("Reload", EditorStyles.toolbarButton, GUILayout.Width(60))) LoadAll();
@@ -177,9 +240,12 @@ public class TowerAbilityEditorWindow : EditorWindow
 
         switch (_tab)
         {
-            case Tab.Towers:    DrawTowerList();    break;
-            case Tab.Abilities: DrawAbilityList();  break;
-            case Tab.Effects:   DrawEffectList();   break;
+            case Tab.Towers:      DrawTowerList();      break;
+            case Tab.Abilities:   DrawAbilityList();    break;
+            case Tab.Effects:     DrawEffectList();     break;
+            case Tab.Projectiles: DrawProjectileList(); break;
+            case Tab.Units:       DrawUnitList();       break;
+            case Tab.Minions:     DrawMinionList();     break;
         }
 
         EditorGUILayout.EndScrollView();
@@ -239,6 +305,58 @@ public class TowerAbilityEditorWindow : EditorWindow
         }
     }
 
+    void DrawProjectileList()
+    {
+        for (int i = 0; i < _projectiles.Count; i++)
+        {
+            var p = _projectiles[i];
+            string name = string.IsNullOrEmpty(p.displayName) ? p.id : p.displayName;
+            string label = $"{name}\n<size=10><color=#aaa>{p.movement}</color></size>";
+
+            bool sel = _pIdx == i;
+            GUI.backgroundColor = sel ? new Color(0.3f, 0.55f, 1f) : Color.white;
+            var style = new GUIStyle(GUI.skin.button) { richText = true, alignment = TextAnchor.MiddleLeft, wordWrap = true, fixedHeight = 0 };
+            if (GUILayout.Button(label, style)) _pIdx = i;
+            GUI.backgroundColor = Color.white;
+        }
+        GUILayout.Space(4);
+        if (GUILayout.Button("+ Projectile"))
+        {
+            _projectiles.Add(new ProjectileDefinition { id = "new_projectile", displayName = "New Projectile" });
+            _pIdx = _projectiles.Count - 1;
+        }
+    }
+
+    void DrawUnitList()
+    {
+        for (int i = 0; i < _units.Count; i++)
+        {
+            string label = string.IsNullOrEmpty(_units[i].displayName) ? _units[i].id : _units[i].displayName;
+            ListItem(label, _uIdx == i, () => _uIdx = i);
+        }
+        GUILayout.Space(4);
+        if (GUILayout.Button("+ Unit"))
+        {
+            _units.Add(new UnitDefinition { id = "new_unit", displayName = "New Unit" });
+            _uIdx = _units.Count - 1;
+        }
+    }
+
+    void DrawMinionList()
+    {
+        for (int i = 0; i < _minions.Count; i++)
+        {
+            string label = string.IsNullOrEmpty(_minions[i].displayName) ? _minions[i].id : _minions[i].displayName;
+            ListItem(label, _mIdx == i, () => _mIdx = i);
+        }
+        GUILayout.Space(4);
+        if (GUILayout.Button("+ Minion"))
+        {
+            _minions.Add(new MinionDefinition { id = "new_minion", displayName = "New Minion" });
+            _mIdx = _minions.Count - 1;
+        }
+    }
+
     // ── Detail Panel ──────────────────────────────────────────────────────
 
     void DrawDetail()
@@ -248,9 +366,12 @@ public class TowerAbilityEditorWindow : EditorWindow
 
         switch (_tab)
         {
-            case Tab.Towers:    DrawTowerDetail();   break;
-            case Tab.Abilities: DrawAbilityDetail(); break;
-            case Tab.Effects:   DrawEffectDetail();  break;
+            case Tab.Towers:      DrawTowerDetail();      break;
+            case Tab.Abilities:   DrawAbilityDetail();    break;
+            case Tab.Effects:     DrawEffectDetail();     break;
+            case Tab.Projectiles: DrawProjectileDetail(); break;
+            case Tab.Units:       DrawUnitDetail();       break;
+            case Tab.Minions:     DrawMinionDetail();     break;
         }
 
         EditorGUILayout.EndScrollView();
@@ -408,6 +529,190 @@ public class TowerAbilityEditorWindow : EditorWindow
         SaveDeleteBar(SaveEffects, () => { _effects.RemoveAt(_eIdx); _eIdx = Mathf.Clamp(_eIdx - 1, 0, _effects.Count - 1); SaveEffects(); });
     }
 
+    // ── Projectile Detail ─────────────────────────────────────────────────
+
+    void DrawProjectileDetail()
+    {
+        if (_pIdx < 0 || _pIdx >= _projectiles.Count)
+        {
+            EmptyMsg("Select a projectile from the list, or click + Projectile.");
+            return;
+        }
+        var p = _projectiles[_pIdx];
+
+        DrawSpritePreview(ResolveProjectilePreview(p), p.color);
+
+        Section("Identity");
+        p.id          = TF("ID",           p.id);
+        p.displayName = TF("Display Name", p.displayName);
+        p.description = TA("Description",  p.description, 2);
+
+        Section("Movement");
+        p.movement      = Popup("Movement", p.movement, MovementOptions);
+        p.speed         = EF.FloatField("Speed",            p.speed);
+        p.lifetime      = EF.FloatField("Lifetime (s, 0=∞)", p.lifetime);
+        p.faceDirection = EF.Toggle(    "Face Direction",   p.faceDirection);
+
+        if (p.movement == "orbit")
+        {
+            Section("Orbit (boomerang)");
+            p.arcRadius  = EF.FloatField("Arc Radius",        p.arcRadius);
+            p.sweepSpeed = EF.FloatField("Sweep Speed (°/s)", p.sweepSpeed);
+            p.spinSpeed  = EF.FloatField("Spin Speed (°/s)",  p.spinSpeed);
+        }
+
+        Section("Hit Behavior");
+        p.hitRadius        = EF.FloatField("Hit Radius",         p.hitRadius);
+        p.pierce           = EF.Toggle(    "Pierce",             p.pierce);
+        p.blockedByShields = EF.Toggle(    "Blocked By Shields", p.blockedByShields);
+        if (p.blockedByShields)
+            p.shieldAbsorb = EF.FloatField("Shield Absorb Dmg",  p.shieldAbsorb);
+        p.drawImpactLine   = EF.Toggle(    "Draw Impact Line",   p.drawImpactLine);
+
+        Section("Visuals");
+        p.scale        = EF.FloatField("Scale",         p.scale);
+        p.spritePath   = TF("Sprite Path",   p.spritePath);
+        p.spriteSheet  = TF("Sprite Sheet",  p.spriteSheet);
+        p.spriteIndex  = EF.IntField(  "Sprite Index",  p.spriteIndex);
+        p.color        = EF.ColorField("Color",         p.color);
+        p.sortingLayer = TF("Sorting Layer", p.sortingLayer);
+        p.sortingOrder = EF.IntField(  "Sorting Order", p.sortingOrder);
+
+        SaveDeleteBar(SaveProjectiles, () => { _projectiles.RemoveAt(_pIdx); _pIdx = Mathf.Clamp(_pIdx - 1, 0, _projectiles.Count - 1); SaveProjectiles(); });
+    }
+
+    // ── Unit Detail ───────────────────────────────────────────────────────
+
+    void DrawUnitDetail()
+    {
+        if (_uIdx < 0 || _uIdx >= _units.Count)
+        {
+            EmptyMsg("Select a unit from the list, or click + Unit.");
+            return;
+        }
+        var u = _units[_uIdx];
+
+        DrawSpritePreview(ResolveUnitPreview(u), u.tintColor);
+
+        Section("Identity");
+        u.id          = TF("ID",           u.id);
+        u.displayName = TF("Display Name", u.displayName);
+        u.description = TA("Description",  u.description, 3);
+
+        Section("Stats");
+        u.life             = EF.FloatField("Life",              u.life);
+        u.speed            = EF.FloatField("Speed",             u.speed);
+        u.physicalDefense  = EF.IntField(  "Physical Defense",  u.physicalDefense);
+        u.elementalDefense = EF.IntField(  "Elemental Defense", u.elementalDefense);
+        u.arcanaDefense    = EF.IntField(  "Arcana Defense",    u.arcanaDefense);
+        u.bounty           = EF.IntField(  "Bounty (gold)",     u.bounty);
+        u.deathBlow        = EF.IntField(  "Death Blow (lives)", u.deathBlow);
+
+        Section("Physics");
+        u.colliderRadius = EF.FloatField("Collider Radius",       u.colliderRadius);
+        u.layer          = EF.IntField(  "Layer (0=auto Enemy)",  u.layer);
+
+        Section("Visuals");
+        u.spritePath  = TF("Sprite Path",   u.spritePath);
+        u.spriteSheet = TF("Sprite Sheet",  u.spriteSheet);
+        u.spriteIndex = EF.IntField(  "Sprite Index", u.spriteIndex);
+        u.scale       = EF.FloatField("Scale",        u.scale);
+        u.tintColor   = EF.ColorField("Tint Color",   u.tintColor);
+        u.debugColor  = EF.ColorField("Debug Color",  u.debugColor);
+
+        Section("Animation");
+        u.animSheet      = TF("Walk Sheet",  u.animSheet);
+        u.animFps        = EF.FloatField("Walk FPS",   u.animFps);
+        u.animDeathSheet = TF("Death Sheet", u.animDeathSheet);
+        u.animDeathFps   = EF.FloatField("Death FPS",  u.animDeathFps);
+
+        Section("Starting Behaviors");
+        EditorGUILayout.HelpBox("Behavior ids applied permanently at spawn (e.g. immunities).", MessageType.None);
+        var behaviors = new List<string>(u.startingBehaviors ?? Array.Empty<string>());
+        int removeBehavior = -1;
+        for (int i = 0; i < behaviors.Count; i++)
+        {
+            EditorGUILayout.BeginHorizontal();
+            behaviors[i] = EditorGUILayout.TextField(behaviors[i]);
+            GUI.backgroundColor = new Color(1f, 0.4f, 0.4f);
+            if (GUILayout.Button("✕", GUILayout.Width(24))) removeBehavior = i;
+            GUI.backgroundColor = Color.white;
+            EditorGUILayout.EndHorizontal();
+        }
+        if (removeBehavior >= 0) behaviors.RemoveAt(removeBehavior);
+        if (GUILayout.Button("+ Behavior")) behaviors.Add("");
+        u.startingBehaviors = behaviors.ToArray();
+
+        Section("Components");
+        if (u.components == null) u.components = Array.Empty<ComponentEntry>();
+        var comps = new List<ComponentEntry>(u.components);
+        int removeIdx = -1;
+        for (int i = 0; i < comps.Count; i++)
+        {
+            EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+            EditorGUILayout.BeginHorizontal();
+            GUILayout.Label($"Component {i}", EditorStyles.boldLabel);
+            GUILayout.FlexibleSpace();
+            GUI.backgroundColor = new Color(1f, 0.4f, 0.4f);
+            if (GUILayout.Button("✕", GUILayout.Width(24))) removeIdx = i;
+            GUI.backgroundColor = Color.white;
+            EditorGUILayout.EndHorizontal();
+            comps[i].key  = TF("Key",         comps[i].key ?? "");
+            comps[i].data = TA("Data (JSON)",  string.IsNullOrEmpty(comps[i].data) ? "{}" : comps[i].data, 4);
+            EditorGUILayout.EndVertical();
+            GUILayout.Space(2);
+        }
+        if (removeIdx >= 0) comps.RemoveAt(removeIdx);
+        if (GUILayout.Button("+ Component")) comps.Add(new ComponentEntry { key = "", data = "{}" });
+        u.components = comps.ToArray();
+
+        SaveDeleteBar(SaveUnits, () => { _units.RemoveAt(_uIdx); _uIdx = Mathf.Clamp(_uIdx - 1, 0, _units.Count - 1); SaveUnits(); });
+    }
+
+    // ── Minion Detail ─────────────────────────────────────────────────────
+
+    void DrawMinionDetail()
+    {
+        if (_mIdx < 0 || _mIdx >= _minions.Count)
+        {
+            EmptyMsg("Select a minion from the list, or click + Minion.");
+            return;
+        }
+        var m = _minions[_mIdx];
+
+        DrawSpritePreview(ResolveMinionPreview(m), m.tintColor);
+
+        Section("Identity");
+        m.id          = TF("ID",           m.id);
+        m.displayName = TF("Display Name", m.displayName);
+        m.description = TA("Description",  m.description, 2);
+
+        Section("Brain");
+        EditorGUILayout.HelpBox("State machine: Wander → Engage → Return → Rest.", MessageType.None);
+        m.moveSpeed    = EF.FloatField("Wander Speed",       m.moveSpeed);
+        m.engageSpeed  = EF.FloatField("Engage Speed",       m.engageSpeed);
+        m.returnSpeed  = EF.FloatField("Return Speed",       m.returnSpeed);
+        m.orbitDist    = EF.FloatField("Orbit Distance",     m.orbitDist);
+        m.wanderRadius = EF.FloatField("Wander Radius",      m.wanderRadius);
+        m.maxAwayTime  = EF.FloatField("Max Away Time (s)",  m.maxAwayTime);
+        m.restDuration = EF.FloatField("Rest Duration (s)",  m.restDuration);
+
+        Section("Attack");
+        m.attackCooldown = EF.FloatField("Attack Cooldown (s)", m.attackCooldown);
+        m.projectileId   = TFDropdown("Projectile ID",    m.projectileId,   ProjectileIds());
+        m.impactEffectId = TFDropdown("Impact Effect ID", m.impactEffectId, EffectIds());
+
+        Section("Visuals");
+        m.scale        = EF.FloatField("Scale",         m.scale);
+        m.spritePath   = TF("Sprite Path (sheet ok)", m.spritePath);
+        m.animFps      = EF.FloatField("Anim FPS",      m.animFps);
+        m.tintColor    = EF.ColorField("Tint Color",    m.tintColor);
+        m.sortingLayer = TF("Sorting Layer", m.sortingLayer);
+        m.sortingOrder = EF.IntField(  "Sorting Order", m.sortingOrder);
+
+        SaveDeleteBar(SaveMinions, () => { _minions.RemoveAt(_mIdx); _mIdx = Mathf.Clamp(_mIdx - 1, 0, _minions.Count - 1); SaveMinions(); });
+    }
+
     // ── Sprite Preview ────────────────────────────────────────────────────
 
     void DrawTowerPreview(TowerDefinition t)
@@ -445,6 +750,63 @@ public class TowerAbilityEditorWindow : EditorWindow
         GUILayout.FlexibleSpace();
         EditorGUILayout.EndHorizontal();
         GUILayout.Space(Pad);
+    }
+
+    // Single-sprite preview used by the Projectile / Unit / Minion tabs.
+    void DrawSpritePreview(Sprite sprite, Color tint)
+    {
+        if (sprite == null) return;
+
+        const float Size = 96f;
+        const float Pad  = 6f;
+
+        GUILayout.Space(Pad);
+        EditorGUILayout.BeginHorizontal();
+        GUILayout.Space(Pad);
+
+        float maxDim = Mathf.Max(1f, sprite.textureRect.width, sprite.textureRect.height);
+        float ppu    = Size / maxDim;
+
+        var boxRect = EditorGUILayout.GetControlRect(false, Size, GUILayout.Width(Size));
+        EditorGUI.DrawRect(boxRect, new Color(0.08f, 0.08f, 0.12f, 1f));
+        BlitSprite(sprite, boxRect, tint, ppu);
+
+        GUILayout.FlexibleSpace();
+        EditorGUILayout.EndHorizontal();
+        GUILayout.Space(Pad);
+    }
+
+    Sprite ResolveProjectilePreview(ProjectileDefinition p)
+    {
+        if (!string.IsNullOrEmpty(p.spritePath))
+        {
+            var sp = LoadSprite(p.spritePath);
+            if (sp == null) sp = LoadSpriteFromSheet(p.spritePath, 0);
+            if (sp != null) return sp;
+        }
+        return LoadSpriteFromSheet(p.spriteSheet, p.spriteIndex);
+    }
+
+    Sprite ResolveUnitPreview(UnitDefinition u)
+    {
+        if (!string.IsNullOrEmpty(u.animSheet))
+        {
+            var sp = LoadSpriteFromSheet(u.animSheet, 0);
+            if (sp != null) return sp;
+        }
+        if (!string.IsNullOrEmpty(u.spriteSheet) && u.spriteIndex >= 0)
+        {
+            var sp = LoadSpriteFromSheet(u.spriteSheet, u.spriteIndex);
+            if (sp != null) return sp;
+        }
+        return LoadSprite(u.spritePath);
+    }
+
+    Sprite ResolveMinionPreview(MinionDefinition m)
+    {
+        if (string.IsNullOrEmpty(m.spritePath)) return null;
+        var sp = LoadSpriteFromSheet(m.spritePath, 0);
+        return sp != null ? sp : LoadSprite(m.spritePath);
     }
 
     // ppu = pixels-per-texel (shared scale so all sprites in a composite are proportional).
@@ -508,14 +870,11 @@ public class TowerAbilityEditorWindow : EditorWindow
         string hint = type switch
         {
             "damage"                      => "damageBase, damageType (0=Physical 1=Arcane 2=Piercing 3=Natural), minimumDamage, maximumDamage, criticalChance, criticalDamageMultiplier, shieldBonus",
-            "launch_missile"              => "impactEffectId, missileSpeed, missileScale, missileLifetime, missileSpritePath (or missileSpriteSheet + missileSpriteIndex), missileColor, faceDirection, homing, arcFlight, piercing, drawLine",
-            "launch_shotgun"              => "impactEffectId, pelletCount, spreadAngle, missileSpeed, missileScale, missileLifetime, missileSpritePath",
-            "launch_boomerang"            => "impactEffectId, arcRadius, sweepSpeed, hitRadius, boomerangScale, boomerangSpritePath, boomerangColor, spinSpeed",
+            "launch"                      => "projectileId (projectiles.json), impactEffectId, count, spreadAngle, speedJitter, lifetimeJitter, scaleJitter, bonusCountKey (ModifierSelection key)",
             "search_area"                 => "effectId, radius, maxTargets (-1=all), horizontalArc, searchFromTarget (bool), startingDepth",
             "set"                         => "effectIds: [\"id1\", \"id2\"]  — runs all listed effects in sequence",
             "apply_behavior"              => "behaviorId  (e.g. \"poisoned\", \"rooted\", \"slowed\")",
             "apply_permanent_speed_buff"  => "speedBonus, radius, targetDefinitionId",
-            "railgun"                     => "damageBase, damageType, beamRange, beamWidth, beamFadeDuration, beamColor",
             "drain_life"                  => "damage, goldPerDrain, techPerDrain",
             _                             => null
         };
@@ -531,6 +890,7 @@ public class TowerAbilityEditorWindow : EditorWindow
         public static float FloatField(string l, float v) => EditorGUILayout.FloatField(l, v);
         public static int   IntField(string l, int v)     => EditorGUILayout.IntField(l, v);
         public static Color ColorField(string l, Color v) => EditorGUILayout.ColorField(l, v);
+        public static bool  Toggle(string l, bool v)      => EditorGUILayout.Toggle(l, v);
     }
 
     string TF(string label, string val) => EditorGUILayout.TextField(label, val ?? "");
@@ -627,6 +987,13 @@ public class TowerAbilityEditorWindow : EditorWindow
     {
         var ids = new string[_effects.Count];
         for (int i = 0; i < _effects.Count; i++) ids[i] = _effects[i].id;
+        return ids;
+    }
+
+    string[] ProjectileIds()
+    {
+        var ids = new string[_projectiles.Count];
+        for (int i = 0; i < _projectiles.Count; i++) ids[i] = _projectiles[i].id;
         return ids;
     }
 

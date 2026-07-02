@@ -269,8 +269,7 @@ public class TowerFactory : MonoBehaviour
     {
         if (depth > 4 || effect == null) return 0f;
         if (effect is Effect_Damage dmg) return dmg.damageBase;
-        if (effect is Effect_Launch_Missile missile) return FindFirstDamage(missile.impactEffectId, depth + 1);
-        if (effect is Effect_Launch_Shotgun shotgun) return FindFirstDamage(shotgun.impactEffectId, depth + 1);
+        if (effect is Effect_Launch launch) return FindFirstDamage(launch.impactEffectId, depth + 1);
         if (effect is Effect_Search_Area area && area.areas.Count > 0 && area.areas[0].effect != null)
             return FindFirstDamage(area.areas[0].effect, depth + 1);
         if (effect is Effect_Set set)

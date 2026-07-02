@@ -8,6 +8,13 @@ using UnityEngine.UI;
 /// </summary>
 public class HUDTierSelector : MonoBehaviour
 {
+    public static HUDTierSelector Instance { get; private set; }
+
+    void Awake()
+    {
+        if (Instance != null && Instance != this) { Destroy(this); return; }
+        Instance = this;
+    }
     const float W = HUDHelpers.RIGHT_W;
     const float H = HUDHelpers.TIER_H;
 
@@ -79,37 +86,32 @@ public class HUDTierSelector : MonoBehaviour
     void Apply()
     {
         if (TowerShop.Instance == null || _tiers.Length == 0) return;
-        int tier     = _tiers[_tierIdx];
-        bool unlocked = StarManager.Instance != null && StarManager.Instance.IsColumnUnlocked(tier);
+        int tier = _tiers[_tierIdx];
 
-        if (unlocked)
-            TowerShop.Instance.SetVisibleTier(tier);
+        TowerShop.Instance.SetVisibleTier(tier);
 
         if (_tierLabel != null)
         {
-            if (unlocked)
-                _tierLabel.text  = $"C{tier}";
-            else
-            {
-                int need = StarManager.ThresholdFor(tier);
-                int have = StarManager.Instance?.TotalStars ?? 0;
-                _tierLabel.text  = $"C{tier}\n<size=10>🔒 {have}/{need}★</size>";
-            }
-            _tierLabel.color = unlocked
-                ? new Color(0.90f, 0.80f, 1f)
-                : new Color(0.55f, 0.45f, 0.65f);
+            _tierLabel.text  = $"T{tier}";
+            _tierLabel.color = new Color(0.90f, 0.80f, 1f);
         }
 
         if (_prevBtn != null) _prevBtn.interactable = _tiers.Length > 1;
         if (_nextBtn != null) _nextBtn.interactable = _tiers.Length > 1;
     }
 
-    // Call after TowerShop.Rebuild() so we pick up the new tier list
-    public void SyncWithShop()
+    // Call after TowerShop.Rebuild() so we pick up the new tier list.
+    // Pass jumpToTier > 0 to snap to that tier after syncing (e.g. after unlocking a new tier).
+    public void SyncWithShop(int jumpToTier = 0)
     {
         if (TowerShop.Instance == null) return;
         _tiers   = TowerShop.Instance.AvailableTiers;
         _tierIdx = 0;
+        if (jumpToTier > 0)
+        {
+            for (int i = 0; i < _tiers.Length; i++)
+                if (_tiers[i] == jumpToTier) { _tierIdx = i; break; }
+        }
         Apply();
     }
 

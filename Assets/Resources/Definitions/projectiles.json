@@ -1,0 +1,152 @@
+{
+    "projectiles": [
+        {
+            "id": "basic_missile",
+            "displayName": "Basic Missile",
+            "description": "Standard homing shot for the basic tower.",
+            "movement": "homing",
+            "speed": 10.0,
+            "lifetime": 7.0,
+            "faceDirection": true,
+            "scale": 1.0,
+            "spritePath": "Art/Towers/T8Bullet"
+        },
+        {
+            "id": "chain_bolt",
+            "displayName": "Chain Bolt",
+            "description": "Fast first hop of the chain lightning tower.",
+            "movement": "homing",
+            "speed": 64.0,
+            "lifetime": 5.0,
+            "scale": 0.4,
+            "drawImpactLine": true,
+            "spriteSheet": "Art/Towers/TowerSet1",
+            "spriteIndex": 1,
+            "color": { "r": 0.2, "g": 0.6, "b": 1.0, "a": 1.0 }
+        },
+        {
+            "id": "chain_bounce_1_bolt",
+            "displayName": "Chain Bounce 1 Bolt",
+            "description": "First bounce hop of the chain lightning tower.",
+            "movement": "homing",
+            "speed": 12.0,
+            "lifetime": 3.0,
+            "scale": 0.35,
+            "drawImpactLine": true,
+            "spriteSheet": "Art/Towers/TowerSet1",
+            "spriteIndex": 1,
+            "color": { "r": 0.2, "g": 0.6, "b": 1.0, "a": 1.0 }
+        },
+        {
+            "id": "chain_bounce_2_bolt",
+            "displayName": "Chain Bounce 2 Bolt",
+            "description": "Second bounce hop of the chain lightning tower.",
+            "movement": "homing",
+            "speed": 12.0,
+            "lifetime": 3.0,
+            "scale": 0.3,
+            "drawImpactLine": true,
+            "spriteSheet": "Art/Towers/TowerSet1",
+            "spriteIndex": 1,
+            "color": { "r": 0.2, "g": 0.6, "b": 1.0, "a": 1.0 }
+        },
+        {
+            "id": "poison_bolt",
+            "displayName": "Poison Bolt",
+            "description": "Slow homing glob that spreads poison on impact.",
+            "movement": "homing",
+            "speed": 7.0,
+            "lifetime": 6.0,
+            "scale": 0.55,
+            "spriteSheet": "Art/Towers/TowerSet1",
+            "spriteIndex": 1,
+            "color": { "r": 0.4, "g": 1.0, "b": 0.3, "a": 1.0 }
+        },
+        {
+            "id": "slow_bolt",
+            "displayName": "Slow Bolt",
+            "description": "Chilling homing shot for the slow tower.",
+            "movement": "homing",
+            "speed": 11.0,
+            "lifetime": 6.0,
+            "faceDirection": true,
+            "scale": 1.5,
+            "spriteSheet": "Art/Towers/TowerSet1",
+            "spriteIndex": 1,
+            "color": { "r": 0.4, "g": 0.8, "b": 1.0, "a": 1.0 }
+        },
+        {
+            "id": "root_bolt",
+            "displayName": "Root Bolt",
+            "description": "Homing shot that roots the target in place.",
+            "movement": "homing",
+            "speed": 9.0,
+            "lifetime": 6.0,
+            "scale": 0.5,
+            "spriteSheet": "Art/Towers/TowerSet1",
+            "spriteIndex": 1,
+            "color": { "r": 0.65, "g": 0.2, "b": 0.9, "a": 1.0 }
+        },
+        {
+            "id": "entropy_bolt",
+            "displayName": "Entropy Bolt",
+            "description": "Homing shot for the entropy tower.",
+            "movement": "homing",
+            "speed": 10.0,
+            "lifetime": 6.0,
+            "scale": 0.45,
+            "spriteSheet": "Art/Towers/TowerSet1",
+            "spriteIndex": 1,
+            "color": { "r": 0.9, "g": 0.4, "b": 0.1, "a": 1.0 }
+        },
+        {
+            "id": "shotgun_pellet",
+            "displayName": "Shotgun Pellet",
+            "description": "Straight-line pellet. Short-lived, stopped by shields.",
+            "movement": "straight",
+            "speed": 22.0,
+            "lifetime": 0.15,
+            "faceDirection": true,
+            "scale": 1.25,
+            "spritePath": "Art/Towers/Bullet7"
+        },
+        {
+            "id": "mortar_shell",
+            "displayName": "Mortar Shell",
+            "description": "Lobbed shell that detonates at the target point.",
+            "movement": "arc",
+            "speed": 5.5,
+            "lifetime": 6.0,
+            "scale": 0.6,
+            "color": { "r": 0.9, "g": 0.6, "b": 0.2, "a": 1.0 }
+        },
+        {
+            "id": "boomerang",
+            "displayName": "Boomerang",
+            "description": "Sweeps a full circle through enemies, re-hitting on the return leg.",
+            "movement": "orbit",
+            "lifetime": 0.0,
+            "arcRadius": 1.0,
+            "sweepSpeed": 500.0,
+            "spinSpeed": 720.0,
+            "hitRadius": 0.45,
+            "pierce": true,
+            "blockedByShields": false,
+            "scale": 1.35,
+            "spritePath": "Art/Towers/Bullet2",
+            "sortingOrder": 15
+        },
+        {
+            "id": "bee_bullet",
+            "displayName": "Bee Bullet",
+            "description": "Tiny homing sting fired by bee drones.",
+            "movement": "homing",
+            "speed": 14.0,
+            "lifetime": 0.6,
+            "faceDirection": true,
+            "scale": 0.5,
+            "spritePath": "Art/Towers/bee_missile_T1",
+            "color": { "r": 1.0, "g": 0.95, "b": 0.3, "a": 1.0 }
+        }
+    ]
+}

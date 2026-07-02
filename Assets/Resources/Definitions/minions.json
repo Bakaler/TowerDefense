@@ -1,0 +1,22 @@
+{
+    "minions": [
+        {
+            "id": "bee",
+            "displayName": "Bee Drone",
+            "description": "Worker bee that wanders the hive radius and stings nearby enemies.",
+            "moveSpeed": 2.8,
+            "engageSpeed": 4.2,
+            "returnSpeed": 5.5,
+            "orbitDist": 0.6,
+            "wanderRadius": 0.8,
+            "maxAwayTime": 6.0,
+            "restDuration": 1.0,
+            "attackCooldown": 0.8,
+            "projectileId": "bee_bullet",
+            "impactEffectId": "drone_impact",
+            "scale": 1.0,
+            "spritePath": "Art/Towers/bee_T1",
+            "animFps": 12.0
+        }
+    ]
+}
