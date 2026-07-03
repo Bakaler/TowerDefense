@@ -50,6 +50,7 @@ public class TechManager : MonoBehaviour
         if (T2Unlocked || Tech < T2Cost) return false;
         Tech -= T2Cost;
         T2Unlocked = true;
+        AudioManager.PlayEvent("tier_unlock");
         return true;
     }
 
@@ -58,6 +59,7 @@ public class TechManager : MonoBehaviour
         if (!T2Unlocked || T3Unlocked || Tech < T3Cost) return false;
         Tech -= T3Cost;
         T3Unlocked = true;
+        AudioManager.PlayEvent("tier_unlock");
         return true;
     }
 
@@ -66,6 +68,7 @@ public class TechManager : MonoBehaviour
         if (!T3Unlocked || T4Unlocked || Tech < T4Cost) return false;
         Tech -= T4Cost;
         T4Unlocked = true;
+        AudioManager.PlayEvent("tier_unlock");
         return true;
     }
 
@@ -74,6 +77,7 @@ public class TechManager : MonoBehaviour
         if (!T4Unlocked || T5Unlocked || Tech < T5Cost) return false;
         Tech -= T5Cost;
         T5Unlocked = true;
+        AudioManager.PlayEvent("tier_unlock");
         return true;
     }
 }

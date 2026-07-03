@@ -48,6 +48,7 @@ public class LogicManager : MonoBehaviour
         if (gameOver) return;
 
         lives += delta;
+        if (delta < 0f) AudioManager.PlayEvent("life_lost");
 
         if (lives <= 0f)
         {

@@ -20,7 +20,7 @@
             "spriteIndex": -1,
             "scale": 1.350000023841858,
             "debugColor": {
-                "r": 0.20000000298023225,
+                "r": 0.20000000298023224,
                 "g": 0.6000000238418579,
                 "b": 1.0,
                 "a": 1.0
@@ -35,7 +35,8 @@
             "upgradeStatMultiplier": 2.25,
             "towerTier": 1,
             "rangePerTier": 0.0,
-            "components": []
+            "components": [],
+            "placeSoundId": "basic_tower_place"
         },
         {
             "id": "income_tower",
@@ -76,11 +77,12 @@
                 {
                     "key": "income_tower",
                     "data": {
-            "orbInterval": 8.0,
-            "orbSpritePath": "Art/resource_1"
-          }
+                        "orbInterval": 8.0,
+                        "orbSpritePath": "Art/resource_1"
+                    }
                 }
-            ]
+            ],
+            "placeSoundId": ""
         },
         {
             "id": "research_tower",
@@ -104,13 +106,13 @@
             "debugColor": {
                 "r": 0.3499999940395355,
                 "g": 1.0,
-                "b": 0.44999998807907107,
+                "b": 0.44999998807907104,
                 "a": 1.0
             },
             "tintColor": {
                 "r": 0.3499999940395355,
                 "g": 1.0,
-                "b": 0.44999998807907107,
+                "b": 0.44999998807907104,
                 "a": 1.0
             },
             "maxTier": 1,
@@ -121,17 +123,18 @@
                 {
                     "key": "research_tower",
                     "data": {
-            "orbInterval": 12.0,
-            "minInterval": 4.0,
-            "arcaneScale": 0.12,
-            "travelTime": 9.0,
-            "fullValue": 2,
-            "arrivalValue": 1,
-            "orbSpriteSheet": "Art/Towers/TowerSet1",
-            "orbSpriteIndex": 1
-          }
+                        "orbInterval": 12.0,
+                        "minInterval": 4.0,
+                        "arcaneScale": 0.12,
+                        "travelTime": 9.0,
+                        "fullValue": 2,
+                        "arrivalValue": 1,
+                        "orbSpriteSheet": "Art/Towers/TowerSet1",
+                        "orbSpriteIndex": 1
+                    }
                 }
-            ]
+            ],
+            "placeSoundId": ""
         },
         {
             "id": "chain_tower",
@@ -168,7 +171,8 @@
             "upgradeStatMultiplier": 2.25,
             "towerTier": 2,
             "rangePerTier": 0.0,
-            "components": []
+            "components": [],
+            "placeSoundId": ""
         },
         {
             "id": "shotgun_tower",
@@ -210,7 +214,8 @@
                     "key": "shotgun_orienter",
                     "data": {}
                 }
-            ]
+            ],
+            "placeSoundId": ""
         },
         {
             "id": "bee_tower",
@@ -251,23 +256,24 @@
                 {
                     "key": "drone_swarm",
                     "data": {
-            "minionId": "bee",
-            "droneCount": 4,
-            "range": 5.0,
-            "cooldown": 0.8,
-            "damage": 6.0,
-            "maxAwayTime": 6.0,
-            "restDuration": 1.0,
-            "effectId": "drone_impact"
-          }
+                        "minionId": "bee",
+                        "droneCount": 4,
+                        "range": 5.0,
+                        "cooldown": 0.8,
+                        "damage": 6.0,
+                        "maxAwayTime": 6.0,
+                        "restDuration": 1.0,
+                        "effectId": "drone_impact"
+                    }
                 }
-            ]
+            ],
+            "placeSoundId": ""
         },
         {
             "id": "boomerang_tower",
             "displayName": "Boomerang Tower",
             "description": "Throws a boomerang that sweeps through all enemies in a wide arc and returns.",
-            "range": 4.0,
+            "range": 6.0,
             "placementRadius": 0.3499999940395355,
             "resourceCost": 5,
             "balanceType": "Physical",
@@ -275,17 +281,17 @@
             "fireAbilityId": "boomerang_shot",
             "displayDamage": 0.0,
             "displayCooldown": 0.0,
-            "rotationSpeed": 120.0,
-            "animFps": 0.0,
-            "spritePath": "Art/Towers/Tower2",
+            "rotationSpeed": 0.0,
+            "animFps": 6.0,
+            "spritePath": "Art/Towers/boomerang_tower",
             "turretSpritePath": "",
             "spriteSheet": "",
             "spriteIndex": -1,
-            "scale": 1.2000000476837159,
+            "scale": 1.2000000476837158,
             "debugColor": {
                 "r": 0.8999999761581421,
                 "g": 0.699999988079071,
-                "b": 0.20000000298023225,
+                "b": 0.20000000298023224,
                 "a": 1.0
             },
             "tintColor": {
@@ -298,7 +304,8 @@
             "upgradeStatMultiplier": 2.25,
             "towerTier": 2,
             "rangePerTier": 0.0,
-            "components": []
+            "components": [],
+            "placeSoundId": ""
         },
         {
             "id": "root_tower",
@@ -321,7 +328,7 @@
             "scale": 1.5,
             "debugColor": {
                 "r": 0.6499999761581421,
-                "g": 0.20000000298023225,
+                "g": 0.20000000298023224,
                 "b": 0.8999999761581421,
                 "a": 1.0
             },
@@ -335,7 +342,8 @@
             "upgradeStatMultiplier": 2.25,
             "towerTier": 2,
             "rangePerTier": 0.3499999940395355,
-            "components": []
+            "components": [],
+            "placeSoundId": ""
         },
         {
             "id": "entropy_tower",
@@ -376,11 +384,12 @@
                 {
                     "key": "stack_on_kill",
                     "data": {
-            "perStackBonus": 0.04,
-            "maxStacks": 50
-          }
+                        "perStackBonus": 0.04,
+                        "maxStacks": 50
+                    }
                 }
-            ]
+            ],
+            "placeSoundId": ""
         },
         {
             "id": "poison_tower",
@@ -404,20 +413,21 @@
             "debugColor": {
                 "r": 0.4000000059604645,
                 "g": 1.0,
-                "b": 0.30000001192092898,
+                "b": 0.30000001192092896,
                 "a": 1.0
             },
             "tintColor": {
                 "r": 0.4000000059604645,
                 "g": 1.0,
-                "b": 0.30000001192092898,
+                "b": 0.30000001192092896,
                 "a": 1.0
             },
             "maxTier": 5,
             "upgradeStatMultiplier": 2.25,
             "towerTier": 2,
             "rangePerTier": 0.0,
-            "components": []
+            "components": [],
+            "placeSoundId": ""
         },
         {
             "id": "collector_tower",
@@ -458,19 +468,20 @@
                 {
                     "key": "collector_tower",
                     "data": {
-            "range": 3.5,
-            "reachTime": 0.35,
-            "cooldown": 1.2
-          }
+                        "range": 3.5,
+                        "reachTime": 0.35,
+                        "cooldown": 1.2
+                    }
                 }
-            ]
+            ],
+            "placeSoundId": ""
         },
         {
             "id": "slow_tower",
             "displayName": "Slow Tower",
             "description": "Fires chilling projectiles that reduce enemy movement speed by 60% for 2 seconds.",
             "range": 3.5,
-            "placementRadius": 0.44999998807907107,
+            "placementRadius": 0.44999998807907104,
             "resourceCost": 3,
             "balanceType": "Elemental",
             "balanceWeight": 1,
@@ -500,7 +511,8 @@
             "upgradeStatMultiplier": 2.25,
             "towerTier": 1,
             "rangePerTier": 0.3499999940395355,
-            "components": []
+            "components": [],
+            "placeSoundId": ""
         },
         {
             "id": "railgun_tower",
@@ -537,7 +549,8 @@
             "upgradeStatMultiplier": 2.25,
             "towerTier": 3,
             "rangePerTier": 0.0,
-            "components": []
+            "components": [],
+            "placeSoundId": ""
         },
         {
             "id": "speed_aura_tower",
@@ -559,13 +572,13 @@
             "spriteIndex": 0,
             "scale": 1.5,
             "debugColor": {
-                "r": 0.30000001192092898,
+                "r": 0.30000001192092896,
                 "g": 0.800000011920929,
                 "b": 1.0,
                 "a": 1.0
             },
             "tintColor": {
-                "r": 0.30000001192092898,
+                "r": 0.30000001192092896,
                 "g": 0.800000011920929,
                 "b": 1.0,
                 "a": 1.0
@@ -578,15 +591,16 @@
                 {
                     "key": "tower_aura",
                     "data": {
-            "range": 5.0,
-            "damageMultiplier": 1.0,
-            "attackSpeedMultiplier": 1.3,
-            "auraColorR": 0.3,
-            "auraColorG": 0.8,
-            "auraColorB": 1.0
-          }
+                        "range": 5.0,
+                        "damageMultiplier": 1.0,
+                        "attackSpeedMultiplier": 1.3,
+                        "auraColorR": 0.3,
+                        "auraColorG": 0.8,
+                        "auraColorB": 1.0
+                    }
                 }
-            ]
+            ],
+            "placeSoundId": ""
         },
         {
             "id": "damage_aura_tower",
@@ -610,13 +624,13 @@
             "debugColor": {
                 "r": 1.0,
                 "g": 0.4000000059604645,
-                "b": 0.20000000298023225,
+                "b": 0.20000000298023224,
                 "a": 1.0
             },
             "tintColor": {
                 "r": 1.0,
                 "g": 0.4000000059604645,
-                "b": 0.20000000298023225,
+                "b": 0.20000000298023224,
                 "a": 1.0
             },
             "maxTier": 5,
@@ -627,15 +641,16 @@
                 {
                     "key": "tower_aura",
                     "data": {
-            "range": 5.0,
-            "damageMultiplier": 1.3,
-            "attackSpeedMultiplier": 1.0,
-            "auraColorR": 1.0,
-            "auraColorG": 0.4,
-            "auraColorB": 0.2
-          }
+                        "range": 5.0,
+                        "damageMultiplier": 1.3,
+                        "attackSpeedMultiplier": 1.0,
+                        "auraColorR": 1.0,
+                        "auraColorG": 0.4,
+                        "auraColorB": 0.2
+                    }
                 }
-            ]
+            ],
+            "placeSoundId": ""
         },
         {
             "id": "laser_tower",
@@ -676,18 +691,19 @@
                 {
                     "key": "continuous_beam",
                     "data": {
-            "damagePerSecond": 8.0,
-            "maxRampMultiplier": 5.0,
-            "rampDuration": 4.0,
-            "beamWidth": 0.06,
-            "damageType": 1,
-            "beamColorR": 1.0,
-            "beamColorG": 0.25,
-            "beamColorB": 0.1,
-            "effectId": "beam_damage"
-          }
+                        "damagePerSecond": 8.0,
+                        "maxRampMultiplier": 5.0,
+                        "rampDuration": 4.0,
+                        "beamWidth": 0.06,
+                        "damageType": 1,
+                        "beamColorR": 1.0,
+                        "beamColorG": 0.25,
+                        "beamColorB": 0.1,
+                        "effectId": "beam_damage"
+                    }
                 }
-            ]
+            ],
+            "placeSoundId": ""
         },
         {
             "id": "mortar_tower",
@@ -711,27 +727,28 @@
             "debugColor": {
                 "r": 0.8999999761581421,
                 "g": 0.6000000238418579,
-                "b": 0.20000000298023225,
+                "b": 0.20000000298023224,
                 "a": 1.0
             },
             "tintColor": {
                 "r": 0.8999999761581421,
                 "g": 0.6000000238418579,
-                "b": 0.20000000298023225,
+                "b": 0.20000000298023224,
                 "a": 1.0
             },
             "maxTier": 5,
             "upgradeStatMultiplier": 2.25,
             "towerTier": 3,
             "rangePerTier": 0.0,
-            "components": []
+            "components": [],
+            "placeSoundId": ""
         },
         {
             "id": "sniper_tower",
             "displayName": "Sniper",
             "description": "Unlimited range. Fires a hitscan shot at the furthest enemy inside its repositionable firing box. Press Move Zone in the panel to reposition the box.",
             "range": 999.0,
-            "placementRadius": 0.44999998807907107,
+            "placementRadius": 0.44999998807907104,
             "resourceCost": 8,
             "balanceType": "Physical",
             "balanceWeight": 1,
@@ -764,13 +781,17 @@
             "components": [
                 {
                     "key": "sniper_zone",
-                    "data": { "halfWidth": 0.68, "halfHeight": 2.98 }
+                    "data": {
+                        "halfWidth": 0.68,
+                        "halfHeight": 2.98
+                    }
                 },
                 {
                     "key": "sniper_turrent",
                     "data": {}
                 }
-            ]
+            ],
+            "placeSoundId": ""
         },
         {
             "id": "siphon_tower",
@@ -811,12 +832,13 @@
                 {
                     "key": "siphon_tower",
                     "data": {
-            "range": 3.0,
-            "drainInterval": 9.0,
-            "drainEffectId": "drain_life"
-          }
+                        "range": 3.0,
+                        "drainInterval": 9.0,
+                        "drainEffectId": "drain_life"
+                    }
                 }
-            ]
+            ],
+            "placeSoundId": ""
         }
     ]
 }

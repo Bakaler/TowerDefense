@@ -53,7 +53,8 @@ public class Effect_Damage : Effect
 
         float finalDamage = Mathf.Clamp(damage, minimumDamage, maximumDamage);
         bool wasAlive = target.isAlive && target.lifeCurrent > 0f;
-        target.TakeDamage(finalDamage, shieldBonus, minimumDamage, maximumDamage, type);
+        // Shield bonus scales with the same tower multipliers as damage
+        target.TakeDamage(finalDamage, shieldBonus * towerMult, minimumDamage, maximumDamage, type);
         bool killedIt = wasAlive && (target.lifeCurrent <= 0f || !target.isAlive);
         if (killedIt)
         {

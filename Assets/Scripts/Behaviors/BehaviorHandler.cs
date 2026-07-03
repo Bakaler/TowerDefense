@@ -14,6 +14,7 @@ public class BehaviorHandler : MonoBehaviour
         public float              Remaining;
         public float              TickTimer;
         public GameObject         DurationVFX;
+        public ShieldBubble       Shield;
 
         public Instance(BehaviorDefinition def)
         {
@@ -39,6 +40,14 @@ public class BehaviorHandler : MonoBehaviour
             if (DurationVFX != null) Object.Destroy(DurationVFX);
             DurationVFX = null;
         }
+
+        /// <summary>Removes everything this behavior instance spawned (VFX + shield bubble).</summary>
+        public void Cleanup()
+        {
+            DestroyVFX();
+            if (Shield != null) Object.Destroy(Shield.gameObject);
+            Shield = null;
+        }
     }
 
     private readonly List<Instance> _active = new();
@@ -57,24 +66,15 @@ public class BehaviorHandler : MonoBehaviour
 
     public void Apply(BehaviorDefinition def)
     {
-        // Check if any active behavior grants immunity to the incoming type
-        if (def.behaviorType != BehaviorType.None)
-        {
-            string typeName = def.behaviorType.ToString();
-            foreach (var inst in _active)
-            {
-                if (inst.Def.immunities != null)
-                    foreach (var imm in inst.Def.immunities)
-                        if (imm == typeName) return;
-            }
-        }
+        // Any active behavior granting immunity to the incoming type blocks it
+        if (IsImmuneTo(def.behaviorType)) return;
 
         switch (def.stackRule)
         {
             case "refresh":
             {
                 var ex = _active.Find(b => b.Def.id == def.id);
-                if (ex != null) { ex.Remaining = def.duration; return; }
+                if (ex != null) { ex.Remaining = def.duration; AttachShield(ex); return; }
                 break;
             }
             case "none":
@@ -90,8 +90,18 @@ public class BehaviorHandler : MonoBehaviour
             StartCoroutine(SpawnDurationVFXDelayed(newInst, def, impactDuration));
         else
             newInst.DurationVFX = SpawnDurationVFX(def);
+        AttachShield(newInst);
         _active.Add(newInst);
+        if (!string.IsNullOrEmpty(def.applySoundId))
+            AudioManager.Play(def.applySoundId);
         Recalculate();
+    }
+
+    /// <summary>Grants (or tops up) the ShieldBubble for behaviors with shieldHp > 0.</summary>
+    void AttachShield(Instance inst)
+    {
+        if (inst.Def.shieldHp <= 0f) return;
+        inst.Shield = ShieldBubble.AddTo(gameObject, inst.Def.shieldHp, inst.Def.shieldRadius);
     }
 
     /// <summary>Apply a behavior permanently (no expiry). Used for starting behaviors.</summary>
@@ -100,6 +110,7 @@ public class BehaviorHandler : MonoBehaviour
         if (_active.Exists(b => b.Def.id == def.id)) return;
         var inst = new Instance(def);
         inst.Remaining = float.MaxValue;   // never expires
+        AttachShield(inst);
         _active.Add(inst);
         Recalculate();
     }
@@ -125,11 +136,25 @@ public class BehaviorHandler : MonoBehaviour
 
     public bool HasBehavior(string behaviorId) => _active.Exists(b => b.Def.id == behaviorId);
 
+    /// <summary>True if any active behavior grants immunity to the given type (e.g. boss_immunity).</summary>
+    public bool IsImmuneTo(BehaviorType type)
+    {
+        if (type == BehaviorType.None) return false;
+        string typeName = type.ToString();
+        foreach (var inst in _active)
+        {
+            if (inst.Def.immunities == null) continue;
+            foreach (var imm in inst.Def.immunities)
+                if (imm == typeName) return true;
+        }
+        return false;
+    }
+
     public void Remove(string behaviorId)
     {
         int removed = 0;
         for (int i = _active.Count - 1; i >= 0; i--)
-            if (_active[i].Def.id == behaviorId) { _active[i].DestroyVFX(); _active.RemoveAt(i); removed++; }
+            if (_active[i].Def.id == behaviorId) { _active[i].Cleanup(); _active.RemoveAt(i); removed++; }
         if (removed > 0) Recalculate();
     }
 
@@ -139,7 +164,7 @@ public class BehaviorHandler : MonoBehaviour
     /// <summary>Remove every active behavior (cleanse).</summary>
     public void RemoveAll()
     {
-        foreach (var inst in _active) inst.DestroyVFX();
+        foreach (var inst in _active) inst.Cleanup();
         _active.Clear();
         Recalculate();
     }
@@ -149,7 +174,7 @@ public class BehaviorHandler : MonoBehaviour
     {
         int removed = 0;
         for (int i = _active.Count - 1; i >= 0; i--)
-            if (_active[i].Def.behaviorType == type) { _active[i].DestroyVFX(); _active.RemoveAt(i); removed++; }
+            if (_active[i].Def.behaviorType == type) { _active[i].Cleanup(); _active.RemoveAt(i); removed++; }
         if (removed > 0) Recalculate();
     }
 
@@ -165,7 +190,9 @@ public class BehaviorHandler : MonoBehaviour
         {
             bool expired = _active[i].Advance(dt, out bool ticked);
             if (ticked) ApplyTick(_active[i]);
-            if (expired) { _active[i].DestroyVFX(); _active.RemoveAt(i); changed = true; }
+            // Shield behaviors expire when their bubble is depleted (destroyed)
+            if (!expired && _active[i].Def.shieldHp > 0f && _active[i].Shield == null) expired = true;
+            if (expired) { _active[i].Cleanup(); _active.RemoveAt(i); changed = true; }
         }
         if (changed) Recalculate();
     }

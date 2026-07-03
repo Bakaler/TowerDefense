@@ -1,48 +1,90 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// Bottom-left debug enemy spawn buttons. Unchanged from original layout.
+/// Bottom-left debug enemy spawn buttons, built live from units.json.
+/// Reloads the definition library and rebuilds itself at the start of every round,
+/// so units added or edited in the Tower &amp; Ability Editor show up without leaving
+/// play mode. Button colors come from each definition's debugColor.
 /// </summary>
 public class HUDDebugPanel : MonoBehaviour
 {
+    const float BTN_W = 110f, BTN_H = 28f, PAD = 6f;
+    const int   MAX_ROWS = 15;   // wrap into a second column past this
+
+    GameObject _canvasRoot;
+    GameObject _panel;
+    int        _lastWave = int.MinValue;
+
     public void Build(GameObject canvasRoot)
     {
-        const float BTN_W = 110f, BTN_H = 28f, PAD = 6f;
+        _canvasRoot = canvasRoot;
+        Rebuild();
+    }
 
-        var ids    = new[] { "basic_enemy", "fast_enemy", "armored_enemy", "boss_enemy", "resilient_enemy",
-                             "splitter_enemy", "phantom_enemy", "charger_enemy", "priest_enemy", "shielder_enemy" };
-        var labels = new[] { "Basic", "Fast", "Armored", "Boss", "Resilient",
-                             "Splitter", "Phantom", "Charger", "Priest", "Shielder" };
-        var colors = new Color[]
-        {
-            new Color(0.65f, 0.15f, 0.15f, 1f), new Color(0.65f, 0.60f, 0.10f, 1f),
-            new Color(0.35f, 0.35f, 0.40f, 1f), new Color(0.55f, 0.10f, 0.55f, 1f),
-            new Color(0.10f, 0.50f, 0.75f, 1f), new Color(0.70f, 0.28f, 0.05f, 1f),
-            new Color(0.55f, 0.30f, 0.85f, 1f), new Color(0.80f, 0.25f, 0.05f, 1f),
-            new Color(0.75f, 0.70f, 0.10f, 1f), new Color(0.15f, 0.45f, 0.80f, 1f),
-        };
+    void Update()
+    {
+        // New round (or first frame) — pick up any units.json changes and rebuild
+        int wave = WaveManager.Instance != null ? WaveManager.Instance.CurrentWave : -1;
+        if (wave == _lastWave) return;
+        _lastWave = wave;
 
-        var panel = new GameObject("DebugSpawnPanel");
-        panel.transform.SetParent(canvasRoot.transform, false);
-        var rt          = panel.AddComponent<RectTransform>();
-        rt.anchorMin    = rt.anchorMax = Vector2.zero;
-        rt.pivot        = Vector2.zero;
+        UnitDefinitionLibrary.Instance?.Reload();
+        Rebuild();
+    }
+
+    void Rebuild()
+    {
+        if (_canvasRoot == null) return;
+        if (_panel != null) Destroy(_panel);
+
+        IReadOnlyList<UnitDefinition> defs = UnitDefinitionLibrary.Instance != null
+            ? UnitDefinitionLibrary.Instance.AllOrdered
+            : System.Array.Empty<UnitDefinition>();
+
+        int count = defs.Count;
+        int cols  = Mathf.Max(1, Mathf.CeilToInt(count / (float)MAX_ROWS));
+        int rows  = cols > 1 ? Mathf.CeilToInt(count / (float)cols) : count;
+
+        _panel = new GameObject("DebugSpawnPanel");
+        _panel.transform.SetParent(_canvasRoot.transform, false);
+        var rt              = _panel.AddComponent<RectTransform>();
+        rt.anchorMin        = rt.anchorMax = Vector2.zero;
+        rt.pivot            = Vector2.zero;
         rt.anchoredPosition = new Vector2(PAD, PAD);
-        rt.sizeDelta    = new Vector2(BTN_W + PAD * 2f, ids.Length * (BTN_H + PAD) + PAD);
-        panel.AddComponent<Image>().color = new Color(0f, 0f, 0f, 0.55f);
+        rt.sizeDelta        = new Vector2(cols * (BTN_W + PAD) + PAD, rows * (BTN_H + PAD) + PAD);
+        _panel.AddComponent<Image>().color = new Color(0f, 0f, 0f, 0.55f);
 
-        for (int i = 0; i < ids.Length; i++)
+        for (int i = 0; i < count; i++)
         {
-            float y  = rt.sizeDelta.y - PAD - (i + 1) * (BTN_H + PAD) + PAD;
-            var bGO  = HUDHelpers.MakeRect($"Debug_{ids[i]}", panel, PAD, y, BTN_W, BTN_H);
-            var bImg = bGO.AddComponent<Image>(); bImg.color = colors[i];
+            var def = defs[i];
+            int col = i / rows;
+            int row = i % rows;
+
+            float x = PAD + col * (BTN_W + PAD);
+            float y = rt.sizeDelta.y - PAD - (row + 1) * (BTN_H + PAD) + PAD;
+
+            var bGO  = HUDHelpers.MakeRect($"Debug_{def.id}", _panel, x, y, BTN_W, BTN_H);
+            var bImg = bGO.AddComponent<Image>();
+            bImg.color = ButtonColor(def);
             var btn  = bGO.AddComponent<Button>(); btn.targetGraphic = bImg;
+
+            string label = string.IsNullOrEmpty(def.displayName) ? def.id : def.displayName;
             HUDHelpers.MakeText(HUDHelpers.MakeRect("L", bGO, 0f, 0f, BTN_W, BTN_H),
-                labels[i], Color.white, 11, bold: true).alignment = TextAnchor.MiddleCenter;
-            string unitId = ids[i];
+                label, Color.white, 11, bold: true).alignment = TextAnchor.MiddleCenter;
+
+            string unitId = def.id;
             btn.onClick.AddListener(() => SpawnUnit(unitId));
         }
+    }
+
+    // Darkened debugColor so white button text stays readable
+    static Color ButtonColor(UnitDefinition def)
+    {
+        var c = Color.Lerp(def.debugColor, Color.black, 0.45f);
+        c.a = 1f;
+        return c;
     }
 
     static void SpawnUnit(string unitId)

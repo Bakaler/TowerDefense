@@ -95,6 +95,7 @@ public class HUDWaveBar : MonoBehaviour
     {
         _paused = false;
         Time.timeScale = 1f;
+        AudioManager.SetSfxPaused(false);
         if (_pauseButtonLabel != null) _pauseButtonLabel.text = "II";
     }
 
@@ -102,6 +103,7 @@ public class HUDWaveBar : MonoBehaviour
     {
         _paused = !_paused;
         Time.timeScale = _paused ? 0f : 1f;
+        AudioManager.SetSfxPaused(_paused);   // SFX pause with the game; music keeps playing
         if (_pauseButtonLabel != null) _pauseButtonLabel.text = _paused ? "▶" : "II";
     }
 

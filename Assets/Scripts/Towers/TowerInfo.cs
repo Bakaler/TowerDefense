@@ -15,6 +15,8 @@ public class TowerInfo : MonoBehaviour
     public string      description  = "";
     public BalanceType balanceType  = BalanceType.Physical;
     public float       damage       = 0f;
+    /// <summary>Extra damage vs stat-shields (from the damage effect's shieldBonus). May be negative.</summary>
+    public float       shieldBonus  = 0f;
     public float       cooldown     = 0f;
     public int         resourceCost = 0;
 
@@ -188,8 +190,22 @@ public class TowerInfo : MonoBehaviour
         var sr = GetComponent<SpriteRenderer>();
         if (sr != null)
         {
-            var sp = TowerFactory.ResolveTieredSprite(def.id, Tier, def.spritePath);
-            if (sp != null) { sr.sprite = sp; sr.color = def.tintColor; }
+            if (def.animFps > 0f)
+            {
+                var frames = Resources.LoadAll<Sprite>(TowerFactory.ResolveTieredPath(def.id, Tier, def.spritePath));
+                if (frames != null && frames.Length > 0)
+                {
+                    sr.color = def.tintColor;
+                    var anim = GetComponent<SpriteAnimator>();
+                    if (anim != null) anim.Setup(frames, def.animFps);
+                    else sr.sprite = frames[0];
+                }
+            }
+            else
+            {
+                var sp = TowerFactory.ResolveTieredSprite(def.id, Tier, def.spritePath);
+                if (sp != null) { sr.sprite = sp; sr.color = def.tintColor; }
+            }
         }
 
         var turretGO = transform.Find("Turret");

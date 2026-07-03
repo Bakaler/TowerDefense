@@ -78,6 +78,7 @@ public class AbilityLibrary : MonoBehaviour
             ability.finish_time      = def.finish_time;
             ability.range            = def.range;
             ability.fireArc          = def.fireArc;
+            ability.fireSoundId      = def.fireSoundId;
             ability.cost             = new AbilityCost { cooldownDuration = def.cooldownDuration };
             ability.attackSheetPath  = def.attackSheetPath;
             ability.attackFrameCount = def.attackFrameCount;
@@ -122,6 +123,7 @@ public class AbilityDefinition
     public float    cooldownDuration = 1f;
     public float    range            = 5f;
     public float    fireArc          = 360f;
+    public string   fireSoundId      = "";
     public float    prepare_time    = 0f;
     public float    cast_start_time = 0f;
     public float    cast_finish_time = 0f;

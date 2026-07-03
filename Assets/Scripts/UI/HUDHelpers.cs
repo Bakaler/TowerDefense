@@ -126,6 +126,7 @@ public static class HUDHelpers
         var btn = go.AddComponent<Button>(); btn.targetGraphic = img;
         var lbl = MakeText(MakeRect("L", go, 0f, 0f, w, h), labelText, Color.white, fontSize, bold);
         lbl.alignment = TextAnchor.MiddleCenter;
+        btn.onClick.AddListener(() => AudioManager.PlayEvent("ui_click"));
         return (btn, lbl);
     }
 

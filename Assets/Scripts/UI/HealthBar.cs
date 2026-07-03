@@ -2,19 +2,24 @@ using UnityEngine;
 
 /// <summary>
 /// Small segmented world-space health bar, sits tight above the unit sprite.
+/// Units with a shield pool (hasShields) get a thin shield bar bordering the top edge.
 /// </summary>
 public class HealthBar : MonoBehaviour
 {
     private UnitParentClass  _unit;
     private SpriteRenderer[] _segs;
     private int              _segCount;
+    private SpriteRenderer   _shieldBar;
 
     private const float SEG_H    = 0.022f;
     private const float SEG_GAP  = 0.008f;
     private const float Y_OFF    = 0.22f;
     private const float TOTAL_W  = 0.28f;
+    private const float SHIELD_H = SEG_H;   // same height as HP row so it reads at game zoom
+    private const float SHIELD_Y = SEG_H * 0.5f + SEG_GAP + SHIELD_H * 0.5f;
 
-    private static readonly Color C_Empty = new Color(0.12f, 0.12f, 0.12f, 0.75f);
+    private static readonly Color C_Empty  = new Color(0.12f, 0.12f, 0.12f, 0.75f);
+    private static readonly Color C_Shield = new Color(0.25f, 0.85f, 1f, 1f);
 
     public static HealthBar Attach(GameObject target)
     {
@@ -52,6 +57,33 @@ public class HealthBar : MonoBehaviour
             sr.sortingOrder     = 30;
             _segs[i] = sr;
         }
+
+        // Shield bar — bordering the top of the HP segments, with a dark track
+        // behind the fill so current vs max shield stays readable.
+        if (_unit.hasShields && _unit.shieldMax > 0f)
+        {
+            var track = new GameObject("ShieldTrack");
+            track.transform.SetParent(transform, false);
+            track.transform.localPosition = new Vector3(0f, SHIELD_Y, -0.01f);
+            track.transform.localScale    = new Vector3(TOTAL_W, SHIELD_H, 1f);
+
+            var tsr              = track.AddComponent<SpriteRenderer>();
+            tsr.sprite           = GetPixel();
+            tsr.color            = C_Empty;
+            tsr.sortingLayerName = "Units";
+            tsr.sortingOrder     = 30;
+
+            var go = new GameObject("ShieldBar");
+            go.transform.SetParent(transform, false);
+            go.transform.localPosition = new Vector3(0f, SHIELD_Y, -0.02f);
+            go.transform.localScale    = new Vector3(TOTAL_W, SHIELD_H, 1f);
+
+            _shieldBar                  = go.AddComponent<SpriteRenderer>();
+            _shieldBar.sprite           = GetPixel();
+            _shieldBar.color            = C_Shield;
+            _shieldBar.sortingLayerName = "Units";
+            _shieldBar.sortingOrder     = 31;
+        }
     }
 
     void LateUpdate()
@@ -67,6 +99,19 @@ public class HealthBar : MonoBehaviour
 
         for (int i = 0; i < _segCount; i++)
             _segs[i].color = i < Mathf.CeilToInt(filled) ? fillColor : C_Empty;
+
+        // Shield bar drains left-to-right; the dark track stays as the outline
+        if (_shieldBar != null)
+        {
+            float spct = _unit.shieldMax > 0f ? Mathf.Clamp01(_unit.shieldCurrent / _unit.shieldMax) : 0f;
+            _shieldBar.enabled = spct > 0f;
+            if (spct > 0f)
+            {
+                float w = TOTAL_W * spct;
+                _shieldBar.transform.localScale    = new Vector3(w, SHIELD_H, 1f);
+                _shieldBar.transform.localPosition = new Vector3(-TOTAL_W * 0.5f + w * 0.5f, SHIELD_Y, -0.02f);
+            }
+        }
     }
 
     static Sprite _pixel;

@@ -10,7 +10,7 @@
         "minimumDamage": 1.0,
         "maximumDamage": 1000000.0,
         "damageType": 2,
-        "shieldBonus": 0.0,
+        "shieldBonus": -1.0,
         "criticalChance": 0.0,
         "criticalDamageMultiplier": 0.0
       }
@@ -255,6 +255,7 @@
         "minimumDamage": 1.0,
         "maximumDamage": 1000000.0,
         "damageType": 1,
+        "shieldBonus": 2.0,
         "criticalChance": 0.0,
         "criticalDamageMultiplier": 2.0
       }

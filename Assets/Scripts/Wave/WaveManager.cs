@@ -81,6 +81,7 @@ public class WaveManager : MonoBehaviour
         IsWaveActive          = true;
         _activeSpawnGroups    = 0;
         _waveSchedulingDone   = false;
+        AudioManager.PlayEvent("wave_start");
         var def               = _waveDefs[CurrentWave - 1];
         StartCoroutine(RunWave(def));
         Debug.Log($"[WaveManager] Wave {CurrentWave}/{TotalWaves} started.");
@@ -142,6 +143,7 @@ public class WaveManager : MonoBehaviour
     void OnWaveClear()
     {
         IsWaveActive = false;
+        if (CurrentWave < TotalWaves) AudioManager.PlayEvent("wave_clear");
         Debug.Log($"[WaveManager] Wave {CurrentWave} cleared.");
 
         ObjectiveTracker.NotifyWaveReached(CurrentWave);
@@ -177,6 +179,7 @@ public class WaveManager : MonoBehaviour
         IsGameOver   = true;
         IsWaveActive = false;
         Time.timeScale = 0f;
+        AudioManager.PlayEvent("defeat");
         Debug.Log("[WaveManager] Game Over.");
     }
 
@@ -213,6 +216,7 @@ public class WaveManager : MonoBehaviour
     {
         IsVictory    = true;
         IsWaveActive = false;
+        AudioManager.PlayEvent("victory");
         Debug.Log("[WaveManager] Victory!");
     }
 }

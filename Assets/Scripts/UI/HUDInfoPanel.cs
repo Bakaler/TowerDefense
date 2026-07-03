@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -27,6 +28,7 @@ public class HUDInfoPanel : MonoBehaviour
     Text    _tpBalance;
     Text    _tpBalanceDist;
     Text    _tpDamage;
+    Text    _tpShieldBonus;
     Text    _tpFireRate;
     Text    _tpKills;
     Text    _tpAura;
@@ -41,7 +43,7 @@ public class HUDInfoPanel : MonoBehaviour
     TowerInfo _selectedTower;
 
     // ── Enemy mode ─────────────────────────────────────────────────────
-    Text _epName, _epHp, _epSpeed, _epDeathBlow;
+    Text _epName, _epHp, _epShield, _epSpeed, _epDeathBlow;
     Text _epArmor, _epResistance, _epFortitude, _epDescription;
     public UnitManager SelectedEnemy { get; private set; }
 
@@ -144,8 +146,9 @@ public class HUDInfoPanel : MonoBehaviour
 
         // C1: Damage / FireRate / MoveZone
         y = topY;
-        _tpDamage   = HUDHelpers.MakeText(HUDHelpers.MakeRect("Damage",  _towerBody, C1, y, COL_W, ROW), "", new Color(0.9f, 0.9f, 0.9f), 14); y -= ROW;
-        _tpFireRate = HUDHelpers.MakeText(HUDHelpers.MakeRect("FireRate", _towerBody, C1, y, COL_W, ROW), "", new Color(0.9f, 0.9f, 0.9f), 14); y -= ROW + 4f;
+        _tpDamage      = HUDHelpers.MakeText(HUDHelpers.MakeRect("Damage",      _towerBody, C1, y, COL_W, ROW), "", new Color(0.9f, 0.9f, 0.9f), 14); y -= ROW;
+        _tpShieldBonus = HUDHelpers.MakeText(HUDHelpers.MakeRect("ShieldBonus", _towerBody, C1, y, COL_W, ROW), "", new Color(0.35f, 0.75f, 1f), 13); y -= ROW;
+        _tpFireRate    = HUDHelpers.MakeText(HUDHelpers.MakeRect("FireRate",    _towerBody, C1, y, COL_W, ROW), "", new Color(0.9f, 0.9f, 0.9f), 14); y -= ROW + 4f;
 
         var mzGO  = HUDHelpers.MakeRect("MoveZoneBtn", _towerBody, C1, y - 4f, COL_W, 30f);
         var mzImg = mzGO.AddComponent<Image>(); mzImg.color = new Color(0.2f, 0.45f, 0.65f, 1f);
@@ -233,12 +236,13 @@ public class HUDInfoPanel : MonoBehaviour
 
         _epName = null;   // shown in header title instead
 
-        _epHp         = HUDHelpers.MakeText(HUDHelpers.MakeRect("HP",    _enemyBody, PAD,              y, colW, ROW), "", Color.white, 14);
-        _epArmor      = HUDHelpers.MakeText(HUDHelpers.MakeRect("Armor", _enemyBody, PAD + colW + PAD, y, colW, ROW), "", new Color(0.8f,0.8f,0.8f), 14); y -= ROW + 3f;
-        _epSpeed      = HUDHelpers.MakeText(HUDHelpers.MakeRect("Spd",   _enemyBody, PAD,              y, colW, ROW), "", Color.white, 14);
-        _epResistance = HUDHelpers.MakeText(HUDHelpers.MakeRect("Res",   _enemyBody, PAD + colW + PAD, y, colW, ROW), "", new Color(0.4f,0.85f,1f), 14); y -= ROW + 3f;
-        _epDeathBlow  = HUDHelpers.MakeText(HUDHelpers.MakeRect("DB",    _enemyBody, PAD,              y, colW, ROW), "", new Color(0.95f,0.4f,0.4f), 14);
-        _epFortitude  = HUDHelpers.MakeText(HUDHelpers.MakeRect("Fort",  _enemyBody, PAD + colW + PAD, y, colW, ROW), "", new Color(0.85f,0.6f,1f), 14); y -= ROW + 8f;
+        _epHp         = HUDHelpers.MakeText(HUDHelpers.MakeRect("HP",     _enemyBody, PAD,              y, colW, ROW), "", Color.white, 14);
+        _epArmor      = HUDHelpers.MakeText(HUDHelpers.MakeRect("Armor",  _enemyBody, PAD + colW + PAD, y, colW, ROW), "", new Color(0.8f,0.8f,0.8f), 14); y -= ROW + 3f;
+        _epShield     = HUDHelpers.MakeText(HUDHelpers.MakeRect("Shield", _enemyBody, PAD,              y, colW, ROW), "", new Color(0.35f,0.75f,1f), 14);
+        _epResistance = HUDHelpers.MakeText(HUDHelpers.MakeRect("Res",    _enemyBody, PAD + colW + PAD, y, colW, ROW), "", new Color(0.4f,0.85f,1f), 14); y -= ROW + 3f;
+        _epSpeed      = HUDHelpers.MakeText(HUDHelpers.MakeRect("Spd",    _enemyBody, PAD,              y, colW, ROW), "", Color.white, 14);
+        _epFortitude  = HUDHelpers.MakeText(HUDHelpers.MakeRect("Fort",   _enemyBody, PAD + colW + PAD, y, colW, ROW), "", new Color(0.85f,0.6f,1f), 14); y -= ROW + 3f;
+        _epDeathBlow  = HUDHelpers.MakeText(HUDHelpers.MakeRect("DB",     _enemyBody, PAD,              y, colW, ROW), "", new Color(0.95f,0.4f,0.4f), 14); y -= ROW + 8f;
 
         HUDHelpers.MakeRect("Div", _enemyBody, PAD, y + 4f, W - PAD * 2f, 1f)
             .AddComponent<Image>().color = new Color(1f, 1f, 1f, 0.12f);
@@ -332,6 +336,7 @@ public class HUDInfoPanel : MonoBehaviour
     {
         DeselectCurrentTower();
         if (info == null) { Hide(); return; }
+        AudioManager.PlayEvent("select");
         SelectedEnemy = null;
         _selectedTower = info;
         info.GetComponent<SniperZone>()?.SetSelected(true);
@@ -388,6 +393,19 @@ public class HUDInfoPanel : MonoBehaviour
             if (baseDmg > 0f && info.AuraDamageMultiplier > 1.001f)
                 dmgStr += $"  <color=#4DFF73>(+{baseDmg * (info.AuraDamageMultiplier - 1f):0.#})</color>";
             _tpDamage.text = dmgStr;
+        }
+
+        if (_tpShieldBonus != null)
+        {
+            // Scales with the same multipliers as the Damage line (and as runtime damage)
+            float sb = info.shieldBonus * info.EffectiveDamageMult;
+            if (Mathf.Abs(sb) > 0.001f)
+            {
+                string sign = sb > 0f ? "+" : "";
+                string col  = sb > 0f ? "#4DFF73" : "#FF7A5C";
+                _tpShieldBonus.text = $"vs Shields  <color={col}>{sign}{sb:0.#}</color>";
+            }
+            else _tpShieldBonus.text = "";
         }
 
         if (_tpFireRate != null)
@@ -485,13 +503,30 @@ public class HUDInfoPanel : MonoBehaviour
     {
         _rm ??= ResourceManagerScript.Instance;
         if (_selectedTower == null) return;
-        if (_selectedTower.TryUpgrade(_rm)) RefreshTower(_selectedTower);
+        if (_selectedTower.TryUpgrade(_rm))
+        {
+            PlayTowerActionSound(_selectedTower, d => d.upgradeSoundId, "tower_upgrade");
+            RefreshTower(_selectedTower);
+        }
+    }
+
+    // Tower-specific sound wins; the generic event is the fallback
+    static void PlayTowerActionSound(TowerInfo info, Func<TowerDefinition, string> pick, string fallbackEvent)
+    {
+        string soundId = null;
+        if (info != null && TowerDefinitionLibrary.Instance != null &&
+            TowerDefinitionLibrary.Instance.TryGet(info.definitionId, out var def))
+            soundId = pick(def);
+
+        if (!string.IsNullOrEmpty(soundId)) AudioManager.Play(soundId);
+        else AudioManager.PlayEvent(fallbackEvent);
     }
 
     void OnSellClicked()
     {
         _rm ??= ResourceManagerScript.Instance;
         if (_selectedTower == null) return;
+        PlayTowerActionSound(_selectedTower, d => d.sellSoundId, "tower_sell");
         _selectedTower.Sell(_rm);
         DeselectCurrentTower();
         Hide();
@@ -569,12 +604,24 @@ public class HUDInfoPanel : MonoBehaviour
 
         if (_headerTitle  != null) _headerTitle.text = name.ToUpper();
         if (_epHp         != null) _epHp.text         = $"HP        {u.lifeCurrent:0}/{u.lifeMax:0}";
+        if (_epShield     != null) _epShield.text     = u.hasShields ? $"Shield    {u.shieldCurrent:0}/{u.shieldMax:0}" : "";
         if (_epSpeed      != null) _epSpeed.text      = $"Speed     {u.speedMax:0.##}";
         if (_epDeathBlow  != null) _epDeathBlow.text  = $"End dmg   {u.deathBlow}";
-        if (_epArmor      != null) _epArmor.text      = $"Armor     {u.physicalDefense}";
-        if (_epResistance != null) _epResistance.text = $"Resist    {u.elementalDefense}";
-        if (_epFortitude  != null) _epFortitude.text  = $"Fortitude {u.arcanaDefense}";
+        if (_epArmor      != null) _epArmor.text      = $"Armor     {u.physicalDefense}{ReductionPct(u, u.physicalDefense)}";
+        if (_epResistance != null) _epResistance.text = $"Resist    {u.elementalDefense}{ReductionPct(u, u.elementalDefense)}";
+        if (_epFortitude  != null) _epFortitude.text  = $"Fortitude {u.arcanaDefense}{ReductionPct(u, u.arcanaDefense)}";
         if (_epDescription!= null) _epDescription.text = desc;
+    }
+
+    /// <summary>
+    /// Damage reduction granted by a defense stat, using the unit's live value —
+    /// behaviors/auras that modify the stat show up automatically.
+    /// </summary>
+    static string ReductionPct(UnitParentClass u, int stat)
+    {
+        if (stat <= 0) return "";
+        float pct = (1f - Mathf.Pow(u.damageReductionBaseModifier, stat)) * 100f;
+        return $"  <color=#9be29b>(-{pct:0}%)</color>";
     }
 
     // ── Tier research refresh ──────────────────────────────────────────

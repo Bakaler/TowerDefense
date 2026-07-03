@@ -13,6 +13,8 @@ public static class TargetValidatorRegistry
     public static void Register(string prefix, Func<string, TargetValidator> factory)
         => _factories[prefix] = factory;
 
+    public static IEnumerable<string> Prefixes => _factories.Keys;
+
     /// <summary>Creates a TargetValidator from a full id string like "no_behavior:poisoned".</summary>
     public static TargetValidator Create(string id)
     {

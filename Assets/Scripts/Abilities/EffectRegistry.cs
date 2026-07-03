@@ -33,5 +33,7 @@ public static class EffectRegistry
     public static bool TryGet(string typeKey, out Type type) =>
         _registry.TryGetValue(typeKey, out type);
 
+    public static IReadOnlyDictionary<string, Type> All => _registry;
+
     public static void Clear() => _registry.Clear();
 }

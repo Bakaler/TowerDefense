@@ -56,6 +56,8 @@ public class AbilityManager : MonoBehaviour
         if (!instance.IsReady) return false;
 
         instance.Trigger();
+        if (!string.IsNullOrEmpty(ability.fireSoundId))
+            AudioManager.Play(ability.fireSoundId);
         StartCoroutine(ExecuteAbilityCoroutine(ability, context));
         return true;
     }

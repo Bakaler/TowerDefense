@@ -15,6 +15,9 @@ public class TowerPlacer : MonoBehaviour
 {
     public static TowerPlacer Instance { get; private set; }
 
+    /// <summary>Frame a tower was last placed — lets click-selection ignore the placing click.</summary>
+    public static int LastPlacementFrame { get; private set; } = -1;
+
     [Header("Ghost preview")]
     [Tooltip("Opacity of the ghost preview sprite while placing.")]
     [Range(0.1f, 1f)]
@@ -174,6 +177,13 @@ public class TowerPlacer : MonoBehaviour
         // Build real tower
         var go = TowerFactory.Instance.Build(_selectedId, worldPos, _ghostRotation);
         if (go == null) { Cancel(); return; }
+        LastPlacementFrame = Time.frameCount;
+
+        // Tower-specific place sound wins; generic event is the fallback
+        if (!string.IsNullOrEmpty(def.placeSoundId))
+            AudioManager.Play(def.placeSoundId);
+        else
+            AudioManager.PlayEvent("tower_place");
 
         // Deduct cost
         if (freeThisPlace)

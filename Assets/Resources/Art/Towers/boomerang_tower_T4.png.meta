@@ -1,0 +1,342 @@
+fileFormatVersion: 2
+guid: 84bb13abe9a988849926b2f2f32de10f
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 4878565630839622284
+    second: boomerang_tower_T4_0
+  - first:
+      213: 6852211918391492662
+    second: boomerang_tower_T4_1
+  - first:
+      213: -7327184086469223641
+    second: boomerang_tower_T4_2
+  - first:
+      213: 2644044792228360317
+    second: boomerang_tower_T4_3
+  - first:
+      213: 7796469046165798214
+    second: boomerang_tower_T4_4
+  - first:
+      213: -3041228476654081046
+    second: boomerang_tower_T4_5
+  - first:
+      213: 4354398335800930012
+    second: boomerang_tower_T4_6
+  - first:
+      213: -2004444343140013178
+    second: boomerang_tower_T4_7
+  - first:
+      213: 3778832036177125396
+    second: boomerang_tower_T4_8
+  - first:
+      213: 3528110724898605094
+    second: boomerang_tower_T4_9
+  - first:
+      213: 4496824837675598652
+    second: boomerang_tower_T4_10
+  - first:
+      213: 3111774960392618594
+    second: boomerang_tower_T4_11
+  - first:
+      213: 6233995395580877985
+    second: boomerang_tower_T4_12
+  - first:
+      213: -5522789299175573585
+    second: boomerang_tower_T4_13
+  - first:
+      213: -8603002037617729868
+    second: boomerang_tower_T4_14
+  - first:
+      213: 6332314594798801807
+    second: boomerang_tower_T4_15
+  - first:
+      213: 4087859982629735918
+    second: boomerang_tower_T4_16
+  - first:
+      213: 6330001528584900402
+    second: boomerang_tower_T4_17
+  - first:
+      213: -1295493472732822906
+    second: boomerang_tower_T4_18
+  - first:
+      213: -704804864166631836
+    second: boomerang_tower_T4_19
+  - first:
+      213: -4498987665375430349
+    second: boomerang_tower_T4_20
+  - first:
+      213: 1099807206884374143
+    second: boomerang_tower_T4_21
+  - first:
+      213: -5859366307772904062
+    second: boomerang_tower_T4_22
+  - first:
+      213: -6797863693800541205
+    second: boomerang_tower_T4_23
+  - first:
+      213: -665273898461226110
+    second: boomerang_tower_T4_24
+  - first:
+      213: 3203481090940888393
+    second: boomerang_tower_T4_25
+  - first:
+      213: 1246662254338231290
+    second: boomerang_tower_T4_26
+  - first:
+      213: 5333681698863150917
+    second: boomerang_tower_T4_27
+  - first:
+      213: -6831667123407707465
+    second: boomerang_tower_T4_28
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: boomerang_tower_T4_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 128
+        height: 128
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a39c691ffc99ed3469f3a9da06739f1a
+      internalID: -4496861
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boomerang_tower_T4_1
+      rect:
+        serializedVersion: 2
+        x: 128
+        y: 0
+        width: 128
+        height: 128
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b8de6dae0d55e2144890ec6f256584f3
+      internalID: 2118344761
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boomerang_tower_T4_2
+      rect:
+        serializedVersion: 2
+        x: 256
+        y: 0
+        width: 128
+        height: 128
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b463e31acdf9e3d43b0c5483d2171ba0
+      internalID: -1848437671
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boomerang_tower_T4_3
+      rect:
+        serializedVersion: 2
+        x: 384
+        y: 0
+        width: 128
+        height: 128
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b623e105bb37a1f469b72e832617dff4
+      internalID: 675112904
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boomerang_tower_T4_4
+      rect:
+        serializedVersion: 2
+        x: 512
+        y: 0
+        width: 128
+        height: 128
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0827d4b41c9b21547be8b63e064e2b34
+      internalID: 2108140626
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boomerang_tower_T4_5
+      rect:
+        serializedVersion: 2
+        x: 640
+        y: 0
+        width: 128
+        height: 128
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 68261f4f89b5fca40b0d351e58274cec
+      internalID: 1650087571
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 5759c42561423e346b24f3b62196d15b
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      boomerang_tower_T4_0: -4496861
+      boomerang_tower_T4_1: 2118344761
+      boomerang_tower_T4_2: -1848437671
+      boomerang_tower_T4_3: 675112904
+      boomerang_tower_T4_4: 2108140626
+      boomerang_tower_T4_5: 1650087571
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

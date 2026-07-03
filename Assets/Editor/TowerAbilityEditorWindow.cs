@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 using System.Text;
 using UnityEditor;
 using UnityEngine;
@@ -12,7 +13,7 @@ using UnityEngine;
 public class TowerAbilityEditorWindow : EditorWindow
 {
     // ── Tabs ──────────────────────────────────────────────────────────────
-    enum Tab { Towers, Abilities, Effects, Projectiles, Units, Minions }
+    enum Tab { Towers, Abilities, Effects, Projectiles, Units, Minions, Sounds }
     Tab _tab;
 
     // ── Tower state ───────────────────────────────────────────────────────
@@ -39,6 +40,15 @@ public class TowerAbilityEditorWindow : EditorWindow
     // ── Minion state ──────────────────────────────────────────────────────
     readonly List<MinionDefinition> _minions = new();
     int _mIdx = -1;
+
+    // ── Sound state (_sIdx == -2 selects the Events map) ──────────────────
+    readonly List<SoundDefinition>  _sounds      = new();
+    readonly List<SoundEventEntry>  _soundEvents = new();
+    int _sIdx = -1;
+
+    static readonly string[] BusOptions      = { "music", "combat", "ui", "ambient" };
+    static readonly string[] WaveOptions     = { "none", "sine", "square", "triangle", "saw", "noise", "drone" };
+    static readonly string[] PickModeOptions = { "shuffle", "random" };
 
     // ── Scroll positions ──────────────────────────────────────────────────
     Vector2 _listScroll, _detailScroll;
@@ -67,7 +77,55 @@ public class TowerAbilityEditorWindow : EditorWindow
         w.Show();
     }
 
-    void OnEnable() => LoadAll();
+    void OnEnable()
+    {
+        EnsureRegistriesLoaded();
+        LoadAll();
+    }
+
+    void OnDisable()
+    {
+        if (_effectForm is ScriptableObject so) DestroyImmediate(so);
+        _effectForm    = null;
+        _effectFormIdx = -1;
+    }
+
+    // ── Registry bootstrap ────────────────────────────────────────────────
+    // The Effect/Component/Validator registries self-populate via
+    // [RuntimeInitializeOnLoadMethod] which only fires in play mode.
+    // Invoke the same static Register() methods here so the editor can offer
+    // dropdowns and reflect data templates in edit mode.
+    static bool _registriesLoaded;
+
+    static void EnsureRegistriesLoaded()
+    {
+        if (_registriesLoaded && ComponentRegistry.All.Count > 0 && EffectRegistry.All.Count > 0)
+            return;
+
+        // Every registration in the codebase is a static parameterless Register()
+        // declared on an Effect, TargetValidator, or MonoBehaviour subclass.
+        InvokeRegisters(TypeCache.GetTypesDerivedFrom<Effect>());
+        InvokeRegisters(TypeCache.GetTypesDerivedFrom<TargetValidator>());
+        InvokeRegisters(TypeCache.GetTypesDerivedFrom<MonoBehaviour>());
+
+        _registriesLoaded = true;
+        int validators = 0; foreach (var _ in TargetValidatorRegistry.Prefixes) validators++;
+        Debug.Log($"[TowerAbilityEditor] Registries loaded — {EffectRegistry.All.Count} effect type(s), " +
+                  $"{ComponentRegistry.All.Count} component key(s), {validators} validator prefix(es).");
+    }
+
+    static void InvokeRegisters(IEnumerable<Type> types)
+    {
+        foreach (var t in types)
+        {
+            var m = t.GetMethod("Register",
+                BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly,
+                null, Type.EmptyTypes, null);
+            if (m == null) continue;
+            try { m.Invoke(null, null); }
+            catch { /* registries skip duplicates themselves */ }
+        }
+    }
 
     // ── Loading ───────────────────────────────────────────────────────────
 
@@ -80,7 +138,50 @@ public class TowerAbilityEditorWindow : EditorWindow
         LoadProjectiles();
         LoadUnits();
         LoadMinions();
+        LoadBehaviorIds();
+        LoadSounds();
     }
+
+    void LoadSounds()
+    {
+        _sounds.Clear(); _soundEvents.Clear(); _sIdx = -1;
+        string text = ReadFile("sounds");
+        if (text == null) return;
+        var col = JsonUtility.FromJson<SoundDefinitionCollection>(text);
+        if (col?.sounds != null) _sounds.AddRange(col.sounds);
+        if (col?.events != null) _soundEvents.AddRange(col.events);
+    }
+
+    void SaveSounds()
+    {
+        var col = new SoundDefinitionCollection { sounds = _sounds.ToArray(), events = _soundEvents.ToArray() };
+        WriteFile("sounds", JsonUtility.ToJson(col, true));
+    }
+
+    string[] SoundIds()
+    {
+        var ids = new string[_sounds.Count];
+        for (int i = 0; i < _sounds.Count; i++) ids[i] = _sounds[i].id;
+        return ids;
+    }
+
+    // ── Behavior ids (read-only, for dropdowns) ───────────────────────────
+    readonly List<string> _behaviorIds = new();
+
+    [Serializable] class BehaviorIdScan { public BehaviorDefinition[] behaviors; }
+
+    void LoadBehaviorIds()
+    {
+        _behaviorIds.Clear();
+        string text = ReadFile("behaviors");
+        if (text == null) return;
+        var col = JsonUtility.FromJson<BehaviorIdScan>(text);
+        if (col?.behaviors == null) return;
+        foreach (var b in col.behaviors)
+            if (!string.IsNullOrEmpty(b.id)) _behaviorIds.Add(b.id);
+    }
+
+    string[] BehaviorIds() => _behaviorIds.ToArray();
 
     void LoadTowers()
     {
@@ -161,6 +262,16 @@ public class TowerAbilityEditorWindow : EditorWindow
 
     void SaveEffects()
     {
+        // Normalize every entry against its type's template: missing fields get
+        // defaults, stale/unknown keys are dropped.
+        foreach (var e in _effects)
+        {
+            var form = BuildForm(e.type, e.data);
+            if (form == null) continue;   // unknown type — leave data untouched
+            e.data = SerializeForm(form);
+            if (form is ScriptableObject so) DestroyImmediate(so);
+        }
+
         var col = new EffectDefinitionCollection { effects = _effects.ToArray() };
         WriteFile("effects", Deprocess(JsonUtility.ToJson(col, true)));
     }
@@ -224,9 +335,10 @@ public class TowerAbilityEditorWindow : EditorWindow
         if (GUILayout.Toggle(_tab == Tab.Projectiles, "Projectiles", EditorStyles.toolbarButton, GUILayout.Width(80)))  _tab = Tab.Projectiles;
         if (GUILayout.Toggle(_tab == Tab.Units,       "Units",       EditorStyles.toolbarButton, GUILayout.Width(70)))  _tab = Tab.Units;
         if (GUILayout.Toggle(_tab == Tab.Minions,     "Minions",     EditorStyles.toolbarButton, GUILayout.Width(70)))  _tab = Tab.Minions;
+        if (GUILayout.Toggle(_tab == Tab.Sounds,      "Sounds",      EditorStyles.toolbarButton, GUILayout.Width(70)))  _tab = Tab.Sounds;
 
         GUILayout.FlexibleSpace();
-        if (GUILayout.Button("Reload", EditorStyles.toolbarButton, GUILayout.Width(60))) LoadAll();
+        if (GUILayout.Button("Reload", EditorStyles.toolbarButton, GUILayout.Width(60))) { EnsureRegistriesLoaded(); LoadAll(); }
 
         EditorGUILayout.EndHorizontal();
     }
@@ -246,6 +358,7 @@ public class TowerAbilityEditorWindow : EditorWindow
             case Tab.Projectiles: DrawProjectileList(); break;
             case Tab.Units:       DrawUnitList();       break;
             case Tab.Minions:     DrawMinionList();     break;
+            case Tab.Sounds:      DrawSoundList();      break;
         }
 
         EditorGUILayout.EndScrollView();
@@ -254,25 +367,44 @@ public class TowerAbilityEditorWindow : EditorWindow
 
     void DrawTowerList()
     {
+        int moveIdx = -1, moveDir = 0;
         for (int i = 0; i < _towers.Count; i++)
         {
             string label = string.IsNullOrEmpty(_towers[i].displayName) ? _towers[i].id : _towers[i].displayName;
-            ListItem(label, _tIdx == i, () => _tIdx = i);
+            int m = ListItem(label, _tIdx == i, () => _tIdx = i);
+            if (m != 0) { moveIdx = i; moveDir = m; }
         }
+        if (moveIdx >= 0 && MoveEntry(_towers, moveIdx, moveDir, ref _tIdx)) SaveTowers();
         GUILayout.Space(4);
         if (GUILayout.Button("+ Tower"))
         {
             _towers.Add(new TowerDefinition { id = "new_tower", displayName = "New Tower" });
             _tIdx = _towers.Count - 1;
         }
+        if (_tIdx >= 0 && _tIdx < _towers.Count && GUILayout.Button("+ Copy Selected"))
+        {
+            var c = CloneDef(_towers[_tIdx]);
+            c.id += "_copy"; c.displayName += " Copy";
+            _towers.Add(c);
+            _tIdx = _towers.Count - 1;
+        }
     }
 
     void DrawAbilityList()
     {
+        int moveIdx = -1, moveDir = 0;
         for (int i = 0; i < _abilities.Count; i++)
         {
             string label = string.IsNullOrEmpty(_abilities[i].displayName) ? _abilities[i].id : _abilities[i].displayName;
-            ListItem(label, _aIdx == i, () => _aIdx = i);
+            int m = ListItem(label, _aIdx == i, () => _aIdx = i);
+            if (m != 0) { moveIdx = i; moveDir = m; }
+        }
+        // The validators list is parallel to _abilities — move both together
+        if (moveIdx >= 0 && MoveEntry(_abilities, moveIdx, moveDir, ref _aIdx))
+        {
+            int dummy = -1;
+            MoveEntry(_aValidators, moveIdx, moveDir, ref dummy);
+            SaveAbilities();
         }
         GUILayout.Space(4);
         if (GUILayout.Button("+ Ability"))
@@ -281,79 +413,352 @@ public class TowerAbilityEditorWindow : EditorWindow
             _aValidators.Add(new List<string>());
             _aIdx = _abilities.Count - 1;
         }
+        if (_aIdx >= 0 && _aIdx < _abilities.Count && GUILayout.Button("+ Copy Selected"))
+        {
+            var c = CloneDef(_abilities[_aIdx]);
+            c.id += "_copy"; c.displayName += " Copy";
+            _abilities.Add(c);
+            _aValidators.Add(_aIdx < _aValidators.Count ? new List<string>(_aValidators[_aIdx]) : new List<string>());
+            _aIdx = _abilities.Count - 1;
+        }
     }
 
     void DrawEffectList()
     {
+        int moveIdx = -1, moveDir = 0;
         for (int i = 0; i < _effects.Count; i++)
         {
             var e = _effects[i];
             string name = string.IsNullOrEmpty(e.displayName) ? e.id : e.displayName;
             string label = $"{name}\n<size=10><color=#aaa>{e.type}</color></size>";
-
-            bool sel = _eIdx == i;
-            GUI.backgroundColor = sel ? new Color(0.3f, 0.55f, 1f) : Color.white;
-            var style = new GUIStyle(GUI.skin.button) { richText = true, alignment = TextAnchor.MiddleLeft, wordWrap = true, fixedHeight = 0 };
-            if (GUILayout.Button(label, style)) _eIdx = i;
-            GUI.backgroundColor = Color.white;
+            int idx = i;
+            int m = ListItem(label, _eIdx == i, () => { _eIdx = idx; _effectRawMode = false; }, RichListStyle());
+            if (m != 0) { moveIdx = i; moveDir = m; }
         }
+        if (moveIdx >= 0 && MoveEntry(_effects, moveIdx, moveDir, ref _eIdx)) SaveEffects();
         GUILayout.Space(4);
         if (GUILayout.Button("+ Effect"))
         {
             _effects.Add(new EffectDefinition { id = "new_effect", displayName = "New Effect", type = "damage", chance = 1f, data = "{}" });
             _eIdx = _effects.Count - 1;
         }
+        if (_eIdx >= 0 && _eIdx < _effects.Count && GUILayout.Button("+ Copy Selected"))
+        {
+            var c = CloneDef(_effects[_eIdx]);
+            c.id += "_copy"; c.displayName += " Copy";
+            _effects.Add(c);
+            _eIdx = _effects.Count - 1;
+        }
     }
 
     void DrawProjectileList()
     {
+        int moveIdx = -1, moveDir = 0;
         for (int i = 0; i < _projectiles.Count; i++)
         {
             var p = _projectiles[i];
             string name = string.IsNullOrEmpty(p.displayName) ? p.id : p.displayName;
             string label = $"{name}\n<size=10><color=#aaa>{p.movement}</color></size>";
-
-            bool sel = _pIdx == i;
-            GUI.backgroundColor = sel ? new Color(0.3f, 0.55f, 1f) : Color.white;
-            var style = new GUIStyle(GUI.skin.button) { richText = true, alignment = TextAnchor.MiddleLeft, wordWrap = true, fixedHeight = 0 };
-            if (GUILayout.Button(label, style)) _pIdx = i;
-            GUI.backgroundColor = Color.white;
+            int idx = i;
+            int m = ListItem(label, _pIdx == i, () => _pIdx = idx, RichListStyle());
+            if (m != 0) { moveIdx = i; moveDir = m; }
         }
+        if (moveIdx >= 0 && MoveEntry(_projectiles, moveIdx, moveDir, ref _pIdx)) SaveProjectiles();
         GUILayout.Space(4);
         if (GUILayout.Button("+ Projectile"))
         {
             _projectiles.Add(new ProjectileDefinition { id = "new_projectile", displayName = "New Projectile" });
             _pIdx = _projectiles.Count - 1;
         }
+        if (_pIdx >= 0 && _pIdx < _projectiles.Count && GUILayout.Button("+ Copy Selected"))
+        {
+            var c = CloneDef(_projectiles[_pIdx]);
+            c.id += "_copy"; c.displayName += " Copy";
+            _projectiles.Add(c);
+            _pIdx = _projectiles.Count - 1;
+        }
     }
 
     void DrawUnitList()
     {
+        int moveIdx = -1, moveDir = 0;
         for (int i = 0; i < _units.Count; i++)
         {
             string label = string.IsNullOrEmpty(_units[i].displayName) ? _units[i].id : _units[i].displayName;
-            ListItem(label, _uIdx == i, () => _uIdx = i);
+            int m = ListItem(label, _uIdx == i, () => _uIdx = i);
+            if (m != 0) { moveIdx = i; moveDir = m; }
         }
+        if (moveIdx >= 0 && MoveEntry(_units, moveIdx, moveDir, ref _uIdx)) SaveUnits();
         GUILayout.Space(4);
         if (GUILayout.Button("+ Unit"))
         {
             _units.Add(new UnitDefinition { id = "new_unit", displayName = "New Unit" });
             _uIdx = _units.Count - 1;
         }
+        if (_uIdx >= 0 && _uIdx < _units.Count && GUILayout.Button("+ Copy Selected"))
+        {
+            var c = CloneDef(_units[_uIdx]);
+            c.id += "_copy"; c.displayName += " Copy";
+            _units.Add(c);
+            _uIdx = _units.Count - 1;
+        }
     }
 
     void DrawMinionList()
     {
+        int moveIdx = -1, moveDir = 0;
         for (int i = 0; i < _minions.Count; i++)
         {
             string label = string.IsNullOrEmpty(_minions[i].displayName) ? _minions[i].id : _minions[i].displayName;
-            ListItem(label, _mIdx == i, () => _mIdx = i);
+            int m = ListItem(label, _mIdx == i, () => _mIdx = i);
+            if (m != 0) { moveIdx = i; moveDir = m; }
         }
+        if (moveIdx >= 0 && MoveEntry(_minions, moveIdx, moveDir, ref _mIdx)) SaveMinions();
         GUILayout.Space(4);
         if (GUILayout.Button("+ Minion"))
         {
             _minions.Add(new MinionDefinition { id = "new_minion", displayName = "New Minion" });
             _mIdx = _minions.Count - 1;
+        }
+        if (_mIdx >= 0 && _mIdx < _minions.Count && GUILayout.Button("+ Copy Selected"))
+        {
+            var c = CloneDef(_minions[_mIdx]);
+            c.id += "_copy"; c.displayName += " Copy";
+            _minions.Add(c);
+            _mIdx = _minions.Count - 1;
+        }
+    }
+
+    void DrawSoundList()
+    {
+        // Pseudo-entry for the event → sound map
+        GUI.backgroundColor = _sIdx == -2 ? new Color(0.3f, 0.55f, 1f) : new Color(0.85f, 0.75f, 0.4f);
+        if (GUILayout.Button("⚡ Game Events", new GUIStyle(GUI.skin.button) { alignment = TextAnchor.MiddleLeft }))
+            _sIdx = -2;
+        GUI.backgroundColor = Color.white;
+        GUILayout.Space(4);
+
+        int moveIdx = -1, moveDir = 0;
+        for (int i = 0; i < _sounds.Count; i++)
+        {
+            var s = _sounds[i];
+            string name  = string.IsNullOrEmpty(s.displayName) ? s.id : s.displayName;
+            string sub   = s.clips != null && s.clips.Length > 0 ? $"{s.clips.Length} clip(s)" : $"synth:{s.synthWave}";
+            string label = $"{name}\n<size=10><color=#aaa>{s.bus} · {sub}</color></size>";
+            int idx = i;
+            int m = ListItem(label, _sIdx == i, () => _sIdx = idx, RichListStyle());
+            if (m != 0) { moveIdx = i; moveDir = m; }
+        }
+        if (moveIdx >= 0 && MoveEntry(_sounds, moveIdx, moveDir, ref _sIdx)) SaveSounds();
+        GUILayout.Space(4);
+        if (GUILayout.Button("+ Sound"))
+        {
+            _sounds.Add(new SoundDefinition { id = "new_sound", displayName = "New Sound", synthWave = "sine" });
+            _sIdx = _sounds.Count - 1;
+        }
+        if (_sIdx >= 0 && _sIdx < _sounds.Count && GUILayout.Button("+ Copy Selected"))
+        {
+            var c = CloneDef(_sounds[_sIdx]);
+            c.id += "_copy"; c.displayName += " Copy";
+            _sounds.Add(c);
+            _sIdx = _sounds.Count - 1;
+        }
+    }
+
+    void DrawSoundDetail()
+    {
+        if (_sIdx == -2) { DrawSoundEvents(); return; }
+        if (_sIdx < 0 || _sIdx >= _sounds.Count)
+        {
+            EmptyMsg("Select a sound, the Game Events map, or click + Sound.");
+            return;
+        }
+        var s = _sounds[_sIdx];
+
+        Section("Identity");
+        s.id          = TF("ID",           s.id);
+        s.displayName = TF("Display Name", s.displayName);
+
+        Section("Clips (empty = synth fallback)");
+        DrawClipList(s);
+        s.pickMode = Popup("Pick Mode", s.pickMode, PickModeOptions);
+
+        Section("Playback");
+        s.bus         = Popup("Bus", s.bus, BusOptions);
+        s.volume      = EF.FloatField("Volume",       s.volume);
+        s.pitch       = EF.FloatField("Pitch",        s.pitch);
+        s.pitchJitter = EF.FloatField("Pitch Jitter", s.pitchJitter);
+        s.loop        = EF.Toggle(    "Loop (music/ambient)", s.loop);
+
+        Section("Discipline");
+        s.minInterval = EF.FloatField("Min Interval (s)",     s.minInterval);
+        s.maxVoices   = EF.IntField(  "Max Voices (0=∞)",     s.maxVoices);
+        s.priority    = EF.IntField(  "Priority",             s.priority);
+
+        Section("Synth Fallback");
+        s.synthWave = Popup("Waveform", s.synthWave, WaveOptions);
+        if (s.synthWave != "none")
+        {
+            s.synthFreq     = EF.FloatField("Frequency (Hz)",      s.synthFreq);
+            s.synthFreqEnd  = EF.FloatField("End Frequency (0=—)", s.synthFreqEnd);
+            s.synthDuration = EF.FloatField("Duration (s)",        s.synthDuration);
+            s.synthAttack   = EF.FloatField("Attack (s)",          s.synthAttack);
+        }
+
+        GUILayout.Space(6);
+        EditorGUILayout.BeginHorizontal();
+        if (GUILayout.Button("▶ Preview", GUILayout.Height(24))) PreviewSound(s);
+        if (GUILayout.Button("■ Stop", GUILayout.Width(70), GUILayout.Height(24))) StopPreview();
+        EditorGUILayout.EndHorizontal();
+
+        SaveDeleteBar(SaveSounds, () => { _sounds.RemoveAt(_sIdx); _sIdx = Mathf.Clamp(_sIdx - 1, 0, _sounds.Count - 1); SaveSounds(); });
+    }
+
+    void DrawSoundEvents()
+    {
+        Section("Game Events → Sounds");
+        EditorGUILayout.HelpBox("Code fires these named events; which sound plays is data.\nKnown events: ui_click, select, tower_place, enemy_death, wave_start, wave_clear, victory, defeat, life_lost, tier_unlock, music_game, music_menu.", MessageType.None);
+
+        int removeIdx = -1;
+        for (int i = 0; i < _soundEvents.Count; i++)
+        {
+            EditorGUILayout.BeginHorizontal();
+            _soundEvents[i].eventId = EditorGUILayout.TextField(_soundEvents[i].eventId, GUILayout.Width(140));
+            _soundEvents[i].soundId = TextWithIdPopup(_soundEvents[i].soundId, SoundIds());
+            GUI.backgroundColor = new Color(1f, 0.4f, 0.4f);
+            if (GUILayout.Button("✕", GUILayout.Width(24))) removeIdx = i;
+            GUI.backgroundColor = Color.white;
+            EditorGUILayout.EndHorizontal();
+        }
+        if (removeIdx >= 0) _soundEvents.RemoveAt(removeIdx);
+        if (GUILayout.Button("+ Event Mapping")) _soundEvents.Add(new SoundEventEntry { eventId = "", soundId = "" });
+
+        GUILayout.Space(10);
+        GUI.backgroundColor = new Color(0.4f, 1f, 0.5f);
+        if (GUILayout.Button("Save", GUILayout.Height(28)))
+        {
+            SaveSounds();
+            EditorUtility.DisplayDialog("Saved", "Changes written to JSON.", "OK");
+        }
+        GUI.backgroundColor = Color.white;
+    }
+
+    // ── Clip list with drag-and-drop AudioClip picker ─────────────────────
+
+    void DrawClipList(SoundDefinition s)
+    {
+        var clips = new List<string>(s.clips ?? Array.Empty<string>());
+        int removeIdx = -1;
+
+        var warnStyle = new GUIStyle(EditorStyles.miniLabel);
+        warnStyle.normal.textColor = new Color(1f, 0.6f, 0.3f);
+
+        for (int i = 0; i < clips.Count; i++)
+        {
+            EditorGUILayout.BeginHorizontal();
+            clips[i] = EditorGUILayout.TextField(clips[i] ?? "");
+
+            var loaded = string.IsNullOrEmpty(clips[i])
+                ? null
+                : Resources.Load<AudioClip>(ToResourcesPath(clips[i]));
+
+            var picked = (AudioClip)EditorGUILayout.ObjectField(loaded, typeof(AudioClip), false, GUILayout.Width(150));
+            if (picked != loaded && picked != null)
+            {
+                string resPath = AssetPathToResourcesPath(AssetDatabase.GetAssetPath(picked));
+                if (resPath != null) { clips[i] = resPath; loaded = picked; }
+                else ShowNotification(new GUIContent("Clip must live under a Resources folder."));
+            }
+
+            GUI.backgroundColor = new Color(1f, 0.4f, 0.4f);
+            if (GUILayout.Button("✕", GUILayout.Width(24))) removeIdx = i;
+            GUI.backgroundColor = Color.white;
+            EditorGUILayout.EndHorizontal();
+
+            if (!string.IsNullOrEmpty(clips[i]) && loaded == null)
+                GUILayout.Label($"   ⚠ not found — paths are Resources-relative, e.g. \"Audio/SFX/{Path.GetFileName(clips[i])}\"", warnStyle);
+        }
+        if (removeIdx >= 0) clips.RemoveAt(removeIdx);
+        if (GUILayout.Button("+ Clip")) clips.Add("");
+
+        s.clips = clips.ToArray();
+    }
+
+    /// <summary>"Assets/Resources/Audio/SFX/x.wav" → "Audio/SFX/x". Null if not under Resources.</summary>
+    static string AssetPathToResourcesPath(string assetPath)
+    {
+        if (string.IsNullOrEmpty(assetPath)) return null;
+        int r = assetPath.IndexOf("/Resources/", StringComparison.OrdinalIgnoreCase);
+        if (r < 0) return null;
+        string p = assetPath.Substring(r + "/Resources/".Length);
+        int dot = p.LastIndexOf('.');
+        return dot > 0 ? p.Substring(0, dot) : p;
+    }
+
+    // ── Sound preview (editor-only playback via AudioUtil reflection) ─────
+
+    void PreviewSound(SoundDefinition s)
+    {
+        AudioClip clip = null;
+        string source = null;
+        if (s.clips != null)
+            foreach (var path in s.clips)
+            {
+                if (string.IsNullOrEmpty(path)) continue;
+                clip = Resources.Load<AudioClip>(ToResourcesPath(path));
+                if (clip != null) { source = path; break; }
+            }
+        if (clip == null)
+        {
+            clip = AudioSynth.GetClip(s);
+            source = clip != null ? $"synth:{s.synthWave}" : null;
+        }
+        if (clip == null) { ShowNotification(new GUIContent("No clip found and no synth waveform set.")); return; }
+
+        if (PlayPreviewClip(clip))
+            ShowNotification(new GUIContent($"▶ {source}"), 0.8f);
+        else
+            ShowNotification(new GUIContent("Preview unavailable in this Unity version — check console."));
+    }
+
+    void StopPreview() => StopAllPreviewClips();
+
+    static Type FindAudioUtil()
+    {
+        foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
+        {
+            var t = asm.GetType("UnityEditor.AudioUtil");
+            if (t != null) return t;
+        }
+        return null;
+    }
+
+    static bool PlayPreviewClip(AudioClip clip)
+    {
+        var util = FindAudioUtil();
+        if (util == null) { Debug.LogWarning("[TowerAbilityEditor] UnityEditor.AudioUtil not found — sound preview disabled."); return false; }
+
+        const BindingFlags Flags = BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
+        foreach (var name in new[] { "PlayPreviewClip", "PlayClip" })
+        {
+            var m = util.GetMethod(name, Flags, null, new[] { typeof(AudioClip), typeof(int), typeof(bool) }, null);
+            if (m != null) { m.Invoke(null, new object[] { clip, 0, false }); return true; }
+            m = util.GetMethod(name, Flags, null, new[] { typeof(AudioClip) }, null);
+            if (m != null) { m.Invoke(null, new object[] { clip }); return true; }
+        }
+        Debug.LogWarning("[TowerAbilityEditor] AudioUtil found but no known preview method — sound preview disabled.");
+        return false;
+    }
+
+    static void StopAllPreviewClips()
+    {
+        var util = FindAudioUtil();
+        if (util == null) return;
+        const BindingFlags Flags = BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
+        foreach (var name in new[] { "StopAllPreviewClips", "StopAllClips" })
+        {
+            var m = util.GetMethod(name, Flags, null, Type.EmptyTypes, null);
+            if (m != null) { m.Invoke(null, null); return; }
         }
     }
 
@@ -372,6 +777,7 @@ public class TowerAbilityEditorWindow : EditorWindow
             case Tab.Projectiles: DrawProjectileDetail(); break;
             case Tab.Units:       DrawUnitDetail();       break;
             case Tab.Minions:     DrawMinionDetail();     break;
+            case Tab.Sounds:      DrawSoundDetail();      break;
         }
 
         EditorGUILayout.EndScrollView();
@@ -408,6 +814,11 @@ public class TowerAbilityEditorWindow : EditorWindow
         t.displayDamage   = EF.FloatField("Display Damage (override)",   t.displayDamage);
         t.displayCooldown = EF.FloatField("Display Cooldown (override)", t.displayCooldown);
 
+        Section("Audio");
+        t.placeSoundId   = TFDropdown("Place Sound (empty = default)",   t.placeSoundId,   SoundIds());
+        t.sellSoundId    = TFDropdown("Sell Sound (empty = default)",    t.sellSoundId,    SoundIds());
+        t.upgradeSoundId = TFDropdown("Upgrade Sound (empty = default)", t.upgradeSoundId, SoundIds());
+
         Section("Upgrades");
         t.maxTier               = EF.IntField(  "Max Tier",                t.maxTier);
         t.towerTier             = EF.IntField(  "Tower Tier (research)",   t.towerTier);
@@ -438,8 +849,7 @@ public class TowerAbilityEditorWindow : EditorWindow
             if (GUILayout.Button("✕", GUILayout.Width(24))) removeIdx = i;
             GUI.backgroundColor = Color.white;
             EditorGUILayout.EndHorizontal();
-            comps[i].key  = TF("Key",          comps[i].key ?? "");
-            comps[i].data = TA("Data (JSON)",   string.IsNullOrEmpty(comps[i].data) ? "{}" : comps[i].data, 4);
+            DrawComponentEntry(comps[i]);
             EditorGUILayout.EndVertical();
             GUILayout.Space(2);
         }
@@ -472,6 +882,9 @@ public class TowerAbilityEditorWindow : EditorWindow
         a.range    = EF.FloatField("Range",       a.range);
         a.fireArc  = EF.FloatField("Fire Arc (°)", a.fireArc);
 
+        Section("Audio");
+        a.fireSoundId = TFDropdown("Fire Sound ID", a.fireSoundId, SoundIds());
+
         Section("Cooldown");
         a.cooldownDuration = EF.FloatField("Cooldown (s)", a.cooldownDuration);
 
@@ -483,12 +896,31 @@ public class TowerAbilityEditorWindow : EditorWindow
         a.finish_time      = EF.FloatField("Finish Time",       a.finish_time);
 
         Section("Target Validators");
-        EditorGUILayout.HelpBox("e.g. \"no_behavior:poisoned\" to skip already-poisoned targets.", MessageType.None);
+        EditorGUILayout.HelpBox("\"no_behavior:poisoned\" skips targets that already have the behavior.\n\"affectable:slowed\" also skips targets immune to it (e.g. boss_immunity).", MessageType.None);
         int removeIdx = -1;
+        var prefixes = ValidatorPrefixes();
         for (int i = 0; i < validators.Count; i++)
         {
+            string cur    = validators[i] ?? "";
+            int    colon  = cur.IndexOf(':');
+            string prefix = colon >= 0 ? cur.Substring(0, colon) : cur;
+            string param  = colon >= 0 ? cur.Substring(colon + 1) : "";
+
             EditorGUILayout.BeginHorizontal();
-            validators[i] = EditorGUILayout.TextField(validators[i]);
+            if (prefixes.Length > 0)
+            {
+                int pIdx  = Array.IndexOf(prefixes, prefix);
+                int shown = pIdx < 0 ? 0 : pIdx;
+                int sel   = EditorGUILayout.Popup(shown, prefixes, GUILayout.Width(110));
+                if (sel != shown || pIdx >= 0) prefix = prefixes[sel];
+            }
+            else
+            {
+                prefix = EditorGUILayout.TextField(prefix, GUILayout.Width(110));
+            }
+            param = TextWithIdPopup(param, BehaviorIds());
+            validators[i] = prefix + ":" + param;
+
             GUI.backgroundColor = new Color(1f, 0.4f, 0.4f);
             if (GUILayout.Button("✕", GUILayout.Width(24))) removeIdx = i;
             GUI.backgroundColor = Color.white;
@@ -516,17 +948,245 @@ public class TowerAbilityEditorWindow : EditorWindow
         e.displayName = TF("Display Name", e.displayName);
 
         Section("Type & Chance");
-        e.type   = Popup("Type", e.type, EffectTypeOptions);
+        e.type   = Popup("Type", e.type, EffectTypeKeys());
         e.chance = EF.FloatField("Chance (0–1)", e.chance);
 
-        DrawEffectDataHint(e.type);
+        Section("Data");
+        var form = GetEffectForm(e);
+        if (form == null)
+        {
+            EditorGUILayout.HelpBox($"Unknown effect type '{e.type}' — editing raw JSON.", MessageType.Warning);
+            _effectRawMode = true;
+        }
 
-        Section("Data (JSON)");
-        GUILayout.Label("Type-specific parameters — edit the JSON object below:", EditorStyles.miniLabel);
-        if (string.IsNullOrEmpty(e.data)) e.data = "{}";
-        e.data = EditorGUILayout.TextArea(e.data, MonoStyle(), GUILayout.MinHeight(140));
+        if (form != null)
+            _effectRawMode = GUILayout.Toggle(_effectRawMode, "Edit raw JSON", EditorStyles.miniButton, GUILayout.Width(110));
+
+        if (_effectRawMode)
+        {
+            if (string.IsNullOrEmpty(e.data)) e.data = "{}";
+            string edited = EditorGUILayout.TextArea(e.data, MonoStyle(), GUILayout.MinHeight(140));
+            if (edited != e.data)
+            {
+                e.data = edited;
+                _effectFormIdx = -1;   // raw edit — rebuild the form next time it's shown
+            }
+        }
+        else if (form != null)
+        {
+            GUILayout.Label("Fields reflected from the effect type — unknown JSON keys are dropped on save.", EditorStyles.miniLabel);
+            DrawEffectForm(form);
+            e.data = SerializeForm(form);
+        }
 
         SaveDeleteBar(SaveEffects, () => { _effects.RemoveAt(_eIdx); _eIdx = Mathf.Clamp(_eIdx - 1, 0, _effects.Count - 1); SaveEffects(); });
+    }
+
+    // ── Effect data form (reflection-driven) ──────────────────────────────
+    // The form model is the same thing the runtime fills from JSON:
+    //  - a nested [Serializable] data class when the effect uses one
+    //    (Effect_Set.EffectSetData, Effect_Search_Area.SearchAreaData), or
+    //  - the Effect subclass itself (fields declared on the subclass only).
+    // New effect types get a working form automatically.
+
+    object _effectForm;
+    string _effectFormType;
+    int    _effectFormIdx = -1;
+    bool   _effectRawMode;
+
+    object GetEffectForm(EffectDefinition e)
+    {
+        if (_effectForm != null && _effectFormIdx == _eIdx && _effectFormType == e.type)
+            return _effectForm;
+
+        if (_effectForm is ScriptableObject old) DestroyImmediate(old);
+        _effectForm     = BuildForm(e.type, e.data);
+        _effectFormType = e.type;
+        _effectFormIdx  = _eIdx;
+        return _effectForm;
+    }
+
+    static object BuildForm(string effectType, string dataJson)
+    {
+        if (!EffectRegistry.TryGet(effectType, out var type)) return null;
+        string json = string.IsNullOrEmpty(dataJson) ? "{}" : dataJson;
+
+        var nested = FindNestedDataType(type);
+        if (nested != null)
+        {
+            object obj;
+            try { obj = JsonUtility.FromJson(json, nested); }
+            catch { obj = null; }
+            return obj ?? Activator.CreateInstance(nested);
+        }
+
+        var so = ScriptableObject.CreateInstance(type);
+        so.hideFlags = HideFlags.HideAndDontSave;
+        try { JsonUtility.FromJsonOverwrite(json, so); } catch { }
+        return so;
+    }
+
+    static Type FindNestedDataType(Type effectType)
+    {
+        foreach (var nt in effectType.GetNestedTypes(BindingFlags.Public | BindingFlags.NonPublic))
+            if (nt.IsClass && nt.IsDefined(typeof(SerializableAttribute), false))
+                return nt;
+        return null;
+    }
+
+    static List<FieldInfo> FormFields(object form)
+    {
+        var flags = BindingFlags.Public | BindingFlags.Instance;
+        if (form is ScriptableObject) flags |= BindingFlags.DeclaredOnly;   // skip Effect base fields
+
+        var fields = new List<FieldInfo>();
+        foreach (var f in form.GetType().GetFields(flags))
+            if (IsSupportedFieldType(f.FieldType))
+                fields.Add(f);
+        return fields;
+    }
+
+    static bool IsSupportedFieldType(Type t) =>
+        t == typeof(float) || t == typeof(int) || t == typeof(bool) || t == typeof(string) ||
+        t == typeof(Color) || t.IsEnum || t == typeof(string[]) || t == typeof(List<string>);
+
+    void DrawEffectForm(object form)
+    {
+        foreach (var f in FormFields(form))
+        {
+            var    t     = f.FieldType;
+            string label = ObjectNames.NicifyVariableName(f.Name);
+            object v     = f.GetValue(form);
+
+            if      (t == typeof(float))  f.SetValue(form, EditorGUILayout.FloatField(label, (float)v));
+            else if (t == typeof(int))    f.SetValue(form, EditorGUILayout.IntField(label, (int)v));
+            else if (t == typeof(bool))   f.SetValue(form, EditorGUILayout.Toggle(label, (bool)v));
+            else if (t == typeof(Color))  f.SetValue(form, EditorGUILayout.ColorField(label, (Color)v));
+            else if (t.IsEnum)            f.SetValue(form, EditorGUILayout.EnumPopup(label, (Enum)v));
+            else if (t == typeof(string)) f.SetValue(form, DrawIdAwareString(label, f.Name, (string)v));
+            else if (t == typeof(string[]))
+            {
+                var list = new List<string>((string[])v ?? Array.Empty<string>());
+                DrawStringList(label, f.Name, list);
+                f.SetValue(form, list.ToArray());
+            }
+            else if (t == typeof(List<string>))
+            {
+                var list = (List<string>)v ?? new List<string>();
+                DrawStringList(label, f.Name, list);
+                f.SetValue(form, list);
+            }
+        }
+    }
+
+    // Field names that reference other definitions get an id dropdown
+    string DrawIdAwareString(string label, string fieldName, string value)
+    {
+        var options = IdOptionsFor(fieldName);
+        return options != null
+            ? TFDropdown(label, value ?? "", options)
+            : TF(label, value);
+    }
+
+    string[] IdOptionsFor(string fieldName)
+    {
+        string n = fieldName.ToLowerInvariant();
+        if (n.Contains("effectid"))     return EffectIds();
+        if (n.Contains("projectileid")) return ProjectileIds();
+        if (n.Contains("behaviorid"))   return BehaviorIds();
+        if (n.Contains("minionid"))     return MinionIds();
+        if (n.Contains("soundid"))      return SoundIds();
+        return null;
+    }
+
+    void DrawStringList(string label, string fieldName, List<string> list)
+    {
+        GUILayout.Label(label, EditorStyles.miniLabel);
+        int removeIdx = -1;
+        for (int i = 0; i < list.Count; i++)
+        {
+            EditorGUILayout.BeginHorizontal();
+            list[i] = DrawIdAwareString($"[{i}]", fieldName, list[i]);
+            GUI.backgroundColor = new Color(1f, 0.4f, 0.4f);
+            if (GUILayout.Button("✕", GUILayout.Width(24))) removeIdx = i;
+            GUI.backgroundColor = Color.white;
+            EditorGUILayout.EndHorizontal();
+        }
+        if (removeIdx >= 0) list.RemoveAt(removeIdx);
+        if (GUILayout.Button($"+ {label} entry")) list.Add("");
+    }
+
+    // ── Form → data JSON ──────────────────────────────────────────────────
+
+    static string SerializeForm(object form)
+    {
+        var sb = new StringBuilder("{ ");
+        bool first = true;
+        foreach (var f in FormFields(form))
+        {
+            if (!first) sb.Append(", ");
+            first = false;
+            sb.Append('"').Append(f.Name).Append("\": ");
+            AppendJsonValue(sb, f.GetValue(form), f.FieldType);
+        }
+        sb.Append(" }");
+        return sb.ToString();
+    }
+
+    static void AppendJsonValue(StringBuilder sb, object v, Type t)
+    {
+        if (t == typeof(float))       sb.Append(((float)v).ToString(System.Globalization.CultureInfo.InvariantCulture));
+        else if (t == typeof(int))    sb.Append((int)v);
+        else if (t == typeof(bool))   sb.Append((bool)v ? "true" : "false");
+        else if (t.IsEnum)            sb.Append(Convert.ToInt32(v));
+        else if (t == typeof(string)) AppendJsonString(sb, (string)v);
+        else if (t == typeof(Color))
+        {
+            var c = (Color)v;
+            sb.Append("{\"r\": ").Append(c.r.ToString(System.Globalization.CultureInfo.InvariantCulture))
+              .Append(", \"g\": ").Append(c.g.ToString(System.Globalization.CultureInfo.InvariantCulture))
+              .Append(", \"b\": ").Append(c.b.ToString(System.Globalization.CultureInfo.InvariantCulture))
+              .Append(", \"a\": ").Append(c.a.ToString(System.Globalization.CultureInfo.InvariantCulture))
+              .Append('}');
+        }
+        else if (t == typeof(string[]) || t == typeof(List<string>))
+        {
+            var items = v as IEnumerable<string> ?? Array.Empty<string>();
+            sb.Append('[');
+            bool firstItem = true;
+            foreach (var s in items)
+            {
+                if (!firstItem) sb.Append(", ");
+                firstItem = false;
+                AppendJsonString(sb, s);
+            }
+            sb.Append(']');
+        }
+        else sb.Append("null");
+    }
+
+    static void AppendJsonString(StringBuilder sb, string s)
+    {
+        sb.Append('"');
+        if (!string.IsNullOrEmpty(s))
+            foreach (char c in s)
+                switch (c)
+                {
+                    case '"':  sb.Append("\\\""); break;
+                    case '\\': sb.Append("\\\\"); break;
+                    case '\n': sb.Append("\\n");  break;
+                    case '\t': sb.Append("\\t");  break;
+                    default:   sb.Append(c);      break;
+                }
+        sb.Append('"');
+    }
+
+    string[] EffectTypeKeys()
+    {
+        if (EffectRegistry.All.Count == 0) return EffectTypeOptions;
+        var keys = new List<string>(EffectRegistry.All.Keys);
+        keys.Sort();
+        return keys.ToArray();
     }
 
     // ── Projectile Detail ─────────────────────────────────────────────────
@@ -568,6 +1228,7 @@ public class TowerAbilityEditorWindow : EditorWindow
         if (p.blockedByShields)
             p.shieldAbsorb = EF.FloatField("Shield Absorb Dmg",  p.shieldAbsorb);
         p.drawImpactLine   = EF.Toggle(    "Draw Impact Line",   p.drawImpactLine);
+        p.impactSoundId    = TFDropdown("Impact Sound ID", p.impactSoundId, SoundIds());
 
         Section("Visuals");
         p.scale        = EF.FloatField("Scale",         p.scale);
@@ -601,6 +1262,7 @@ public class TowerAbilityEditorWindow : EditorWindow
 
         Section("Stats");
         u.life             = EF.FloatField("Life",              u.life);
+        u.shield           = EF.FloatField("Shield (0 = none)", u.shield);
         u.speed            = EF.FloatField("Speed",             u.speed);
         u.physicalDefense  = EF.IntField(  "Physical Defense",  u.physicalDefense);
         u.elementalDefense = EF.IntField(  "Elemental Defense", u.elementalDefense);
@@ -626,14 +1288,17 @@ public class TowerAbilityEditorWindow : EditorWindow
         u.animDeathSheet = TF("Death Sheet", u.animDeathSheet);
         u.animDeathFps   = EF.FloatField("Death FPS",  u.animDeathFps);
 
+        Section("Audio");
+        u.deathSoundId = TFDropdown("Death Sound (empty = default)", u.deathSoundId, SoundIds());
+
         Section("Starting Behaviors");
-        EditorGUILayout.HelpBox("Behavior ids applied permanently at spawn (e.g. immunities).", MessageType.None);
+        EditorGUILayout.HelpBox("Behavior ids applied permanently at spawn (e.g. immunities, shields).", MessageType.None);
         var behaviors = new List<string>(u.startingBehaviors ?? Array.Empty<string>());
         int removeBehavior = -1;
         for (int i = 0; i < behaviors.Count; i++)
         {
             EditorGUILayout.BeginHorizontal();
-            behaviors[i] = EditorGUILayout.TextField(behaviors[i]);
+            behaviors[i] = TextWithIdPopup(behaviors[i], BehaviorIds());
             GUI.backgroundColor = new Color(1f, 0.4f, 0.4f);
             if (GUILayout.Button("✕", GUILayout.Width(24))) removeBehavior = i;
             GUI.backgroundColor = Color.white;
@@ -657,8 +1322,7 @@ public class TowerAbilityEditorWindow : EditorWindow
             if (GUILayout.Button("✕", GUILayout.Width(24))) removeIdx = i;
             GUI.backgroundColor = Color.white;
             EditorGUILayout.EndHorizontal();
-            comps[i].key  = TF("Key",         comps[i].key ?? "");
-            comps[i].data = TA("Data (JSON)",  string.IsNullOrEmpty(comps[i].data) ? "{}" : comps[i].data, 4);
+            DrawComponentEntry(comps[i]);
             EditorGUILayout.EndVertical();
             GUILayout.Space(2);
         }
@@ -865,23 +1529,6 @@ public class TowerAbilityEditorWindow : EditorWindow
         return result;
     }
 
-    static void DrawEffectDataHint(string type)
-    {
-        string hint = type switch
-        {
-            "damage"                      => "damageBase, damageType (0=Physical 1=Arcane 2=Piercing 3=Natural), minimumDamage, maximumDamage, criticalChance, criticalDamageMultiplier, shieldBonus",
-            "launch"                      => "projectileId (projectiles.json), impactEffectId, count, spreadAngle, speedJitter, lifetimeJitter, scaleJitter, bonusCountKey (ModifierSelection key)",
-            "search_area"                 => "effectId, radius, maxTargets (-1=all), horizontalArc, searchFromTarget (bool), startingDepth",
-            "set"                         => "effectIds: [\"id1\", \"id2\"]  — runs all listed effects in sequence",
-            "apply_behavior"              => "behaviorId  (e.g. \"poisoned\", \"rooted\", \"slowed\")",
-            "apply_permanent_speed_buff"  => "speedBonus, radius, targetDefinitionId",
-            "drain_life"                  => "damage, goldPerDrain, techPerDrain",
-            _                             => null
-        };
-        if (hint != null)
-            EditorGUILayout.HelpBox(hint, MessageType.None);
-    }
-
     // ── UI Helpers ────────────────────────────────────────────────────────
 
     // Shorthand for EditorGUILayout
@@ -894,6 +1541,49 @@ public class TowerAbilityEditorWindow : EditorWindow
     }
 
     string TF(string label, string val) => EditorGUILayout.TextField(label, val ?? "");
+
+    /// <summary>Text field + id popup combo (no label). Caller wraps in a horizontal group.
+    /// "—" = empty; only writes on an actual selection change.</summary>
+    string TextWithIdPopup(string value, string[] options, float popupWidth = 150f)
+    {
+        value = EditorGUILayout.TextField(value ?? "");
+        if (options.Length > 0)
+        {
+            var opts = new string[options.Length + 1];
+            opts[0] = "—";
+            Array.Copy(options, 0, opts, 1, options.Length);
+            int idx = Array.IndexOf(options, value) + 1;
+            int sel = EditorGUILayout.Popup(idx, opts, GUILayout.Width(popupWidth));
+            if (sel != idx) value = sel <= 0 ? "" : opts[sel];
+        }
+        return value;
+    }
+
+    /// <summary>Component entry editor: key dropdown from ComponentRegistry + data JSON.
+    /// Picking a key with empty data prefills the component's Data template with defaults.</summary>
+    void DrawComponentEntry(ComponentEntry entry)
+    {
+        if (ComponentRegistry.All.Count == 0)
+            EditorGUILayout.HelpBox("ComponentRegistry is empty — component key dropdown unavailable (check console).", MessageType.Warning);
+
+        string prevKey = entry.key ?? "";
+        entry.key = TFDropdown("Key", prevKey, ComponentKeys());
+
+        if (entry.key != prevKey && (string.IsNullOrEmpty(entry.data) || entry.data.Trim() == "{}"))
+            entry.data = ComponentDataTemplate(entry.key);
+
+        entry.data = TA("Data (JSON)", string.IsNullOrEmpty(entry.data) ? "{}" : entry.data, 4);
+    }
+
+    /// <summary>Default data JSON for a component key, reflected from its nested [Serializable] Data class.</summary>
+    static string ComponentDataTemplate(string key)
+    {
+        if (!ComponentRegistry.TryGet(key, out var type)) return "{}";
+        var dataType = FindNestedDataType(type);
+        if (dataType == null) return "{}";
+        try { return JsonUtility.ToJson(Activator.CreateInstance(dataType), true); }
+        catch { return "{}"; }
+    }
 
     string TA(string label, string val, int lines)
     {
@@ -908,27 +1598,68 @@ public class TowerAbilityEditorWindow : EditorWindow
         return idx >= 0 && idx < options.Length ? options[idx] : current;
     }
 
+    // Text field + id popup. "—" = empty; the popup only writes on an actual selection
+    // change, so optional empty fields aren't force-filled just by being drawn.
     string TFDropdown(string label, string val, string[] options)
     {
         EditorGUILayout.BeginHorizontal();
         val = EditorGUILayout.TextField(label, val ?? "");
         if (options.Length > 0)
         {
-            int idx = Array.IndexOf(options, val);
-            int sel = EditorGUILayout.Popup(idx < 0 ? 0 : idx, options, GUILayout.Width(150));
-            if (sel >= 0 && sel < options.Length) val = options[sel];
+            var opts = new string[options.Length + 1];
+            opts[0] = "—";
+            Array.Copy(options, 0, opts, 1, options.Length);
+            int idx = Array.IndexOf(options, val) + 1;   // 0 = "—" when not found
+            int sel = EditorGUILayout.Popup(idx, opts, GUILayout.Width(150));
+            if (sel != idx) val = sel <= 0 ? "" : opts[sel];
         }
         EditorGUILayout.EndHorizontal();
         return val;
     }
 
-    void ListItem(string label, bool selected, Action onSelect)
+    /// <summary>
+    /// Selectable list row with ▲/▼ reorder buttons.
+    /// Returns 0 (no move), -1 (move up), or +1 (move down).
+    /// </summary>
+    int ListItem(string label, bool selected, Action onSelect, GUIStyle style = null)
     {
+        int move = 0;
+        EditorGUILayout.BeginHorizontal();
+
+        var arrowStyle = new GUIStyle(GUI.skin.button)
+        {
+            fontSize = 8,
+            padding  = new RectOffset(0, 0, 0, 0),
+            margin   = new RectOffset(1, 1, 4, 1),
+        };
+        if (GUILayout.Button("▲", arrowStyle, GUILayout.Width(16), GUILayout.Height(16))) move = -1;
+        if (GUILayout.Button("▼", arrowStyle, GUILayout.Width(16), GUILayout.Height(16))) move = +1;
+
         GUI.backgroundColor = selected ? new Color(0.3f, 0.55f, 1f) : Color.white;
-        if (GUILayout.Button(label, new GUIStyle(GUI.skin.button) { alignment = TextAnchor.MiddleLeft }))
-            onSelect();
+        var s = style ?? new GUIStyle(GUI.skin.button) { alignment = TextAnchor.MiddleLeft };
+        if (GUILayout.Button(label, s)) onSelect();
         GUI.backgroundColor = Color.white;
+
+        EditorGUILayout.EndHorizontal();
+        return move;
     }
+
+    /// <summary>Swaps list[idx] with its neighbor in dir, keeping the selection on the moved item.</summary>
+    static bool MoveEntry<T>(List<T> list, int idx, int dir, ref int selIdx)
+    {
+        int to = idx + dir;
+        if (idx < 0 || idx >= list.Count || to < 0 || to >= list.Count) return false;
+        (list[idx], list[to]) = (list[to], list[idx]);
+        if (selIdx == idx) selIdx = to;
+        else if (selIdx == to) selIdx = idx;
+        return true;
+    }
+
+    static GUIStyle RichListStyle() =>
+        new GUIStyle(GUI.skin.button) { richText = true, alignment = TextAnchor.MiddleLeft, wordWrap = true, fixedHeight = 0 };
+
+    /// <summary>Deep copy via JSON round-trip — safe for nested arrays (components, colors).</summary>
+    static T CloneDef<T>(T src) => JsonUtility.FromJson<T>(JsonUtility.ToJson(src));
 
     void Section(string title)
     {
@@ -995,6 +1726,27 @@ public class TowerAbilityEditorWindow : EditorWindow
         var ids = new string[_projectiles.Count];
         for (int i = 0; i < _projectiles.Count; i++) ids[i] = _projectiles[i].id;
         return ids;
+    }
+
+    string[] MinionIds()
+    {
+        var ids = new string[_minions.Count];
+        for (int i = 0; i < _minions.Count; i++) ids[i] = _minions[i].id;
+        return ids;
+    }
+
+    string[] ComponentKeys()
+    {
+        var keys = new List<string>(ComponentRegistry.All.Keys);
+        keys.Sort();
+        return keys.ToArray();
+    }
+
+    string[] ValidatorPrefixes()
+    {
+        var keys = new List<string>(TargetValidatorRegistry.Prefixes);
+        keys.Sort();
+        return keys.ToArray();
     }
 
     // ── JSON Pre/Deprocess ────────────────────────────────────────────────

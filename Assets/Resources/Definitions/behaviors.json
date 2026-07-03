@@ -50,6 +50,27 @@
       "tintColor": { "r": 1.0, "g": 1.0, "b": 1.0, "a": 1.0 }
     },
     {
+      "id": "boss_immunity",
+      "displayName": "Unstoppable",
+      "behaviorType": 0,
+      "duration": 999999,
+      "stackRule": "none",
+      "moveSpeedMultiplier": 1.0,
+      "immunities": ["Slowed", "Rooted", "Stunned"],
+      "tintColor": { "r": 1.0, "g": 1.0, "b": 1.0, "a": 1.0 }
+    },
+    {
+      "id": "shielded",
+      "displayName": "Shielded",
+      "behaviorType": 0,
+      "duration": 999999,
+      "stackRule": "refresh",
+      "moveSpeedMultiplier": 1.0,
+      "shieldHp": 40.0,
+      "shieldRadius": 0.55,
+      "tintColor": { "r": 1.0, "g": 1.0, "b": 1.0, "a": 1.0 }
+    },
+    {
       "id": "charger_death_rage",
       "displayName": "Death Rage",
       "behaviorType": 0,

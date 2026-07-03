@@ -64,15 +64,17 @@ public class TowerFactory : MonoBehaviour
         rb.bodyType     = RigidbodyType2D.Kinematic;
         rb.gravityScale = 0f;
 
+        // Colliders scale with the transform — divide radii by scale so world-space
+        // sizes match the definition values regardless of tower scale.
+        float towerScale   = def.scale > 0f ? def.scale : 1f;
+
         // Range detection trigger — seeded from def.range; Turrent.Start() may refine it
         // if the tower has a fireAbility with its own range value.
         var rangeCol       = go.AddComponent<CircleCollider2D>();
-        rangeCol.radius    = def.range > 0f ? def.range : 1f;
+        rangeCol.radius    = (def.range > 0f ? def.range : 1f) / towerScale;
         rangeCol.isTrigger = true;
 
         // Small solid collider used by TowerPlacer overlap check to prevent stacking.
-        // Divide by scale so the world-space radius matches def.placementRadius regardless of tower scale.
-        float towerScale   = def.scale > 0f ? def.scale : 1f;
         var bodyCol        = go.AddComponent<CircleCollider2D>();
         bodyCol.radius     = (def.placementRadius > 0f ? def.placementRadius : 0.4f) / towerScale;
         bodyCol.isTrigger  = false;
@@ -136,6 +138,7 @@ public class TowerFactory : MonoBehaviour
         info.resourceCost = def.resourceCost;
         info.cooldown     = def.displayCooldown > 0f ? def.displayCooldown : ResolveCooldown(def.fireAbilityId);
         info.damage       = def.displayDamage   > 0f ? def.displayDamage   : ResolveDamage(def.fireAbilityId);
+        info.shieldBonus  = ResolveShieldBonus(def.fireAbilityId);
         if (System.Enum.TryParse<BalanceType>(def.balanceType, true, out var bt))
             info.balanceType = bt;
         info.rangePerTier = def.rangePerTier;
@@ -248,37 +251,43 @@ public class TowerFactory : MonoBehaviour
         return ab != null ? ab.cost.cooldownDuration : 0f;
     }
 
-    private static float ResolveDamage(string abilityId)
+    private static float ResolveDamage(string abilityId) =>
+        ResolveDamageEffect(abilityId)?.damageBase ?? 0f;
+
+    private static float ResolveShieldBonus(string abilityId) =>
+        ResolveDamageEffect(abilityId)?.shieldBonus ?? 0f;
+
+    private static Effect_Damage ResolveDamageEffect(string abilityId)
     {
-        if (string.IsNullOrEmpty(abilityId)) return 0f;
-        if (AbilityLibrary.Instance == null || EffectLibrary.Instance == null) return 0f;
+        if (string.IsNullOrEmpty(abilityId)) return null;
+        if (AbilityLibrary.Instance == null || EffectLibrary.Instance == null) return null;
         var ab = AbilityLibrary.Instance.GetAbility(abilityId);
-        if (ab == null) return 0f;
-        return FindFirstDamage(ab.effectId, 0);
+        if (ab == null) return null;
+        return FindFirstDamageEffect(ab.effectId, 0);
     }
 
-    // Walk the effect tree up to 4 levels deep looking for the first damage value
-    private static float FindFirstDamage(string effectId, int depth)
+    // Walk the effect tree up to 4 levels deep looking for the first damage effect
+    private static Effect_Damage FindFirstDamageEffect(string effectId, int depth)
     {
-        if (depth > 4 || string.IsNullOrEmpty(effectId)) return 0f;
+        if (depth > 4 || string.IsNullOrEmpty(effectId)) return null;
         var effect = EffectLibrary.Instance?.GetEffect(effectId);
-        return effect != null ? FindFirstDamage(effect, depth) : 0f;
+        return effect != null ? FindFirstDamageEffect(effect, depth) : null;
     }
 
-    private static float FindFirstDamage(Effect effect, int depth)
+    private static Effect_Damage FindFirstDamageEffect(Effect effect, int depth)
     {
-        if (depth > 4 || effect == null) return 0f;
-        if (effect is Effect_Damage dmg) return dmg.damageBase;
-        if (effect is Effect_Launch launch) return FindFirstDamage(launch.impactEffectId, depth + 1);
+        if (depth > 4 || effect == null) return null;
+        if (effect is Effect_Damage dmg) return dmg.damageBase > 0f ? dmg : null;
+        if (effect is Effect_Launch launch) return FindFirstDamageEffect(launch.impactEffectId, depth + 1);
         if (effect is Effect_Search_Area area && area.areas.Count > 0 && area.areas[0].effect != null)
-            return FindFirstDamage(area.areas[0].effect, depth + 1);
+            return FindFirstDamageEffect(area.areas[0].effect, depth + 1);
         if (effect is Effect_Set set)
             foreach (var id in set.EffectIds)
             {
-                float v = FindFirstDamage(id, depth + 1);
-                if (v > 0f) return v;
+                var found = FindFirstDamageEffect(id, depth + 1);
+                if (found != null) return found;
             }
-        return 0f;
+        return null;
     }
 
     private static List<string> ResolveOrder(ComponentEntry[] entries)

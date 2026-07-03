@@ -16,6 +16,9 @@ public class UnitDefinition
 
     // ── Stats ─────────────────────────────────────────────────────────
     public float life              = 100f;
+    /// <summary>Secondary HP pool drained before life. 0 = no shield. Damage effects'
+    /// shieldBonus adds/subtracts damage while this pool is up.</summary>
+    public float shield            = 0f;
     public float speed             = 3f;
     public int   physicalDefense   = 0;
     public int   elementalDefense  = 0;
@@ -68,6 +71,10 @@ public class UnitDefinition
     public string animDeathSheet;
     /// <summary>Frames per second for the death animation. Default 8.</summary>
     public float  animDeathFps = 8f;
+
+    // ── Audio ─────────────────────────────────────────────────────────
+    /// <summary>Sound played on death (sounds.json id). Empty = the "enemy_death" event sound.</summary>
+    public string deathSoundId = "";
 
     // ── Components ────────────────────────────────────────────────────
     /// <summary>

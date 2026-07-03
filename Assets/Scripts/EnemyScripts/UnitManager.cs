@@ -178,7 +178,10 @@ public class UnitManager : UnitParentClass
     void OnMouseDown()
     {
         if (isAlive)
+        {
+            AudioManager.PlayEvent("select");
             GameHUD.Instance?.SelectEnemy(this);
+        }
     }
 
     // ── Death ─────────────────────────────────────────────────────────
@@ -188,6 +191,16 @@ public class UnitManager : UnitParentClass
         isAlive = false;
         if (myCollider != null)
             myCollider.enabled = false;
+
+        if (killedByDamage)
+        {
+            if (UnitDefinitionLibrary.Instance != null &&
+                UnitDefinitionLibrary.Instance.TryGet(definitionId, out var def) &&
+                !string.IsNullOrEmpty(def.deathSoundId))
+                AudioManager.Play(def.deathSoundId);
+            else
+                AudioManager.PlayEvent("enemy_death");
+        }
 
         if (killedByDamage)
             ObjectiveTracker.NotifyKill(definitionId);

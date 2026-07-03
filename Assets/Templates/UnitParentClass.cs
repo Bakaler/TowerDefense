@@ -79,13 +79,20 @@ public class UnitParentClass : MonoBehaviour
     {
         float damageTaken = Mathf.Min(Mathf.Max(TotalDamageAfterReduction(damageAmount, type), minimum), maximum);
 
-        if (hasShields)
+        if (hasShields && shieldCurrent > 0)
         {
-            shieldCurrent -= damageTaken;
-            if (shieldCurrent < 0)
+            // shieldBonus modifies damage dealt to the shield only (may be negative)
+            float shieldDamage = Mathf.Max(0f, damageTaken + shieldBonus);
+            if (shieldDamage < shieldCurrent)
             {
-                lifeCurrent += shieldCurrent;
+                shieldCurrent -= shieldDamage;
+            }
+            else
+            {
+                // Shield breaks — the unspent fraction of the hit carries into life at normal damage
+                float usedFraction = shieldDamage > 0f ? shieldCurrent / shieldDamage : 1f;
                 shieldCurrent = 0;
+                lifeCurrent  -= damageTaken * (1f - usedFraction);
             }
         }
         else

@@ -14,6 +14,9 @@ public class Ability_Effect : Ability
     /// <summary>Total fire cone in degrees. 360 = omnidirectional (no arc restriction).</summary>
     public float fireArc = 360f;
 
+    /// <summary>Sound played when the ability triggers (sounds.json id).</summary>
+    public string fireSoundId = "";
+
     [Tooltip("Time before cast officially starts (wind-up)")]
     public float prepare_time    = 0f;
     [Tooltip("Time at which the ability fires")]

@@ -24,10 +24,16 @@ public class Turrent : MonoBehaviour
     // Rotation speed from tower definition; arc from the ability
     private float _rotationSpeed = 0f;    // deg/s; 0 = no rotation
 
+    // World-space firing range — targets must have their *center* inside this,
+    // so firing matches the displayed range circle exactly.
+    private float _worldRange = 0f;
+
     void Start()
     {
         _abilityManager = GetComponent<AbilityManager>();
         _rangeCollider  = GetComponent<CircleCollider2D>();
+        if (_rangeCollider != null)
+            _worldRange = _rangeCollider.radius * Mathf.Max(0.01f, transform.localScale.x);
 
         // Use the dedicated "Turret" child for rotation if present; fall back to root
         var turretChild = transform.Find("Turret");
@@ -52,7 +58,11 @@ public class Turrent : MonoBehaviour
         _abilityManager.RegisterAbility(ability);
 
         if (_rangeCollider != null && ability.range > 0f)
-            _rangeCollider.radius = ability.range;
+        {
+            // Collider radius scales with the transform — compensate so world range matches
+            _rangeCollider.radius = ability.range / Mathf.Max(0.01f, transform.localScale.x);
+            _worldRange           = ability.range;
+        }
 
         if (ability.range > 0f)
             GetComponent<TowerInfo>()?.SetupRangeCircle(ability.range);
@@ -136,12 +146,19 @@ public class Turrent : MonoBehaviour
         GameObject fallback = null;
         float      fbVal    = bestVal;
 
+        float rangeSqr = _worldRange > 0f ? _worldRange * _worldRange : float.MaxValue;
+
         foreach (var go in enemiesInRange)
         {
             if (go == null) continue;
             var unit = go.GetComponent<UnitParentClass>();
             if (unit == null || !unit.isAlive) continue;
             if (!IsOnScreen(go)) continue;
+
+            // The trigger list includes collider-edge touches — require the enemy's
+            // center inside the range so shots match the displayed circle.
+            if (Vector2.SqrMagnitude((Vector2)go.transform.position - (Vector2)transform.position) > rangeSqr)
+                continue;
 
             float val = Score(go, unit);
 

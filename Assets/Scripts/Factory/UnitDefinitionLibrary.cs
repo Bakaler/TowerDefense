@@ -11,6 +11,7 @@ public class UnitDefinitionLibrary : MonoBehaviour
     public static UnitDefinitionLibrary Instance { get; private set; }
 
     private readonly Dictionary<string, UnitDefinition> _definitions = new();
+    private readonly List<UnitDefinition>               _ordered     = new();
     private bool _loaded;
 
     private void Awake()
@@ -46,6 +47,15 @@ public class UnitDefinitionLibrary : MonoBehaviour
         get { EnsureLoaded(); return _definitions; }
     }
 
+    /// <summary>Definitions in units.json file order (stable for UI lists).</summary>
+    public IReadOnlyList<UnitDefinition> AllOrdered
+    {
+        get { EnsureLoaded(); return _ordered; }
+    }
+
+    /// <summary>Re-reads units.json. Lets play-mode tools pick up definitions saved by the editor.</summary>
+    public void Reload() => Load();
+
     // ── Loading ───────────────────────────────────────────────────────
 
     private void EnsureLoaded()
@@ -57,6 +67,7 @@ public class UnitDefinitionLibrary : MonoBehaviour
     {
         _loaded = true;
         _definitions.Clear();
+        _ordered.Clear();
 
         var asset = Resources.Load<TextAsset>("Definitions/units");
         if (asset == null)
@@ -83,6 +94,7 @@ public class UnitDefinitionLibrary : MonoBehaviour
             if (string.IsNullOrEmpty(def?.id)) continue;
             if (_definitions.ContainsKey(def.id)) { Debug.LogWarning($"[UnitDefinitionLibrary] Duplicate id '{def.id}' skipped."); continue; }
             _definitions[def.id] = def;
+            _ordered.Add(def);
         }
 
         Debug.Log($"[UnitDefinitionLibrary] Loaded {_definitions.Count} unit definition(s): [{string.Join(", ", _definitions.Keys)}]");

@@ -31,6 +31,12 @@ public class BehaviorDefinition
 
     public Color tintColor = Color.white;
 
+    // ── Shield — >0 grants a projectile-intercepting ShieldBubble while active ──
+    /// <summary>Bubble hit points. The behavior expires when the bubble is depleted.</summary>
+    public float shieldHp     = 0f;
+    /// <summary>World radius of the granted bubble.</summary>
+    public float shieldRadius = 0.55f;
+
     /// <summary>
     /// BehaviorType names this behavior blocks from being applied (e.g. ["Slowed","Rooted"]).
     /// Used to give units immunity to specific CC types via a permanent behavior.
@@ -42,6 +48,9 @@ public class BehaviorDefinition
     /// The effect fires with the dying unit as the caster origin.
     /// </summary>
     public string onDeathEffectId = "";
+
+    /// <summary>Sound played when this behavior is applied (sounds.json id).</summary>
+    public string applySoundId = "";
 
     // ── VFX ───────────────────────────────────────────────────────────
     // Impact animation: plays once at the hit location when behavior is applied.

@@ -64,7 +64,7 @@ public class GameHUD : MonoBehaviour
         BuildPlayFieldBorder(canvasGO);
     }
 
-    void Start() { }
+    void Start() => AudioManager.PlayMusicEvent("music_game");
 
     void BuildShopArea(GameObject canvasRoot)
     {
@@ -161,6 +161,8 @@ public class GameHUD : MonoBehaviour
         if (!Input.GetMouseButtonDown(0)) return;
         if (EventSystem.current.IsPointerOverGameObject()) return;
         if (TowerPlacer.Instance != null && TowerPlacer.Instance.IsPlacing) return;
+        // The click that placed a tower shouldn't also select it (script-order race)
+        if (Time.frameCount == TowerPlacer.LastPlacementFrame) return;
         if (Camera.main == null) return;
 
         Vector2 mouse = Camera.main.ScreenToWorldPoint(Input.mousePosition);

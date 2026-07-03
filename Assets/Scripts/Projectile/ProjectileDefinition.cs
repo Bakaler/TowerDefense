@@ -47,6 +47,8 @@ public class ProjectileDefinition
     public float shieldAbsorb = 10f;
     /// <summary>Draw a fading line from spawn point to impact (chain lightning look).</summary>
     public bool  drawImpactLine = false;
+    /// <summary>Sound played on each impact (sounds.json id). Rate-limited by the sound's own minInterval.</summary>
+    public string impactSoundId = "";
 
     // ── Visuals ───────────────────────────────────────────────────────
     public float  scale = 1f;

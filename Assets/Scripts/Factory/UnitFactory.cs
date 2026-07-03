@@ -126,10 +126,20 @@ public class UnitFactory : MonoBehaviour
         float hp             = def.life * LevelSelection.EnemyHpMult;
         unit.lifeMax         = hp;
         unit.lifeCurrent     = hp;
+        if (def.shield > 0f)
+        {
+            // Shields scale with difficulty like life does
+            float sh           = def.shield * LevelSelection.EnemyHpMult;
+            unit.hasShields    = true;
+            unit.shieldMax     = sh;
+            unit.shieldCurrent = sh;
+        }
         float spd            = def.speed * LevelSelection.EnemySpeedMult;
         unit.speedMax        = spd;
         unit.speedCurrent    = spd;
-        unit.physicalDefense = def.physicalDefense;
+        unit.physicalDefense  = def.physicalDefense;
+        unit.elementalDefense = def.elementalDefense;
+        unit.arcanaDefense    = def.arcanaDefense;
         unit.bounty          = Mathf.RoundToInt(def.bounty * LevelSelection.BountyMult);
         unit.deathBlow       = def.deathBlow;
         unit.isAlive         = true;

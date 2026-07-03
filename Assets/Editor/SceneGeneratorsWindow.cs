@@ -141,7 +141,7 @@ public class SceneGeneratorsWindow : EditorWindow
         bgRT.offsetMax = Vector2.zero;
         var bgImg      = bg.AddComponent<UnityEngine.UI.Image>();
         bgImg.color    = new Color(0.05f, 0.05f, 0.10f, 1f);
-        bgImg.raycastTarget = false;
+        bgImg.raycastTarget = false;    
 
         // ── Title ─────────────────────────────────────────────────────
         var title    = MakeRect("Title", canvasGO, 0f, 160f, 900f, 160f);

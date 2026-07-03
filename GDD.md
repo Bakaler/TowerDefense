@@ -1,6 +1,6 @@
 # Tower Defense — Game Design Document
 
-> Last updated: 2026-06-29
+> Last updated: 2026-07-03
 
 ---
 
@@ -11,11 +11,13 @@
 4. [Tech & Tier System](#tech--tier-system)
 5. [Towers](#towers)
 6. [Enemies](#enemies)
-7. [Levels & Modifiers](#levels--modifiers)
-8. [Abilities & Effects](#abilities--effects)
-9. [Status Effects / Behaviors](#status-effects--behaviors)
-10. [UI Systems](#ui-systems)
-11. [Missing / TODO](#missing--todo)
+7. [Shields & Damage Model](#shields--damage-model)
+8. [Levels & Modifiers](#levels--modifiers)
+9. [Abilities & Effects](#abilities--effects)
+10. [Status Effects / Behaviors](#status-effects--behaviors)
+11. [Data-Driven Architecture & Tooling](#data-driven-architecture--tooling)
+12. [UI Systems](#ui-systems)
+13. [Missing / TODO](#missing--todo)
 
 ---
 
@@ -104,7 +106,7 @@ Each tower has a **balanceType**: Physical, Arcane, or Elemental.
 |-------|------|------|-------|
 | Chain Tower | Arcane | 6 | Chains to 4 enemies |
 | Boomerang Tower | Physical | 5 | Arc sweep, returns |
-| Bee Tower | Physical | 6 | 4 drones (animated), 6 dmg / 0.8 sec, `maxAwayTime` 6 sec, `restDuration` 1 sec |
+| Bee Tower | Physical | 6 | 4 "bee" minions (minions.json), 6 dmg / 0.8 sec, forced hive return every 6 sec |
 | Root Tower | Elemental | 7 | Roots 1 sec, won't retarget rooted |
 | Entropy Tower | Arcane | 8 | +4% dmg per kill stack, max 50 stacks (StackOnKill component) |
 | Speed Aura | Arcane | 7 | +30% attack speed to nearby towers (T1 only, no upgrades) |
@@ -127,46 +129,72 @@ Each tower has a **balanceType**: Physical, Arcane, or Elemental.
 
 ## Enemies
 
-| Enemy | HP | Speed | Armor | Bounty | Special |
-|-------|----|-------|-------|--------|---------|
-| Basic | 65 | 1.75 | 0 | 10 | — |
-| Fast | 28 | 2.25 | 0 | 15 | Thin, quick |
-| Armored | 220 | 0.6 | 55 | 25 | Armor reduces Physical dmg; use Arcane/Piercing |
-| Boss | 900 | 0.35 | 20 | 150 | 3x deathblow |
-| Resilient | 80 | 1.5 | 0 | — | First hit: clears debuffs + 3x speed for 1.5 sec |
-| Splitter | 120 | 1.0 | 0 | — | Splits into 4 mini-units on death |
-| Splitter Mini | 20 | 1.8 | 0 | 5 | Spawned by Splitter |
-| Phantom | 70 | 2.1 | 0 | — | Immune to slows and roots |
-| Charger | 90 | 1.6 | 0 | — | Nearby Charger death = permanent speed boost |
-| Priest | 55 | 1.3 | 0 | — | Periodically cleanses allies (range 3.5, 3 sec CD) |
-| Shielder | 110 | 1.1 | 5 | — | Grants 40 HP shields to self + allies (range 3.5, 8 sec CD) |
+| Enemy | HP | Shield | Speed | Armor (P/E/A) | Bounty | Special |
+|-------|----|--------|-------|---------------|--------|---------|
+| Basic | 65 | — | 1.75 | 0 | 10 | — |
+| Fast | 28 | — | 2.25 | 0 | 15 | Thin, quick |
+| Armored | 220 | 10 | 0.6 | 55/0/0 | 25 | Armor reduces Physical dmg; use Arcane/Piercing |
+| Shielded | 10 | 260 | 0.6 | 100/0/0 | 0 | Nearly all durability is shield pool — shield-bonus damage counters it |
+| Boss | 450 | 450 | 0.35 | 50/50/50 | 0 | 5x deathblow, immune to Slow/Root/Stun (`boss_immunity`), animated (enemy_3 sheets) |
+| Resilient | 80 | — | 1.5 | 0 | 20 | First hit: clears debuffs + 3x speed for 1.5 sec |
+| Splitter | 120 | — | 1.0 | 0 | 30 | Splits into 4 mini-units on death |
+| Splitter Mini | 20 | — | 1.8 | 0 | 5 | Spawned by Splitter, no deathblow |
+| Phantom | 70 | — | 2.1 | 0 | 18 | Immune to slows and roots |
+| Charger | 90 | — | 1.6 | 0 | 20 | Nearby Charger death = permanent speed boost |
+| Priest | 55 | — | 1.3 | 0 | 22 | Cleanses Slowed/Rooted/Debuff from allies every 3 sec (`ally_aura`, radius 3.5) |
+| Shielder | 110 | 60 | 1.1 | 5/0/0 | 28 | Spawns with a 40 HP bubble (`shielded` behavior) that physically blocks non-piercing projectiles; no longer shields allies |
+
+Enemy shields and HP scale with the level's `EnemyHpMult` difficulty multiplier.
+
+---
+
+## Shields & Damage Model
+
+Two independent shield systems:
+
+**1. Stat shields (secondary HP pool)** — `shield` in units.json. Drains before life; overflow
+spills into HP. Rendered as a cyan bar bordering the top of the HP bar, and as a live
+`Shield x/y` row on the enemy info panel. Damage effects can carry a `shieldBonus`
+(added/subtracted damage **against the shield pool only**, scaled by tower damage multipliers):
+
+| Source | shieldBonus | Meaning |
+|--------|------------|---------|
+| Shotgun pellets | +2 | Pellets hit shields for 10 instead of 8 |
+| Basic tower | −1 | Hits shields for 17 instead of 18 |
+
+The tower info panel shows this as a `vs Shields +N` line. On the shield-break hit, the bonus
+applies only to the shield portion — the remainder carries into HP at normal damage.
+
+**2. Shield bubbles** — the `shielded` behavior (behaviors.json: `shieldHp`, `shieldRadius`)
+grants a physical bubble child object that intercepts projectiles whose definition has
+`blockedByShields`, absorbing `shieldAbsorb` (default 10) per blocked shot. Piercing
+projectiles ignore it. The behavior expires when the bubble is depleted.
+
+**Armor formula:** `damage × 0.995^defense` per damage type (compounding −0.5% per point).
+Piercing uses half the physical defense. ~139 armor = 50% reduction; immunity is impossible.
+The enemy panel shows the live reduction % next to each defense stat.
+
+| Armor | Physical reduction |
+|-------|-------------------|
+| 25 | 12% |
+| 55 | 24% |
+| 100 | 39% |
+| 139 | 50% |
+| 200 | 63% |
 
 ---
 
 ## Levels & Modifiers
 
-### Level 1 — The Valley
-- Gold: 50 | Lives: 20 | Tech: 0 | Start Tier: 1
-- Towers: T1 only (Basic, Slow, Shotgun, Poison, Income, Research)
-- 1 path, 8 placement zones
-- 5 waves: 5→8→12→15→14 enemies, mixed basic/fast
+Level definitions live in `Resources/Definitions/Levels/level_N.json` + `waves_N.json`.
 
-### Level 2 — Level Two
-- Gold: 60 | Lives: 20 | Tech: 0 | Start Tier: 1
-- **1 modifier column:** +25 Gold OR +10 Tech
-- Towers: T1-2 (no Auras, Collector, Railgun, Laser, Sniper, Mortar, Entropy)
-- 1 forking path (2 branches), 4 placement zones
-- 5 waves, ends with boss
-
-### Level 3 — The Tree Line
-- Gold: 125 | Lives: 100 | Tech: 50 | Start Tier: 2
-- **3 modifier columns:**
-  - C1: +10 Gold OR +10 Research
-  - C2: +10 Lives OR Full Refunds (100% sell value)
-  - C3: Swift Towers (+15% fire rate) OR Far Sight (+20% range) OR Heavy Shots (+20% damage)
-- All 23 towers available
-- 3 parallel paths, 3 spawners, 12 placement zones
-- 3 waves with staggered multi-spawner patterns
+| # | Name | Gold | Lives | Tech | Tier | Towers | Notes |
+|---|------|------|-------|------|------|--------|-------|
+| 1 | Tutorial | 3 | 10 | 15 | 2 | Basic only | Onboarding |
+| 2 | Beginners Trail | 3 | 10 | 0 | 2 | Basic, Slow, Income | — |
+| 3 | The Tree Line | 125 | 100 | 50 | 2 | Wide roster | 3 modifier columns (gold/research, lives/refunds, fire rate/range/damage) |
+| 4 | Level 4 | 125 | 100 | 50 | 2 | Wide roster | WIP — placeholder name |
+| 5 | Level 5 | 125 | 100 | 50 | 2 | Wide roster | WIP — placeholder name |
 
 ### Modifier Types (Implemented)
 
@@ -185,20 +213,33 @@ Each tower has a **balanceType**: Physical, Arcane, or Elemental.
 ## Abilities & Effects
 
 Defined in `abilities.json`. Each tower's `fireAbilityId` points to an entry.
+Launch-type effects reference a projectile definition in `projectiles.json` (see
+[Data-Driven Architecture](#data-driven-architecture--tooling)).
 
 | Ability | Cooldown | Range | Notes |
 |---------|----------|-------|-------|
 | basic_tower_shot | 1.24s | 3.5 | 60° arc |
-| shotgun_tower_shot | 2.8s | 5.5 | 60° arc, multi-pellet |
-| boomerang_shot | 2.2s | 3 | 90° arc, returns |
-| chain_lightning_shot | 2.5s | 4 | 360°, chains 4 targets |
-| poison_tower_shot | 2.5s | 3.5 | Won't retarget poisoned |
-| root_tower_shot | 2.0s | 2.5 | Won't retarget rooted |
+| shotgun_tower_shot | 2.8s | 5.5 | 60° arc, 10 pellets, +2 vs shields |
+| boomerang_shot | 1.75s | 5 | 360°, orbit sweep, re-hits on return leg |
+| chain_lightning_shot | 2.5s | 4 | 360°, chains via bounce searches |
+| poison_tower_shot | 2.5s | 3.5 | `no_behavior:poisoned` |
+| root_tower_shot | 2.0s | 2.5 | `affectable:rooted` |
 | entropy_tower_shot | 1.6s | 4 | 360° |
-| slow_tower_shot | 1.5s | 4 | 360° |
-| railgun_shot | 4.0s | 22 | 360°, full-map pierce |
-| mortar_shot | 4.0s | 7 | 360°, AoE on last position |
+| slow_tower_shot | 1.5s | 4 | `affectable:slowed` |
+| railgun_shot | 4.0s | 22 | 10° arc, full-map pierce |
+| mortar_shot | 4.0s | 7 | 360°, arc flight, AoE at target point |
 | sniper_shot | 2.0s | 999 | 360°, furthest in zone |
+
+**Target validators** filter target selection; invalid targets are only attacked as a
+fallback when nothing valid is in range:
+- `no_behavior:X` — skip targets that already have behavior X
+- `affectable:X` — also skip targets *immune* to X's behavior type (e.g. the Boss).
+  Net effect: CC towers only engage the Boss when every other target is already CC'd
+  and the Boss leads the pack — and even then only deal damage, the CC bounces off.
+
+Range is honest as of 2026-07-03: the range-collider/scale bug (towers detecting
+~1.5x their displayed circle) is fixed, and targets must have their *center* inside
+the ring.
 
 ---
 
@@ -209,8 +250,60 @@ Defined in `abilities.json`. Each tower's `fireAbilityId` points to an entry.
 | Rooted | 1 sec | 0% move speed | Refresh |
 | Slowed | 6.5 sec | 40% move speed | Refresh |
 | Poisoned | 4 sec | 4 dmg / 0.75 sec (Elemental) | Refresh |
+| shielded | Until depleted | Grants a 40 HP projectile-blocking bubble (radius 0.55) | Refresh (tops bubble up) |
 | phantom_immunity | Permanent | Immune to Slowed + Rooted | — |
+| boss_immunity | Permanent | Immune to Slowed + Rooted + Stunned | — |
 | charger_death_rage | Permanent | Speed boost on nearby Charger death | — |
+
+Behavior capabilities are field-activated: `shieldHp > 0` grants a bubble, `tickDamage > 0`
+ticks a DoT, `immunities: [...]` blocks CC types, `onDeathEffectId` fires an effect on death.
+Units gain behaviors at spawn via `startingBehaviors`, from towers via `apply_behavior`
+effects, or from allies via the generic `ally_aura` component (applyBehaviorId / cleanseTypes
+/ interval — powers both the Priest and the Shielder).
+
+---
+
+## Data-Driven Architecture & Tooling
+
+**Principle:** mechanics are reusable code primitives; content is JSON. The test for new
+content is "can I create a variant without writing a script?"
+
+**Definition files** (`Resources/Definitions/`):
+
+| File | Consumed by | Contents |
+|------|------------|----------|
+| towers.json | TowerFactory | Tower stats, visuals, components |
+| units.json | UnitFactory | Enemy stats, shield, visuals, components, startingBehaviors |
+| projectiles.json | ProjectileFactory | Movement (straight/homing/arc/orbit), hit policy, shield interaction, visuals |
+| minions.json | MinionFactory | Drone-like sub-units: brain params, attack projectile, visuals |
+| abilities.json | AbilityLibrary | Cooldown, range, arc, target validators |
+| effects.json | EffectLibrary | Damage / launch / search_area / set / apply_behavior / drain_life chains |
+| behaviors.json | BehaviorLibrary | Status effects (CC, DoT, shields, immunities) |
+| waves.json, Levels/* | WaveManager, LevelManager | Wave comps, level configs |
+| researches.json | ResearchManager | Per-tower purchasable upgrades |
+
+**Registries** (self-registering via `[RuntimeInitializeOnLoadMethod]` static `Register()`):
+`EffectRegistry` (type key → Effect class), `ComponentRegistry` (key → MonoBehaviour),
+`TargetValidatorRegistry` (prefix → validator factory), plus projectile movement modes.
+Adding a new mechanic = one class + one Register line; it becomes available to all JSON.
+
+**Unified launcher:** the `launch` effect type spawns any projectile definition with
+spawn-pattern data (count, spreadAngle, speed/lifetime/scale jitter, bonusCountKey).
+Shotgun = `count: 10, spreadAngle: 70`; missile = defaults; boomerang = orbit projectile.
+
+**Tower & Ability Editor** (`TowerDefense/Tower & Ability Editor`):
+- Tabs for Towers, Abilities, Effects, Projectiles, Units, Minions — create/edit/delete/save,
+  sprite previews, ▲▼ reordering (auto-saves file order), `+ Copy Selected` duplication
+- Effect data forms are **reflected from the effect classes** — fields, defaults, and enum
+  popups come from the code itself; saving normalizes every entry against its template
+  (adds missing fields with defaults, drops stale keys)
+- Id references (`impactEffectId`, `projectileId`, `behaviorId`, component keys, validator
+  prefixes, startingBehaviors) are dropdowns fed by the loaded files and registries
+- Component data blobs auto-fill their template JSON when a key is picked
+
+**Live testing:** the bottom-left debug spawn panel rebuilds from units.json at the start
+of every round (reloading the definition library), so new/edited units are spawnable
+mid-playtest without leaving play mode.
 
 ---
 
@@ -224,11 +317,22 @@ Defined in `abilities.json`. Each tower's `fireAbilityId` points to an entry.
 
 **Tower Info Panel (on select):**
 - Name, type, balance contribution
-- Damage, fire rate, kill count
+- Damage, `vs Shields` bonus (buff-scaled), fire rate, kill count
 - Upgrade button (gated by tier unlock + gold)
+- Research button → per-tower research shop (purchases from researches.json)
 - Sell button (75% refund or 100% with FullRefund modifier)
 - Target priority selectors
 - Move Zone button (Sniper only)
+
+**Enemy Info Panel (on click):** HP, Shield (live), Speed, End dmg, Armor/Resist/Fortitude
+each with live damage-reduction % (reflects runtime stat changes)
+
+**Enemy overhead:** segmented HP bar + cyan shield bar with track (hides when depleted)
+
+**Wave bar:** Start Wave | Pause | Fast-forward (2x) | Lives
+
+**Debug spawn panel (bottom-left):** one button per units.json entry, colored by debugColor,
+rebuilt each round
 
 **Game Over / Victory Overlays:**
 - Victory: Play Again | Next Level | Main Menu
@@ -242,25 +346,40 @@ Defined in `abilities.json`. Each tower's `fireAbilityId` points to an entry.
 
 ## Missing / TODO
 
+### Done since last revision (2026-06-29 → 2026-07-03)
+- [x] **Research shop UI** — per-tower research sub-panel on the tower info panel
+- [x] **Pause button** — pause + 2x fast-forward on the wave bar
+- [x] **Projectiles as data** — projectiles.json + ProjectileFactory, unified `launch` effect
+- [x] **Minions as data** — minions.json + MinionFactory (bee drones migrated)
+- [x] **Shield systems** — stat shield pools + bubble behavior, shieldBonus damage interactions, UI
+- [x] **Boss immunities + smart CC targeting** — `boss_immunity`, `affectable:` validators
+- [x] **Editor overhaul** — Projectiles/Units/Minions tabs, reflected effect forms, id dropdowns, reorder, copy
+- [x] **Live debug spawn panel** — rebuilds from units.json each round
+- [x] **Range honesty fix** — collider/scale bug + center-in-ring targeting
+
 ### High Priority
-- [ ] **Research upgrades** — only 2 defined (`basic_firerate_1`, `shotgun_bullets_1`), no UI integration to buy/apply them. Needs a research shop panel
-- [ ] **Pause button** — `Time.timeScale` exists but no UI button
-- [ ] **Audio** — no sound effects or music anywhere in the game
-- [ ] **More levels** — only 3 exist; no campaign progression gates or unlock system
+- [x] **Audio system** — in-house, data-driven: sounds.json (clips + playback discipline + synth placeholders), AudioLibrary/AudioManager (buses, voice caps, priority stealing), hooks on ability fire / projectile impact / deaths / behaviors / game events / music, `play_sound` effect type, Sounds editor tab with preview. *Real audio clips still needed — everything currently plays procedural synth placeholders.*
+- [ ] **Range/balance pass** — the range fix was an effective across-the-board nerf; ranges and boss durability (450+450 with CC-immune) need a tuning pass
+- [ ] **Levels 4–5** — placeholder names/configs; no campaign progression gates or unlock system
+- [ ] **Boss death animation double-play** — reported, not yet diagnosed (suspect enemy_3_death sheet slicing: 15 slices for 6 visual frames)
 
 ### Medium Priority
+- [ ] **Definitions cross-reference validator** — editor "Validate All" that catches dangling ids across the 9 JSON files (towers→abilities→effects→projectiles/behaviors, units→components, waves→units)
 - [ ] **Persistent progression** — no save system, level unlocks, or run history
 - [ ] **Difficulty modes** — no hard mode or dynamic wave scaling
 - [ ] **Aura buff visualization** — no indicator on towers currently being buffed by an aura
 - [ ] **Sell animation** — no visual feedback when a tower is sold/upgraded
 - [ ] **Balance tooltip** — no explanation of threshold mechanic for new players
-- [ ] **Tutorial / tooltips** — nothing guiding first-time players
+- [ ] **Tutorial / tooltips** — level 1 is named Tutorial but nothing guides first-time players
 
 ### Low Priority / Nice to Have
-- [ ] **More research upgrades** — each tower should have 2-3 per tier
+- [ ] **More research upgrades** — still only 2 defined (`basic_firerate_1`, `shotgun_bullets_1`); each tower should have 2-3 per tier
+- [ ] **Deferred datalization** — pickups/orbs (Income/Research/Shimmer) into a pickups.json, generic resource_generator component, vfx.json registry
+- [ ] **Projectile pooling** — shotgun creates/destroys ~10 GameObjects per shot
+- [ ] **Behaviors editor tab** — behaviors.json is the last definitions file not editable in the window
 - [ ] **Enemy intro briefs** — warning when a new enemy type appears for the first time
 - [ ] **Wave cancel** — the 5-sec auto-start countdown can't be cancelled mid-count
 - [ ] **Stats / achievements** — kills, leaderboard, personal bests
 - [ ] **More modifier types** — enemy speed reduction, starting with a free tower, etc.
-- [ ] **More enemy types** — stun-immune, damage-reflection, splitting boss variants
+- [ ] **More enemy types** — damage-reflection, splitting boss variants (stun-immune now exists via immunities)
 - [ ] **Tower synergy combos** — explicit bonuses for mixing specific tower pairs

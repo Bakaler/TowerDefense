@@ -222,6 +222,8 @@ public class Projectile : MonoBehaviour
     void DetonateAtPoint()
     {
         _done = true;
+        if (!string.IsNullOrEmpty(def.impactSoundId))
+            AudioManager.Play(def.impactSoundId);
         if (impactEffect != null)
         {
             var ctx = BuildContext(null);
@@ -234,6 +236,8 @@ public class Projectile : MonoBehaviour
 
     void ApplyImpact(UnitParentClass unit)
     {
+        if (!string.IsNullOrEmpty(def.impactSoundId))
+            AudioManager.Play(def.impactSoundId);
         if (impactEffect == null) return;
         var ctx = BuildContext(unit);
         EffectExecutor.ExecuteEffect(impactEffect, ctx);

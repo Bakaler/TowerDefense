@@ -27,6 +27,14 @@ public class TowerDefinition
     // ── Ability ───────────────────────────────────────────────────────
     public string fireAbilityId;
 
+    // ── Audio ─────────────────────────────────────────────────────────
+    /// <summary>Placement sound (sounds.json id). Empty = the generic "tower_place" event sound.</summary>
+    public string placeSoundId = "";
+    /// <summary>Sell sound. Empty = the generic "tower_sell" event sound.</summary>
+    public string sellSoundId = "";
+    /// <summary>Upgrade sound. Empty = the generic "tower_upgrade" event sound.</summary>
+    public string upgradeSoundId = "";
+
     // ── HUD display overrides (for component-driven towers with no fireAbilityId) ──
     /// <summary>If > 0 overrides the auto-resolved damage shown in the tower panel.</summary>
     public float displayDamage   = 0f;
