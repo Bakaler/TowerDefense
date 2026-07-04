@@ -199,7 +199,7 @@ public class TowerFactory : MonoBehaviour
             string path = $"Art/Towers/{baseId}_T{t}";
             if (LoadFirstSprite(path) != null) return path;
         }
-        return !string.IsNullOrEmpty(fallbackPath) ? fallbackPath : null;
+        return !string.IsNullOrEmpty(fallbackPath) ? RuntimeSprites.Normalize(fallbackPath) : null;
     }
 
     public static Sprite ResolveTieredSprite(string baseId, int tier, string fallbackPath)
@@ -220,7 +220,7 @@ public class TowerFactory : MonoBehaviour
     // Handles both single sprites and multi-sprite sheets.
     static Sprite LoadFirstSprite(string path)
     {
-        var sprites = Resources.LoadAll<Sprite>(path);
+        var sprites = Resources.LoadAll<Sprite>(RuntimeSprites.Normalize(path));
         if (sprites != null && sprites.Length > 0) return sprites[0];
         return null;
     }

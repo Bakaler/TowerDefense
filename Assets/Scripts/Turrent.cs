@@ -28,6 +28,9 @@ public class Turrent : MonoBehaviour
     // so firing matches the displayed range circle exactly.
     private float _worldRange = 0f;
 
+    /// <summary>Called when range changes at runtime (e.g. rangePerTier upgrades).</summary>
+    public void SetWorldRange(float range) => _worldRange = range;
+
     void Start()
     {
         _abilityManager = GetComponent<AbilityManager>();

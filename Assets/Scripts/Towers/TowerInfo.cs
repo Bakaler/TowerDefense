@@ -117,64 +117,6 @@ public class TowerInfo : MonoBehaviour
         }
     }
 
-    // ── Tier rings ────────────────────────────────────────────────────
-    private const int   RING_SEGMENTS = 32;
-    private const float RING_WIDTH    = 0.018f;
-    private const float RING_BASE_R   = 0.22f;
-    private const float RING_SPACING  = 0.10f;
-
-    // Gold T2, cyan T3, purple T4, hot-pink T5 — alpha ramps up with each tier
-    private static readonly Color[] RING_COLORS =
-    {
-        new Color(1.00f, 0.82f, 0.20f, 0.70f),   // tier 2 — gold
-        new Color(0.45f, 0.95f, 1.00f, 0.48f),   // tier 3 — cyan
-        new Color(0.75f, 0.20f, 1.00f, 0.28f),   // tier 4 — purple
-        new Color(1.00f, 0.15f, 0.55f, 0.12f),   // tier 5 — hot pink
-    };
-
-    private LineRenderer[] _tierRings = new LineRenderer[0];
-
-    void RebuildTierRings()
-    {
-        // Destroy existing rings
-        foreach (var lr in _tierRings)
-            if (lr != null) Destroy(lr.gameObject);
-
-        int ringCount = Tier - 1;   // tier 1 = 0 rings, tier 2 = 1 ring, tier 3 = 2 rings
-        _tierRings = new LineRenderer[ringCount];
-
-        for (int i = 0; i < ringCount; i++)
-        {
-            var go = new GameObject($"TierRing{i + 1}");
-            go.transform.SetParent(transform, false);
-
-            float radius = RING_BASE_R + i * RING_SPACING;
-            Color col    = i < RING_COLORS.Length ? RING_COLORS[i] : Color.white;
-
-            var lr               = go.AddComponent<LineRenderer>();
-            lr.loop              = true;
-            lr.positionCount     = RING_SEGMENTS;
-            lr.startWidth        = RING_WIDTH;
-            lr.endWidth          = RING_WIDTH;
-            lr.useWorldSpace     = false;
-            lr.sortingLayerName  = "Units";
-            lr.sortingOrder      = 19;
-            lr.material          = new Material(Shader.Find("Sprites/Default"));
-            lr.startColor        = col;
-            lr.endColor          = col;
-
-            for (int s = 0; s < RING_SEGMENTS; s++)
-            {
-                float angle = s / (float)RING_SEGMENTS * Mathf.PI * 2f;
-                lr.SetPosition(s, new Vector3(Mathf.Cos(angle) * radius,
-                                              Mathf.Sin(angle) * radius, 0f));
-            }
-
-            lr.gameObject.SetActive(_selected == this);
-            _tierRings[i] = lr;
-        }
-    }
-
     // Set by TowerFactory after reading the definition
     [HideInInspector] public float rangePerTier       = 0f;
     [HideInInspector] public float balanceMultiplier  = 1f;   // doubles each upgrade tier
@@ -232,15 +174,16 @@ public class TowerInfo : MonoBehaviour
         StatMultiplier    = Mathf.Pow(upgradeStatMultiplier, Tier - 1);
         ObjectiveTracker.NotifyUpgrade(definitionId);
         balanceMultiplier *= 2f;   // each tier doubles this tower's balance contribution
-        RebuildTierRings();
         RefreshSprite();
+        TowerUpgradeFade.Play(this, Tier - 1);   // new tier fades in over the old visuals
 
         // Grow range for towers that have rangePerTier set (e.g. slow, root)
         if (rangePerTier > 0f)
         {
             float newRange = _baseRange + rangePerTier * (Tier - 1);
             var col = GetComponent<CircleCollider2D>();
-            if (col != null) col.radius = newRange;
+            if (col != null) col.radius = newRange / Mathf.Max(0.01f, transform.localScale.x);
+            GetComponent<Turrent>()?.SetWorldRange(newRange);
             SetupRangeCircle(newRange);
         }
 
@@ -326,8 +269,6 @@ public class TowerInfo : MonoBehaviour
         else if (_selected == this) _selected = null;
 
         if (_rangeCircle != null) _rangeCircle.gameObject.SetActive(isSelected);
-        foreach (var lr in _tierRings)
-            if (lr != null) lr.gameObject.SetActive(isSelected);
     }
 
     // World-space click radius — used by GameHUD.Update() for manual proximity picking

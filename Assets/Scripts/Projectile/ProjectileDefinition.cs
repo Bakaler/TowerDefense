@@ -29,7 +29,8 @@ public class ProjectileDefinition
     public bool   faceDirection = false;
 
     // ── Orbit (boomerang) ─────────────────────────────────────────────
-    /// <summary>Distance of the sweep circle's center from the caster.</summary>
+    /// <summary>Max sweep-circle radius. The loop sizes itself to reach the target
+    /// (apex = 2 × radius), capped by this value.</summary>
     public float arcRadius  = 4f;
     /// <summary>Sweep speed in degrees per second.</summary>
     public float sweepSpeed = 180f;
@@ -52,8 +53,11 @@ public class ProjectileDefinition
 
     // ── Visuals ───────────────────────────────────────────────────────
     public float  scale = 1f;
-    /// <summary>Resources path to a single sprite (no extension). Takes priority over the sheet.</summary>
+    /// <summary>Resources path to a single sprite (no extension). Takes priority over the sheet.
+    /// When animFps > 0 and this path is a sliced sheet, its frames play as a loop.</summary>
     public string spritePath;
+    /// <summary>Frames per second for looping flight animation. 0 = static sprite.</summary>
+    public float animFps = 0f;
     /// <summary>Resources path to a sliced sprite sheet (no extension). Pair with spriteIndex.</summary>
     public string spriteSheet;
     public int    spriteIndex = -1;

@@ -16,6 +16,9 @@ public static class SoundLibrary
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
     static void Reset() { _cache = null; _events = null; }
 
+    /// <summary>Re-reads sounds.json on next access. Lets play-mode tools pick up edits live.</summary>
+    public static void Reload() { _cache = null; _events = null; }
+
     public static SoundDefinition Get(string id)
     {
         EnsureLoaded();

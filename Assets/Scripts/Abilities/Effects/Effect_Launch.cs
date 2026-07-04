@@ -87,7 +87,7 @@ public class Effect_Launch : Effect
                 origin             = spawnTransform.position,
                 direction          = Rotate(toTarget, offset),
                 targetUnit         = homing ? context.Target : null,
-                targetPoint        = context.TargetPoint,
+                targetPoint        = context.Target != null ? context.Target.transform.position : context.TargetPoint,
                 impactEffect       = _impactEffect,
                 caster             = context.Caster,
                 casterTransform    = context.CasterTransform ?? context.Caster?.transform,

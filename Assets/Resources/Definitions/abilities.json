@@ -7,6 +7,7 @@
             "cooldownDuration": 1.2400000095367432,
             "range": 3.5,
             "fireArc": 60.0,
+            "fireSoundId": "shot_basic",
             "prepare_time": 0.0,
             "cast_start_time": 0.0,
             "cast_finish_time": 0.0,
@@ -15,16 +16,16 @@
             "attackSheetPath": "",
             "attackFrameCount": 0,
             "attackFps": 12.0,
-            "attackScale": 1.0,
-            "fireSoundId": "shot_basic"
+            "attackScale": 1.0
         },
         {
             "id": "boomerang_shot",
             "displayName": "Boomerang Shot",
             "effectId": "boomerang_throw",
             "cooldownDuration": 1.75,
-            "range": 5.0,
+            "range": 6.0,
             "fireArc": 360.0,
+            "fireSoundId": "boomerang_whoosh",
             "prepare_time": 0.0,
             "cast_start_time": 0.0,
             "cast_finish_time": 0.0,
@@ -33,8 +34,7 @@
             "attackSheetPath": "",
             "attackFrameCount": 0,
             "attackFps": 12.0,
-            "attackScale": 1.0,
-            "fireSoundId": "boomerang_whoosh"
+            "attackScale": 1.0
         },
         {
             "id": "chain_lightning_shot",
@@ -43,6 +43,7 @@
             "cooldownDuration": 2.5,
             "range": 4.0,
             "fireArc": 360.0,
+            "fireSoundId": "chain_zap",
             "prepare_time": 0.0,
             "cast_start_time": 0.0,
             "cast_finish_time": 0.0,
@@ -51,8 +52,7 @@
             "attackSheetPath": "",
             "attackFrameCount": 0,
             "attackFps": 12.0,
-            "attackScale": 1.0,
-            "fireSoundId": "chain_zap"
+            "attackScale": 1.0
         },
         {
             "id": "poison_tower_shot",
@@ -61,6 +61,7 @@
             "cooldownDuration": 2.5,
             "range": 3.5,
             "fireArc": 360.0,
+            "fireSoundId": "shot_soft",
             "prepare_time": 0.0,
             "cast_start_time": 0.0,
             "cast_finish_time": 0.0,
@@ -71,8 +72,7 @@
             "attackSheetPath": "",
             "attackFrameCount": 0,
             "attackFps": 12.0,
-            "attackScale": 1.0,
-            "fireSoundId": "shot_soft"
+            "attackScale": 1.0
         },
         {
             "id": "root_tower_shot",
@@ -81,6 +81,7 @@
             "cooldownDuration": 2.0,
             "range": 2.5,
             "fireArc": 360.0,
+            "fireSoundId": "shot_soft",
             "prepare_time": 0.0,
             "cast_start_time": 0.0,
             "cast_finish_time": 0.0,
@@ -91,8 +92,7 @@
             "attackSheetPath": "Art/VFX/root_attack",
             "attackFrameCount": 6,
             "attackFps": 12.0,
-            "attackScale": 1.0,
-            "fireSoundId": "shot_soft"
+            "attackScale": 1.0
         },
         {
             "id": "shotgun_tower_shot",
@@ -101,6 +101,7 @@
             "cooldownDuration": 2.799999952316284,
             "range": 5.5,
             "fireArc": 60.0,
+            "fireSoundId": "shotgun_blast",
             "prepare_time": 0.0,
             "cast_start_time": 0.0,
             "cast_finish_time": 0.0,
@@ -109,8 +110,7 @@
             "attackSheetPath": "",
             "attackFrameCount": 0,
             "attackFps": 12.0,
-            "attackScale": 1.0,
-            "fireSoundId": "shotgun_blast"
+            "attackScale": 1.0
         },
         {
             "id": "entropy_tower_shot",
@@ -119,6 +119,7 @@
             "cooldownDuration": 1.600000023841858,
             "range": 4.0,
             "fireArc": 360.0,
+            "fireSoundId": "shot_basic",
             "prepare_time": 0.0,
             "cast_start_time": 0.0,
             "cast_finish_time": 0.0,
@@ -127,8 +128,7 @@
             "attackSheetPath": "",
             "attackFrameCount": 0,
             "attackFps": 12.0,
-            "attackScale": 1.0,
-            "fireSoundId": "shot_basic"
+            "attackScale": 1.0
         },
         {
             "id": "slow_tower_shot",
@@ -137,6 +137,7 @@
             "cooldownDuration": 1.5,
             "range": 4.0,
             "fireArc": 360.0,
+            "fireSoundId": "shot_soft",
             "prepare_time": 0.0,
             "cast_start_time": 0.0,
             "cast_finish_time": 0.0,
@@ -147,8 +148,7 @@
             "attackSheetPath": "",
             "attackFrameCount": 0,
             "attackFps": 12.0,
-            "attackScale": 1.0,
-            "fireSoundId": "shot_soft"
+            "attackScale": 1.0
         },
         {
             "id": "railgun_shot",
@@ -157,6 +157,7 @@
             "cooldownDuration": 4.0,
             "range": 22.0,
             "fireArc": 10.0,
+            "fireSoundId": "railgun_blast",
             "prepare_time": 0.0,
             "cast_start_time": 0.0,
             "cast_finish_time": 0.0,
@@ -165,8 +166,7 @@
             "attackSheetPath": "",
             "attackFrameCount": 0,
             "attackFps": 12.0,
-            "attackScale": 1.0,
-            "fireSoundId": "railgun_blast"
+            "attackScale": 1.0
         },
         {
             "id": "mortar_shot",
@@ -175,6 +175,7 @@
             "cooldownDuration": 4.0,
             "range": 7.0,
             "fireArc": 360.0,
+            "fireSoundId": "mortar_thunk",
             "prepare_time": 0.0,
             "cast_start_time": 0.0,
             "cast_finish_time": 0.0,
@@ -183,8 +184,7 @@
             "attackSheetPath": "",
             "attackFrameCount": 0,
             "attackFps": 12.0,
-            "attackScale": 1.0,
-            "fireSoundId": "mortar_thunk"
+            "attackScale": 1.0
         },
         {
             "id": "sniper_shot",
@@ -193,6 +193,7 @@
             "cooldownDuration": 2.0,
             "range": 999.0,
             "fireArc": 360.0,
+            "fireSoundId": "sniper_crack",
             "prepare_time": 0.0,
             "cast_start_time": 0.0,
             "cast_finish_time": 0.0,
@@ -201,8 +202,7 @@
             "attackSheetPath": "",
             "attackFrameCount": 0,
             "attackFps": 12.0,
-            "attackScale": 1.0,
-            "fireSoundId": "sniper_crack"
+            "attackScale": 1.0
         }
     ]
 }

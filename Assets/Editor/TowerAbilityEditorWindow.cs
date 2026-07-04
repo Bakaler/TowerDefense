@@ -1216,7 +1216,7 @@ public class TowerAbilityEditorWindow : EditorWindow
         if (p.movement == "orbit")
         {
             Section("Orbit (boomerang)");
-            p.arcRadius  = EF.FloatField("Arc Radius",        p.arcRadius);
+            p.arcRadius  = EF.FloatField("Max Arc Radius (reach = 2×)", p.arcRadius);
             p.sweepSpeed = EF.FloatField("Sweep Speed (°/s)", p.sweepSpeed);
             p.spinSpeed  = EF.FloatField("Spin Speed (°/s)",  p.spinSpeed);
         }
@@ -1232,7 +1232,8 @@ public class TowerAbilityEditorWindow : EditorWindow
 
         Section("Visuals");
         p.scale        = EF.FloatField("Scale",         p.scale);
-        p.spritePath   = TF("Sprite Path",   p.spritePath);
+        p.spritePath   = TF("Sprite Path (sheet = anim frames)", p.spritePath);
+        p.animFps      = EF.FloatField("Anim FPS (0 = static)",  p.animFps);
         p.spriteSheet  = TF("Sprite Sheet",  p.spriteSheet);
         p.spriteIndex  = EF.IntField(  "Sprite Index",  p.spriteIndex);
         p.color        = EF.ColorField("Color",         p.color);

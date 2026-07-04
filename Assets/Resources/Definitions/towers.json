@@ -10,17 +10,20 @@
             "balanceType": "Physical",
             "balanceWeight": 1,
             "fireAbilityId": "basic_tower_shot",
+            "placeSoundId": "basic_tower_place",
+            "sellSoundId": "",
+            "upgradeSoundId": "",
             "displayDamage": 0.0,
             "displayCooldown": 0.0,
             "rotationSpeed": 180.0,
             "animFps": 0.0,
-            "spritePath": "Resources/Art/Towers/basic_tower_T1",
-            "turretSpritePath": "Resources/Art/Towers/basic_tower_turret_T1",
+            "spritePath": "Art/Towers/basic_tower_T1",
+            "turretSpritePath": "Art/Towers/basic_tower_turret_T1",
             "spriteSheet": "",
             "spriteIndex": -1,
             "scale": 1.350000023841858,
             "debugColor": {
-                "r": 0.20000000298023224,
+                "r": 0.20000000298023225,
                 "g": 0.6000000238418579,
                 "b": 1.0,
                 "a": 1.0
@@ -35,8 +38,7 @@
             "upgradeStatMultiplier": 2.25,
             "towerTier": 1,
             "rangePerTier": 0.0,
-            "components": [],
-            "placeSoundId": "basic_tower_place"
+            "components": []
         },
         {
             "id": "income_tower",
@@ -48,6 +50,9 @@
             "balanceType": "Elemental",
             "balanceWeight": 1,
             "fireAbilityId": "",
+            "placeSoundId": "",
+            "sellSoundId": "",
+            "upgradeSoundId": "",
             "displayDamage": 0.0,
             "displayCooldown": 0.0,
             "rotationSpeed": 0.0,
@@ -81,8 +86,7 @@
                         "orbSpritePath": "Art/resource_1"
                     }
                 }
-            ],
-            "placeSoundId": ""
+            ]
         },
         {
             "id": "research_tower",
@@ -94,6 +98,9 @@
             "balanceType": "Arcane",
             "balanceWeight": 1,
             "fireAbilityId": "",
+            "placeSoundId": "",
+            "sellSoundId": "",
+            "upgradeSoundId": "",
             "displayDamage": 0.0,
             "displayCooldown": 0.0,
             "rotationSpeed": 0.0,
@@ -106,13 +113,13 @@
             "debugColor": {
                 "r": 0.3499999940395355,
                 "g": 1.0,
-                "b": 0.44999998807907104,
+                "b": 0.44999998807907107,
                 "a": 1.0
             },
             "tintColor": {
                 "r": 0.3499999940395355,
                 "g": 1.0,
-                "b": 0.44999998807907104,
+                "b": 0.44999998807907107,
                 "a": 1.0
             },
             "maxTier": 1,
@@ -133,8 +140,7 @@
                         "orbSpriteIndex": 1
                     }
                 }
-            ],
-            "placeSoundId": ""
+            ]
         },
         {
             "id": "chain_tower",
@@ -146,6 +152,9 @@
             "balanceType": "Arcane",
             "balanceWeight": 1,
             "fireAbilityId": "chain_lightning_shot",
+            "placeSoundId": "",
+            "sellSoundId": "",
+            "upgradeSoundId": "",
             "displayDamage": 0.0,
             "displayCooldown": 0.0,
             "rotationSpeed": 0.0,
@@ -171,8 +180,7 @@
             "upgradeStatMultiplier": 2.25,
             "towerTier": 2,
             "rangePerTier": 0.0,
-            "components": [],
-            "placeSoundId": ""
+            "components": []
         },
         {
             "id": "shotgun_tower",
@@ -184,12 +192,15 @@
             "balanceType": "Arcane",
             "balanceWeight": 1,
             "fireAbilityId": "shotgun_tower_shot",
+            "placeSoundId": "",
+            "sellSoundId": "",
+            "upgradeSoundId": "",
             "displayDamage": 0.0,
             "displayCooldown": 0.0,
             "rotationSpeed": 500.0,
             "animFps": 0.0,
-            "spritePath": "Resources/Art/Towers/shotgun_tower_T1",
-            "turretSpritePath": "Resources/Art/Towers/shotgun_tower_turret_T1",
+            "spritePath": "Art/Towers/shotgun_tower_T1",
+            "turretSpritePath": "Art/Towers/shotgun_tower_turret_T1",
             "spriteSheet": "",
             "spriteIndex": -1,
             "scale": 1.5,
@@ -214,8 +225,7 @@
                     "key": "shotgun_orienter",
                     "data": {}
                 }
-            ],
-            "placeSoundId": ""
+            ]
         },
         {
             "id": "bee_tower",
@@ -227,6 +237,9 @@
             "balanceType": "Physical",
             "balanceWeight": 1,
             "fireAbilityId": "",
+            "placeSoundId": "",
+            "sellSoundId": "",
+            "upgradeSoundId": "",
             "displayDamage": 6.0,
             "displayCooldown": 0.800000011920929,
             "rotationSpeed": 0.0,
@@ -266,8 +279,7 @@
                         "effectId": "drone_impact"
                     }
                 }
-            ],
-            "placeSoundId": ""
+            ]
         },
         {
             "id": "boomerang_tower",
@@ -279,6 +291,9 @@
             "balanceType": "Physical",
             "balanceWeight": 1,
             "fireAbilityId": "boomerang_shot",
+            "placeSoundId": "",
+            "sellSoundId": "",
+            "upgradeSoundId": "",
             "displayDamage": 0.0,
             "displayCooldown": 0.0,
             "rotationSpeed": 0.0,
@@ -287,11 +302,11 @@
             "turretSpritePath": "",
             "spriteSheet": "",
             "spriteIndex": -1,
-            "scale": 1.2000000476837158,
+            "scale": 1.4500000476837159,
             "debugColor": {
                 "r": 0.8999999761581421,
                 "g": 0.699999988079071,
-                "b": 0.20000000298023224,
+                "b": 0.20000000298023225,
                 "a": 1.0
             },
             "tintColor": {
@@ -304,8 +319,7 @@
             "upgradeStatMultiplier": 2.25,
             "towerTier": 2,
             "rangePerTier": 0.0,
-            "components": [],
-            "placeSoundId": ""
+            "components": []
         },
         {
             "id": "root_tower",
@@ -317,18 +331,21 @@
             "balanceType": "Elemental",
             "balanceWeight": 1,
             "fireAbilityId": "root_tower_shot",
+            "placeSoundId": "",
+            "sellSoundId": "",
+            "upgradeSoundId": "",
             "displayDamage": 0.0,
             "displayCooldown": 0.0,
             "rotationSpeed": 360.0,
             "animFps": 0.0,
-            "spritePath": "Resources/Art/Towers/root_tower_T1",
-            "turretSpritePath": "Resources/Art/Towers/root_tower_turret_T1",
+            "spritePath": "Art/Towers/root_tower_T1",
+            "turretSpritePath": "Art/Towers/root_tower_turret_T1",
             "spriteSheet": "",
             "spriteIndex": 0,
             "scale": 1.5,
             "debugColor": {
                 "r": 0.6499999761581421,
-                "g": 0.20000000298023224,
+                "g": 0.20000000298023225,
                 "b": 0.8999999761581421,
                 "a": 1.0
             },
@@ -342,8 +359,7 @@
             "upgradeStatMultiplier": 2.25,
             "towerTier": 2,
             "rangePerTier": 0.3499999940395355,
-            "components": [],
-            "placeSoundId": ""
+            "components": []
         },
         {
             "id": "entropy_tower",
@@ -355,6 +371,9 @@
             "balanceType": "Arcane",
             "balanceWeight": 1,
             "fireAbilityId": "entropy_tower_shot",
+            "placeSoundId": "",
+            "sellSoundId": "",
+            "upgradeSoundId": "",
             "displayDamage": 0.0,
             "displayCooldown": 0.0,
             "rotationSpeed": 90.0,
@@ -388,8 +407,7 @@
                         "maxStacks": 50
                     }
                 }
-            ],
-            "placeSoundId": ""
+            ]
         },
         {
             "id": "poison_tower",
@@ -401,6 +419,9 @@
             "balanceType": "Elemental",
             "balanceWeight": 1,
             "fireAbilityId": "poison_tower_shot",
+            "placeSoundId": "",
+            "sellSoundId": "",
+            "upgradeSoundId": "",
             "displayDamage": 0.0,
             "displayCooldown": 0.0,
             "rotationSpeed": 0.0,
@@ -413,21 +434,20 @@
             "debugColor": {
                 "r": 0.4000000059604645,
                 "g": 1.0,
-                "b": 0.30000001192092896,
+                "b": 0.30000001192092898,
                 "a": 1.0
             },
             "tintColor": {
                 "r": 0.4000000059604645,
                 "g": 1.0,
-                "b": 0.30000001192092896,
+                "b": 0.30000001192092898,
                 "a": 1.0
             },
             "maxTier": 5,
             "upgradeStatMultiplier": 2.25,
             "towerTier": 2,
             "rangePerTier": 0.0,
-            "components": [],
-            "placeSoundId": ""
+            "components": []
         },
         {
             "id": "collector_tower",
@@ -439,11 +459,14 @@
             "balanceType": "Elemental",
             "balanceWeight": 1,
             "fireAbilityId": "",
+            "placeSoundId": "",
+            "sellSoundId": "",
+            "upgradeSoundId": "",
             "displayDamage": 0.0,
             "displayCooldown": 0.0,
             "rotationSpeed": 0.0,
             "animFps": 0.0,
-            "spritePath": "",
+            "spritePath": "Art/Towers/Tower3",
             "turretSpritePath": "",
             "spriteSheet": "Art/Towers/Tower3",
             "spriteIndex": 0,
@@ -473,19 +496,21 @@
                         "cooldown": 1.2
                     }
                 }
-            ],
-            "placeSoundId": ""
+            ]
         },
         {
             "id": "slow_tower",
             "displayName": "Slow Tower",
             "description": "Fires chilling projectiles that reduce enemy movement speed by 60% for 2 seconds.",
             "range": 3.5,
-            "placementRadius": 0.44999998807907104,
+            "placementRadius": 0.44999998807907107,
             "resourceCost": 3,
             "balanceType": "Elemental",
             "balanceWeight": 1,
             "fireAbilityId": "slow_tower_shot",
+            "placeSoundId": "",
+            "sellSoundId": "",
+            "upgradeSoundId": "",
             "displayDamage": 0.0,
             "displayCooldown": 0.0,
             "rotationSpeed": 0.0,
@@ -511,8 +536,7 @@
             "upgradeStatMultiplier": 2.25,
             "towerTier": 1,
             "rangePerTier": 0.3499999940395355,
-            "components": [],
-            "placeSoundId": ""
+            "components": []
         },
         {
             "id": "railgun_tower",
@@ -524,6 +548,9 @@
             "balanceType": "Physical",
             "balanceWeight": 1,
             "fireAbilityId": "railgun_shot",
+            "placeSoundId": "",
+            "sellSoundId": "",
+            "upgradeSoundId": "",
             "displayDamage": 0.0,
             "displayCooldown": 0.0,
             "rotationSpeed": 15.0,
@@ -549,8 +576,7 @@
             "upgradeStatMultiplier": 2.25,
             "towerTier": 3,
             "rangePerTier": 0.0,
-            "components": [],
-            "placeSoundId": ""
+            "components": []
         },
         {
             "id": "speed_aura_tower",
@@ -562,6 +588,9 @@
             "balanceType": "Arcane",
             "balanceWeight": 1,
             "fireAbilityId": "",
+            "placeSoundId": "",
+            "sellSoundId": "",
+            "upgradeSoundId": "",
             "displayDamage": 0.0,
             "displayCooldown": 0.0,
             "rotationSpeed": 0.0,
@@ -572,13 +601,13 @@
             "spriteIndex": 0,
             "scale": 1.5,
             "debugColor": {
-                "r": 0.30000001192092896,
+                "r": 0.30000001192092898,
                 "g": 0.800000011920929,
                 "b": 1.0,
                 "a": 1.0
             },
             "tintColor": {
-                "r": 0.30000001192092896,
+                "r": 0.30000001192092898,
                 "g": 0.800000011920929,
                 "b": 1.0,
                 "a": 1.0
@@ -599,8 +628,7 @@
                         "auraColorB": 1.0
                     }
                 }
-            ],
-            "placeSoundId": ""
+            ]
         },
         {
             "id": "damage_aura_tower",
@@ -612,6 +640,9 @@
             "balanceType": "Physical",
             "balanceWeight": 1,
             "fireAbilityId": "",
+            "placeSoundId": "",
+            "sellSoundId": "",
+            "upgradeSoundId": "",
             "displayDamage": 0.0,
             "displayCooldown": 0.0,
             "rotationSpeed": 0.0,
@@ -624,13 +655,13 @@
             "debugColor": {
                 "r": 1.0,
                 "g": 0.4000000059604645,
-                "b": 0.20000000298023224,
+                "b": 0.20000000298023225,
                 "a": 1.0
             },
             "tintColor": {
                 "r": 1.0,
                 "g": 0.4000000059604645,
-                "b": 0.20000000298023224,
+                "b": 0.20000000298023225,
                 "a": 1.0
             },
             "maxTier": 5,
@@ -649,8 +680,7 @@
                         "auraColorB": 0.2
                     }
                 }
-            ],
-            "placeSoundId": ""
+            ]
         },
         {
             "id": "laser_tower",
@@ -662,6 +692,9 @@
             "balanceType": "Arcane",
             "balanceWeight": 1,
             "fireAbilityId": "",
+            "placeSoundId": "",
+            "sellSoundId": "",
+            "upgradeSoundId": "",
             "displayDamage": 0.0,
             "displayCooldown": 0.0,
             "rotationSpeed": 200.0,
@@ -702,8 +735,7 @@
                         "effectId": "beam_damage"
                     }
                 }
-            ],
-            "placeSoundId": ""
+            ]
         },
         {
             "id": "mortar_tower",
@@ -715,6 +747,9 @@
             "balanceType": "Physical",
             "balanceWeight": 1,
             "fireAbilityId": "mortar_shot",
+            "placeSoundId": "",
+            "sellSoundId": "",
+            "upgradeSoundId": "",
             "displayDamage": 0.0,
             "displayCooldown": 0.0,
             "rotationSpeed": 0.0,
@@ -727,32 +762,34 @@
             "debugColor": {
                 "r": 0.8999999761581421,
                 "g": 0.6000000238418579,
-                "b": 0.20000000298023224,
+                "b": 0.20000000298023225,
                 "a": 1.0
             },
             "tintColor": {
                 "r": 0.8999999761581421,
                 "g": 0.6000000238418579,
-                "b": 0.20000000298023224,
+                "b": 0.20000000298023225,
                 "a": 1.0
             },
             "maxTier": 5,
             "upgradeStatMultiplier": 2.25,
             "towerTier": 3,
             "rangePerTier": 0.0,
-            "components": [],
-            "placeSoundId": ""
+            "components": []
         },
         {
             "id": "sniper_tower",
             "displayName": "Sniper",
             "description": "Unlimited range. Fires a hitscan shot at the furthest enemy inside its repositionable firing box. Press Move Zone in the panel to reposition the box.",
             "range": 999.0,
-            "placementRadius": 0.44999998807907104,
+            "placementRadius": 0.44999998807907107,
             "resourceCost": 8,
             "balanceType": "Physical",
             "balanceWeight": 1,
             "fireAbilityId": "sniper_shot",
+            "placeSoundId": "",
+            "sellSoundId": "",
+            "upgradeSoundId": "",
             "displayDamage": 60.0,
             "displayCooldown": 2.0,
             "rotationSpeed": 0.0,
@@ -790,8 +827,7 @@
                     "key": "sniper_turrent",
                     "data": {}
                 }
-            ],
-            "placeSoundId": ""
+            ]
         },
         {
             "id": "siphon_tower",
@@ -803,6 +839,9 @@
             "balanceType": "Elemental",
             "balanceWeight": 1,
             "fireAbilityId": "",
+            "placeSoundId": "",
+            "sellSoundId": "",
+            "upgradeSoundId": "",
             "displayDamage": 2.0,
             "displayCooldown": 9.0,
             "rotationSpeed": 0.0,
@@ -837,8 +876,7 @@
                         "drainEffectId": "drain_life"
                     }
                 }
-            ],
-            "placeSoundId": ""
+            ]
         }
     ]
 }

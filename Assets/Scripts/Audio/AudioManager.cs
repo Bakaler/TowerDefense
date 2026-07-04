@@ -236,6 +236,7 @@ public class AudioManager : MonoBehaviour
         to.loop   = loadedClips <= 1;   // playlist mode when there's something to rotate
         to.volume = 0f;
         to.Play();
+        Debug.Log($"[AudioManager] Music → {clip.name}");
 
         if (_musicFade != null) StopCoroutine(_musicFade);
         _musicFade = StartCoroutine(CrossfadeMusic(from, to));
@@ -259,6 +260,33 @@ public class AudioManager : MonoBehaviour
         _musicDef     = null;
         if (_musicFade != null) StopCoroutine(_musicFade);
         _musicFade = StartCoroutine(CrossfadeMusic(_musicOnA ? _musicA : _musicB, null));
+    }
+
+    /// <summary>
+    /// Call after SoundLibrary.Reload() — rebinds the live music definition so edits
+    /// made during play (new playlist clips, volume, synth params) take effect.
+    /// </summary>
+    public void OnDefinitionsReloaded()
+    {
+        AudioSynth.ClearCache();
+        _warned.Clear();
+
+        if (string.IsNullOrEmpty(_musicSoundId)) return;
+        var def = SoundLibrary.Get(_musicSoundId);
+        if (def == null) return;
+
+        _musicDef       = def;
+        _musicDefVolume = def.volume;
+
+        int loadedClips = 0;
+        if (def.clips != null)
+            foreach (var c in def.clips)
+                if (LoadClipPath(c) != null) loadedClips++;
+
+        // Playlist mode kicks in at the end of the current track
+        var cur = _musicOnA ? _musicA : _musicB;
+        cur.loop = loadedClips <= 1;
+        if (_musicFade == null) cur.volume = _musicDefVolume * BusMult("music");
     }
 
     IEnumerator CrossfadeMusic(AudioSource from, AudioSource to)

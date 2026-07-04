@@ -20,9 +20,19 @@ public static class RuntimeSprites
         _circleCache.Clear();
     }
 
+    /// <summary>Strips a leading "Resources/" — a common data typo; Resources paths are relative to the folder.</summary>
+    public static string Normalize(string path)
+    {
+        if (string.IsNullOrEmpty(path)) return path;
+        return path.StartsWith("Resources/", System.StringComparison.OrdinalIgnoreCase)
+            ? path.Substring("Resources/".Length)
+            : path;
+    }
+
     /// <summary>Loads a single sprite from Resources (falls back to the first cell of a sheet). Cached.</summary>
     public static Sprite Load(string path)
     {
+        path = Normalize(path);
         if (string.IsNullOrEmpty(path)) return null;
         if (_spriteCache.TryGetValue(path, out var cached)) return cached;
 
@@ -39,6 +49,7 @@ public static class RuntimeSprites
     /// <summary>Loads all sprites of a sliced sheet from Resources. Cached. Never null.</summary>
     public static Sprite[] LoadSheet(string path)
     {
+        path = Normalize(path);
         if (string.IsNullOrEmpty(path)) return System.Array.Empty<Sprite>();
         if (_sheetCache.TryGetValue(path, out var cached)) return cached;
 

@@ -65,6 +65,17 @@ public static class ProjectileFactory
         sr.sortingLayerName = string.IsNullOrEmpty(def.sortingLayer) ? "Units" : def.sortingLayer;
         sr.sortingOrder     = def.sortingOrder;
 
+        // Looping flight animation when the definition asks for it and frames exist
+        if (def.animFps > 0f)
+        {
+            var frames = ResolveAnimFrames(def, args.originTower);
+            if (frames.Length > 1)
+            {
+                sr.sprite = frames[0];
+                go.AddComponent<SpriteAnimator>().Setup(frames, def.animFps);
+            }
+        }
+
         var proj             = go.AddComponent<Projectile>();
         proj.def             = def;
         proj.movement        = movement;
@@ -112,5 +123,27 @@ public static class ProjectileFactory
 
         var sprite = RuntimeSprites.Resolve(def.spritePath, def.spriteSheet, def.spriteIndex);
         return sprite != null ? sprite : RuntimeSprites.Circle();
+    }
+
+    /// <summary>
+    /// Animation frames: tiered tower art ({towerId}_missile_T{tier} as a sliced sheet)
+    /// wins, then the definition's spritePath as a sheet. Empty when neither has frames.
+    /// </summary>
+    static Sprite[] ResolveAnimFrames(ProjectileDefinition def, GameObject originTower)
+    {
+        if (originTower != null)
+        {
+            var info = originTower.GetComponent<TowerInfo>();
+            if (info != null)
+            {
+                string tieredPath = TowerFactory.ResolveTieredPath(info.definitionId + "_missile", info.Tier, null);
+                if (tieredPath != null)
+                {
+                    var tiered = RuntimeSprites.LoadSheet(tieredPath);
+                    if (tiered.Length > 1) return tiered;
+                }
+            }
+        }
+        return RuntimeSprites.LoadSheet(def.spritePath);
     }
 }

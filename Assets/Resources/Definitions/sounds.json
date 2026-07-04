@@ -464,7 +464,9 @@
             "id": "music_game",
             "displayName": "Game Music (placeholder drone)",
             "clips": [
-                "Audio/Music/game_theme"
+                "Audio/Music/game_theme",
+                "Audio/Music/game_theme_2",
+                "Audio/Music/game_theme_3"
             ],
             "pickMode": "shuffle",
             "bus": "music",
@@ -485,9 +487,7 @@
             "id": "music_menu",
             "displayName": "Menu Music (placeholder drone)",
             "clips": [
-                "Audio/Music/menu_theme",
-                "Audio/Music/game_theme_2",
-                "Audio/Music/game_theme_3"
+                "Audio/Music/menu_theme"
             ],
             "pickMode": "shuffle",
             "bus": "music",

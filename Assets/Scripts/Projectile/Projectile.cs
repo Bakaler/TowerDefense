@@ -38,6 +38,7 @@ public class Projectile : MonoBehaviour
 
     // Orbit state
     private Vector2 _orbitCenter;
+    private float   _orbitRadius;
     private float   _orbitAngle;
     private float   _orbitSweep;
     private bool    _orbitReturnLeg;
@@ -59,9 +60,14 @@ public class Projectile : MonoBehaviour
                 break;
 
             case MovementMode.Orbit:
-                // Circle center sits arcRadius ahead of the caster in the launch direction
+                // Size the loop so its apex (2 × radius) reaches the target it was
+                // thrown at; def.arcRadius caps the maximum loop size.
                 Vector2 casterPos = _spawnPos;
-                _orbitCenter = casterPos + direction.normalized * def.arcRadius;
+                float span = ((Vector2)targetPoint - casterPos).magnitude;
+                _orbitRadius = span > 0.05f
+                    ? Mathf.Min(span * 0.5f, Mathf.Max(0.1f, def.arcRadius))
+                    : def.arcRadius;
+                _orbitCenter = casterPos + direction.normalized * _orbitRadius;
                 Vector2 toStart = casterPos - _orbitCenter;
                 _orbitAngle = Mathf.Atan2(toStart.y, toStart.x) * Mathf.Rad2Deg;
                 break;
@@ -143,8 +149,8 @@ public class Projectile : MonoBehaviour
 
         float rad = _orbitAngle * Mathf.Deg2Rad;
         transform.position = new Vector3(
-            _orbitCenter.x + Mathf.Cos(rad) * def.arcRadius,
-            _orbitCenter.y + Mathf.Sin(rad) * def.arcRadius,
+            _orbitCenter.x + Mathf.Cos(rad) * _orbitRadius,
+            _orbitCenter.y + Mathf.Sin(rad) * _orbitRadius,
             0f);
 
         // Tangent-facing + extra spin

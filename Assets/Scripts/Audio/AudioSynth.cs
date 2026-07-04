@@ -19,6 +19,9 @@ public static class AudioSynth
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
     static void Reset() => _cache.Clear();
 
+    /// <summary>Drop generated clips so edited synth params take effect (live reload).</summary>
+    public static void ClearCache() => _cache.Clear();
+
     /// <summary>Returns a generated clip for the definition, or null if synthWave is "none".</summary>
     public static AudioClip GetClip(SoundDefinition def)
     {

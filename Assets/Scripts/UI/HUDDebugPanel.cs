@@ -31,6 +31,8 @@ public class HUDDebugPanel : MonoBehaviour
         _lastWave = wave;
 
         UnitDefinitionLibrary.Instance?.Reload();
+        SoundLibrary.Reload();
+        AudioManager.Instance?.OnDefinitionsReloaded();
         Rebuild();
     }
 

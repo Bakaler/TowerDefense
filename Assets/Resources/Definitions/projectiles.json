@@ -11,13 +11,15 @@
             "arcRadius": 4.0,
             "sweepSpeed": 180.0,
             "spinSpeed": 0.0,
-            "hitRadius": 0.15000000596046448,
+            "hitRadius": 0.15000000596046449,
             "pierce": false,
             "blockedByShields": true,
             "shieldAbsorb": 10.0,
             "drawImpactLine": false,
+            "impactSoundId": "impact_thud",
             "scale": 1.0,
             "spritePath": "Art/Towers/T8Bullet",
+            "animFps": 0.0,
             "spriteSheet": "",
             "spriteIndex": -1,
             "color": {
@@ -27,8 +29,7 @@
                 "a": 1.0
             },
             "sortingLayer": "Units",
-            "sortingOrder": 10,
-            "impactSoundId": "impact_thud"
+            "sortingOrder": 10
         },
         {
             "id": "chain_bolt",
@@ -41,24 +42,25 @@
             "arcRadius": 4.0,
             "sweepSpeed": 180.0,
             "spinSpeed": 0.0,
-            "hitRadius": 0.15000000596046448,
+            "hitRadius": 0.15000000596046449,
             "pierce": false,
             "blockedByShields": true,
             "shieldAbsorb": 10.0,
             "drawImpactLine": true,
+            "impactSoundId": "impact_soft",
             "scale": 0.4000000059604645,
             "spritePath": "",
+            "animFps": 0.0,
             "spriteSheet": "Art/Towers/TowerSet1",
             "spriteIndex": 1,
             "color": {
-                "r": 0.20000000298023224,
+                "r": 0.20000000298023225,
                 "g": 0.6000000238418579,
                 "b": 1.0,
                 "a": 1.0
             },
             "sortingLayer": "Units",
-            "sortingOrder": 10,
-            "impactSoundId": "impact_soft"
+            "sortingOrder": 10
         },
         {
             "id": "chain_bounce_1_bolt",
@@ -71,24 +73,25 @@
             "arcRadius": 4.0,
             "sweepSpeed": 180.0,
             "spinSpeed": 0.0,
-            "hitRadius": 0.15000000596046448,
+            "hitRadius": 0.15000000596046449,
             "pierce": false,
             "blockedByShields": true,
             "shieldAbsorb": 10.0,
             "drawImpactLine": true,
+            "impactSoundId": "impact_soft",
             "scale": 0.3499999940395355,
             "spritePath": "",
+            "animFps": 0.0,
             "spriteSheet": "Art/Towers/TowerSet1",
             "spriteIndex": 1,
             "color": {
-                "r": 0.20000000298023224,
+                "r": 0.20000000298023225,
                 "g": 0.6000000238418579,
                 "b": 1.0,
                 "a": 1.0
             },
             "sortingLayer": "Units",
-            "sortingOrder": 10,
-            "impactSoundId": "impact_soft"
+            "sortingOrder": 10
         },
         {
             "id": "chain_bounce_2_bolt",
@@ -101,24 +104,25 @@
             "arcRadius": 4.0,
             "sweepSpeed": 180.0,
             "spinSpeed": 0.0,
-            "hitRadius": 0.15000000596046448,
+            "hitRadius": 0.15000000596046449,
             "pierce": false,
             "blockedByShields": true,
             "shieldAbsorb": 10.0,
             "drawImpactLine": true,
-            "scale": 0.30000001192092896,
+            "impactSoundId": "impact_soft",
+            "scale": 0.30000001192092898,
             "spritePath": "",
+            "animFps": 0.0,
             "spriteSheet": "Art/Towers/TowerSet1",
             "spriteIndex": 1,
             "color": {
-                "r": 0.20000000298023224,
+                "r": 0.20000000298023225,
                 "g": 0.6000000238418579,
                 "b": 1.0,
                 "a": 1.0
             },
             "sortingLayer": "Units",
-            "sortingOrder": 10,
-            "impactSoundId": "impact_soft"
+            "sortingOrder": 10
         },
         {
             "id": "poison_bolt",
@@ -131,24 +135,25 @@
             "arcRadius": 4.0,
             "sweepSpeed": 180.0,
             "spinSpeed": 0.0,
-            "hitRadius": 0.15000000596046448,
+            "hitRadius": 0.15000000596046449,
             "pierce": false,
             "blockedByShields": true,
             "shieldAbsorb": 10.0,
             "drawImpactLine": false,
+            "impactSoundId": "impact_soft",
             "scale": 0.550000011920929,
             "spritePath": "",
+            "animFps": 0.0,
             "spriteSheet": "Art/Towers/TowerSet1",
             "spriteIndex": 1,
             "color": {
                 "r": 0.4000000059604645,
                 "g": 1.0,
-                "b": 0.30000001192092896,
+                "b": 0.30000001192092898,
                 "a": 1.0
             },
             "sortingLayer": "Units",
-            "sortingOrder": 10,
-            "impactSoundId": "impact_soft"
+            "sortingOrder": 10
         },
         {
             "id": "slow_bolt",
@@ -161,13 +166,15 @@
             "arcRadius": 4.0,
             "sweepSpeed": 180.0,
             "spinSpeed": 0.0,
-            "hitRadius": 0.15000000596046448,
+            "hitRadius": 0.15000000596046449,
             "pierce": false,
             "blockedByShields": true,
             "shieldAbsorb": 10.0,
             "drawImpactLine": false,
+            "impactSoundId": "impact_soft",
             "scale": 1.5,
             "spritePath": "",
+            "animFps": 0.0,
             "spriteSheet": "Art/Towers/TowerSet1",
             "spriteIndex": 1,
             "color": {
@@ -177,8 +184,7 @@
                 "a": 1.0
             },
             "sortingLayer": "Units",
-            "sortingOrder": 10,
-            "impactSoundId": "impact_soft"
+            "sortingOrder": 10
         },
         {
             "id": "root_bolt",
@@ -191,24 +197,25 @@
             "arcRadius": 4.0,
             "sweepSpeed": 180.0,
             "spinSpeed": 0.0,
-            "hitRadius": 0.15000000596046448,
+            "hitRadius": 0.15000000596046449,
             "pierce": false,
             "blockedByShields": true,
             "shieldAbsorb": 10.0,
             "drawImpactLine": false,
+            "impactSoundId": "impact_soft",
             "scale": 0.5,
             "spritePath": "",
+            "animFps": 0.0,
             "spriteSheet": "Art/Towers/TowerSet1",
             "spriteIndex": 1,
             "color": {
                 "r": 0.6499999761581421,
-                "g": 0.20000000298023224,
+                "g": 0.20000000298023225,
                 "b": 0.8999999761581421,
                 "a": 1.0
             },
             "sortingLayer": "Units",
-            "sortingOrder": 10,
-            "impactSoundId": "impact_soft"
+            "sortingOrder": 10
         },
         {
             "id": "entropy_bolt",
@@ -221,13 +228,15 @@
             "arcRadius": 4.0,
             "sweepSpeed": 180.0,
             "spinSpeed": 0.0,
-            "hitRadius": 0.15000000596046448,
+            "hitRadius": 0.15000000596046449,
             "pierce": false,
             "blockedByShields": true,
             "shieldAbsorb": 10.0,
             "drawImpactLine": false,
-            "scale": 0.44999998807907104,
+            "impactSoundId": "impact_thud",
+            "scale": 0.44999998807907107,
             "spritePath": "",
+            "animFps": 0.0,
             "spriteSheet": "Art/Towers/TowerSet1",
             "spriteIndex": 1,
             "color": {
@@ -237,8 +246,7 @@
                 "a": 1.0
             },
             "sortingLayer": "Units",
-            "sortingOrder": 10,
-            "impactSoundId": "impact_thud"
+            "sortingOrder": 10
         },
         {
             "id": "shotgun_pellet",
@@ -246,18 +254,20 @@
             "description": "Straight-line pellet. Short-lived, stopped by shields.",
             "movement": "straight",
             "speed": 22.0,
-            "lifetime": 0.15000000596046448,
+            "lifetime": 0.15000000596046449,
             "faceDirection": true,
             "arcRadius": 4.0,
             "sweepSpeed": 180.0,
             "spinSpeed": 0.0,
-            "hitRadius": 0.15000000596046448,
+            "hitRadius": 0.15000000596046449,
             "pierce": false,
             "blockedByShields": true,
             "shieldAbsorb": 10.0,
             "drawImpactLine": false,
+            "impactSoundId": "impact_soft",
             "scale": 1.25,
             "spritePath": "Art/Towers/Bullet7",
+            "animFps": 0.0,
             "spriteSheet": "",
             "spriteIndex": -1,
             "color": {
@@ -267,8 +277,7 @@
                 "a": 1.0
             },
             "sortingLayer": "Units",
-            "sortingOrder": 10,
-            "impactSoundId": "impact_soft"
+            "sortingOrder": 10
         },
         {
             "id": "mortar_shell",
@@ -281,43 +290,46 @@
             "arcRadius": 4.0,
             "sweepSpeed": 180.0,
             "spinSpeed": 0.0,
-            "hitRadius": 0.15000000596046448,
+            "hitRadius": 0.15000000596046449,
             "pierce": false,
             "blockedByShields": true,
             "shieldAbsorb": 10.0,
             "drawImpactLine": false,
+            "impactSoundId": "explosion",
             "scale": 0.6000000238418579,
             "spritePath": "",
+            "animFps": 0.0,
             "spriteSheet": "",
             "spriteIndex": -1,
             "color": {
                 "r": 0.8999999761581421,
                 "g": 0.6000000238418579,
-                "b": 0.20000000298023224,
+                "b": 0.20000000298023225,
                 "a": 1.0
             },
             "sortingLayer": "Units",
-            "sortingOrder": 10,
-            "impactSoundId": "explosion"
+            "sortingOrder": 10
         },
         {
             "id": "boomerang",
             "displayName": "Boomerang",
-            "description": "Sweeps a full circle through enemies, re-hitting on the return leg.",
+            "description": "Loops out to its target and back, re-hitting on the return leg. arcRadius caps the loop (reach = 2x arcRadius).",
             "movement": "orbit",
-            "speed": 10.0,
+            "speed": 6.0,
             "lifetime": 0.0,
             "faceDirection": false,
-            "arcRadius": 1.0,
-            "sweepSpeed": 2000.0,
-            "spinSpeed": 1000.0,
-            "hitRadius": 0.44999998807907104,
+            "arcRadius": 2.5,
+            "sweepSpeed": 100.0,
+            "spinSpeed": -1000.0,
+            "hitRadius": 0.44999998807907107,
             "pierce": true,
             "blockedByShields": false,
             "shieldAbsorb": 10.0,
             "drawImpactLine": false,
-            "scale": 1.350000023841858,
-            "spritePath": "Art/Towers/Bullet2",
+            "impactSoundId": "impact_soft",
+            "scale": 1.0,
+            "spritePath": "Art/Towers/boomerang_missile_T1",
+            "animFps": 12.0,
             "spriteSheet": "",
             "spriteIndex": -1,
             "color": {
@@ -327,8 +339,7 @@
                 "a": 1.0
             },
             "sortingLayer": "Units",
-            "sortingOrder": 15,
-            "impactSoundId": "impact_soft"
+            "sortingOrder": 15
         },
         {
             "id": "bee_bullet",
@@ -341,24 +352,25 @@
             "arcRadius": 4.0,
             "sweepSpeed": 180.0,
             "spinSpeed": 0.0,
-            "hitRadius": 0.15000000596046448,
+            "hitRadius": 0.15000000596046449,
             "pierce": false,
             "blockedByShields": true,
             "shieldAbsorb": 10.0,
             "drawImpactLine": false,
+            "impactSoundId": "bee_sting",
             "scale": 0.5,
             "spritePath": "Art/Towers/bee_missile_T1",
+            "animFps": 0.0,
             "spriteSheet": "",
             "spriteIndex": -1,
             "color": {
                 "r": 1.0,
                 "g": 0.949999988079071,
-                "b": 0.30000001192092896,
+                "b": 0.30000001192092898,
                 "a": 1.0
             },
             "sortingLayer": "Units",
-            "sortingOrder": 10,
-            "impactSoundId": "bee_sting"
+            "sortingOrder": 10
         }
     ]
 }

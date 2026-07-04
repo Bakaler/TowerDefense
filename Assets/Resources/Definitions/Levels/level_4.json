@@ -1,809 +1,1478 @@
-﻿{
-    "id":  "level_4",
-    "displayName":  "Level 4",
-    "startGold":  125,
-    "startLives":  100,
-    "startTech":  50,
-    "startTier":  2,
-    "backgroundSprite":  "Art/Maps/level_3",
-    "backgroundX":  0.019999999552965165,
-    "backgroundY":  1.059999942779541,
-    "maxTowers":  -1,
-    "allowedTowers":  [
-                          "basic_tower",
-                          "income_tower",
-                          "research_tower",
-                          "chain_tower",
-                          "slow_tower",
-                          "sniper_tower",
-                          "siphon_tower",
-                          "mortar_tower",
-                          "laser_tower",
-                          "damage_aura_tower",
-                          "speed_aura_tower",
-                          "railgun_tower",
-                          "collector_tower",
-                          "poison_tower",
-                          "entropy_tower",
-                          "root_tower",
-                          "boomerang_tower",
-                          "bee_tower",
-                          "shotgun_tower"
-                      ],
-    "modifierColumns":  [
-
-                        ],
-    "difficulties":  [
-                         {
-                             "label":  "Easy",
-                             "enemyHpMult":  0.75,
-                             "enemySpeedMult":  1.0,
-                             "goldMult":  1.0,
-                             "bountyMult":  1.0,
-                             "startGold":  -1,
-                             "startLives":  -1,
-                             "startTech":  -1,
-                             "startTier":  -1,
-                             "maxTowers":  -1,
-                             "allowedTowers":  [
-
-                                               ],
-                             "disabledGroups":  [
-
-                                                ],
-                             "objectives":  [
-
-                                            ]
-                         },
-                         {
-                             "label":  "Medium",
-                             "enemyHpMult":  1.0,
-                             "enemySpeedMult":  1.0,
-                             "goldMult":  1.0,
-                             "bountyMult":  1.0,
-                             "startGold":  -1,
-                             "startLives":  -1,
-                             "startTech":  -1,
-                             "startTier":  -1,
-                             "maxTowers":  -1,
-                             "allowedTowers":  [
-
-                                               ],
-                             "disabledGroups":  [
-
-                                                ],
-                             "objectives":  [
-
-                                            ]
-                         },
-                         {
-                             "label":  "Hard",
-                             "enemyHpMult":  1.75,
-                             "enemySpeedMult":  1.0,
-                             "goldMult":  1.0,
-                             "bountyMult":  1.0,
-                             "startGold":  -1,
-                             "startLives":  -1,
-                             "startTech":  -1,
-                             "startTier":  -1,
-                             "maxTowers":  -1,
-                             "allowedTowers":  [
-
-                                               ],
-                             "disabledGroups":  [
-
-                                                ],
-                             "objectives":  [
-
-                                            ]
-                         }
-                     ],
-    "objectives":  [
-
-                   ],
-    "paths":  [
-                  {
-                      "spawnerIndex":  1,
-                      "nodes":  [
-                                    {
-                                        "id":  "n0",
-                                        "x":  -9.920000076293946,
-                                        "y":  0.550000011920929,
-                                        "next":  [
-                                                     "n1"
-                                                 ]
-                                    },
-                                    {
-                                        "id":  "n1",
-                                        "x":  -6.840000152587891,
-                                        "y":  2.440000057220459,
-                                        "next":  [
-                                                     "n2"
-                                                 ]
-                                    },
-                                    {
-                                        "id":  "n2",
-                                        "x":  -2.8299999237060549,
-                                        "y":  4.300000190734863,
-                                        "next":  [
-                                                     "n3"
-                                                 ]
-                                    },
-                                    {
-                                        "id":  "n3",
-                                        "x":  0.8199999928474426,
-                                        "y":  5.25,
-                                        "next":  [
-                                                     "n4"
-                                                 ]
-                                    },
-                                    {
-                                        "id":  "n4",
-                                        "x":  7.920000076293945,
-                                        "y":  6.949999809265137,
-                                        "next":  [
-
-                                                 ]
-                                    }
-                                ]
-                  },
-                  {
-                      "spawnerIndex":  0,
-                      "nodes":  [
-                                    {
-                                        "id":  "n0",
-                                        "x":  -8.989999771118164,
-                                        "y":  -4.739999771118164,
-                                        "next":  [
-                                                     "n1"
-                                                 ]
-                                    },
-                                    {
-                                        "id":  "n1",
-                                        "x":  -5.739999771118164,
-                                        "y":  -2.3399999141693117,
-                                        "next":  [
-                                                     "n2"
-                                                 ]
-                                    },
-                                    {
-                                        "id":  "n2",
-                                        "x":  -3.0299999713897707,
-                                        "y":  -1.3600000143051148,
-                                        "next":  [
-                                                     "n3"
-                                                 ]
-                                    },
-                                    {
-                                        "id":  "n3",
-                                        "x":  1.4500000476837159,
-                                        "y":  -1.0700000524520875,
-                                        "next":  [
-                                                     "n4"
-                                                 ]
-                                    },
-                                    {
-                                        "id":  "n4",
-                                        "x":  5.349999904632568,
-                                        "y":  0.05999999865889549,
-                                        "next":  [
-                                                     "n5"
-                                                 ]
-                                    },
-                                    {
-                                        "id":  "n5",
-                                        "x":  10.289999961853028,
-                                        "y":  1.7699999809265137,
-                                        "next":  [
-
-                                                 ]
-                                    }
-                                ]
-                  },
-                  {
-                      "spawnerIndex":  2,
-                      "nodes":  [
-                                    {
-                                        "id":  "n0",
-                                        "x":  -9.8100004196167,
-                                        "y":  4.099999904632568,
-                                        "next":  [
-                                                     "n1"
-                                                 ]
-                                    },
-                                    {
-                                        "id":  "n1",
-                                        "x":  -6.480000019073486,
-                                        "y":  5.130000114440918,
-                                        "next":  [
-                                                     "n2"
-                                                 ]
-                                    },
-                                    {
-                                        "id":  "n2",
-                                        "x":  -1.0700000524520875,
-                                        "y":  5.710000038146973,
-                                        "next":  [
-                                                     "n3"
-                                                 ]
-                                    },
-                                    {
-                                        "id":  "n3",
-                                        "x":  0.6100000143051148,
-                                        "y":  5.769999980926514,
-                                        "next":  [
-                                                     "n4"
-                                                 ]
-                                    },
-                                    {
-                                        "id":  "n4",
-                                        "x":  3.450000047683716,
-                                        "y":  4.980000019073486,
-                                        "next":  [
-                                                     "n5"
-                                                 ]
-                                    },
-                                    {
-                                        "id":  "n5",
-                                        "x":  7.039999961853027,
-                                        "y":  5.349999904632568,
-                                        "next":  [
-                                                     "n6"
-                                                 ]
-                                    },
-                                    {
-                                        "id":  "n6",
-                                        "x":  10.649999618530274,
-                                        "y":  5.889999866485596,
-                                        "next":  [
-
-                                                 ]
-                                    }
-                                ]
-                  }
-              ],
-    "placementZones":  [
-                           {
-                               "type":  "lane",
-                               "x":  0.0,
-                               "y":  0.0,
-                               "radius":  2.0,
-                               "width":  0.25,
-                               "points":  [
-                                              {
-                                                  "x":  -0.12999999523162843,
-                                                  "y":  0.28999999165534975,
-                                                  "width":  0.25
-                                              },
-                                              {
-                                                  "x":  2.1500000953674318,
-                                                  "y":  0.20000000298023225,
-                                                  "width":  0.25
-                                              },
-                                              {
-                                                  "x":  5.900000095367432,
-                                                  "y":  1.1299999952316285,
-                                                  "width":  0.25
-                                              },
-                                              {
-                                                  "x":  8.479999542236329,
-                                                  "y":  2.1500000953674318,
-                                                  "width":  0.25
-                                              },
-                                              {
-                                                  "x":  9.979999542236329,
-                                                  "y":  2.9600000381469728,
-                                                  "width":  0.25
-                                              }
-                                          ]
-                           },
-                           {
-                               "type":  "lane",
-                               "x":  0.0,
-                               "y":  0.0,
-                               "radius":  2.0,
-                               "width":  0.25,
-                               "points":  [
-                                              {
-                                                  "x":  -6.28000020980835,
-                                                  "y":  -0.07000000029802323,
-                                                  "width":  0.25
-                                              },
-                                              {
-                                                  "x":  -3.7899999618530275,
-                                                  "y":  1.0700000524520875,
-                                                  "width":  0.25
-                                              }
-                                          ]
-                           },
-                           {
-                               "type":  "lane",
-                               "x":  0.0,
-                               "y":  0.0,
-                               "radius":  2.0,
-                               "width":  0.25,
-                               "points":  [
-                                              {
-                                                  "x":  1.4299999475479127,
-                                                  "y":  2.430000066757202,
-                                                  "width":  0.25
-                                              },
-                                              {
-                                                  "x":  3.450000047683716,
-                                                  "y":  2.7200000286102297,
-                                                  "width":  0.25
-                                              }
-                                          ]
-                           },
-                           {
-                               "type":  "lane",
-                               "x":  0.0,
-                               "y":  0.0,
-                               "radius":  2.0,
-                               "width":  0.25,
-                               "points":  [
-                                              {
-                                                  "x":  -10.279999732971192,
-                                                  "y":  -2.809999942779541,
-                                                  "width":  0.25
-                                              },
-                                              {
-                                                  "x":  -8.050000190734864,
-                                                  "y":  -1.399999976158142,
-                                                  "width":  0.25
-                                              }
-                                          ]
-                           },
-                           {
-                               "type":  "lane",
-                               "x":  0.0,
-                               "y":  0.0,
-                               "radius":  2.0,
-                               "width":  0.25,
-                               "points":  [
-                                              {
-                                                  "x":  -7.53000020980835,
-                                                  "y":  -1.7599999904632569,
-                                                  "width":  0.25
-                                              },
-                                              {
-                                                  "x":  -5.610000133514404,
-                                                  "y":  -1.090000033378601,
-                                                  "width":  0.25
-                                              },
-                                              {
-                                                  "x":  -3.259999990463257,
-                                                  "y":  -1.0,
-                                                  "width":  0.25
-                                              }
-                                          ]
-                           },
-                           {
-                               "type":  "lane",
-                               "x":  0.0,
-                               "y":  0.0,
-                               "radius":  2.0,
-                               "width":  0.25,
-                               "points":  [
-                                              {
-                                                  "x":  -1.190000057220459,
-                                                  "y":  -1.1100000143051148,
-                                                  "width":  0.25
-                                              },
-                                              {
-                                                  "x":  2.3399999141693117,
-                                                  "y":  -1.8600000143051148,
-                                                  "width":  0.25
-                                              },
-                                              {
-                                                  "x":  4.460000038146973,
-                                                  "y":  -1.7999999523162842,
-                                                  "width":  0.25
-                                              },
-                                              {
-                                                  "x":  5.75,
-                                                  "y":  -1.4800000190734864,
-                                                  "width":  0.25
-                                              }
-                                          ]
-                           },
-                           {
-                               "type":  "lane",
-                               "x":  0.0,
-                               "y":  0.0,
-                               "radius":  2.0,
-                               "width":  0.25,
-                               "points":  [
-                                              {
-                                                  "x":  6.769999980926514,
-                                                  "y":  -1.0099999904632569,
-                                                  "width":  0.25
-                                              },
-                                              {
-                                                  "x":  9.979999542236329,
-                                                  "y":  0.3700000047683716,
-                                                  "width":  0.25
-                                              }
-                                          ]
-                           },
-                           {
-                               "type":  "lane",
-                               "x":  0.0,
-                               "y":  0.0,
-                               "radius":  2.0,
-                               "width":  0.25,
-                               "points":  [
-                                              {
-                                                  "x":  -4.800000190734863,
-                                                  "y":  -4.360000133514404,
-                                                  "width":  0.25
-                                              },
-                                              {
-                                                  "x":  -2.380000114440918,
-                                                  "y":  -3.2100000381469728,
-                                                  "width":  0.25
-                                              },
-                                              {
-                                                  "x":  1.7000000476837159,
-                                                  "y":  -2.559999942779541,
-                                                  "width":  0.25
-                                              }
-                                          ]
-                           },
-                           {
-                               "type":  "lane",
-                               "x":  0.0,
-                               "y":  0.0,
-                               "radius":  2.0,
-                               "width":  0.25,
-                               "points":  [
-                                              {
-                                                  "x":  -3.859999895095825,
-                                                  "y":  -4.519999980926514,
-                                                  "width":  0.25
-                                              },
-                                              {
-                                                  "x":  -2.4600000381469728,
-                                                  "y":  -3.940000057220459,
-                                                  "width":  0.25
-                                              }
-                                          ]
-                           },
-                           {
-                               "type":  "lane",
-                               "x":  0.0,
-                               "y":  0.0,
-                               "radius":  2.0,
-                               "width":  0.25,
-                               "points":  [
-                                              {
-                                                  "x":  -0.23000000417232514,
-                                                  "y":  -3.619999885559082,
-                                                  "width":  0.25
-                                              },
-                                              {
-                                                  "x":  5.409999847412109,
-                                                  "y":  -2.7200000286102297,
-                                                  "width":  0.25
-                                              },
-                                              {
-                                                  "x":  8.729999542236329,
-                                                  "y":  -1.4700000286102296,
-                                                  "width":  0.25
-                                              },
-                                              {
-                                                  "x":  10.050000190734864,
-                                                  "y":  -0.6399999856948853,
-                                                  "width":  0.25
-                                              }
-                                          ]
-                           },
-                           {
-                               "type":  "lane",
-                               "x":  0.0,
-                               "y":  0.0,
-                               "radius":  2.0,
-                               "width":  0.25,
-                               "points":  [
-                                              {
-                                                  "x":  5.309999942779541,
-                                                  "y":  -3.859999895095825,
-                                                  "width":  0.25
-                                              },
-                                              {
-                                                  "x":  10.100000381469727,
-                                                  "y":  -2.2799999713897707,
-                                                  "width":  0.25
-                                              }
-                                          ]
-                           },
-                           {
-                               "type":  "lane",
-                               "x":  0.0,
-                               "y":  0.0,
-                               "radius":  2.0,
-                               "width":  0.25,
-                               "points":  [
-                                              {
-                                                  "x":  5.599999904632568,
-                                                  "y":  -4.53000020980835,
-                                                  "width":  0.25
-                                              },
-                                              {
-                                                  "x":  7.900000095367432,
-                                                  "y":  -3.8299999237060549,
-                                                  "width":  0.25
-                                              }
-                                          ]
-                           }
-                       ],
-    "waves":  [
-                  {
-                      "groups":  [
-                                     {
-                                         "unitDefinitionId":  "basic_enemy",
-                                         "count":  13,
-                                         "spawnInterval":  1.0,
-                                         "startTime":  0.0,
-                                         "spawnerIndex":  0,
-                                         "dropConfig":  {
-                                                            "mode":  "chance",
-                                                            "fallbackChance":  -1.0,
-                                                            "pattern":  [
-
-                                                                        ],
-                                                            "repeat":  true
-                                                        }
-                                     },
-                                     {
-                                         "unitDefinitionId":  "fast_enemy",
-                                         "count":  8,
-                                         "spawnInterval":  1.5,
-                                         "startTime":  1.0,
-                                         "spawnerIndex":  0,
-                                         "dropConfig":  {
-                                                            "mode":  "chance",
-                                                            "fallbackChance":  -1.0,
-                                                            "pattern":  [
-
-                                                                        ],
-                                                            "repeat":  true
-                                                        }
-                                     },
-                                     {
-                                         "unitDefinitionId":  "fast_enemy",
-                                         "count":  8,
-                                         "spawnInterval":  1.5,
-                                         "startTime":  1.25,
-                                         "spawnerIndex":  0,
-                                         "dropConfig":  {
-                                                            "mode":  "chance",
-                                                            "fallbackChance":  -1.0,
-                                                            "pattern":  [
-
-                                                                        ],
-                                                            "repeat":  true
-                                                        }
-                                     },
-                                     {
-                                         "unitDefinitionId":  "fast_enemy",
-                                         "count":  8,
-                                         "spawnInterval":  1.5,
-                                         "startTime":  1.5,
-                                         "spawnerIndex":  0,
-                                         "dropConfig":  {
-                                                            "mode":  "chance",
-                                                            "fallbackChance":  -1.0,
-                                                            "pattern":  [
-
-                                                                        ],
-                                                            "repeat":  true
-                                                        }
-                                     },
-                                     {
-                                         "unitDefinitionId":  "armored_enemy",
-                                         "count":  6,
-                                         "spawnInterval":  2.0,
-                                         "startTime":  2.0,
-                                         "spawnerIndex":  0,
-                                         "dropConfig":  {
-                                                            "mode":  "chance",
-                                                            "fallbackChance":  -1.0,
-                                                            "pattern":  [
-
-                                                                        ],
-                                                            "repeat":  true
-                                                        }
-                                     }
-                                 ]
-                  },
-                  {
-                      "groups":  [
-                                     {
-                                         "unitDefinitionId":  "basic_enemy",
-                                         "count":  10,
-                                         "spawnInterval":  2.0,
-                                         "startTime":  0.0,
-                                         "spawnerIndex":  0,
-                                         "dropConfig":  {
-                                                            "mode":  "chance",
-                                                            "fallbackChance":  -1.0,
-                                                            "pattern":  [
-
-                                                                        ],
-                                                            "repeat":  true
-                                                        }
-                                     },
-                                     {
-                                         "unitDefinitionId":  "basic_enemy",
-                                         "count":  10,
-                                         "spawnInterval":  2.0,
-                                         "startTime":  0.25,
-                                         "spawnerIndex":  0,
-                                         "dropConfig":  {
-                                                            "mode":  "chance",
-                                                            "fallbackChance":  -1.0,
-                                                            "pattern":  [
-
-                                                                        ],
-                                                            "repeat":  true
-                                                        }
-                                     },
-                                     {
-                                         "unitDefinitionId":  "basic_enemy",
-                                         "count":  5,
-                                         "spawnInterval":  4.0,
-                                         "startTime":  0.0,
-                                         "spawnerIndex":  0,
-                                         "dropConfig":  {
-                                                            "mode":  "chance",
-                                                            "fallbackChance":  -1.0,
-                                                            "pattern":  [
-
-                                                                        ],
-                                                            "repeat":  true
-                                                        }
-                                     },
-                                     {
-                                         "unitDefinitionId":  "armored_enemy",
-                                         "count":  2,
-                                         "spawnInterval":  10.0,
-                                         "startTime":  6.0,
-                                         "spawnerIndex":  0,
-                                         "dropConfig":  {
-                                                            "mode":  "chance",
-                                                            "fallbackChance":  -1.0,
-                                                            "pattern":  [
-
-                                                                        ],
-                                                            "repeat":  true
-                                                        }
-                                     },
-                                     {
-                                         "unitDefinitionId":  "armored_enemy",
-                                         "count":  5,
-                                         "spawnInterval":  4.0,
-                                         "startTime":  2.0,
-                                         "spawnerIndex":  0,
-                                         "dropConfig":  {
-                                                            "mode":  "chance",
-                                                            "fallbackChance":  -1.0,
-                                                            "pattern":  [
-
-                                                                        ],
-                                                            "repeat":  true
-                                                        }
-                                     },
-                                     {
-                                         "unitDefinitionId":  "fast_enemy",
-                                         "count":  3,
-                                         "spawnInterval":  5.0,
-                                         "startTime":  1.0,
-                                         "spawnerIndex":  1,
-                                         "dropConfig":  {
-                                                            "mode":  "chance",
-                                                            "fallbackChance":  -1.0,
-                                                            "pattern":  [
-
-                                                                        ],
-                                                            "repeat":  true
-                                                        }
-                                     },
-                                     {
-                                         "unitDefinitionId":  "fast_enemy",
-                                         "count":  3,
-                                         "spawnInterval":  5.0,
-                                         "startTime":  1.25,
-                                         "spawnerIndex":  1,
-                                         "dropConfig":  {
-                                                            "mode":  "chance",
-                                                            "fallbackChance":  -1.0,
-                                                            "pattern":  [
-
-                                                                        ],
-                                                            "repeat":  true
-                                                        }
-                                     },
-                                     {
-                                         "unitDefinitionId":  "fast_enemy",
-                                         "count":  3,
-                                         "spawnInterval":  5.0,
-                                         "startTime":  1.5,
-                                         "spawnerIndex":  1,
-                                         "dropConfig":  {
-                                                            "mode":  "chance",
-                                                            "fallbackChance":  -1.0,
-                                                            "pattern":  [
-
-                                                                        ],
-                                                            "repeat":  true
-                                                        }
-                                     }
-                                 ]
-                  },
-                  {
-                      "groups":  [
-                                     {
-                                         "unitDefinitionId":  "basic_enemy",
-                                         "count":  30,
-                                         "spawnInterval":  1.0,
-                                         "startTime":  0.0,
-                                         "spawnerIndex":  0,
-                                         "dropConfig":  {
-                                                            "mode":  "chance",
-                                                            "fallbackChance":  -1.0,
-                                                            "pattern":  [
-
-                                                                        ],
-                                                            "repeat":  true
-                                                        }
-                                     },
-                                     {
-                                         "unitDefinitionId":  "basic_enemy",
-                                         "count":  15,
-                                         "spawnInterval":  2.0,
-                                         "startTime":  1.0,
-                                         "spawnerIndex":  0,
-                                         "dropConfig":  {
-                                                            "mode":  "chance",
-                                                            "fallbackChance":  -1.0,
-                                                            "pattern":  [
-
-                                                                        ],
-                                                            "repeat":  true
-                                                        }
-                                     },
-                                     {
-                                         "unitDefinitionId":  "basic_enemy",
-                                         "count":  10,
-                                         "spawnInterval":  3.0,
-                                         "startTime":  0.0,
-                                         "spawnerIndex":  0,
-                                         "dropConfig":  {
-                                                            "mode":  "chance",
-                                                            "fallbackChance":  -1.0,
-                                                            "pattern":  [
-
-                                                                        ],
-                                                            "repeat":  true
-                                                        }
-                                     },
-                                     {
-                                         "unitDefinitionId":  "armored_enemy",
-                                         "count":  3,
-                                         "spawnInterval":  10.0,
-                                         "startTime":  5.0,
-                                         "spawnerIndex":  1,
-                                         "dropConfig":  {
-                                                            "mode":  "chance",
-                                                            "fallbackChance":  -1.0,
-                                                            "pattern":  [
-
-                                                                        ],
-                                                            "repeat":  true
-                                                        }
-                                     }
-                                 ]
-                  }
-              ]
+{
+    "id": "level_4",
+    "displayName": "Level 4",
+    "startGold": 125,
+    "startLives": 100,
+    "startTech": 50,
+    "startTier": 2,
+    "backgroundSprite": "Art/Maps/level_3",
+    "backgroundX": 0.019999999552965164,
+    "backgroundY": 1.059999942779541,
+    "maxTowers": -1,
+    "allowedTowers": [
+        "basic_tower",
+        "income_tower",
+        "research_tower",
+        "chain_tower",
+        "slow_tower",
+        "sniper_tower",
+        "siphon_tower",
+        "mortar_tower",
+        "laser_tower",
+        "damage_aura_tower",
+        "speed_aura_tower",
+        "railgun_tower",
+        "collector_tower",
+        "poison_tower",
+        "entropy_tower",
+        "root_tower",
+        "boomerang_tower",
+        "bee_tower",
+        "shotgun_tower"
+    ],
+    "modifierColumns": [],
+    "difficulties": [
+        {
+            "label": "Easy",
+            "enemyHpMult": 0.75,
+            "enemySpeedMult": 1.0,
+            "goldMult": 1.0,
+            "bountyMult": 1.0,
+            "startGold": -1,
+            "startLives": -1,
+            "startTech": -1,
+            "startTier": -1,
+            "maxTowers": -1,
+            "allowedTowers": [],
+            "disabledGroups": [],
+            "objectives": []
+        },
+        {
+            "label": "Medium",
+            "enemyHpMult": 1.0,
+            "enemySpeedMult": 1.0,
+            "goldMult": 1.0,
+            "bountyMult": 1.0,
+            "startGold": -1,
+            "startLives": -1,
+            "startTech": -1,
+            "startTier": -1,
+            "maxTowers": -1,
+            "allowedTowers": [],
+            "disabledGroups": [],
+            "objectives": []
+        },
+        {
+            "label": "Hard",
+            "enemyHpMult": 1.75,
+            "enemySpeedMult": 1.0,
+            "goldMult": 1.0,
+            "bountyMult": 1.0,
+            "startGold": -1,
+            "startLives": -1,
+            "startTech": -1,
+            "startTier": -1,
+            "maxTowers": -1,
+            "allowedTowers": [],
+            "disabledGroups": [],
+            "objectives": []
+        }
+    ],
+    "objectives": [],
+    "paths": [
+        {
+            "spawnerIndex": 1,
+            "nodes": [
+                {
+                    "id": "n0",
+                    "x": -9.920000076293945,
+                    "y": 0.550000011920929,
+                    "next": [
+                        "n1"
+                    ]
+                },
+                {
+                    "id": "n1",
+                    "x": -6.840000152587891,
+                    "y": 2.440000057220459,
+                    "next": [
+                        "n2"
+                    ]
+                },
+                {
+                    "id": "n2",
+                    "x": -2.8299999237060547,
+                    "y": 4.300000190734863,
+                    "next": [
+                        "n3"
+                    ]
+                },
+                {
+                    "id": "n3",
+                    "x": 0.8199999928474426,
+                    "y": 5.25,
+                    "next": [
+                        "n4"
+                    ]
+                },
+                {
+                    "id": "n4",
+                    "x": 7.920000076293945,
+                    "y": 6.949999809265137,
+                    "next": []
+                }
+            ]
+        },
+        {
+            "spawnerIndex": 0,
+            "nodes": [
+                {
+                    "id": "n0",
+                    "x": -8.989999771118164,
+                    "y": -4.739999771118164,
+                    "next": [
+                        "n1"
+                    ]
+                },
+                {
+                    "id": "n1",
+                    "x": -5.739999771118164,
+                    "y": -2.3399999141693115,
+                    "next": [
+                        "n2"
+                    ]
+                },
+                {
+                    "id": "n2",
+                    "x": -3.0299999713897705,
+                    "y": -1.3600000143051147,
+                    "next": [
+                        "n3"
+                    ]
+                },
+                {
+                    "id": "n3",
+                    "x": 1.4500000476837158,
+                    "y": -1.0700000524520874,
+                    "next": [
+                        "n4"
+                    ]
+                },
+                {
+                    "id": "n4",
+                    "x": 5.349999904632568,
+                    "y": 0.05999999865889549,
+                    "next": [
+                        "n5"
+                    ]
+                },
+                {
+                    "id": "n5",
+                    "x": 10.289999961853027,
+                    "y": 1.7699999809265137,
+                    "next": []
+                }
+            ]
+        },
+        {
+            "spawnerIndex": 2,
+            "nodes": [
+                {
+                    "id": "n0",
+                    "x": -9.8100004196167,
+                    "y": 4.099999904632568,
+                    "next": [
+                        "n1"
+                    ]
+                },
+                {
+                    "id": "n1",
+                    "x": -6.480000019073486,
+                    "y": 5.130000114440918,
+                    "next": [
+                        "n2"
+                    ]
+                },
+                {
+                    "id": "n2",
+                    "x": -1.0700000524520874,
+                    "y": 5.710000038146973,
+                    "next": [
+                        "n3"
+                    ]
+                },
+                {
+                    "id": "n3",
+                    "x": 0.6100000143051147,
+                    "y": 5.769999980926514,
+                    "next": [
+                        "n4"
+                    ]
+                },
+                {
+                    "id": "n4",
+                    "x": 3.450000047683716,
+                    "y": 4.980000019073486,
+                    "next": [
+                        "n5"
+                    ]
+                },
+                {
+                    "id": "n5",
+                    "x": 7.039999961853027,
+                    "y": 5.349999904632568,
+                    "next": [
+                        "n6"
+                    ]
+                },
+                {
+                    "id": "n6",
+                    "x": 10.649999618530273,
+                    "y": 5.889999866485596,
+                    "next": []
+                }
+            ]
+        }
+    ],
+    "placementZones": [
+        {
+            "type": "lane",
+            "x": 0.0,
+            "y": 0.0,
+            "radius": 2.0,
+            "width": 0.25,
+            "points": [
+                {
+                    "x": -0.12999999523162842,
+                    "y": 0.28999999165534973,
+                    "width": 0.25
+                },
+                {
+                    "x": 2.1500000953674316,
+                    "y": 0.20000000298023224,
+                    "width": 0.25
+                },
+                {
+                    "x": 5.900000095367432,
+                    "y": 1.1299999952316284,
+                    "width": 0.25
+                },
+                {
+                    "x": 8.479999542236328,
+                    "y": 2.1500000953674316,
+                    "width": 0.25
+                },
+                {
+                    "x": 9.979999542236328,
+                    "y": 2.9600000381469727,
+                    "width": 0.25
+                }
+            ]
+        },
+        {
+            "type": "lane",
+            "x": 0.0,
+            "y": 0.0,
+            "radius": 2.0,
+            "width": 0.25,
+            "points": [
+                {
+                    "x": -6.28000020980835,
+                    "y": -0.07000000029802322,
+                    "width": 0.25
+                },
+                {
+                    "x": -3.7899999618530273,
+                    "y": 1.0700000524520874,
+                    "width": 0.25
+                }
+            ]
+        },
+        {
+            "type": "lane",
+            "x": 0.0,
+            "y": 0.0,
+            "radius": 2.0,
+            "width": 0.25,
+            "points": [
+                {
+                    "x": 1.4299999475479126,
+                    "y": 2.430000066757202,
+                    "width": 0.25
+                },
+                {
+                    "x": 3.450000047683716,
+                    "y": 2.7200000286102295,
+                    "width": 0.25
+                }
+            ]
+        },
+        {
+            "type": "lane",
+            "x": 0.0,
+            "y": 0.0,
+            "radius": 2.0,
+            "width": 0.25,
+            "points": [
+                {
+                    "x": -10.279999732971191,
+                    "y": -2.809999942779541,
+                    "width": 0.25
+                },
+                {
+                    "x": -8.050000190734863,
+                    "y": -1.399999976158142,
+                    "width": 0.25
+                }
+            ]
+        },
+        {
+            "type": "lane",
+            "x": 0.0,
+            "y": 0.0,
+            "radius": 2.0,
+            "width": 0.25,
+            "points": [
+                {
+                    "x": -7.53000020980835,
+                    "y": -1.7599999904632568,
+                    "width": 0.25
+                },
+                {
+                    "x": -5.610000133514404,
+                    "y": -1.090000033378601,
+                    "width": 0.25
+                },
+                {
+                    "x": -3.259999990463257,
+                    "y": -1.0,
+                    "width": 0.25
+                }
+            ]
+        },
+        {
+            "type": "lane",
+            "x": 0.0,
+            "y": 0.0,
+            "radius": 2.0,
+            "width": 0.25,
+            "points": [
+                {
+                    "x": -1.190000057220459,
+                    "y": -1.1100000143051147,
+                    "width": 0.25
+                },
+                {
+                    "x": 2.3399999141693115,
+                    "y": -1.8600000143051147,
+                    "width": 0.25
+                },
+                {
+                    "x": 4.460000038146973,
+                    "y": -1.7999999523162842,
+                    "width": 0.25
+                },
+                {
+                    "x": 5.75,
+                    "y": -1.4800000190734863,
+                    "width": 0.25
+                }
+            ]
+        },
+        {
+            "type": "lane",
+            "x": 0.0,
+            "y": 0.0,
+            "radius": 2.0,
+            "width": 0.25,
+            "points": [
+                {
+                    "x": 6.769999980926514,
+                    "y": -1.0099999904632568,
+                    "width": 0.25
+                },
+                {
+                    "x": 9.979999542236328,
+                    "y": 0.3700000047683716,
+                    "width": 0.25
+                }
+            ]
+        },
+        {
+            "type": "lane",
+            "x": 0.0,
+            "y": 0.0,
+            "radius": 2.0,
+            "width": 0.25,
+            "points": [
+                {
+                    "x": -4.800000190734863,
+                    "y": -4.360000133514404,
+                    "width": 0.25
+                },
+                {
+                    "x": -2.380000114440918,
+                    "y": -3.2100000381469727,
+                    "width": 0.25
+                },
+                {
+                    "x": 1.7000000476837158,
+                    "y": -2.559999942779541,
+                    "width": 0.25
+                }
+            ]
+        },
+        {
+            "type": "lane",
+            "x": 0.0,
+            "y": 0.0,
+            "radius": 2.0,
+            "width": 0.25,
+            "points": [
+                {
+                    "x": -3.859999895095825,
+                    "y": -4.519999980926514,
+                    "width": 0.25
+                },
+                {
+                    "x": -2.4600000381469727,
+                    "y": -3.940000057220459,
+                    "width": 0.25
+                }
+            ]
+        },
+        {
+            "type": "lane",
+            "x": 0.0,
+            "y": 0.0,
+            "radius": 2.0,
+            "width": 0.25,
+            "points": [
+                {
+                    "x": -0.23000000417232513,
+                    "y": -3.619999885559082,
+                    "width": 0.25
+                },
+                {
+                    "x": 5.409999847412109,
+                    "y": -2.7200000286102295,
+                    "width": 0.25
+                },
+                {
+                    "x": 8.729999542236328,
+                    "y": -1.4700000286102295,
+                    "width": 0.25
+                },
+                {
+                    "x": 10.050000190734863,
+                    "y": -0.6399999856948853,
+                    "width": 0.25
+                }
+            ]
+        },
+        {
+            "type": "lane",
+            "x": 0.0,
+            "y": 0.0,
+            "radius": 2.0,
+            "width": 0.25,
+            "points": [
+                {
+                    "x": 5.309999942779541,
+                    "y": -3.859999895095825,
+                    "width": 0.25
+                },
+                {
+                    "x": 10.100000381469727,
+                    "y": -2.2799999713897705,
+                    "width": 0.25
+                }
+            ]
+        },
+        {
+            "type": "lane",
+            "x": 0.0,
+            "y": 0.0,
+            "radius": 2.0,
+            "width": 0.25,
+            "points": [
+                {
+                    "x": 5.599999904632568,
+                    "y": -4.53000020980835,
+                    "width": 0.25
+                },
+                {
+                    "x": 7.900000095367432,
+                    "y": -3.8299999237060547,
+                    "width": 0.25
+                }
+            ]
+        }
+    ],
+    "waves": [
+        {
+            "groups": [
+                {
+                    "unitDefinitionId": "basic_enemy",
+                    "count": 13,
+                    "spawnInterval": 1.0,
+                    "startTime": 0.0,
+                    "spawnerIndex": 0,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "fast_enemy",
+                    "count": 8,
+                    "spawnInterval": 1.5,
+                    "startTime": 1.0,
+                    "spawnerIndex": 0,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "fast_enemy",
+                    "count": 8,
+                    "spawnInterval": 1.5,
+                    "startTime": 1.25,
+                    "spawnerIndex": 0,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "fast_enemy",
+                    "count": 8,
+                    "spawnInterval": 1.5,
+                    "startTime": 1.5,
+                    "spawnerIndex": 0,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "armored_enemy",
+                    "count": 6,
+                    "spawnInterval": 2.0,
+                    "startTime": 2.0,
+                    "spawnerIndex": 0,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                }
+            ]
+        },
+        {
+            "groups": [
+                {
+                    "unitDefinitionId": "basic_enemy",
+                    "count": 10,
+                    "spawnInterval": 2.0,
+                    "startTime": 0.0,
+                    "spawnerIndex": 0,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "basic_enemy",
+                    "count": 10,
+                    "spawnInterval": 2.0,
+                    "startTime": 0.25,
+                    "spawnerIndex": 0,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "basic_enemy",
+                    "count": 5,
+                    "spawnInterval": 4.0,
+                    "startTime": 0.0,
+                    "spawnerIndex": 0,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "armored_enemy",
+                    "count": 2,
+                    "spawnInterval": 10.0,
+                    "startTime": 6.0,
+                    "spawnerIndex": 0,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "armored_enemy",
+                    "count": 5,
+                    "spawnInterval": 4.0,
+                    "startTime": 2.0,
+                    "spawnerIndex": 0,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "fast_enemy",
+                    "count": 3,
+                    "spawnInterval": 5.0,
+                    "startTime": 1.0,
+                    "spawnerIndex": 1,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "fast_enemy",
+                    "count": 3,
+                    "spawnInterval": 5.0,
+                    "startTime": 1.25,
+                    "spawnerIndex": 1,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "fast_enemy",
+                    "count": 3,
+                    "spawnInterval": 5.0,
+                    "startTime": 1.5,
+                    "spawnerIndex": 1,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                }
+            ]
+        },
+        {
+            "groups": [
+                {
+                    "unitDefinitionId": "basic_enemy",
+                    "count": 30,
+                    "spawnInterval": 1.0,
+                    "startTime": 0.0,
+                    "spawnerIndex": 0,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "basic_enemy",
+                    "count": 15,
+                    "spawnInterval": 2.0,
+                    "startTime": 1.0,
+                    "spawnerIndex": 0,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "basic_enemy",
+                    "count": 10,
+                    "spawnInterval": 3.0,
+                    "startTime": 0.0,
+                    "spawnerIndex": 0,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "armored_enemy",
+                    "count": 3,
+                    "spawnInterval": 10.0,
+                    "startTime": 5.0,
+                    "spawnerIndex": 1,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                }
+            ]
+        },
+        {
+            "groups": [
+                {
+                    "unitDefinitionId": "fast_enemy",
+                    "count": 20,
+                    "spawnInterval": 0.8,
+                    "startTime": 0.0,
+                    "spawnerIndex": 0,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "fast_enemy",
+                    "count": 10,
+                    "spawnInterval": 1.2,
+                    "startTime": 1.0,
+                    "spawnerIndex": 1,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "charger_enemy",
+                    "count": 4,
+                    "spawnInterval": 3.0,
+                    "startTime": 4.0,
+                    "spawnerIndex": 0,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                }
+            ]
+        },
+        {
+            "groups": [
+                {
+                    "unitDefinitionId": "armored_enemy",
+                    "count": 8,
+                    "spawnInterval": 2.5,
+                    "startTime": 0.0,
+                    "spawnerIndex": 0,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "shielded_enemy",
+                    "count": 2,
+                    "spawnInterval": 8.0,
+                    "startTime": 6.0,
+                    "spawnerIndex": 0,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "basic_enemy",
+                    "count": 15,
+                    "spawnInterval": 1.2,
+                    "startTime": 0.0,
+                    "spawnerIndex": 1,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                }
+            ]
+        },
+        {
+            "groups": [
+                {
+                    "unitDefinitionId": "splitter_enemy",
+                    "count": 6,
+                    "spawnInterval": 4.0,
+                    "startTime": 0.0,
+                    "spawnerIndex": 0,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "fast_enemy",
+                    "count": 12,
+                    "spawnInterval": 1.0,
+                    "startTime": 2.0,
+                    "spawnerIndex": 2,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "charger_enemy",
+                    "count": 6,
+                    "spawnInterval": 2.5,
+                    "startTime": 3.0,
+                    "spawnerIndex": 1,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                }
+            ]
+        },
+        {
+            "groups": [
+                {
+                    "unitDefinitionId": "phantom_enemy",
+                    "count": 10,
+                    "spawnInterval": 1.2,
+                    "startTime": 0.0,
+                    "spawnerIndex": 0,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "phantom_enemy",
+                    "count": 6,
+                    "spawnInterval": 1.5,
+                    "startTime": 2.0,
+                    "spawnerIndex": 1,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "basic_enemy",
+                    "count": 20,
+                    "spawnInterval": 0.9,
+                    "startTime": 1.0,
+                    "spawnerIndex": 0,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                }
+            ]
+        },
+        {
+            "groups": [
+                {
+                    "unitDefinitionId": "shielder_enemy",
+                    "count": 4,
+                    "spawnInterval": 5.0,
+                    "startTime": 0.0,
+                    "spawnerIndex": 0,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "armored_enemy",
+                    "count": 8,
+                    "spawnInterval": 2.5,
+                    "startTime": 1.0,
+                    "spawnerIndex": 0,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "fast_enemy",
+                    "count": 15,
+                    "spawnInterval": 0.8,
+                    "startTime": 3.0,
+                    "spawnerIndex": 2,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                }
+            ]
+        },
+        {
+            "groups": [
+                {
+                    "unitDefinitionId": "armored_enemy",
+                    "count": 10,
+                    "spawnInterval": 2.0,
+                    "startTime": 0.0,
+                    "spawnerIndex": 0,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "shielded_enemy",
+                    "count": 4,
+                    "spawnInterval": 6.0,
+                    "startTime": 4.0,
+                    "spawnerIndex": 0,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "charger_enemy",
+                    "count": 8,
+                    "spawnInterval": 2.0,
+                    "startTime": 0.0,
+                    "spawnerIndex": 1,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "fast_enemy",
+                    "count": 12,
+                    "spawnInterval": 1.0,
+                    "startTime": 2.0,
+                    "spawnerIndex": 2,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                }
+            ]
+        },
+        {
+            "groups": [
+                {
+                    "unitDefinitionId": "boss_enemy",
+                    "count": 2,
+                    "spawnInterval": 2.15,
+                    "startTime": 0.0,
+                    "spawnerIndex": 0,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                }
+            ]
+        },
+        {
+            "groups": [
+                {
+                    "unitDefinitionId": "basic_enemy",
+                    "count": 40,
+                    "spawnInterval": 0.5,
+                    "startTime": 0.0,
+                    "spawnerIndex": 0,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "fast_enemy",
+                    "count": 15,
+                    "spawnInterval": 1.0,
+                    "startTime": 3.0,
+                    "spawnerIndex": 1,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "basic_enemy",
+                    "count": 15,
+                    "spawnInterval": 1.0,
+                    "startTime": 1.0,
+                    "spawnerIndex": 2,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                }
+            ]
+        },
+        {
+            "groups": [
+                {
+                    "unitDefinitionId": "splitter_enemy",
+                    "count": 8,
+                    "spawnInterval": 3.0,
+                    "startTime": 0.0,
+                    "spawnerIndex": 0,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "phantom_enemy",
+                    "count": 10,
+                    "spawnInterval": 1.5,
+                    "startTime": 2.0,
+                    "spawnerIndex": 1,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "fast_enemy",
+                    "count": 10,
+                    "spawnInterval": 1.0,
+                    "startTime": 4.0,
+                    "spawnerIndex": 2,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                }
+            ]
+        },
+        {
+            "groups": [
+                {
+                    "unitDefinitionId": "charger_enemy",
+                    "count": 15,
+                    "spawnInterval": 1.0,
+                    "startTime": 0.0,
+                    "spawnerIndex": 0,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "fast_enemy",
+                    "count": 20,
+                    "spawnInterval": 0.7,
+                    "startTime": 2.0,
+                    "spawnerIndex": 1,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                }
+            ]
+        },
+        {
+            "groups": [
+                {
+                    "unitDefinitionId": "shielded_enemy",
+                    "count": 8,
+                    "spawnInterval": 3.0,
+                    "startTime": 0.0,
+                    "spawnerIndex": 0,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "shielder_enemy",
+                    "count": 4,
+                    "spawnInterval": 6.0,
+                    "startTime": 2.0,
+                    "spawnerIndex": 0,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "armored_enemy",
+                    "count": 6,
+                    "spawnInterval": 3.0,
+                    "startTime": 1.0,
+                    "spawnerIndex": 1,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                }
+            ]
+        },
+        {
+            "groups": [
+                {
+                    "unitDefinitionId": "armored_enemy",
+                    "count": 8,
+                    "spawnInterval": 2.0,
+                    "startTime": 0.0,
+                    "spawnerIndex": 0,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "splitter_enemy",
+                    "count": 6,
+                    "spawnInterval": 3.5,
+                    "startTime": 1.0,
+                    "spawnerIndex": 1,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "phantom_enemy",
+                    "count": 8,
+                    "spawnInterval": 1.5,
+                    "startTime": 2.0,
+                    "spawnerIndex": 2,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "basic_enemy",
+                    "count": 25,
+                    "spawnInterval": 0.7,
+                    "startTime": 0.0,
+                    "spawnerIndex": 0,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                }
+            ]
+        },
+        {
+            "groups": [
+                {
+                    "unitDefinitionId": "phantom_enemy",
+                    "count": 12,
+                    "spawnInterval": 1.2,
+                    "startTime": 0.0,
+                    "spawnerIndex": 0,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "splitter_enemy",
+                    "count": 8,
+                    "spawnInterval": 3.0,
+                    "startTime": 2.0,
+                    "spawnerIndex": 1,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "charger_enemy",
+                    "count": 10,
+                    "spawnInterval": 1.5,
+                    "startTime": 4.0,
+                    "spawnerIndex": 2,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                }
+            ]
+        },
+        {
+            "groups": [
+                {
+                    "unitDefinitionId": "armored_enemy",
+                    "count": 14,
+                    "spawnInterval": 1.8,
+                    "startTime": 0.0,
+                    "spawnerIndex": 0,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "shielder_enemy",
+                    "count": 6,
+                    "spawnInterval": 4.5,
+                    "startTime": 1.0,
+                    "spawnerIndex": 0,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "shielded_enemy",
+                    "count": 5,
+                    "spawnInterval": 5.0,
+                    "startTime": 3.0,
+                    "spawnerIndex": 1,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                }
+            ]
+        },
+        {
+            "groups": [
+                {
+                    "unitDefinitionId": "basic_enemy",
+                    "count": 30,
+                    "spawnInterval": 0.5,
+                    "startTime": 0.0,
+                    "spawnerIndex": 0,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "fast_enemy",
+                    "count": 25,
+                    "spawnInterval": 0.6,
+                    "startTime": 1.0,
+                    "spawnerIndex": 1,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "splitter_enemy",
+                    "count": 8,
+                    "spawnInterval": 3.0,
+                    "startTime": 3.0,
+                    "spawnerIndex": 2,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "charger_enemy",
+                    "count": 10,
+                    "spawnInterval": 1.8,
+                    "startTime": 5.0,
+                    "spawnerIndex": 0,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                }
+            ]
+        },
+        {
+            "groups": [
+                {
+                    "unitDefinitionId": "armored_enemy",
+                    "count": 12,
+                    "spawnInterval": 1.8,
+                    "startTime": 0.0,
+                    "spawnerIndex": 0,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "shielded_enemy",
+                    "count": 8,
+                    "spawnInterval": 3.5,
+                    "startTime": 2.0,
+                    "spawnerIndex": 0,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "phantom_enemy",
+                    "count": 12,
+                    "spawnInterval": 1.2,
+                    "startTime": 1.0,
+                    "spawnerIndex": 1,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "shielder_enemy",
+                    "count": 5,
+                    "spawnInterval": 5.0,
+                    "startTime": 0.0,
+                    "spawnerIndex": 2,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "fast_enemy",
+                    "count": 20,
+                    "spawnInterval": 0.7,
+                    "startTime": 4.0,
+                    "spawnerIndex": 2,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                }
+            ]
+        },
+        {
+            "groups": [
+                {
+                    "unitDefinitionId": "boss_enemy",
+                    "count": 5,
+                    "spawnInterval": 2.15,
+                    "startTime": 0.0,
+                    "spawnerIndex": 0,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                }
+            ]
+        }
+    ]
 }
