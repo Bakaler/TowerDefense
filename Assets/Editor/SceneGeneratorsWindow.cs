@@ -11,8 +11,10 @@ using UnityEngine.Rendering.Universal;
 /// </summary>
 public class SceneGeneratorsWindow : EditorWindow
 {
-    static readonly string[] _tabs = { "Wave Scene", "Landing Scene", "Level Select Scene", "Modifier Select Scene" };
+    static readonly string[] _tabs = { "Wave Scene", "Landing Scene", "Main Menu Scene", "Level Select Scene", "Modifier Select Scene" };
     int    _tab;
+    string _mainMenuSceneName      = "MainMenuScene";
+    string _landingSceneName       = "LandingScene";
     string _levelSelectSceneName   = "LevelSelectionScene";
     string _modifierSelectSceneName = "ModifierSelectScene";
     string _gameSceneName          = "GameScene";
@@ -27,7 +29,8 @@ public class SceneGeneratorsWindow : EditorWindow
 
         if      (_tab == 0) DrawWaveScene();
         else if (_tab == 1) DrawLandingScene();
-        else if (_tab == 2) DrawLevelSelectScene();
+        else if (_tab == 2) DrawMainMenuScene();
+        else if (_tab == 3) DrawLevelSelectScene();
         else                DrawModifierSelectScene();
     }
 
@@ -52,12 +55,12 @@ public class SceneGeneratorsWindow : EditorWindow
     void DrawLandingScene()
     {
         EditorGUILayout.HelpBox(
-            "Generates a standalone landing / main-menu scene.\n" +
-            "Set the game scene name below, then click Generate.",
+            "Generates the landing scene: title + runtime-built profile picker.\n" +
+            "Selecting a profile loads the main menu scene.",
             MessageType.Info);
 
         GUILayout.Space(8);
-        _levelSelectSceneName = EditorGUILayout.TextField("Level Select Scene Name", _levelSelectSceneName);
+        _mainMenuSceneName = EditorGUILayout.TextField("Main Menu Scene Name", _mainMenuSceneName);
         GUILayout.Space(8);
 
         if (GUILayout.Button("Generate Landing Scene", GUILayout.Height(36)))
@@ -68,7 +71,7 @@ public class SceneGeneratorsWindow : EditorWindow
     {
         if (!EditorUtility.DisplayDialog(
             "Generate Landing Scene",
-            $"This will reset all objects in the active scene and build a landing screen.\n\nGame scene: \"{_gameSceneName}\"\n\nProceed?",
+            $"This will reset all objects in the active scene and build a landing screen.\n\nMain menu scene: \"{_mainMenuSceneName}\"\n\nProceed?",
             "Yes", "Cancel"))
             return;
 
@@ -78,7 +81,8 @@ public class SceneGeneratorsWindow : EditorWindow
         // ── Clear existing objects ────────────────────────────────────
         foreach (string n in new[]
         {
-            "--- GLOBAL LIGHT ---", "--- LANDING UI ---", "[LandingManager]"
+            "--- GLOBAL LIGHT ---", "--- LANDING UI ---", "[LandingManager]",
+            "[MainMenuController]", "[Libraries]",   // in case a menu scene was the starting point
         })
         {
             var existing = GameObject.Find(n);
@@ -106,8 +110,8 @@ public class SceneGeneratorsWindow : EditorWindow
         // ── LandingManager ────────────────────────────────────────────
         var mgr    = new GameObject("[LandingManager]");
         Undo.RegisterCreatedObjectUndo(mgr, "Create LandingManager");
-        var lsm                    = mgr.AddComponent<LandingScreenManager>();
-        lsm.levelSelectSceneName   = _levelSelectSceneName;
+        var lsm               = mgr.AddComponent<LandingScreenManager>();
+        lsm.mainMenuSceneName = _mainMenuSceneName;
 
         // ── Canvas ────────────────────────────────────────────────────
         var canvasGO = new GameObject("--- LANDING UI ---");
@@ -162,36 +166,131 @@ public class SceneGeneratorsWindow : EditorWindow
         subTxt.alignment = TextAnchor.MiddleCenter;
         subTxt.color     = new Color(0.75f, 0.75f, 0.85f, 1f);
 
-        // ── Play button ───────────────────────────────────────────────
-        var btnGO   = MakeRect("PlayButton", canvasGO, 0f, -80f, 280f, 70f);
-        var btnImg  = btnGO.AddComponent<UnityEngine.UI.Image>();
-        btnImg.color = new Color(0.18f, 0.55f, 0.22f, 1f);
-        var btn     = btnGO.AddComponent<UnityEngine.UI.Button>();
-        btn.targetGraphic = btnImg;
-        var cols    = btn.colors;
-        cols.highlightedColor = new Color(0.25f, 0.72f, 0.30f, 1f);
-        cols.pressedColor     = new Color(0.12f, 0.38f, 0.15f, 1f);
-        btn.colors  = cols;
-        UnityEventTools.AddPersistentListener(btn.onClick, lsm.OnPlayPressed);
-
-        var btnLbl    = MakeRect("Label", btnGO, 0f, 0f, 0f, 0f);
-        var btnLblRT  = btnLbl.GetComponent<RectTransform>();
-        btnLblRT.anchorMin = Vector2.zero;
-        btnLblRT.anchorMax = Vector2.one;
-        btnLblRT.offsetMin = Vector2.zero;
-        btnLblRT.offsetMax = Vector2.zero;
-        var btnTxt    = btnLbl.AddComponent<UnityEngine.UI.Text>();
-        btnTxt.text      = "PLAY";
-        btnTxt.font      = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-        btnTxt.fontSize  = 42;
-        btnTxt.fontStyle = FontStyle.Bold;
-        btnTxt.alignment = TextAnchor.MiddleCenter;
-        btnTxt.color     = Color.white;
+        // Profile picker UI is built at runtime by ProfileSelectScreen
+        // (added by LandingScreenManager on Start).
 
         Undo.CollapseUndoOperations(undoGroup);
         EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
+        EnsureSceneInBuildSettings();
 
-        Debug.Log($"[SceneGenerators] Landing scene built. Play button loads \"{_gameSceneName}\".");
+        Debug.Log($"[SceneGenerators] Landing scene built. Profile select loads \"{_mainMenuSceneName}\".");
+    }
+
+    // ── Tab 2: Main Menu Scene ────────────────────────────────────────
+
+    void DrawMainMenuScene()
+    {
+        EditorGUILayout.HelpBox(
+            "Generates the main menu scene (Play / Settings / Achievements / Journal).\n" +
+            "Run this in a blank scene saved as MainMenuScene.\n" +
+            "All UI is built at runtime by MainMenuController.",
+            MessageType.Info);
+
+        GUILayout.Space(8);
+        _levelSelectSceneName = EditorGUILayout.TextField("Level Select Scene Name", _levelSelectSceneName);
+        _landingSceneName     = EditorGUILayout.TextField("Landing Scene Name", _landingSceneName);
+        GUILayout.Space(8);
+
+        if (GUILayout.Button("Generate Main Menu Scene", GUILayout.Height(36)))
+            GenerateMainMenuScene();
+    }
+
+    void GenerateMainMenuScene()
+    {
+        if (!EditorUtility.DisplayDialog(
+            "Generate Main Menu Scene",
+            "This will reset the active scene and build the main menu.\nProceed?",
+            "Yes", "Cancel"))
+            return;
+
+        Undo.SetCurrentGroupName("Generate Main Menu Scene");
+        int undoGroup = Undo.GetCurrentGroup();
+
+        // Also clears landing-scene objects — a common starting point is
+        // duplicating LandingScene, which must not keep its profile picker.
+        foreach (string n in new[]
+        {
+            "--- GLOBAL LIGHT ---", "[MainMenuController]", "[Libraries]", "EventSystem",
+            "[LandingManager]", "--- LANDING UI ---",
+        })
+        {
+            var e = GameObject.Find(n);
+            if (e != null) Undo.DestroyObjectImmediate(e);
+        }
+
+        // Global light
+        var lightRoot = new GameObject("--- GLOBAL LIGHT ---");
+        Undo.RegisterCreatedObjectUndo(lightRoot, "Create Global Light");
+        var light      = lightRoot.AddComponent<Light2D>();
+        light.lightType = Light2D.LightType.Global;
+        light.intensity = 1f;
+
+        // Camera
+        var cam = Camera.main;
+        if (cam != null)
+        {
+            cam.transform.position = new Vector3(0f, 0f, -10f);
+            cam.orthographic       = true;
+            cam.orthographicSize   = 7f;
+            cam.backgroundColor    = new Color(0.05f, 0.05f, 0.10f, 1f);
+        }
+
+        // MainMenuController — builds all UI at runtime
+        var mgr = new GameObject("[MainMenuController]");
+        Undo.RegisterCreatedObjectUndo(mgr, "Create MainMenuController");
+        var mmc = mgr.AddComponent<MainMenuController>();
+        mmc.levelSelectSceneName = _levelSelectSceneName;
+        mmc.landingSceneName     = _landingSceneName;
+
+        // Definition libraries — the Journal reads towers/units from these;
+        // ability/effect libraries feed TowerStatResolver's damage/cooldown.
+        var libs = new GameObject("[Libraries]");
+        Undo.RegisterCreatedObjectUndo(libs, "Create Libraries");
+        libs.AddComponent<TowerDefinitionLibrary>();
+        libs.AddComponent<UnitDefinitionLibrary>();
+        libs.AddComponent<AbilityLibrary>();
+        libs.AddComponent<EffectLibrary>();
+
+        // EventSystem
+        foreach (var existing in Object.FindObjectsByType<UnityEngine.EventSystems.EventSystem>(FindObjectsSortMode.None))
+            Undo.DestroyObjectImmediate(existing.gameObject);
+        var esGO = new GameObject("EventSystem");
+        Undo.RegisterCreatedObjectUndo(esGO, "Create EventSystem");
+        esGO.AddComponent<UnityEngine.EventSystems.EventSystem>();
+        esGO.AddComponent<UnityEngine.EventSystems.StandaloneInputModule>();
+
+        Undo.CollapseUndoOperations(undoGroup);
+        EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
+        EnsureSceneInBuildSettings();
+
+        Debug.Log("[SceneGenerators] Main menu scene built.");
+    }
+
+    /// <summary>Adds the active (saved) scene to Build Settings so LoadScene-by-name works.</summary>
+    static void EnsureSceneInBuildSettings()
+    {
+        var scene = EditorSceneManager.GetActiveScene();
+        if (string.IsNullOrEmpty(scene.path))
+        {
+            // Unsaved scene can't be registered — without this, LoadScene-by-name
+            // fails at runtime and the menu buttons appear to do nothing.
+            EditorUtility.DisplayDialog(
+                "Scene not in Build Settings",
+                "This scene has never been saved, so it was NOT added to Build Settings.\n\n" +
+                "Save the scene (Ctrl+S), then either regenerate or add it via File → Build Settings → Add Open Scenes.",
+                "OK");
+            return;
+        }
+
+        foreach (var s in EditorBuildSettings.scenes)
+            if (s.path == scene.path) return;
+
+        var list = new System.Collections.Generic.List<EditorBuildSettingsScene>(EditorBuildSettings.scenes)
+        {
+            new EditorBuildSettingsScene(scene.path, true)
+        };
+        EditorBuildSettings.scenes = list.ToArray();
+        Debug.Log($"[SceneGenerators] Added \"{scene.path}\" to Build Settings.");
     }
 
     // ── Tab 2: Level Select Scene ─────────────────────────────────────

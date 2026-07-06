@@ -93,7 +93,7 @@ public class HUDOverlays : MonoBehaviour
 
         MakeOverlayBtn(panel, "MenuBtn", new Vector2(0f, btnY - 80f),
             "Main Menu", new Color(0.30f, 0.30f, 0.36f, 1f),
-            () => UnityEngine.SceneManagement.SceneManager.LoadScene("LandingScene"));
+            () => UnityEngine.SceneManagement.SceneManager.LoadScene("MainMenuScene"));
 
         return panel;
     }

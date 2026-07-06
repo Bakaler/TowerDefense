@@ -15,6 +15,9 @@ EditorBuildSettings:
     path: Assets/Scenes/LandingScene.unity
     guid: 31ac455a05096a841a4e0e1a1de89fa6
   - enabled: 1
+    path: Assets/Scenes/MainMenuScene.unity
+    guid: 74fc5cdc0c7989f4cbd2d9a3f01b52a4
+  - enabled: 1
     path: Assets/Scenes/LevelSelectionScene.unity
     guid: e2ae918791379374ab0f09279d1ff2b9
   - enabled: 1

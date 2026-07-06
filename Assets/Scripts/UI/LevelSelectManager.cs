@@ -194,7 +194,7 @@ public class LevelSelectManager : MonoBehaviour
         var backImg = backGO.AddComponent<Image>(); backImg.color = new Color(0.28f, 0.12f, 0.12f, 1f);
         var backBtn = backGO.AddComponent<Button>(); backBtn.targetGraphic = backImg;
         AddText(MakeRect("Label", backGO, 0, 0, 180f, 48f), "BACK", Color.white, 22, bold: true, stretchToParent: true);
-        backBtn.onClick.AddListener(() => SceneManager.LoadScene("LandingScene"));
+        backBtn.onClick.AddListener(() => SceneManager.LoadScene("MainMenuScene"));
     }
 
     LevelData[] LoadLevelData()

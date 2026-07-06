@@ -136,9 +136,9 @@ public class TowerFactory : MonoBehaviour
         info.displayName  = def.displayName ?? def.id;
         info.description  = def.description ?? "";
         info.resourceCost = def.resourceCost;
-        info.cooldown     = def.displayCooldown > 0f ? def.displayCooldown : ResolveCooldown(def.fireAbilityId);
-        info.damage       = def.displayDamage   > 0f ? def.displayDamage   : ResolveDamage(def.fireAbilityId);
-        info.shieldBonus  = ResolveShieldBonus(def.fireAbilityId);
+        info.cooldown     = TowerStatResolver.Cooldown(def);
+        info.damage       = TowerStatResolver.Damage(def);
+        info.shieldBonus  = TowerStatResolver.ShieldBonus(def);
         if (System.Enum.TryParse<BalanceType>(def.balanceType, true, out var bt))
             info.balanceType = bt;
         info.rangePerTier = def.rangePerTier;
@@ -241,53 +241,6 @@ public class TowerFactory : MonoBehaviour
         tex.Apply();
         tex.filterMode = FilterMode.Bilinear;
         return Sprite.Create(tex, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f), size);
-    }
-
-    private static float ResolveCooldown(string abilityId)
-    {
-        if (string.IsNullOrEmpty(abilityId)) return 0f;
-        if (AbilityLibrary.Instance == null) return 0f;
-        var ab = AbilityLibrary.Instance.GetAbility(abilityId);
-        return ab != null ? ab.cost.cooldownDuration : 0f;
-    }
-
-    private static float ResolveDamage(string abilityId) =>
-        ResolveDamageEffect(abilityId)?.damageBase ?? 0f;
-
-    private static float ResolveShieldBonus(string abilityId) =>
-        ResolveDamageEffect(abilityId)?.shieldBonus ?? 0f;
-
-    private static Effect_Damage ResolveDamageEffect(string abilityId)
-    {
-        if (string.IsNullOrEmpty(abilityId)) return null;
-        if (AbilityLibrary.Instance == null || EffectLibrary.Instance == null) return null;
-        var ab = AbilityLibrary.Instance.GetAbility(abilityId);
-        if (ab == null) return null;
-        return FindFirstDamageEffect(ab.effectId, 0);
-    }
-
-    // Walk the effect tree up to 4 levels deep looking for the first damage effect
-    private static Effect_Damage FindFirstDamageEffect(string effectId, int depth)
-    {
-        if (depth > 4 || string.IsNullOrEmpty(effectId)) return null;
-        var effect = EffectLibrary.Instance?.GetEffect(effectId);
-        return effect != null ? FindFirstDamageEffect(effect, depth) : null;
-    }
-
-    private static Effect_Damage FindFirstDamageEffect(Effect effect, int depth)
-    {
-        if (depth > 4 || effect == null) return null;
-        if (effect is Effect_Damage dmg) return dmg.damageBase > 0f ? dmg : null;
-        if (effect is Effect_Launch launch) return FindFirstDamageEffect(launch.impactEffectId, depth + 1);
-        if (effect is Effect_Search_Area area && area.areas.Count > 0 && area.areas[0].effect != null)
-            return FindFirstDamageEffect(area.areas[0].effect, depth + 1);
-        if (effect is Effect_Set set)
-            foreach (var id in set.EffectIds)
-            {
-                var found = FindFirstDamageEffect(id, depth + 1);
-                if (found != null) return found;
-            }
-        return null;
     }
 
     private static List<string> ResolveOrder(ComponentEntry[] entries)

@@ -1,0 +1,40 @@
+{
+  "achievements": [
+    {
+      "id": "level1_any",
+      "title": "First Steps",
+      "description": "Complete Level 1 on any difficulty.",
+      "hidden": false,
+      "iconPath": "",
+      "iconSheet": "",
+      "iconIndex": -1,
+      "conditionType": "LevelStars",
+      "levelIndex": 1,
+      "minStars": 1
+    },
+    {
+      "id": "level1_perfect",
+      "title": "Flawless Foundation",
+      "description": "Complete Level 1 on Hard difficulty.",
+      "hidden": false,
+      "iconPath": "",
+      "iconSheet": "",
+      "iconIndex": -1,
+      "conditionType": "LevelStars",
+      "levelIndex": 1,
+      "minStars": 3
+    },
+    {
+      "id": "stars_15",
+      "title": "Constellation",
+      "description": "Earn 15 stars in total.",
+      "hidden": true,
+      "iconPath": "",
+      "iconSheet": "",
+      "iconIndex": -1,
+      "conditionType": "TotalStars",
+      "levelIndex": 0,
+      "minStars": 15
+    }
+  ]
+}
