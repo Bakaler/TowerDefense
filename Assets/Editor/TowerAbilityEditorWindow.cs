@@ -309,6 +309,12 @@ public class TowerAbilityEditorWindow : EditorWindow
     {
         File.WriteAllText(FilePath(name), json);
         AssetDatabase.Refresh();
+
+        // Saving during Play mode: the libraries loaded their definitions at
+        // scene start, so re-read — newly spawned units pick up the edit live.
+        if (Application.isPlaying && name == "units")
+            UnitDefinitionLibrary.Instance?.Reload();
+
         Debug.Log($"[TowerAbilityEditor] Saved {name}.json");
     }
 
@@ -1274,6 +1280,9 @@ public class TowerAbilityEditorWindow : EditorWindow
         Section("Physics");
         u.colliderRadius = EF.FloatField("Collider Radius",       u.colliderRadius);
         u.layer          = EF.IntField(  "Layer (0=auto Enemy)",  u.layer);
+
+        Section("Movement");
+        u.rotateToMovement = EF.Toggle("Rotate To Movement", u.rotateToMovement);
 
         Section("Visuals");
         u.spritePath  = TF("Sprite Path",   u.spritePath);

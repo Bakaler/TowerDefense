@@ -243,6 +243,7 @@ public class TowerInfo : MonoBehaviour
     public void RegisterKill()
     {
         KillCount++;
+        RunStats.NotifyKill();
         OnTowerKill?.Invoke(this);
     }
 

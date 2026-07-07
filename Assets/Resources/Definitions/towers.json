@@ -15,7 +15,7 @@
             "upgradeSoundId": "",
             "displayDamage": 0.0,
             "displayCooldown": 0.0,
-            "rotationSpeed": 180.0,
+            "rotationSpeed": 320.0,
             "animFps": 0.0,
             "spritePath": "Art/Towers/basic_tower_T1",
             "turretSpritePath": "Art/Towers/basic_tower_turret_T1",

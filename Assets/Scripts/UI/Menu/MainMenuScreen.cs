@@ -23,7 +23,7 @@ public class MainMenuScreen : MenuScreen
 
         var (playBtn, _) = UIControlFactory.Button(panel, "PlayBtn", 0f, y, BTN_W, BTN_H,
             UIControlFactory.ButtonGreen, "PLAY", 34);
-        playBtn.onClick.AddListener(() => SceneManager.LoadScene(Controller.levelSelectSceneName));
+        playBtn.onClick.AddListener(() => ScreenFader.LoadScene(Controller.levelSelectSceneName));
         y -= BTN_H + GAP;
 
         var (settingsBtn, _) = UIControlFactory.Button(panel, "SettingsBtn", 0f, y, BTN_W, BTN_H,
@@ -45,7 +45,7 @@ public class MainMenuScreen : MenuScreen
             "", UIControlFactory.TextDim, 20);
         var (switchBtn, _) = UIControlFactory.Button(panel, "SwitchProfileBtn", 0f, -490f, 220f, 44f,
             new Color(0.22f, 0.22f, 0.30f, 1f), "SWITCH PROFILE", 16);
-        switchBtn.onClick.AddListener(() => SceneManager.LoadScene(Controller.landingSceneName));
+        switchBtn.onClick.AddListener(() => ScreenFader.LoadScene(Controller.landingSceneName));
 
         return panel;
     }

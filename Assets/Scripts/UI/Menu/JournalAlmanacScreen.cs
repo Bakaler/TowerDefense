@@ -1,11 +1,13 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 /// <summary>
 /// The almanac itself: a card grid over every tower or unit definition.
-/// One screen instance serves both modes — SetMode before pushing; the grid
-/// rebuilds when the mode changed. All entries render as discovered for now
-/// (JournalCardFactory.SetDiscovered carries the future gating).
+/// One screen instance serves both modes — SetMode before pushing.
+/// Towers get tier / balance-type filter chips; clicking any card opens a
+/// detail popup with the full description. All entries render as discovered
+/// for now (JournalCardFactory.SetDiscovered carries the future gating).
 /// </summary>
 public class JournalAlmanacScreen : MenuScreen
 {
@@ -13,40 +15,126 @@ public class JournalAlmanacScreen : MenuScreen
 
     Mode _mode = Mode.Towers;
     Mode? _builtMode;
-    UnityEngine.UI.Text _title;
+    GameObject _panel;
+    Text       _title;
     GameObject _gridContent;
+    GameObject _detailPopup;
+
+    // ── Tower filters ─────────────────────────────────────────────────
+    GameObject _chipRow;
+    bool       _chipsBuilt;
+    int        _tierFilter;          // 0 = all
+    string     _typeFilter;          // null = all
+    readonly List<(Image img, System.Func<bool> isActive)> _chips = new();
+
+    static readonly Color ChipIdle   = new Color(0.14f, 0.16f, 0.22f, 1f);
+    static readonly Color ChipActive = new Color(0.25f, 0.45f, 0.75f, 1f);
 
     public void SetMode(Mode mode) => _mode = mode;
 
     protected override GameObject Build(GameObject canvasRoot)
     {
-        var panel = UIControlFactory.Rect("JournalAlmanacScreen", canvasRoot, 0f, 0f, 1920f, 1080f);
+        _panel = UIControlFactory.Rect("JournalAlmanacScreen", canvasRoot, 0f, 0f, 1920f, 1080f);
 
-        _title = UIControlFactory.Label(panel, "Title", 0f, 420f, 800f, 80f,
-            "", UIControlFactory.TitleColor, 52, TextAnchor.MiddleCenter, bold: true);
+        _title = UIControlFactory.Label(_panel, "Title", 0f, 430f, 800f, 70f,
+            "", UIControlFactory.TitleColor, 48, TextAnchor.MiddleCenter, bold: true);
 
-        _gridContent = UIScrollListFactory.Grid(panel, "Grid", 0f, -30f, 1360f, 720f,
+        _chipRow = UIControlFactory.Rect("Chips", _panel, 0f, 360f, 1400f, 44f);
+
+        _gridContent = UIScrollListFactory.Grid(_panel, "Grid", 0f, -50f, 1360f, 680f,
             JournalCardFactory.CardSize, spacing: 18f);
 
-        var (backBtn, _) = UIControlFactory.Button(panel, "BackBtn", 0f, -470f, 220f, 52f,
+        var (backBtn, _) = UIControlFactory.Button(_panel, "BackBtn", 0f, -470f, 220f, 52f,
             new Color(0.28f, 0.12f, 0.12f, 1f), "BACK", 22);
         backBtn.onClick.AddListener(() => Controller.Back());
 
-        return panel;
+        return _panel;
     }
 
     protected override void Refresh()
     {
         _title.text = _mode == Mode.Towers ? "TOWER ALMANAC" : "ENEMY ALMANAC";
+        CloseDetail();
+
+        _chipRow.SetActive(_mode == Mode.Towers);
+        if (_mode == Mode.Towers && !_chipsBuilt) BuildChips();
+
         if (_builtMode == _mode) return;
         _builtMode = _mode;
+        RebuildGrid();
+    }
 
+    // ── Filter chips ──────────────────────────────────────────────────
+
+    void BuildChips()
+    {
+        var lib = TowerDefinitionLibrary.Instance;
+        if (lib == null) return;
+        _chipsBuilt = true;
+
+        // Distinct tiers and balance types straight from the data
+        var tiers = new SortedSet<int>();
+        var types = new SortedSet<string>();
+        foreach (var def in lib.All.Values)
+        {
+            tiers.Add(def.towerTier);
+            if (!string.IsNullOrEmpty(def.balanceType)) types.Add(def.balanceType);
+        }
+
+        var entries = new List<(string label, System.Action onClick, System.Func<bool> isActive)>
+        {
+            ("ALL", () => { _tierFilter = 0; _typeFilter = null; },
+                    () => _tierFilter == 0 && _typeFilter == null),
+        };
+        foreach (int t in tiers)
+        {
+            int tier = t;
+            entries.Add(($"T{tier}", () => _tierFilter = _tierFilter == tier ? 0 : tier,
+                                     () => _tierFilter == tier));
+        }
+        foreach (string ty in types)
+        {
+            string type = ty;
+            entries.Add((type, () => _typeFilter = _typeFilter == type ? null : type,
+                               () => _typeFilter == type));
+        }
+
+        const float CHIP_H = 40f, GAP = 10f;
+        float chipW = Mathf.Min(150f, (1400f - GAP * (entries.Count - 1)) / entries.Count);
+        float totalW = entries.Count * chipW + (entries.Count - 1) * GAP;
+        float x = -totalW * 0.5f + chipW * 0.5f;
+
+        foreach (var (label, onClick, isActive) in entries)
+        {
+            var (btn, _) = UIControlFactory.Button(_chipRow, $"Chip_{label}", x, 0f, chipW, CHIP_H,
+                ChipIdle, label, 17);
+            _chips.Add((btn.image, isActive));
+            btn.onClick.AddListener(() =>
+            {
+                onClick();
+                RefreshChipColors();
+                RebuildGrid();
+            });
+            x += chipW + GAP;
+        }
+        RefreshChipColors();
+    }
+
+    void RefreshChipColors()
+    {
+        foreach (var (img, isActive) in _chips)
+            img.color = isActive() ? ChipActive : ChipIdle;
+    }
+
+    // ── Grid ──────────────────────────────────────────────────────────
+
+    void RebuildGrid()
+    {
+        CloseDetail();
         UIScrollListFactory.Clear(_gridContent);
         if (_mode == Mode.Towers) BuildTowerCards();
         else                      BuildEnemyCards();
     }
-
-    // ── Towers ────────────────────────────────────────────────────────
 
     void BuildTowerCards()
     {
@@ -55,26 +143,85 @@ public class JournalAlmanacScreen : MenuScreen
 
         foreach (var def in SortedByTier(lib.All.Values))
         {
+            if (_tierFilter != 0 && def.towerTier != _tierFilter) continue;
+            if (_typeFilter != null && def.balanceType != _typeFilter) continue;
+
+            var captured = def;
             JournalCardFactory.Create(_gridContent, def.displayName ?? def.id,
                 TowerBaseSprite(def), TowerStats(def),
-                overlaySprite: string.IsNullOrEmpty(def.turretSpritePath) ? null : RuntimeSprites.Load(def.turretSpritePath),
-                tint: def.tintColor);
+                overlaySprite: TowerTurretSprite(def),
+                tint: def.tintColor,
+                onClick: () => ShowDetail(
+                    captured.displayName ?? captured.id,
+                    TowerBaseSprite(captured), TowerTurretSprite(captured), captured.tintColor,
+                    string.Join("\n", TowerStats(captured)), captured.description));
         }
     }
 
-    /// <summary>Same resolution order as the tower editor's tooltip preview:
-    /// spritePath first (frame 0 of animated sheets via Load's fallback), then spriteSheet cell.</summary>
-    static Sprite TowerBaseSprite(TowerDefinition def)
+    void BuildEnemyCards()
     {
-        if (!string.IsNullOrEmpty(def.spritePath))
+        var lib = UnitDefinitionLibrary.Instance;
+        if (lib == null) { WarnMissingLibrary("UnitDefinitionLibrary"); return; }
+
+        foreach (var def in lib.All.Values)
         {
-            var s = RuntimeSprites.Load(def.spritePath);
-            if (s != null) return s;
+            var captured = def;
+            JournalCardFactory.Create(_gridContent, def.displayName ?? def.id,
+                UnitSprite(def), EnemyStats(def), tint: def.tintColor,
+                onClick: () => ShowDetail(
+                    captured.displayName ?? captured.id,
+                    UnitSprite(captured), null, captured.tintColor,
+                    string.Join("\n", EnemyStats(captured)), captured.description));
         }
-        if (!string.IsNullOrEmpty(def.spriteSheet))
-            return RuntimeSprites.FromSheet(def.spriteSheet, Mathf.Max(def.spriteIndex, 0));
-        return null;
     }
+
+    // ── Detail popup ──────────────────────────────────────────────────
+
+    void ShowDetail(string entryName, Sprite sprite, Sprite overlay, Color tint,
+        string statsText, string description)
+    {
+        CloseDetail();
+
+        var content = UIControlFactory.Popup(_panel, "DetailPopup", entryName.ToUpper(),
+            860f, 560f, out var closeBtn);
+        _detailPopup = content.transform.parent.parent.gameObject;   // full-screen blocker
+        closeBtn.onClick.AddListener(CloseDetail);
+
+        // Clicking the dim area outside the frame also closes
+        var blockerBtn = _detailPopup.AddComponent<Button>();
+        blockerBtn.targetGraphic = _detailPopup.GetComponent<Image>();
+        blockerBtn.transition    = Selectable.Transition.None;
+        blockerBtn.onClick.AddListener(CloseDetail);
+
+        // Left column: big sprite + stats beneath
+        var frame = JournalCardFactory.SpriteComposite(content, "Sprite", 190f, sprite, overlay, tint);
+        frame.GetComponent<RectTransform>().anchoredPosition = new Vector2(-270f, 120f);
+
+        UIControlFactory.Label(content, "Stats", -270f, -115f, 280f, 250f,
+            statsText, UIControlFactory.TextColor, 19, TextAnchor.UpperLeft);
+
+        // Right column: full description
+        UIControlFactory.Label(content, "DescHeader", 160f, 195f, 460f, 32f,
+            "— DESCRIPTION —", UIControlFactory.TextDim, 18);
+        var desc = UIControlFactory.Label(content, "Desc", 160f, -30f, 460f, 400f,
+            string.IsNullOrEmpty(description) ? "No description yet." : description,
+            UIControlFactory.TextColor, 21, TextAnchor.UpperLeft);
+        desc.lineSpacing = 1.15f;
+    }
+
+    void CloseDetail()
+    {
+        if (_detailPopup != null) Destroy(_detailPopup);
+        _detailPopup = null;
+    }
+
+    // ── Sprite resolution — shared with the wave preview ──────────────
+
+    static Sprite TowerBaseSprite(TowerDefinition def)   => DefinitionIcons.TowerBase(def);
+    static Sprite TowerTurretSprite(TowerDefinition def) => DefinitionIcons.TowerTurret(def);
+    static Sprite UnitSprite(UnitDefinition def)         => DefinitionIcons.Unit(def);
+
+    // ── Stat lines ────────────────────────────────────────────────────
 
     static IEnumerable<TowerDefinition> SortedByTier(IEnumerable<TowerDefinition> defs)
     {
@@ -100,37 +247,6 @@ public class JournalAlmanacScreen : MenuScreen
         float sb = TowerStatResolver.ShieldBonus(def);
         if (Mathf.Abs(sb) > 0.001f)
             yield return $"vs Shield {(sb > 0f ? "+" : "")}{sb:0.#}";
-    }
-
-    // ── Enemies ───────────────────────────────────────────────────────
-
-    void BuildEnemyCards()
-    {
-        var lib = UnitDefinitionLibrary.Instance;
-        if (lib == null) { WarnMissingLibrary("UnitDefinitionLibrary"); return; }
-
-        foreach (var def in lib.All.Values)
-        {
-            JournalCardFactory.Create(_gridContent, def.displayName ?? def.id,
-                UnitSprite(def), EnemyStats(def), tint: def.tintColor);
-        }
-    }
-
-    /// <summary>Same resolution order as the unit editor's tooltip preview:
-    /// walk-animation frame 0, then spriteSheet cell, then single sprite.</summary>
-    static Sprite UnitSprite(UnitDefinition def)
-    {
-        if (!string.IsNullOrEmpty(def.animSheet))
-        {
-            var s = RuntimeSprites.FromSheet(def.animSheet, 0);
-            if (s != null) return s;
-        }
-        if (!string.IsNullOrEmpty(def.spriteSheet) && def.spriteIndex >= 0)
-        {
-            var s = RuntimeSprites.FromSheet(def.spriteSheet, def.spriteIndex);
-            if (s != null) return s;
-        }
-        return RuntimeSprites.Load(def.spritePath);
     }
 
     static IEnumerable<string> EnemyStats(UnitDefinition def)

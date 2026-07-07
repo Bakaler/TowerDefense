@@ -461,6 +461,25 @@
             "synthAttack": 0.004999999888241291
         },
         {
+            "id": "achievement_chime",
+            "displayName": "Achievement Earned",
+            "clips": [],
+            "pickMode": "shuffle",
+            "bus": "ui",
+            "volume": 0.75,
+            "pitch": 1.0,
+            "pitchJitter": 0.0,
+            "loop": false,
+            "minInterval": 0.2,
+            "maxVoices": 0,
+            "priority": 5,
+            "synthWave": "sine",
+            "synthFreq": 660.0,
+            "synthFreqEnd": 1320.0,
+            "synthDuration": 0.4,
+            "synthAttack": 0.004999999888241291
+        },
+        {
             "id": "music_game",
             "displayName": "Game Music (placeholder drone)",
             "clips": [
@@ -608,6 +627,10 @@
         {
             "eventId": "tier_unlock",
             "soundId": "tier_unlock_chime"
+        },
+        {
+            "eventId": "achievement_earned",
+            "soundId": "achievement_chime"
         },
         {
             "eventId": "music_game",

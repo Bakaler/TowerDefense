@@ -13,7 +13,9 @@ public class HUDOverlays : MonoBehaviour
 
     GameObject _gameOverPanel;
     GameObject _victoryPanel;
+    Text       _victoryStats;
     bool       _victorySaved;
+    bool       _gameOverSaved;
 
     public bool IsGameOver => _gameOverPanel != null && _gameOverPanel.activeSelf;
     public bool IsVictory  => _victoryPanel  != null && _victoryPanel.activeSelf;
@@ -31,14 +33,36 @@ public class HUDOverlays : MonoBehaviour
         var wm = WaveManager.Instance;
         if (wm == null) return;
 
-        if (_gameOverPanel != null) _gameOverPanel.SetActive(wm.IsGameOver);
+        if (_gameOverPanel != null)
+        {
+            _gameOverPanel.SetActive(wm.IsGameOver);
+            if (wm.IsGameOver && !_gameOverSaved)
+            {
+                _gameOverSaved = true;
+                RunStats.FlushToProfile();   // partial runs still count toward lifetime stats
+            }
+        }
+
         if (_victoryPanel  != null)
         {
             _victoryPanel.SetActive(wm.IsVictory);
             if (wm.IsVictory && !_victorySaved)
             {
                 _victorySaved = true;
+
+                // Recap reads the live counters — build it before the flush zeroes them
+                if (_victoryStats != null)
+                {
+                    float lives = LogicManager.Instance != null ? LogicManager.Instance.lives : 0f;
+                    _victoryStats.text =
+                        $"Waves {wm.TotalWaves}   ·   Kills {RunStats.Kills}   ·   " +
+                        $"Gold earned {RunStats.GoldEarned}g   ·   Lives {lives:0}";
+                }
+
+                var report = RunStats.BuildReport(LevelSelection.SelectedLevel, LevelSelection.SelectedDifficulty);
+                RunStats.FlushToProfile();
                 SaveManager.RecordVictory(LevelSelection.SelectedLevel, LevelSelection.SelectedDifficulty);
+                AchievementManager.Instance?.EvaluateVictoryRun(report);
             }
         }
     }
@@ -47,7 +71,8 @@ public class HUDOverlays : MonoBehaviour
     {
         _gameOverPanel?.SetActive(false);
         _victoryPanel?.SetActive(false);
-        _victorySaved = false;
+        _victorySaved  = false;
+        _gameOverSaved = false;
     }
 
     GameObject BuildOverlay(GameObject root, string goName, string title, Color titleColor, bool isVictory)
@@ -74,11 +99,25 @@ public class HUDOverlays : MonoBehaviour
         sGO.transform.SetParent(panel.transform, false);
         var sRT = sGO.AddComponent<RectTransform>();
         sRT.anchorMin = sRT.anchorMax = sRT.pivot = new Vector2(0.5f, 0.5f);
-        sRT.anchoredPosition = new Vector2(0f, 20f); sRT.sizeDelta = new Vector2(700f, 60f);
+        sRT.anchoredPosition = new Vector2(0f, 40f); sRT.sizeDelta = new Vector2(700f, 50f);
         var sTxt = sGO.AddComponent<Text>();
         sTxt.text = isVictory ? "All waves repelled!" : "Your base has been breached.";
         sTxt.color = new Color(0.8f, 0.8f, 0.85f); sTxt.font = HUDHelpers.GetFont();
         sTxt.fontSize = 28; sTxt.alignment = TextAnchor.MiddleCenter;
+
+        // Run recap (victory only — filled in by Tick when the win lands)
+        if (isVictory)
+        {
+            var rGO = new GameObject("Recap");
+            rGO.transform.SetParent(panel.transform, false);
+            var rRT = rGO.AddComponent<RectTransform>();
+            rRT.anchorMin = rRT.anchorMax = rRT.pivot = new Vector2(0.5f, 0.5f);
+            rRT.anchoredPosition = new Vector2(0f, -8f); rRT.sizeDelta = new Vector2(900f, 32f);
+            _victoryStats = rGO.AddComponent<Text>();
+            _victoryStats.text = ""; _victoryStats.color = new Color(0.95f, 0.88f, 0.55f);
+            _victoryStats.font = HUDHelpers.GetFont();
+            _victoryStats.fontSize = 20; _victoryStats.alignment = TextAnchor.MiddleCenter;
+        }
 
         float btnY = -70f;
         MakeOverlayBtn(panel, "RestartBtn", new Vector2(0f, btnY),
@@ -93,7 +132,7 @@ public class HUDOverlays : MonoBehaviour
 
         MakeOverlayBtn(panel, "MenuBtn", new Vector2(0f, btnY - 80f),
             "Main Menu", new Color(0.30f, 0.30f, 0.36f, 1f),
-            () => UnityEngine.SceneManagement.SceneManager.LoadScene("MainMenuScene"));
+            () => ScreenFader.LoadScene("MainMenuScene"));
 
         return panel;
     }
@@ -117,12 +156,12 @@ public class HUDOverlays : MonoBehaviour
     {
         int next = LevelSelection.SelectedLevel + 1;
         var ta   = Resources.Load<TextAsset>($"Definitions/Levels/level_{next}");
-        if (ta == null) { UnityEngine.SceneManagement.SceneManager.LoadScene("LevelSelectionScene"); return; }
+        if (ta == null) { ScreenFader.LoadScene("LevelSelectionScene"); return; }
         LevelSelection.SelectedLevel = next;
         ModifierSelection.Clear();
         var data    = JsonUtility.FromJson<LevelData>(ta.text);
         bool hasMods = (data?.modifierColumns != null && data.modifierColumns.Length > 0)
                     || Resources.Load<TextAsset>("Definitions/modifier_columns") != null;
-        UnityEngine.SceneManagement.SceneManager.LoadScene(hasMods ? "ModifierSelectScene" : "GameScene");
+        ScreenFader.LoadScene(hasMods ? "ModifierSelectScene" : "GameScene");
     }
 }

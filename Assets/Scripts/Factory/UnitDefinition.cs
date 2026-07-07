@@ -26,6 +26,13 @@ public class UnitDefinition
     public int   bounty            = 10;
     public int   deathBlow         = 1;
 
+    // ── Movement ──────────────────────────────────────────────────────
+    /// <summary>
+    /// Rotate the unit toward its movement direction (missile-style). Off by
+    /// default — left/right sprite flipping happens regardless of this flag.
+    /// </summary>
+    public bool rotateToMovement = false;
+
     // ── Physics ───────────────────────────────────────────────────────
     /// <summary>Radius of the CircleCollider2D on the unit. Default 0.3.</summary>
     public float colliderRadius  = 0.3f;

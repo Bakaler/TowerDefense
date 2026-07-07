@@ -17,7 +17,11 @@ public class GameHUD : MonoBehaviour
     HUDDebugPanel    _debug;
     HUDTierSelector  _tier;
     HUDOverlays      _overlays;
+    HUDPauseMenu     _pause;
     Canvas           _canvas;
+
+    /// <summary>Wave bar exposes pause/speed control for the pause menu.</summary>
+    public HUDWaveBar WaveBar => _wave;
 
     // ── Lifecycle ──────────────────────────────────────────────────────
 
@@ -56,6 +60,7 @@ public class GameHUD : MonoBehaviour
         _debug    = gameObject.AddComponent<HUDDebugPanel>();   _debug.Build(canvasGO);
         _tier     = gameObject.AddComponent<HUDTierSelector>(); _tier.Build(canvasGO);
         _overlays = gameObject.AddComponent<HUDOverlays>();     _overlays.Build(canvasGO);
+        _pause    = gameObject.AddComponent<HUDPauseMenu>();    _pause.Build(canvasGO);
 
         // Decorative border overlay (Art/UI/GameBorder)
         BuildSpriteOverlay(canvasGO, "Art/UI/GameBorder", sortingOrder: 10);
@@ -139,9 +144,11 @@ public class GameHUD : MonoBehaviour
 
     public void ResetForLevelLoad()
     {
+        RunStats.ResetForLevel();
         _info?.Reset();
         _overlays?.Reset();
         _wave?.ResetPause();
+        _pause?.HideImmediate();
         _stats?.RefreshObjectives();
         _tier?.SyncWithShop();
     }
@@ -154,6 +161,11 @@ public class GameHUD : MonoBehaviour
         _overlays?.Tick();
         HandleClickSelection();
         HandleTowerRotation();
+
+        // Lifetime playtime — skip while paused or on an end screen
+        var wm = WaveManager.Instance;
+        if (Time.timeScale > 0f && (wm == null || (!wm.IsVictory && !wm.IsGameOver)))
+            RunStats.TickPlaytime(Time.unscaledDeltaTime);
     }
 
     void HandleClickSelection()

@@ -19,5 +19,5 @@ public class LandingScreenManager : MonoBehaviour
     }
 
     /// <summary>Legacy hook for the old scene's PLAY button — now routes to the main menu.</summary>
-    public void OnPlayPressed() => SceneManager.LoadScene(mainMenuSceneName);
+    public void OnPlayPressed() => ScreenFader.LoadScene(mainMenuSceneName);
 }

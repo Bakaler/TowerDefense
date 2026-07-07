@@ -162,6 +162,10 @@ public class HUDInfoPanel : MonoBehaviour
         y = topY;
         var (upgBtn, upgLbl) = HUDHelpers.MakeBtn(_towerBody, "UpgradeBtn", C2, y - BTNH + ROW, COL_W, BTNH, new Color(0.15f,0.55f,0.25f,1f), "UPGRADE", 12, true);
         _tpUpgradeBtn = upgBtn; _tpUpgradeBtnLabel = upgLbl;
+        // Two-line label (cost + damage preview) needs to shrink to fit
+        _tpUpgradeBtnLabel.resizeTextForBestFit = true;
+        _tpUpgradeBtnLabel.resizeTextMinSize    = 8;
+        _tpUpgradeBtnLabel.resizeTextMaxSize    = 12;
         var uc = _tpUpgradeBtn.colors; uc.highlightedColor = new Color(0.2f,0.7f,0.3f); uc.disabledColor = new Color(0.22f,0.22f,0.22f); _tpUpgradeBtn.colors = uc;
         _tpUpgradeBtn.onClick.AddListener(OnUpgradeClicked);
 
@@ -453,7 +457,15 @@ public class HUDInfoPanel : MonoBehaviour
         if (_tpUpgradeBtnLabel == null) return;
         if (!canTier)        _tpUpgradeBtnLabel.text = "MAX TIER";
         else if (!hasRes)    _tpUpgradeBtnLabel.text = $"LOCKED  (needs Tier {info.RequiredResearchTier} research)";
-        else                 _tpUpgradeBtnLabel.text = $"UPGRADE  Tier {info.Tier + 1}  —  {info.UpgradeCost}g";
+        else
+        {
+            // Damage preview so upgrading isn't a blind purchase
+            string label  = $"UPGRADE  Tier {info.Tier + 1}  —  {info.UpgradeCost}g";
+            float  curDmg = info.damage * info.EffectiveDamageMult;
+            if (curDmg > 0.01f)
+                label += $"\nDMG  {curDmg:0.#} → {curDmg * info.upgradeStatMultiplier:0.#}";
+            _tpUpgradeBtnLabel.text = label;
+        }
     }
 
     void RefreshBalanceDist(TowerInfo info)

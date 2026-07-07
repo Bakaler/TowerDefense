@@ -74,6 +74,10 @@ public class WaveManager : MonoBehaviour
     public bool CanStartWave =>
         !IsWaveActive && !IsVictory && !IsGameOver && CurrentWave < TotalWaves;
 
+    /// <summary>The wave that will be sent next (the upcoming one while a wave is active). Null when none remain.</summary>
+    public WaveDefinition PeekNextWave() =>
+        CurrentWave < TotalWaves && CurrentWave < _waveDefs.Count ? _waveDefs[CurrentWave] : null;
+
     public void StartNextWave()
     {
         if (!CanStartWave) return;
@@ -144,6 +148,7 @@ public class WaveManager : MonoBehaviour
     {
         IsWaveActive = false;
         if (CurrentWave < TotalWaves) AudioManager.PlayEvent("wave_clear");
+        RunStats.NotifyWaveCleared();
         Debug.Log($"[WaveManager] Wave {CurrentWave} cleared.");
 
         ObjectiveTracker.NotifyWaveReached(CurrentWave);

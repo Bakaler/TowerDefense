@@ -24,12 +24,22 @@ public class AchievementDefinition
 
     // ── Condition ─────────────────────────────────────────────────────
     /// <summary>
-    /// "LevelStars"  — GetStars(levelIndex) >= minStars
-    /// "TotalStars"  — TotalStarsAllLevels() >= minStars
+    /// Save-state conditions (re-checked on every progress change):
+    ///   "LevelStars"   — GetStars(levelIndex) >= minStars
+    ///   "TotalStars"   — TotalStarsAllLevels() >= minStars
+    ///   "TotalKills"   — lifetime kills >= count
+    ///   "TowersBuilt"  — lifetime towers built >= count
+    ///   "WavesCleared" — lifetime waves cleared >= count
+    ///   "GoldEarned"   — lifetime gold earned >= count
+    /// Run conditions (checked once, at the moment of victory):
+    ///   "FlawlessVictory" — won a level without losing a life
+    ///   "MonoTypeVictory" — won a level using only balanceType towers
     /// </summary>
     public string conditionType;
     public int    levelIndex;
     public int    minStars;
+    public int    count;
+    public string balanceType;
 }
 
 [Serializable]

@@ -42,12 +42,24 @@ public static class JournalCardFactory
     /// </summary>
     public static View Create(GameObject parent, string entryName, Sprite sprite,
         IEnumerable<string> statLines, bool discovered = true,
-        Sprite overlaySprite = null, Color? tint = null)
+        Sprite overlaySprite = null, Color? tint = null, System.Action onClick = null)
     {
         var root = new GameObject($"Card_{entryName}");
         root.transform.SetParent(parent.transform, false);
         root.AddComponent<RectTransform>().sizeDelta = CardSize;
-        root.AddComponent<Image>().color = UIControlFactory.PanelColor;
+        var bg = root.AddComponent<Image>();
+        bg.color = UIControlFactory.PanelColor;
+
+        if (onClick != null)
+        {
+            var btn = root.AddComponent<Button>();
+            btn.targetGraphic = btn.image;
+            var cols = btn.colors;
+            cols.highlightedColor = new Color(1.25f, 1.25f, 1.35f, 1f);
+            cols.pressedColor     = new Color(0.8f, 0.8f, 0.85f, 1f);
+            btn.colors = cols;
+            btn.onClick.AddListener(() => { AudioManager.PlayEvent("ui_click"); onClick(); });
+        }
 
         float w = CardSize.x, h = CardSize.y;
 
@@ -102,6 +114,31 @@ public static class JournalCardFactory
 
         view.SetDiscovered(discovered);
         return view;
+    }
+
+    /// <summary>
+    /// Standalone base+overlay sprite composite (same shared-scale rendering the
+    /// cards use) for detail popups. Center-pivoted; caller positions the frame.
+    /// </summary>
+    public static GameObject SpriteComposite(GameObject parent, string name, float size,
+        Sprite sprite, Sprite overlaySprite, Color tint)
+    {
+        var frame = new GameObject(name);
+        frame.transform.SetParent(parent.transform, false);
+        var rt       = frame.AddComponent<RectTransform>();
+        rt.anchorMin = rt.anchorMax = rt.pivot = new Vector2(0.5f, 0.5f);
+        rt.sizeDelta = new Vector2(size, size);
+
+        float maxDim = 1f;
+        if (sprite        != null) maxDim = Mathf.Max(maxDim, sprite.rect.width, sprite.rect.height);
+        if (overlaySprite != null) maxDim = Mathf.Max(maxDim, overlaySprite.rect.width, overlaySprite.rect.height);
+        float scale = size / maxDim;
+
+        MakeLayer(frame, "Base", sprite != null ? sprite : RuntimeSprites.Circle(32),
+            sprite != null ? scale : 0f, size).color = tint;
+        if (overlaySprite != null)
+            MakeLayer(frame, "Overlay", overlaySprite, scale, size).color = tint;
+        return frame;
     }
 
     /// <summary>Centered sprite layer inside the frame. scale &gt; 0 sizes by texel

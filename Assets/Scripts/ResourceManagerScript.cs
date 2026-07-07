@@ -31,6 +31,7 @@ public class ResourceManagerScript : MonoBehaviour
     public void ChangeResourceOne(int delta)
     {
         resourceOne += delta;
+        RunStats.NotifyGoldEarned(delta);   // ignores negative deltas
     }
 
     public void ChangeResearch(int delta)

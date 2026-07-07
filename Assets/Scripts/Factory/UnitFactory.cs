@@ -119,6 +119,13 @@ public class UnitFactory : MonoBehaviour
                 Debug.LogWarning($"[UnitFactory] Animation sheet '{def.animSheet}' not found for '{def.id}'.");
         }
 
+        // Never spawn an invisible unit — placeholder circle if nothing resolved
+        if (sr.sprite == null)
+        {
+            sr.sprite = MakePlaceholderSprite(s);
+            sr.color  = def.debugColor;
+        }
+
         // ── 4. UnitManager ────────────────────────────────────────
         var unit = go.AddComponent<UnitManager>();
         unit.myCollider      = col;
@@ -142,6 +149,7 @@ public class UnitFactory : MonoBehaviour
         unit.arcanaDefense    = def.arcanaDefense;
         unit.bounty          = Mathf.RoundToInt(def.bounty * LevelSelection.BountyMult);
         unit.deathBlow       = def.deathBlow;
+        unit.rotateToMovement = def.rotateToMovement;
         unit.isAlive         = true;
 
         // ── 5. Extra components ───────────────────────────────────

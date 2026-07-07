@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -13,18 +14,29 @@ public class HUDWaveBar : MonoBehaviour
     static readonly Color C_BtnReady = new Color(0.18f, 0.60f, 0.28f, 1f);
     static readonly Color C_BtnWait  = new Color(0.28f, 0.28f, 0.32f, 1f);
 
+    static readonly Color C_FfIdle   = new Color(0.20f, 0.30f, 0.22f, 1f);
+    static readonly Color C_FfActive = new Color(0.20f, 0.60f, 0.30f, 1f);
+
     Button _waveButton;
     Text   _waveButtonLabel;
     Button _pauseButton;
     Text   _pauseButtonLabel;
     Text   _waveText;
     Text   _livesText;
+    Image  _ffImage;
+    Text   _ffLabel;
     bool   _paused;
+    float  _speed = 1f;   // desired game speed while unpaused (1 or 2)
+
+    GameObject _canvasRoot;
+    GameObject _previewPanel;
+    int        _previewIndex = -2;   // wave index the preview was built for (-1 = hidden)
 
     public bool Paused => _paused;
 
     public void Build(GameObject canvasRoot)
     {
+        _canvasRoot = canvasRoot;
         var panel = new GameObject("WaveBar");
         panel.transform.SetParent(canvasRoot.transform, false);
         var rt       = panel.AddComponent<RectTransform>();
@@ -84,27 +96,117 @@ public class HUDWaveBar : MonoBehaviour
         _pauseButtonLabel.alignment = TextAnchor.MiddleCenter;
         _pauseButton.onClick.AddListener(TogglePause);
 
-        // Fast-forward button (right of pause)
+        // Fast-forward button (right of pause) — F key also toggles
         float ffX = PAD + (W - PAD * 2f - PW - 4f) + 4f;
-        var (ffBtn, _) = HUDHelpers.MakeBtn(panel, "FFBtn", ffX, PAD, PW, BTNH,
-            new Color(0.20f, 0.30f, 0.22f, 1f), "▶▶", 14, bold: true);
-        ffBtn.onClick.AddListener(() => Time.timeScale = _paused ? 0f : (Time.timeScale >= 2f ? 1f : 2f));
+        var (ffBtn, ffLbl) = HUDHelpers.MakeBtn(panel, "FFBtn", ffX, PAD, PW, BTNH,
+            C_FfIdle, "▶▶", 14, bold: true);
+        _ffImage = ffBtn.image;
+        _ffLabel = ffLbl;
+        ffBtn.onClick.AddListener(ToggleSpeed);
     }
 
     public void ResetPause()
     {
         _paused = false;
-        Time.timeScale = 1f;
+        _speed  = 1f;
+        ApplyTimeScale();
         AudioManager.SetSfxPaused(false);
         if (_pauseButtonLabel != null) _pauseButtonLabel.text = "II";
+        RefreshSpeedButton();
     }
 
-    void TogglePause()
+    /// <summary>Pause/unpause without losing the chosen game speed. Also used by the Escape menu.</summary>
+    public void SetPaused(bool paused)
     {
-        _paused = !_paused;
-        Time.timeScale = _paused ? 0f : 1f;
-        AudioManager.SetSfxPaused(_paused);   // SFX pause with the game; music keeps playing
-        if (_pauseButtonLabel != null) _pauseButtonLabel.text = _paused ? "▶" : "II";
+        _paused = paused;
+        ApplyTimeScale();
+        AudioManager.SetSfxPaused(paused);   // SFX pause with the game; music keeps playing
+        if (_pauseButtonLabel != null) _pauseButtonLabel.text = paused ? "▶" : "II";
+    }
+
+    /// <summary>Flips between 1x and 2x. Survives pause — the speed re-applies on resume.</summary>
+    public void ToggleSpeed()
+    {
+        _speed = _speed >= 2f ? 1f : 2f;
+        ApplyTimeScale();
+        RefreshSpeedButton();
+    }
+
+    void TogglePause() => SetPaused(!_paused);
+
+    void ApplyTimeScale() => Time.timeScale = _paused ? 0f : _speed;
+
+    void RefreshSpeedButton()
+    {
+        if (_ffImage != null) _ffImage.color = _speed >= 2f ? C_FfActive : C_FfIdle;
+        if (_ffLabel != null) _ffLabel.text  = _speed >= 2f ? "2×" : "▶▶";
+    }
+
+    // ── Next-wave preview (pop-out left of the wave bar) ──────────────
+
+    void UpdateWavePreview(WaveManager wm)
+    {
+        int idx = wm == null || wm.IsVictory || wm.IsGameOver || wm.CurrentWave >= wm.TotalWaves
+            ? -1 : wm.CurrentWave;
+        if (idx == _previewIndex) return;
+        _previewIndex = idx;
+
+        if (_previewPanel != null) Destroy(_previewPanel);
+        _previewPanel = null;
+        if (idx < 0) return;
+
+        var def = wm.PeekNextWave();
+        if (def == null || def.groups == null || def.groups.Count == 0) return;
+
+        // Aggregate counts per unit type, preserving first-seen order
+        var order  = new List<string>();
+        var counts = new Dictionary<string, int>();
+        foreach (var g in def.groups)
+        {
+            if (string.IsNullOrEmpty(g.unitDefinitionId)) continue;
+            if (!counts.ContainsKey(g.unitDefinitionId)) { counts[g.unitDefinitionId] = 0; order.Add(g.unitDefinitionId); }
+            counts[g.unitDefinitionId] += g.count;
+        }
+        if (order.Count == 0) return;
+
+        const float PW = 218f, ROW = 30f, HDR = 26f, PAD = 8f;
+        float ph = HDR + PAD * 2f + order.Count * ROW;
+
+        _previewPanel = new GameObject("NextWavePreview");
+        _previewPanel.transform.SetParent(_canvasRoot.transform, false);
+        var rt       = _previewPanel.AddComponent<RectTransform>();
+        rt.anchorMin = rt.anchorMax = new Vector2(1f, 0f);
+        rt.pivot     = new Vector2(1f, 0f);
+        rt.anchoredPosition = new Vector2(-W - 6f, 6f);
+        rt.sizeDelta = new Vector2(PW, ph);
+        var bg = _previewPanel.AddComponent<Image>();
+        bg.color         = new Color(0.06f, 0.07f, 0.12f, 0.90f);
+        bg.raycastTarget = false;
+
+        var hdr = HUDHelpers.MakeText(
+            HUDHelpers.MakeRect("Hdr", _previewPanel, PAD, ph - PAD - HDR, PW - PAD * 2f, HDR),
+            $"NEXT WAVE  {idx + 1}", new Color(0.95f, 0.88f, 0.55f), 12, bold: true);
+        hdr.alignment = TextAnchor.MiddleCenter;
+
+        var lib = UnitDefinitionLibrary.Instance;
+        for (int i = 0; i < order.Count; i++)
+        {
+            var unitDef = lib != null ? lib.Get(order[i]) : null;
+            float y = ph - PAD - HDR - (i + 1) * ROW;
+
+            var iconGO = HUDHelpers.MakeRect($"Icon_{i}", _previewPanel, PAD, y + 2f, ROW - 4f, ROW - 4f);
+            var icon   = iconGO.AddComponent<Image>();
+            var sprite = DefinitionIcons.Unit(unitDef);
+            icon.sprite         = sprite != null ? sprite : RuntimeSprites.Circle(16);
+            icon.color          = unitDef != null ? unitDef.tintColor : Color.white;
+            icon.preserveAspect = true;
+            icon.raycastTarget  = false;
+
+            string unitName = unitDef?.displayName ?? order[i];
+            HUDHelpers.MakeText(
+                HUDHelpers.MakeRect($"Lbl_{i}", _previewPanel, PAD + ROW + 4f, y, PW - PAD * 2f - ROW - 4f, ROW),
+                $"{unitName}  ×{counts[order[i]]}", new Color(0.85f, 0.85f, 0.90f), 12);
+        }
     }
 
     LogicManager _lm;
@@ -113,6 +215,12 @@ public class HUDWaveBar : MonoBehaviour
     void Update()
     {
         var wm = WaveManager.Instance;
+
+        // F toggles game speed — but never while the game-over freeze holds timeScale at 0
+        if (Input.GetKeyDown(KeyCode.F) && (wm == null || !wm.IsGameOver))
+            ToggleSpeed();
+
+        UpdateWavePreview(wm);
 
         if (_livesText != null && _lm != null)
             _livesText.text = $"♥  {Mathf.Max(0, (int)_lm.lives)}";

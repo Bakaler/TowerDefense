@@ -28,6 +28,18 @@ public static class SaveManager
         public List<int> unlockedLevels = new List<int> { 1 };
         public List<LevelStarEntry> starsPerLevel = new List<LevelStarEntry>();
         public List<string> earnedAchievements = new List<string>();
+        public LifetimeStats stats = new LifetimeStats();
+    }
+
+    /// <summary>Cumulative counters across every run of a profile.</summary>
+    [Serializable]
+    public class LifetimeStats
+    {
+        public int   totalKills;
+        public int   wavesCleared;
+        public int   towersBuilt;
+        public int   goldEarned;
+        public float playtimeSeconds;
     }
 
     [Serializable]
@@ -267,6 +279,32 @@ public static class SaveManager
         };
         Write();
         StarManager.Instance?.Refresh();
+        OnProgressChanged?.Invoke();
+    }
+
+    // ── Lifetime stats API ────────────────────────────────────────────
+
+    /// <summary>Read-only view of the active profile's cumulative stats.</summary>
+    public static LifetimeStats GetLifetimeStats()
+    {
+        EnsureLoaded();
+        return _data.stats ?? (_data.stats = new LifetimeStats());
+    }
+
+    /// <summary>Adds a run's counters to the profile and persists. Fires OnProgressChanged
+    /// so stat-based achievements re-evaluate.</summary>
+    public static void AccumulateLifetimeStats(int kills, int wavesCleared, int towersBuilt,
+        int goldEarned, float playtimeSeconds)
+    {
+        EnsureLoaded();
+        var s = _data.stats ?? (_data.stats = new LifetimeStats());
+        s.totalKills      += kills;
+        s.wavesCleared    += wavesCleared;
+        s.towersBuilt     += towersBuilt;
+        s.goldEarned      += goldEarned;
+        s.playtimeSeconds += playtimeSeconds;
+        _data.lastPlayedUtc = DateTime.UtcNow.ToString("o");
+        Write();
         OnProgressChanged?.Invoke();
     }
 

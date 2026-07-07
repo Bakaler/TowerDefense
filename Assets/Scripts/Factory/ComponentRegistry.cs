@@ -33,9 +33,11 @@ public static class ComponentRegistry
             return;
         }
 
-        if (_registry.ContainsKey(key))
+        // Re-registration of the same type is normal when domain reload is
+        // disabled (statics survive, bootstrap methods re-run every Play).
+        if (_registry.TryGetValue(key, out var existing) && existing != componentType)
         {
-            Debug.LogWarning($"[ComponentRegistry] Key '{key}' already registered. Skipping '{componentType.Name}'.");
+            Debug.LogWarning($"[ComponentRegistry] Key '{key}' already registered to '{existing.Name}'. Skipping '{componentType.Name}'.");
             return;
         }
 

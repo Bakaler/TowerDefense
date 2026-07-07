@@ -68,28 +68,68 @@ public class AchievementManager : MonoBehaviour
     {
         foreach (var def in _all)
         {
-            if (string.IsNullOrEmpty(def.id)) continue;
-            if (SaveManager.IsAchievementEarned(def.id)) continue;
             if (!ConditionMet(def)) continue;
-
-            if (SaveManager.MarkAchievementEarned(def.id))
-            {
-                Debug.Log($"[AchievementManager] Earned '{def.title}' ({def.id})");
-                AudioManager.PlayEvent("achievement_earned");
-                OnAchievementEarned?.Invoke(def);
-            }
+            Award(def);
         }
+    }
+
+    /// <summary>
+    /// Called once at the moment of victory with the run's snapshot — awards
+    /// run-condition achievements that can't be derived from save state.
+    /// </summary>
+    public void EvaluateVictoryRun(RunStats.Report report)
+    {
+        foreach (var def in _all)
+        {
+            if (!RunConditionMet(def, report)) continue;
+            Award(def);
+        }
+    }
+
+    void Award(AchievementDefinition def)
+    {
+        if (string.IsNullOrEmpty(def.id)) return;
+        if (!SaveManager.MarkAchievementEarned(def.id)) return;   // already earned
+        Debug.Log($"[AchievementManager] Earned '{def.title}' ({def.id})");
+        AudioManager.PlayEvent("achievement_earned");
+        OnAchievementEarned?.Invoke(def);
     }
 
     static bool ConditionMet(AchievementDefinition def)
     {
+        if (SaveManager.IsAchievementEarned(def.id)) return false;
+        var stats = SaveManager.GetLifetimeStats();
         switch (def.conditionType)
         {
-            case "LevelStars": return SaveManager.GetStars(def.levelIndex) >= def.minStars;
-            case "TotalStars": return SaveManager.TotalStarsAllLevels() >= def.minStars;
+            case "LevelStars":   return SaveManager.GetStars(def.levelIndex) >= def.minStars;
+            case "TotalStars":   return SaveManager.TotalStarsAllLevels() >= def.minStars;
+            case "TotalKills":   return stats.totalKills   >= def.count;
+            case "TowersBuilt":  return stats.towersBuilt  >= def.count;
+            case "WavesCleared": return stats.wavesCleared >= def.count;
+            case "GoldEarned":   return stats.goldEarned   >= def.count;
+            case "FlawlessVictory":
+            case "MonoTypeVictory":
+                return false;   // run conditions — evaluated by EvaluateVictoryRun only
             default:
                 Debug.LogWarning($"[AchievementManager] Unknown conditionType '{def.conditionType}' on '{def.id}'");
                 return false;
+        }
+    }
+
+    static bool RunConditionMet(AchievementDefinition def, RunStats.Report report)
+    {
+        if (SaveManager.IsAchievementEarned(def.id)) return false;
+        switch (def.conditionType)
+        {
+            case "FlawlessVictory":
+                return report.livesLost <= 0f;
+            case "MonoTypeVictory":
+                return !string.IsNullOrEmpty(def.balanceType)
+                    && report.balanceTypesUsed.Count > 0
+                    && report.balanceTypesUsed.Count == 1
+                    && report.balanceTypesUsed.Contains(def.balanceType);
+            default:
+                return false;   // save-state conditions are handled by EvaluateAll
         }
     }
 }

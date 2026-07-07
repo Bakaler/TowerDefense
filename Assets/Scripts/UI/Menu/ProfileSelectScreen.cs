@@ -61,7 +61,7 @@ public class ProfileSelectScreen : MonoBehaviour
         playBtn.onClick.AddListener(() =>
         {
             SaveManager.SetActiveProfile(slot);
-            SceneManager.LoadScene(mainMenuSceneName);
+            ScreenFader.LoadScene(mainMenuSceneName);
         });
 
         // Delete: first click arms it, second confirms
@@ -115,7 +115,7 @@ public class ProfileSelectScreen : MonoBehaviour
         {
             SaveManager.CreateProfile(slot, input.text);
             SaveManager.SetActiveProfile(slot);
-            SceneManager.LoadScene(mainMenuSceneName);
+            ScreenFader.LoadScene(mainMenuSceneName);
         });
 
         var (cancelBtn, _) = UIControlFactory.Button(card, "Cancel", 0f, -115f, CARD_W - 80f, 44f,

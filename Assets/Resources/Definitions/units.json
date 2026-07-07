@@ -4,7 +4,7 @@
             "id": "basic_enemy",
             "displayName": "Basic Enemy",
             "description": "Standard cannon fodder. No armor, moderate speed.",
-            "life": 65.0,
+            "life": 45.0,
             "shield": 0.0,
             "speed": 1.75,
             "physicalDefense": 0,
@@ -12,7 +12,8 @@
             "arcanaDefense": 0,
             "bounty": 10,
             "deathBlow": 1,
-            "colliderRadius": 0.30000001192092896,
+            "rotateToMovement": false,
+            "colliderRadius": 0.30000001192092898,
             "layer": 0,
             "spritePath": "",
             "spriteSheet": "",
@@ -34,14 +35,14 @@
             "animFps": 8.0,
             "animDeathSheet": "Art/Units/basic_enemy_death",
             "animDeathFps": 10.0,
+            "deathSoundId": "",
             "components": [],
-            "startingBehaviors": [],
-            "deathSoundId": ""
+            "startingBehaviors": []
         },
         {
             "id": "fast_enemy",
             "displayName": "Fast Enemy",
-            "description": "Thin but quick \u2014 outruns sparse coverage. Slows and chain towers counter it.",
+            "description": "Thin but quick — outruns sparse coverage. Slows and chain towers counter it.",
             "life": 28.0,
             "shield": 0.0,
             "speed": 2.25,
@@ -50,7 +51,8 @@
             "arcanaDefense": 0,
             "bounty": 15,
             "deathBlow": 1,
-            "colliderRadius": 0.20000000298023224,
+            "rotateToMovement": false,
+            "colliderRadius": 0.20000000298023225,
             "layer": 0,
             "spritePath": "",
             "spriteSheet": "",
@@ -59,7 +61,7 @@
             "debugColor": {
                 "r": 1.0,
                 "g": 0.0,
-                "b": 0.28814125061035156,
+                "b": 0.28814125061035159,
                 "a": 1.0
             },
             "tintColor": {
@@ -72,9 +74,9 @@
             "animFps": 8.0,
             "animDeathSheet": "Art/Units/enemy_1_death",
             "animDeathFps": 10.0,
+            "deathSoundId": "",
             "components": [],
-            "startingBehaviors": [],
-            "deathSoundId": ""
+            "startingBehaviors": []
         },
         {
             "id": "armored_enemy",
@@ -88,6 +90,7 @@
             "arcanaDefense": 0,
             "bounty": 25,
             "deathBlow": 1,
+            "rotateToMovement": false,
             "colliderRadius": 0.3499999940395355,
             "layer": 0,
             "spritePath": "",
@@ -110,9 +113,9 @@
             "animFps": 8.0,
             "animDeathSheet": "Art/Units/enemy_2_death",
             "animDeathFps": 10.0,
+            "deathSoundId": "",
             "components": [],
-            "startingBehaviors": [],
-            "deathSoundId": ""
+            "startingBehaviors": []
         },
         {
             "id": "shielded_enemy",
@@ -126,6 +129,7 @@
             "arcanaDefense": 0,
             "bounty": 0,
             "deathBlow": 1,
+            "rotateToMovement": false,
             "colliderRadius": 0.3499999940395355,
             "layer": 0,
             "spritePath": "",
@@ -148,9 +152,9 @@
             "animFps": 8.0,
             "animDeathSheet": "Art/Units/enemy_2_death",
             "animDeathFps": 10.0,
+            "deathSoundId": "",
             "components": [],
-            "startingBehaviors": [],
-            "deathSoundId": ""
+            "startingBehaviors": []
         },
         {
             "id": "boss_enemy",
@@ -164,6 +168,7 @@
             "arcanaDefense": 50,
             "bounty": 0,
             "deathBlow": 5,
+            "rotateToMovement": false,
             "colliderRadius": 0.75,
             "layer": 0,
             "spritePath": "",
@@ -186,11 +191,11 @@
             "animFps": 6.0,
             "animDeathSheet": "Art/Units/enemy_3_death",
             "animDeathFps": 12.0,
+            "deathSoundId": "boss_death",
             "components": [],
             "startingBehaviors": [
                 "boss_immunity"
-            ],
-            "deathSoundId": "boss_death"
+            ]
         },
         {
             "id": "resilient_enemy",
@@ -204,20 +209,21 @@
             "arcanaDefense": 0,
             "bounty": 20,
             "deathBlow": 1,
-            "colliderRadius": 0.30000001192092896,
+            "rotateToMovement": false,
+            "colliderRadius": 0.30000001192092898,
             "layer": 0,
             "spritePath": "",
             "spriteSheet": "Art/Enemies/Enemies",
             "spriteIndex": 0,
             "scale": 3.0,
             "debugColor": {
-                "r": 0.20000000298023224,
+                "r": 0.20000000298023225,
                 "g": 0.800000011920929,
                 "b": 1.0,
                 "a": 1.0
             },
             "tintColor": {
-                "r": 0.20000000298023224,
+                "r": 0.20000000298023225,
                 "g": 0.800000011920929,
                 "b": 1.0,
                 "a": 1.0
@@ -226,6 +232,7 @@
             "animFps": 8.0,
             "animDeathSheet": "",
             "animDeathFps": 8.0,
+            "deathSoundId": "",
             "components": [
                 {
                     "key": "on_first_hit_cleanse",
@@ -235,14 +242,13 @@
                     }
                 }
             ],
-            "startingBehaviors": [],
-            "deathSoundId": ""
+            "startingBehaviors": []
         },
         {
             "id": "splitter_enemy",
             "displayName": "Splitter",
             "description": "Splits into 4 smaller units upon death that continue along the path.",
-            "life": 120.0,
+            "life": 100.0,
             "shield": 0.0,
             "speed": 1.0,
             "physicalDefense": 0,
@@ -250,12 +256,13 @@
             "arcanaDefense": 0,
             "bounty": 30,
             "deathBlow": 1,
+            "rotateToMovement": true,
             "colliderRadius": 0.3499999940395355,
             "layer": 0,
             "spritePath": "",
-            "spriteSheet": "Art/Enemies/Enemies",
+            "spriteSheet": "",
             "spriteIndex": 1,
-            "scale": 4.0,
+            "scale": 2.0,
             "debugColor": {
                 "r": 1.0,
                 "g": 0.4000000059604645,
@@ -268,10 +275,11 @@
                 "b": 0.0,
                 "a": 1.0
             },
-            "animSheet": "",
-            "animFps": 8.0,
+            "animSheet": "Art/Units/enemy_4_unit",
+            "animFps": 6.0,
             "animDeathSheet": "",
-            "animDeathFps": 8.0,
+            "animDeathFps": 6.0,
+            "deathSoundId": "",
             "components": [
                 {
                     "key": "splitter_on_death",
@@ -281,8 +289,7 @@
                     }
                 }
             ],
-            "startingBehaviors": [],
-            "deathSoundId": ""
+            "startingBehaviors": []
         },
         {
             "id": "splitter_mini",
@@ -296,12 +303,13 @@
             "arcanaDefense": 0,
             "bounty": 5,
             "deathBlow": 0,
-            "colliderRadius": 0.18000000715255737,
+            "rotateToMovement": true,
+            "colliderRadius": 0.18000000715255738,
             "layer": 0,
             "spritePath": "",
-            "spriteSheet": "Art/Enemies/Enemies",
+            "spriteSheet": "",
             "spriteIndex": 2,
-            "scale": 2.0,
+            "scale": 1.0,
             "debugColor": {
                 "r": 1.0,
                 "g": 0.550000011920929,
@@ -314,13 +322,13 @@
                 "b": 0.10000000149011612,
                 "a": 1.0
             },
-            "animSheet": "",
-            "animFps": 8.0,
+            "animSheet": "Art/Units/enemy_4_unit",
+            "animFps": 6.0,
             "animDeathSheet": "",
-            "animDeathFps": 8.0,
+            "animDeathFps": 6.0,
+            "deathSoundId": "",
             "components": [],
-            "startingBehaviors": [],
-            "deathSoundId": ""
+            "startingBehaviors": []
         },
         {
             "id": "phantom_enemy",
@@ -328,12 +336,13 @@
             "description": "Immune to slows and roots. Only burst damage or stuns can stop it.",
             "life": 70.0,
             "shield": 0.0,
-            "speed": 2.0999999046325684,
+            "speed": 2.0999999046325685,
             "physicalDefense": 0,
             "elementalDefense": 0,
             "arcanaDefense": 0,
             "bounty": 18,
             "deathBlow": 1,
+            "rotateToMovement": false,
             "colliderRadius": 0.25,
             "layer": 0,
             "spritePath": "",
@@ -356,11 +365,11 @@
             "animFps": 8.0,
             "animDeathSheet": "",
             "animDeathFps": 8.0,
+            "deathSoundId": "",
             "components": [],
             "startingBehaviors": [
                 "phantom_immunity"
-            ],
-            "deathSoundId": ""
+            ]
         },
         {
             "id": "charger_enemy",
@@ -374,7 +383,8 @@
             "arcanaDefense": 0,
             "bounty": 20,
             "deathBlow": 1,
-            "colliderRadius": 0.30000001192092896,
+            "rotateToMovement": false,
+            "colliderRadius": 0.30000001192092898,
             "layer": 0,
             "spritePath": "",
             "spriteSheet": "Art/Enemies/Enemies",
@@ -396,11 +406,11 @@
             "animFps": 8.0,
             "animDeathSheet": "",
             "animDeathFps": 8.0,
+            "deathSoundId": "",
             "components": [],
             "startingBehaviors": [
                 "charger_death_rage"
-            ],
-            "deathSoundId": ""
+            ]
         },
         {
             "id": "priest_enemy",
@@ -414,6 +424,7 @@
             "arcanaDefense": 0,
             "bounty": 22,
             "deathBlow": 1,
+            "rotateToMovement": false,
             "colliderRadius": 0.2800000011920929,
             "layer": 0,
             "spritePath": "",
@@ -436,6 +447,7 @@
             "animFps": 8.0,
             "animDeathSheet": "",
             "animDeathFps": 8.0,
+            "deathSoundId": "",
             "components": [
                 {
                     "key": "ally_aura",
@@ -451,8 +463,7 @@
                     }
                 }
             ],
-            "startingBehaviors": [],
-            "deathSoundId": ""
+            "startingBehaviors": []
         },
         {
             "id": "shielder_enemy",
@@ -466,6 +477,7 @@
             "arcanaDefense": 0,
             "bounty": 28,
             "deathBlow": 1,
+            "rotateToMovement": false,
             "colliderRadius": 0.3499999940395355,
             "layer": 0,
             "spritePath": "",
@@ -473,13 +485,13 @@
             "spriteIndex": 3,
             "scale": 3.0,
             "debugColor": {
-                "r": 0.30000001192092896,
+                "r": 0.30000001192092898,
                 "g": 0.6499999761581421,
                 "b": 1.0,
                 "a": 1.0
             },
             "tintColor": {
-                "r": 0.30000001192092896,
+                "r": 0.30000001192092898,
                 "g": 0.6499999761581421,
                 "b": 1.0,
                 "a": 1.0
@@ -488,11 +500,11 @@
             "animFps": 8.0,
             "animDeathSheet": "",
             "animDeathFps": 8.0,
+            "deathSoundId": "",
             "components": [],
             "startingBehaviors": [
                 "shielded"
-            ],
-            "deathSoundId": ""
+            ]
         }
     ]
 }

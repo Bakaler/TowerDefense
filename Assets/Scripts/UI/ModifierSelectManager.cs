@@ -210,7 +210,7 @@ public class ModifierSelectManager : MonoBehaviour
         var backImg = backGO.AddComponent<Image>(); backImg.color = new Color(0.28f, 0.12f, 0.12f, 1f);
         var backBtn = backGO.AddComponent<Button>(); backBtn.targetGraphic = backImg;
         AddText(MakeRect("Label", backGO, 0, 0, 160f, 48f), "BACK", Color.white, 20, bold: true, stretchToParent: true);
-        backBtn.onClick.AddListener(() => SceneManager.LoadScene("LevelSelectionScene"));
+        backBtn.onClick.AddListener(() => ScreenFader.LoadScene("LevelSelectionScene"));
     }
 
     // All card images grouped by column for highlight management
@@ -250,7 +250,7 @@ public class ModifierSelectManager : MonoBehaviour
         foreach (var pick in _picks)
             if (pick != null) ModifierSelection.Add(pick);
 
-        SceneManager.LoadScene(gameSceneName);
+        ScreenFader.LoadScene(gameSceneName);
     }
 
     LevelData LoadLevelData()

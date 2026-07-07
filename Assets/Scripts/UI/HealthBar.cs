@@ -2,7 +2,10 @@ using UnityEngine;
 
 /// <summary>
 /// Small segmented world-space health bar, sits tight above the unit sprite.
-/// Units with a shield pool (hasShields) get a thin shield bar bordering the top edge.
+/// Bar width tracks the unit's on-screen sprite size (with sane min/max) and
+/// renders at constant world proportions regardless of the unit's transform
+/// scale. Units with a shield pool (hasShields) get a thin shield bar
+/// bordering the top edge.
 /// </summary>
 public class HealthBar : MonoBehaviour
 {
@@ -10,11 +13,12 @@ public class HealthBar : MonoBehaviour
     private SpriteRenderer[] _segs;
     private int              _segCount;
     private SpriteRenderer   _shieldBar;
+    private Vector3          _worldOffset;
+    private float            _barW = 0.42f;
 
-    private const float SEG_H    = 0.022f;
-    private const float SEG_GAP  = 0.008f;
-    private const float Y_OFF    = 0.22f;
-    private const float TOTAL_W  = 0.28f;
+    private const float SEG_H    = 0.055f;
+    private const float SEG_GAP  = 0.012f;
+    private const float Y_OFF    = 0.26f;
     private const float SHIELD_H = SEG_H;   // same height as HP row so it reads at game zoom
     private const float SHIELD_Y = SEG_H * 0.5f + SEG_GAP + SHIELD_H * 0.5f;
 
@@ -23,12 +27,30 @@ public class HealthBar : MonoBehaviour
 
     public static HealthBar Attach(GameObject target)
     {
-        var go   = new GameObject("HealthBar");
+        var go = new GameObject("HealthBar");
         go.transform.SetParent(target.transform, false);
-        go.transform.localPosition = new Vector3(0f, Y_OFF, 0f);
+
+        // The bar is a child, so counter the unit's scale — geometry below is
+        // in true world units whether the unit is a 2x boss or a 0.5x mini.
+        float s = Mathf.Max(0.0001f, Mathf.Abs(target.transform.lossyScale.x));
+        go.transform.localScale = new Vector3(1f / s, 1f / s, 1f);
 
         var hb   = go.AddComponent<HealthBar>();
         hb._unit = target.GetComponent<UnitParentClass>();
+
+        // Size and position from the sprite's actual world footprint
+        float topWorld = Y_OFF;
+        var sr = target.GetComponent<SpriteRenderer>();
+        if (sr != null && sr.sprite != null)
+        {
+            topWorld  = sr.sprite.bounds.extents.y * s + 0.08f;
+            hb._barW  = Mathf.Clamp(sr.sprite.bounds.size.x * s * 0.9f, 0.35f, 1.2f);
+        }
+
+        hb._worldOffset = new Vector3(0f, topWorld, 0f);
+        go.transform.position = target.transform.position + hb._worldOffset;
+        Debug.Log($"[SplitterDebug] HealthBar attached to '{target.name}' — unitScale={s:0.##} " +
+                  $"barW={hb._barW:0.##} yOffset={topWorld:0.##} unit={(hb._unit != null ? "ok" : "NULL")}");
         return hb;
     }
 
@@ -39,8 +61,8 @@ public class HealthBar : MonoBehaviour
         // Segment count scales with unit toughness, capped at 10
         _segCount = Mathf.Clamp(Mathf.CeilToInt(_unit.lifeMax / 25f), 3, 10);
 
-        float segW = (TOTAL_W - SEG_GAP * (_segCount - 1)) / _segCount;
-        float startX = -TOTAL_W * 0.5f;
+        float segW = (_barW - SEG_GAP * (_segCount - 1)) / _segCount;
+        float startX = -_barW * 0.5f;
 
         _segs = new SpriteRenderer[_segCount];
         for (int i = 0; i < _segCount; i++)
@@ -65,7 +87,7 @@ public class HealthBar : MonoBehaviour
             var track = new GameObject("ShieldTrack");
             track.transform.SetParent(transform, false);
             track.transform.localPosition = new Vector3(0f, SHIELD_Y, -0.01f);
-            track.transform.localScale    = new Vector3(TOTAL_W, SHIELD_H, 1f);
+            track.transform.localScale    = new Vector3(_barW, SHIELD_H, 1f);
 
             var tsr              = track.AddComponent<SpriteRenderer>();
             tsr.sprite           = GetPixel();
@@ -76,7 +98,7 @@ public class HealthBar : MonoBehaviour
             var go = new GameObject("ShieldBar");
             go.transform.SetParent(transform, false);
             go.transform.localPosition = new Vector3(0f, SHIELD_Y, -0.02f);
-            go.transform.localScale    = new Vector3(TOTAL_W, SHIELD_H, 1f);
+            go.transform.localScale    = new Vector3(_barW, SHIELD_H, 1f);
 
             _shieldBar                  = go.AddComponent<SpriteRenderer>();
             _shieldBar.sprite           = GetPixel();
@@ -89,6 +111,10 @@ public class HealthBar : MonoBehaviour
     void LateUpdate()
     {
         if (_unit == null || _segs == null) return;
+
+        // Stay upright and pinned above the unit even when it rotates to its movement direction
+        transform.rotation = Quaternion.identity;
+        transform.position = _unit.transform.position + _worldOffset;
 
         float pct   = _unit.lifeMax > 0f ? Mathf.Clamp01(_unit.lifeCurrent / _unit.lifeMax) : 0f;
         float filled = pct * _segCount;
@@ -107,9 +133,9 @@ public class HealthBar : MonoBehaviour
             _shieldBar.enabled = spct > 0f;
             if (spct > 0f)
             {
-                float w = TOTAL_W * spct;
+                float w = _barW * spct;
                 _shieldBar.transform.localScale    = new Vector3(w, SHIELD_H, 1f);
-                _shieldBar.transform.localPosition = new Vector3(-TOTAL_W * 0.5f + w * 0.5f, SHIELD_Y, -0.02f);
+                _shieldBar.transform.localPosition = new Vector3(-_barW * 0.5f + w * 0.5f, SHIELD_Y, -0.02f);
             }
         }
     }

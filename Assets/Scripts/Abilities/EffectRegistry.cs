@@ -22,9 +22,11 @@ public static class EffectRegistry
             Debug.LogWarning($"[EffectRegistry] '{effectType.Name}' does not extend Effect.");
             return;
         }
-        if (_registry.ContainsKey(typeKey))
+        // Re-registration of the same type is normal when domain reload is
+        // disabled (statics survive, bootstrap methods re-run every Play).
+        if (_registry.TryGetValue(typeKey, out var existing) && existing != effectType)
         {
-            Debug.LogWarning($"[EffectRegistry] Key '{typeKey}' already registered.");
+            Debug.LogWarning($"[EffectRegistry] Key '{typeKey}' already registered to '{existing.Name}'.");
             return;
         }
         _registry[typeKey] = effectType;

@@ -12,6 +12,10 @@ public class UnitManager : UnitParentClass
     public int bounty;
     public int deathBlow = 1;
 
+    /// <summary>Rotate toward the movement direction (set from UnitDefinition.rotateToMovement).</summary>
+    public bool rotateToMovement;
+    const float RotateSpeed = 540f;   // deg/sec toward the travel direction
+
     // isDead compatibility shim — reads from UnitParentClass.isAlive
     public bool isDead => !isAlive;
 
@@ -144,11 +148,19 @@ public class UnitManager : UnitParentClass
         _follower.SetSpeed(speed);
 
         // Flip sprite to face movement direction
-        if (_sr != null)
+        var dir = _follower.CurrentDirection;
+        if (_sr != null && Mathf.Abs(dir.x) > 0.01f)
+            _sr.flipX = dir.x > 0f;
+
+        // Optional: rotate toward the movement direction (rotateToMovement flag).
+        // The flip above still decides mirroring; rotation is applied on top.
+        if (rotateToMovement && dir.sqrMagnitude > 0.0001f)
         {
-            float dx = _follower.CurrentDirection.x;
-            if (Mathf.Abs(dx) > 0.01f)
-                _sr.flipX = dx > 0f;
+            float ang = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
+            // Art faces left when unflipped, so the unflipped case is offset 180°
+            float target = _sr != null && _sr.flipX ? ang : ang - 180f;
+            float z = Mathf.MoveTowardsAngle(transform.eulerAngles.z, target, RotateSpeed * Time.deltaTime);
+            transform.rotation = Quaternion.Euler(0f, 0f, z);
         }
 
         bool reachedEnd = _follower.Tick();
@@ -186,11 +198,18 @@ public class UnitManager : UnitParentClass
 
     // ── Death ─────────────────────────────────────────────────────────
 
+    /// <summary>Fired synchronously inside Die(), before any destruction —
+    /// death-reaction components (splitting, etc.) must use this, not poll
+    /// isAlive in Update: a no-death-anim unit is destroyed the same frame.</summary>
+    public event System.Action OnDied;
+
     public void Die(bool killedByDamage = false)
     {
         isAlive = false;
         if (myCollider != null)
             myCollider.enabled = false;
+
+        OnDied?.Invoke();
 
         if (killedByDamage)
         {
