@@ -49,8 +49,6 @@ public class HealthBar : MonoBehaviour
 
         hb._worldOffset = new Vector3(0f, topWorld, 0f);
         go.transform.position = target.transform.position + hb._worldOffset;
-        Debug.Log($"[SplitterDebug] HealthBar attached to '{target.name}' — unitScale={s:0.##} " +
-                  $"barW={hb._barW:0.##} yOffset={topWorld:0.##} unit={(hb._unit != null ? "ok" : "NULL")}");
         return hb;
     }
 

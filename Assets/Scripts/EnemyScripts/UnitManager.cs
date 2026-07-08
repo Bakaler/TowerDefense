@@ -14,7 +14,10 @@ public class UnitManager : UnitParentClass
 
     /// <summary>Rotate toward the movement direction (set from UnitDefinition.rotateToMovement).</summary>
     public bool rotateToMovement;
+    /// <summary>Extra degrees added to the movement rotation — 180 flips art authored the other way.</summary>
+    public float spriteAngleOffset;
     const float RotateSpeed = 540f;   // deg/sec toward the travel direction
+    private bool _hasFacing;          // false until the first facing snap after spawn
 
     // isDead compatibility shim — reads from UnitParentClass.isAlive
     public bool isDead => !isAlive;
@@ -82,6 +85,11 @@ public class UnitManager : UnitParentClass
 
     public override void TakeDamage(float damageAmount, float shieldBonus, float minimum, float maximum, DamageType type)
     {
+        // Vulnerability behaviors amplify all incoming damage
+        var handler = GetComponent<BehaviorHandler>();
+        if (handler != null && handler.DamageTakenMult != 1f)
+            damageAmount *= handler.DamageTakenMult;
+
         base.TakeDamage(damageAmount, shieldBonus, minimum, maximum, type);
         if (_sr != null)
         {
@@ -101,6 +109,8 @@ public class UnitManager : UnitParentClass
             yield return null;
         }
         _sr.color = _baseColor;
+        // Restore any behavior tint (e.g. invisibility transparency) the flash overwrote
+        GetComponent<BehaviorHandler>()?.Refresh();
     }
 
 
@@ -157,9 +167,15 @@ public class UnitManager : UnitParentClass
         if (rotateToMovement && dir.sqrMagnitude > 0.0001f)
         {
             float ang = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
-            // Art faces left when unflipped, so the unflipped case is offset 180°
-            float target = _sr != null && _sr.flipX ? ang : ang - 180f;
-            float z = Mathf.MoveTowardsAngle(transform.eulerAngles.z, target, RotateSpeed * Time.deltaTime);
+            // Art faces left when unflipped, so the unflipped case is offset 180°;
+            // spriteAngleOffset (per unit definition) corrects art authored differently
+            float target = (_sr != null && _sr.flipX ? ang : ang - 180f) + spriteAngleOffset;
+            // First frame after spawn: snap straight to the travel facing so units
+            // never appear pointing the wrong way and visibly turning around.
+            float z = _hasFacing
+                ? Mathf.MoveTowardsAngle(transform.eulerAngles.z, target, RotateSpeed * Time.deltaTime)
+                : target;
+            _hasFacing = true;
             transform.rotation = Quaternion.Euler(0f, 0f, z);
         }
 

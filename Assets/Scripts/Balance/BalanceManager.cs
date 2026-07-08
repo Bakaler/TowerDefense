@@ -13,7 +13,7 @@ public class BalanceManager : MonoBehaviour
     public float Elemental  { get; private set; }
     public float Arcane     { get; private set; }
     public float Physical   { get; private set; }
-    public int   MaxTowers  { get; private set; } = 8;
+    public int   MaxTowers  { get; private set; } = 10;
     public int   TowerCount { get; private set; }
 
     private int _levelCap   = -1;
@@ -22,6 +22,9 @@ public class BalanceManager : MonoBehaviour
     public void AddBonusSlots(int n) => _bonusSlots += n;
 
     public static readonly int[] Thresholds = { 12, 36, 80 };
+
+    /// <summary>Copies of the same tower id that earn full balance credit before decay kicks in.</summary>
+    public const int FullCreditCount = 4;
 
     void Awake()
     {
@@ -76,7 +79,7 @@ public class BalanceManager : MonoBehaviour
         int total  = Mathf.FloorToInt(e + a + p);
         int slots  = 0;
         foreach (int t in Thresholds) if (total >= t) slots++;
-        int balanced = 8 + slots * 4;
+        int balanced = 10 + slots * 4;
         int cap = _levelCap > 0 ? Mathf.Min(balanced, _levelCap) : balanced;
         MaxTowers  = cap + _bonusSlots;
         TowerCount = towers.Count;
@@ -85,8 +88,8 @@ public class BalanceManager : MonoBehaviour
     static float BalanceRatio(int count)
     {
         if (count <= 0) return 0f;
-        if (count <= 4) return 1f;
-        float r = 4f / count;
+        if (count <= FullCreditCount) return 1f;
+        float r = (float)FullCreditCount / count;
         return r * r;
     }
 }

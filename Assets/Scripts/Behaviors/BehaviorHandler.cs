@@ -55,6 +55,9 @@ public class BehaviorHandler : MonoBehaviour
     private Color                   _baseColor;
     private UnitManager             _unit;
 
+    /// <summary>Product of all active damageTakenMultiplier values (1 = normal).</summary>
+    public float DamageTakenMult { get; private set; } = 1f;
+
     void Awake()
     {
         _sr    = GetComponent<SpriteRenderer>();
@@ -200,6 +203,13 @@ public class BehaviorHandler : MonoBehaviour
     void ApplyTick(Instance inst)
     {
         if (_unit == null || !_unit.isAlive) return;
+
+        // Periodic behavior grant (e.g. cloak cycle → invisibility)
+        if (!string.IsNullOrEmpty(inst.Def.tickBehaviorId)
+            && BehaviorLibrary.Instance != null
+            && BehaviorLibrary.Instance.TryGet(inst.Def.tickBehaviorId, out var tickDef))
+            Apply(tickDef);
+
         if (inst.Def.tickDamage <= 0f) return;
         var dmgType = (DamageType)inst.Def.tickDamageType;
         _unit.TakeDamage(inst.Def.tickDamage, 0f, 0f, inst.Def.tickDamage * 10f, dmgType);
@@ -242,15 +252,19 @@ public class BehaviorHandler : MonoBehaviour
     void Recalculate()
     {
         float speedMult = 1f;
+        float dmgTaken  = 1f;
         Color tint      = _baseColor;
 
         foreach (var inst in _active)
         {
             speedMult *= inst.Def.moveSpeedMultiplier;
+            dmgTaken  *= inst.Def.damageTakenMultiplier > 0f ? inst.Def.damageTakenMultiplier : 1f;
             // Use the tint from the highest-priority (last applied) non-white behavior
             if (inst.Def.tintColor != Color.white)
                 tint = inst.Def.tintColor;
         }
+
+        DamageTakenMult = dmgTaken;
 
         if (_unit != null)
             _unit.speedCurrent = _unit.speedMax * speedMult;

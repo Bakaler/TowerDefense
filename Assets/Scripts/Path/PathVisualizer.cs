@@ -97,6 +97,13 @@ public class PathVisualizer : MonoBehaviour
 
     void DrawEdge(PathNode from, PathNode to)
     {
+        // Teleport link — faint dashed straight line instead of a walkable spline
+        if (from.isTeleporter)
+        {
+            DrawTeleportLink(from.Position, to.Position);
+            return;
+        }
+
         // Sample Catmull-Rom — mirror PathGraph's logic
         Vector2 p0 = GetPredecessorHint(from, to);
         Vector2 p1 = from.Position;
@@ -121,6 +128,30 @@ public class PathVisualizer : MonoBehaviour
         // Arrows
         if (showArrows)
             DrawArrows(points);
+    }
+
+    void DrawTeleportLink(Vector2 from, Vector2 to)
+    {
+        const float DASH = 0.35f;
+        const float GAP  = 0.25f;
+
+        Vector2 dir  = (to - from).normalized;
+        float   dist = Vector2.Distance(from, to);
+        var     tint = new Color(0.85f, 0.4f, 1f, 0.35f);   // faint magenta
+
+        float d = 0f;
+        while (d < dist)
+        {
+            float end = Mathf.Min(d + DASH, dist);
+            var lr = CreateLine("TeleportDash");
+            lr.positionCount = 2;
+            lr.SetPosition(0, from + dir * d);
+            lr.SetPosition(1, from + dir * end);
+            lr.startColor = tint;
+            lr.endColor   = tint;
+            _lines.Add(lr);
+            d = end + GAP;
+        }
     }
 
     void DrawArrows(Vector3[] points)

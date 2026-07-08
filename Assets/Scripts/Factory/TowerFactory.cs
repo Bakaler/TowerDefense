@@ -146,6 +146,7 @@ public class TowerFactory : MonoBehaviour
         info.maxTier               = def.maxTier > 0 ? def.maxTier : 1;
         info.upgradeStatMultiplier = def.upgradeStatMultiplier > 0f ? def.upgradeStatMultiplier : 2.25f;
         info.towerTier             = def.towerTier > 0 ? def.towerTier : 1;
+        info.detectorTier          = def.detectorTier;
 
         // ── 5c. Range circle ──────────────────────────────────────────
         // Use def.range as the initial radius. Turrent.Start() calls SetupRangeCircle

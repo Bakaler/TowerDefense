@@ -60,19 +60,39 @@ public class LevelSelectManager : MonoBehaviour
             "SELECT LEVEL", new Color(0.95f, 0.88f, 0.55f, 1f), 64, bold: true);
 
         var levels = LoadLevelData();
-        float totalW = levels.Length * CARD_W + (levels.Length - 1) * CARD_GAP;
-        float startX = -totalW * 0.5f + CARD_W * 0.5f;
+
+        // Grid layout — up to 5 cards per row; extra levels wrap onto new rows.
+        // The whole grid scales down uniformly when rows would overflow the
+        // vertical band between the title and the back button.
+        const int   PER_ROW = 5;
+        const float ROW_GAP = 28f;
+        const float AVAIL_H = 650f;   // vertical space available for the grid
+        const float GRID_CY = -15f;   // grid center Y (canvas units)
+
+        int   rows      = Mathf.Max(1, Mathf.CeilToInt(levels.Length / (float)PER_ROW));
+        float gridH     = rows * CARD_H + (rows - 1) * ROW_GAP;
+        float gridScale = Mathf.Min(1f, AVAIL_H / gridH);
+        float rowH      = (CARD_H + ROW_GAP) * gridScale;
+        float topRowY   = GRID_CY + (gridH * gridScale) * 0.5f - CARD_H * gridScale * 0.5f;
 
         for (int i = 0; i < levels.Length; i++)
         {
             int       levelNum  = i + 1;
             LevelData data      = levels[i];
-            float     x         = startX + i * (CARD_W + CARD_GAP);
             bool      unlocked  = SaveManager.IsLevelUnlocked(levelNum);
             int       stars     = SaveManager.GetStars(levelNum);
 
+            // Grid position — rows of PER_ROW, each row centered horizontally
+            int   row      = i / PER_ROW;
+            int   gridCol  = i % PER_ROW;
+            int   rowCount = Mathf.Min(PER_ROW, levels.Length - row * PER_ROW);
+            float rowW     = rowCount * CARD_W * gridScale + (rowCount - 1) * CARD_GAP * gridScale;
+            float x        = -rowW * 0.5f + CARD_W * gridScale * 0.5f + gridCol * (CARD_W + CARD_GAP) * gridScale;
+            float cardY    = topRowY - row * rowH;
+
             // Card
-            var card    = MakeRect($"Level{levelNum}Card", canvasGO, x, 30f, CARD_W, CARD_H);
+            var card = MakeRect($"Level{levelNum}Card", canvasGO, x, cardY, CARD_W, CARD_H);
+            card.transform.localScale = new Vector3(gridScale, gridScale, 1f);
             var cardImg = card.AddComponent<Image>();
             cardImg.color = unlocked ? C_Unlocked : C_Locked;
 

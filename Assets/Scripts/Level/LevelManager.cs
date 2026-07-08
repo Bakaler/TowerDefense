@@ -247,6 +247,8 @@ public class LevelManager : MonoBehaviour
                 var go   = new GameObject($"PathNode_{nd.id}");
                 go.transform.position = new Vector3(nd.x, nd.y, 0f);
                 var pn   = go.AddComponent<PathNode>();
+                pn.isTeleporter  = nd.teleporter;
+                pn.teleportDelay = nd.teleportDelay;
                 nodeMap[nd.id] = pn;
                 nodeGOs.Add(go);
                 _built.Add(go);

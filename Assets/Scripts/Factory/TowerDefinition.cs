@@ -19,6 +19,17 @@ public class TowerDefinition
     public float placementRadius = 0.4f;   // body footprint used for overlap/spacing check
     public int   resourceCost    = 100;
 
+    // ── Placement ─────────────────────────────────────────────────────
+    /// <summary>"" = normal single-click placement. "pair" = two clicks (post A, then post B).</summary>
+    public string placementMode = "";
+    /// <summary>Max world-space distance between the two posts when placementMode is "pair".</summary>
+    public float pairMaxSpan = 4f;
+
+    // ── Detection ─────────────────────────────────────────────────────
+    /// <summary>Tower tier at which this tower can target invisible units.
+    /// 0 = never, 1 = from placement, 2 = once upgraded to tier 2, etc.</summary>
+    public int detectorTier = 0;
+
     // ── Balance ───────────────────────────────────────────────────────
     public string balanceType   = "Physical";  // "Elemental" | "Arcane" | "Physical"
     /// <summary>Tower cost in the per-level balance budget. T1=1, T2=2, T3=4.</summary>

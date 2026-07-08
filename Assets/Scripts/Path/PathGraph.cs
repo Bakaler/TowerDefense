@@ -93,6 +93,7 @@ public class PathGraph : MonoBehaviour
         if (head == null) return new Route(null);
 
         var waypoints = new List<Vector2>();
+        var teleports = new Dictionary<int, float>();
         PathNode prev    = null;
         PathNode current = head;
 
@@ -110,6 +111,13 @@ public class PathGraph : MonoBehaviour
             if (prev == null)
             {
                 // First node — just add its position
+                waypoints.Add(current.Position);
+            }
+            else if (prev.isTeleporter)
+            {
+                // Teleport jump — no travel between the nodes; RouteFollower
+                // fades the unit out here and back in at the next waypoint.
+                teleports[waypoints.Count - 1] = Mathf.Max(0f, prev.teleportDelay);
                 waypoints.Add(current.Position);
             }
             else
@@ -136,7 +144,7 @@ public class PathGraph : MonoBehaviour
             current = next;
         }
 
-        return new Route(waypoints);
+        return new Route(waypoints, teleports);
     }
 
     // ── Spline helpers ────────────────────────────────────────────────

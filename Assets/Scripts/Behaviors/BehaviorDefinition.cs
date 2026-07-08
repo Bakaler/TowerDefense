@@ -2,12 +2,13 @@ using UnityEngine;
 
 public enum BehaviorType
 {
-    None     = 0,
-    Slowed   = 1,
-    Rooted   = 2,
-    Stunned  = 3,
-    Silenced = 4,
-    Debuff   = 5,   // generic catch-all for DoTs, etc.
+    None      = 0,
+    Slowed    = 1,
+    Rooted    = 2,
+    Stunned   = 3,
+    Silenced  = 4,
+    Debuff    = 5,   // generic catch-all for DoTs, etc.
+    Invisible = 6,   // untargetable by towers without detection
 }
 
 [System.Serializable]
@@ -22,12 +23,17 @@ public class BehaviorDefinition
 
     // Stat modifiers
     public float moveSpeedMultiplier = 1f;
+    /// <summary>All damage the unit takes is multiplied by this while active (2 = +100%).</summary>
+    public float damageTakenMultiplier = 1f;
 
     // DoT tick — tickInterval 0 means no ticks
     public float tickInterval  = 0f;
     public float tickDamage    = 0f;
     /// <summary>DamageType enum value: 0=Elemental 1=Arcane 2=Physical 3=Piercing 4=Poison 5=Pure</summary>
     public int   tickDamageType = 4;   // Poison
+    /// <summary>Behavior id applied on every tick — lets a permanent behavior periodically
+    /// grant another one (e.g. a cloak cycle applying a few seconds of invisibility).</summary>
+    public string tickBehaviorId = "";
 
     public Color tintColor = Color.white;
 

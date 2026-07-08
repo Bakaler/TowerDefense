@@ -1,12 +1,12 @@
 {
     "id": "level_5",
-    "displayName": "Level 5",
+    "displayName": "BossRound",
     "startGold": 125,
     "startLives": 100,
     "startTech": 50,
     "startTier": 2,
     "backgroundSprite": "Art/Maps/level_3",
-    "backgroundX": 0.019999999552965165,
+    "backgroundX": 0.07999999821186066,
     "backgroundY": 1.059999942779541,
     "maxTowers": -1,
     "allowedTowers": [
@@ -28,7 +28,8 @@
         "root_tower",
         "boomerang_tower",
         "bee_tower",
-        "shotgun_tower"
+        "shotgun_tower",
+        "fence_tower"
     ],
     "modifierColumns": [],
     "difficulties": [

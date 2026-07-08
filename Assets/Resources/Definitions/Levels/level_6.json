@@ -1,0 +1,2569 @@
+{
+    "id": "level_6",
+    "displayName": "Level 6",
+    "startGold": 25,
+    "startLives": 15,
+    "startTech": 0,
+    "startTier": 1,
+    "backgroundSprite": "Art/Maps/Level5",
+    "backgroundX": 0.07999999821186066,
+    "backgroundY": 1.059999942779541,
+    "maxTowers": -1,
+    "allowedTowers": [],
+    "modifierColumns": [],
+    "difficulties": [
+        {
+            "label": "Easy",
+            "enemyHpMult": 0.44999998807907107,
+            "enemySpeedMult": 1.0,
+            "goldMult": 1.0,
+            "bountyMult": 1.0,
+            "startGold": -1,
+            "startLives": -1,
+            "startTech": -1,
+            "startTier": -1,
+            "maxTowers": -1,
+            "allowedTowers": [],
+            "disabledGroups": [],
+            "objectives": []
+        },
+        {
+            "label": "Medium",
+            "enemyHpMult": 1.0,
+            "enemySpeedMult": 1.0,
+            "goldMult": 1.0,
+            "bountyMult": 1.0,
+            "startGold": -1,
+            "startLives": -1,
+            "startTech": -1,
+            "startTier": -1,
+            "maxTowers": -1,
+            "allowedTowers": [],
+            "disabledGroups": [],
+            "objectives": []
+        },
+        {
+            "label": "Hard",
+            "enemyHpMult": 1.5,
+            "enemySpeedMult": 1.0,
+            "goldMult": 1.0,
+            "bountyMult": 1.0,
+            "startGold": -1,
+            "startLives": -1,
+            "startTech": -1,
+            "startTier": -1,
+            "maxTowers": -1,
+            "allowedTowers": [],
+            "disabledGroups": [],
+            "objectives": []
+        }
+    ],
+    "objectives": [],
+    "paths": [
+        {
+            "spawnerIndex": 0,
+            "nodes": [
+                {
+                    "id": "n0",
+                    "x": -10.119999885559082,
+                    "y": 6.210000038146973,
+                    "teleporter": false,
+                    "teleportDelay": 0.0,
+                    "next": [
+                        "n1"
+                    ]
+                },
+                {
+                    "id": "n1",
+                    "x": -7.53000020980835,
+                    "y": 5.96999979019165,
+                    "teleporter": false,
+                    "teleportDelay": 0.0,
+                    "next": [
+                        "n1_post"
+                    ]
+                },
+                {
+                    "id": "n1_post",
+                    "x": -5.010000228881836,
+                    "y": 4.940000057220459,
+                    "teleporter": false,
+                    "teleportDelay": 0.0,
+                    "next": [
+                        "n1_post_post"
+                    ]
+                },
+                {
+                    "id": "n1_post_post",
+                    "x": -0.8100000023841858,
+                    "y": 2.440000057220459,
+                    "teleporter": false,
+                    "teleportDelay": 0.0,
+                    "next": [
+                        "n1_post_post_post"
+                    ]
+                },
+                {
+                    "id": "n1_post_post_post",
+                    "x": 2.549999952316284,
+                    "y": 1.4199999570846558,
+                    "teleporter": false,
+                    "teleportDelay": 0.0,
+                    "next": [
+                        "n1_post_post_post_post"
+                    ]
+                },
+                {
+                    "id": "n1_post_post_post_post",
+                    "x": 4.019999980926514,
+                    "y": 2.2699999809265138,
+                    "teleporter": false,
+                    "teleportDelay": 0.0,
+                    "next": [
+                        "n1_post_post_post_post_post"
+                    ]
+                },
+                {
+                    "id": "n1_post_post_post_post_post",
+                    "x": 2.5,
+                    "y": 3.450000047683716,
+                    "teleporter": false,
+                    "teleportDelay": 0.0,
+                    "next": [
+                        "n1_post_post_post_post_post_post"
+                    ]
+                },
+                {
+                    "id": "n1_post_post_post_post_post_post",
+                    "x": -0.11999999731779099,
+                    "y": 3.2100000381469728,
+                    "teleporter": true,
+                    "teleportDelay": 0.0,
+                    "next": [
+                        "n1_post_post_post_post_post_post_post"
+                    ]
+                },
+                {
+                    "id": "n1_post_post_post_post_post_post_post",
+                    "x": -1.399999976158142,
+                    "y": 1.75,
+                    "teleporter": true,
+                    "teleportDelay": 0.0,
+                    "next": [
+                        "n1_post_post_post_post_post_post_post_post"
+                    ]
+                },
+                {
+                    "id": "n1_post_post_post_post_post_post_post_post",
+                    "x": -0.14000000059604646,
+                    "y": 0.550000011920929,
+                    "teleporter": false,
+                    "teleportDelay": 0.0,
+                    "next": [
+                        "n1_post_post_post_post_post_post_post_post_post"
+                    ]
+                },
+                {
+                    "id": "n1_post_post_post_post_post_post_post_post_post",
+                    "x": 3.2799999713897707,
+                    "y": 0.47999998927116396,
+                    "teleporter": false,
+                    "teleportDelay": 0.0,
+                    "next": [
+                        "n1_post_post_post_post_post_post_post_post_post_post"
+                    ]
+                },
+                {
+                    "id": "n1_post_post_post_post_post_post_post_post_post_post",
+                    "x": 6.329999923706055,
+                    "y": -0.10000000149011612,
+                    "teleporter": false,
+                    "teleportDelay": 0.0,
+                    "next": [
+                        "n1_post_post_post_post_post_post_post_post_post_post_post"
+                    ]
+                },
+                {
+                    "id": "n1_post_post_post_post_post_post_post_post_post_post_post",
+                    "x": 6.989999771118164,
+                    "y": -1.2999999523162842,
+                    "teleporter": false,
+                    "teleportDelay": 0.0,
+                    "next": [
+                        "n1_post_post_post_post_post_post_post_post_post_post_post_post"
+                    ]
+                },
+                {
+                    "id": "n1_post_post_post_post_post_post_post_post_post_post_post_post",
+                    "x": 5.860000133514404,
+                    "y": -3.1600000858306886,
+                    "teleporter": false,
+                    "teleportDelay": 0.0,
+                    "next": [
+                        "n1_post_post_post_post_post_post_post_post_post_post_post_post_post"
+                    ]
+                },
+                {
+                    "id": "n1_post_post_post_post_post_post_post_post_post_post_post_post_post",
+                    "x": 2.7899999618530275,
+                    "y": -4.78000020980835,
+                    "teleporter": false,
+                    "teleportDelay": 0.0,
+                    "next": []
+                }
+            ]
+        },
+        {
+            "spawnerIndex": 1,
+            "nodes": [
+                {
+                    "id": "n0",
+                    "x": -10.149999618530274,
+                    "y": 5.820000171661377,
+                    "teleporter": false,
+                    "teleportDelay": 0.0,
+                    "next": [
+                        "n1"
+                    ]
+                },
+                {
+                    "id": "n1",
+                    "x": -7.75,
+                    "y": 5.579999923706055,
+                    "teleporter": false,
+                    "teleportDelay": 0.0,
+                    "next": [
+                        "n1_post"
+                    ]
+                },
+                {
+                    "id": "n1_post",
+                    "x": -5.340000152587891,
+                    "y": 4.460000038146973,
+                    "teleporter": false,
+                    "teleportDelay": 0.0,
+                    "next": [
+                        "n1_post_post"
+                    ]
+                },
+                {
+                    "id": "n1_post_post",
+                    "x": -2.369999885559082,
+                    "y": 2.6600000858306886,
+                    "teleporter": false,
+                    "teleportDelay": 0.0,
+                    "next": [
+                        "n1_post_post_post"
+                    ]
+                },
+                {
+                    "id": "n1_post_post_post",
+                    "x": 0.12999999523162843,
+                    "y": 1.5399999618530274,
+                    "teleporter": false,
+                    "teleportDelay": 0.0,
+                    "next": [
+                        "n1_post_post_post_post"
+                    ]
+                },
+                {
+                    "id": "n1_post_post_post_post",
+                    "x": 2.5399999618530275,
+                    "y": 0.9800000190734863,
+                    "teleporter": false,
+                    "teleportDelay": 0.0,
+                    "next": [
+                        "n1_post_post_post_post_post"
+                    ]
+                },
+                {
+                    "id": "n1_post_post_post_post_post",
+                    "x": 4.099999904632568,
+                    "y": 1.4700000286102296,
+                    "teleporter": false,
+                    "teleportDelay": 0.0,
+                    "next": [
+                        "n1_post_post_post_post_post_post"
+                    ]
+                },
+                {
+                    "id": "n1_post_post_post_post_post_post",
+                    "x": 4.400000095367432,
+                    "y": 2.490000009536743,
+                    "teleporter": false,
+                    "teleportDelay": 0.0,
+                    "next": [
+                        "n1_post_post_post_post_post_post_post"
+                    ]
+                },
+                {
+                    "id": "n1_post_post_post_post_post_post_post",
+                    "x": 2.799999952316284,
+                    "y": 3.799999952316284,
+                    "teleporter": false,
+                    "teleportDelay": 0.0,
+                    "next": [
+                        "n1_post_post_post_post_post_post_post_post"
+                    ]
+                },
+                {
+                    "id": "n1_post_post_post_post_post_post_post_post",
+                    "x": -0.36000001430511477,
+                    "y": 3.5799999237060549,
+                    "teleporter": true,
+                    "teleportDelay": 0.0,
+                    "next": [
+                        "n1_post_post_post_post_post_post_post_post_post_post"
+                    ]
+                },
+                {
+                    "id": "n1_post_post_post_post_post_post_post_post_post_post",
+                    "x": -1.940000057220459,
+                    "y": 1.940000057220459,
+                    "teleporter": true,
+                    "teleportDelay": 0.0,
+                    "next": [
+                        "n1_post_post_post_post_post_post_post_post_post_post_post"
+                    ]
+                },
+                {
+                    "id": "n1_post_post_post_post_post_post_post_post_post_post_post",
+                    "x": -0.75,
+                    "y": 0.5299999713897705,
+                    "teleporter": false,
+                    "teleportDelay": 0.0,
+                    "next": [
+                        "n1_post_post_post_post_post_post_post_post_post_post_post_post"
+                    ]
+                },
+                {
+                    "id": "n1_post_post_post_post_post_post_post_post_post_post_post_post",
+                    "x": 1.5099999904632569,
+                    "y": 0.2199999988079071,
+                    "teleporter": false,
+                    "teleportDelay": 0.0,
+                    "next": [
+                        "n1_post_post_post_post_post_post_post_post_post_post_post_post_post"
+                    ]
+                },
+                {
+                    "id": "n1_post_post_post_post_post_post_post_post_post_post_post_post_post",
+                    "x": 3.5799999237060549,
+                    "y": -0.6800000071525574,
+                    "teleporter": false,
+                    "teleportDelay": 0.0,
+                    "next": [
+                        "n1_post_post_post_post_post_post_post_post_post_post_post_post_post_post"
+                    ]
+                },
+                {
+                    "id": "n1_post_post_post_post_post_post_post_post_post_post_post_post_post_post",
+                    "x": 6.760000228881836,
+                    "y": -2.700000047683716,
+                    "teleporter": false,
+                    "teleportDelay": 0.0,
+                    "next": [
+                        "n1_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post"
+                    ]
+                },
+                {
+                    "id": "n1_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post",
+                    "x": 7.400000095367432,
+                    "y": -3.7799999713897707,
+                    "teleporter": false,
+                    "teleportDelay": 0.0,
+                    "next": [
+                        "n1_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post"
+                    ]
+                },
+                {
+                    "id": "n1_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post",
+                    "x": 6.300000190734863,
+                    "y": -4.840000152587891,
+                    "teleporter": false,
+                    "teleportDelay": 0.0,
+                    "next": []
+                }
+            ]
+        },
+        {
+            "spawnerIndex": 2,
+            "nodes": [
+                {
+                    "id": "n0",
+                    "x": -10.109999656677246,
+                    "y": 4.550000190734863,
+                    "teleporter": false,
+                    "teleportDelay": 0.0,
+                    "next": [
+                        "n1"
+                    ]
+                },
+                {
+                    "id": "n1",
+                    "x": -8.630000114440918,
+                    "y": 5.260000228881836,
+                    "teleporter": false,
+                    "teleportDelay": 0.0,
+                    "next": [
+                        "n1_post"
+                    ]
+                },
+                {
+                    "id": "n1_post",
+                    "x": -5.809999942779541,
+                    "y": 5.760000228881836,
+                    "teleporter": false,
+                    "teleportDelay": 0.0,
+                    "next": [
+                        "n1_post_post"
+                    ]
+                },
+                {
+                    "id": "n1_post_post",
+                    "x": -2.9100000858306886,
+                    "y": 5.230000019073486,
+                    "teleporter": false,
+                    "teleportDelay": 0.0,
+                    "next": [
+                        "n1_post_post_post"
+                    ]
+                },
+                {
+                    "id": "n1_post_post_post",
+                    "x": -0.9900000095367432,
+                    "y": 3.6600000858306886,
+                    "teleporter": false,
+                    "teleportDelay": 0.0,
+                    "next": [
+                        "n1_post_post_post_post"
+                    ]
+                },
+                {
+                    "id": "n1_post_post_post_post",
+                    "x": 0.4300000071525574,
+                    "y": 1.1299999952316285,
+                    "teleporter": false,
+                    "teleportDelay": 0.0,
+                    "next": [
+                        "n1_post_post_post_post_post"
+                    ]
+                },
+                {
+                    "id": "n1_post_post_post_post_post",
+                    "x": 3.4100000858306886,
+                    "y": -1.0099999904632569,
+                    "teleporter": false,
+                    "teleportDelay": 0.0,
+                    "next": [
+                        "n1_post_post_post_post_post_post"
+                    ]
+                },
+                {
+                    "id": "n1_post_post_post_post_post_post",
+                    "x": 5.429999828338623,
+                    "y": -2.299999952316284,
+                    "teleporter": false,
+                    "teleportDelay": 0.0,
+                    "next": [
+                        "n1_post_post_post_post_post_post_post"
+                    ]
+                },
+                {
+                    "id": "n1_post_post_post_post_post_post_post",
+                    "x": 6.659999847412109,
+                    "y": -3.3399999141693117,
+                    "teleporter": false,
+                    "teleportDelay": 0.0,
+                    "next": [
+                        "n1_post_post_post_post_post_post_post_post"
+                    ]
+                },
+                {
+                    "id": "n1_post_post_post_post_post_post_post_post",
+                    "x": 5.989999771118164,
+                    "y": -4.679999828338623,
+                    "teleporter": false,
+                    "teleportDelay": 0.0,
+                    "next": []
+                }
+            ]
+        },
+        {
+            "spawnerIndex": 3,
+            "nodes": [
+                {
+                    "id": "n0",
+                    "x": -5.340000152587891,
+                    "y": 6.920000076293945,
+                    "teleporter": false,
+                    "teleportDelay": 0.0,
+                    "next": [
+                        "n1"
+                    ]
+                },
+                {
+                    "id": "n1",
+                    "x": -4.239999771118164,
+                    "y": 6.389999866485596,
+                    "teleporter": false,
+                    "teleportDelay": 0.0,
+                    "next": [
+                        "n1_post"
+                    ]
+                },
+                {
+                    "id": "n1_post",
+                    "x": -1.4199999570846558,
+                    "y": 5.710000038146973,
+                    "teleporter": false,
+                    "teleportDelay": 0.0,
+                    "next": [
+                        "n1_post_post"
+                    ]
+                },
+                {
+                    "id": "n1_post_post",
+                    "x": 0.699999988079071,
+                    "y": 5.409999847412109,
+                    "teleporter": false,
+                    "teleportDelay": 0.0,
+                    "next": [
+                        "n1_post_post_post"
+                    ]
+                },
+                {
+                    "id": "n1_post_post_post",
+                    "x": 4.210000038146973,
+                    "y": 4.489999771118164,
+                    "teleporter": false,
+                    "teleportDelay": 0.0,
+                    "next": [
+                        "n1_post_post_post_post"
+                    ]
+                },
+                {
+                    "id": "n1_post_post_post_post",
+                    "x": 4.71999979019165,
+                    "y": 0.47999998927116396,
+                    "teleporter": false,
+                    "teleportDelay": 0.0,
+                    "next": [
+                        "n1_post_post_post_post_post"
+                    ]
+                },
+                {
+                    "id": "n1_post_post_post_post_post",
+                    "x": 0.14000000059604646,
+                    "y": -4.599999904632568,
+                    "teleporter": false,
+                    "teleportDelay": 0.0,
+                    "next": []
+                }
+            ]
+        },
+        {
+            "spawnerIndex": 4,
+            "nodes": [
+                {
+                    "id": "n0",
+                    "x": -5.769999980926514,
+                    "y": 6.809999942779541,
+                    "teleporter": false,
+                    "teleportDelay": 0.0,
+                    "next": [
+                        "n1"
+                    ]
+                },
+                {
+                    "id": "n1",
+                    "x": -4.400000095367432,
+                    "y": 6.059999942779541,
+                    "teleporter": false,
+                    "teleportDelay": 0.0,
+                    "next": [
+                        "n1_post"
+                    ]
+                },
+                {
+                    "id": "n1_post",
+                    "x": -1.5199999809265137,
+                    "y": 5.300000190734863,
+                    "teleporter": false,
+                    "teleportDelay": 0.0,
+                    "next": [
+                        "n1_post_post"
+                    ]
+                },
+                {
+                    "id": "n1_post_post",
+                    "x": 2.180000066757202,
+                    "y": 4.579999923706055,
+                    "teleporter": false,
+                    "teleportDelay": 0.0,
+                    "next": [
+                        "n1_post_post_post"
+                    ]
+                },
+                {
+                    "id": "n1_post_post_post",
+                    "x": 3.9100000858306886,
+                    "y": 3.819999933242798,
+                    "teleporter": false,
+                    "teleportDelay": 0.0,
+                    "next": [
+                        "n1_post_post_post_post"
+                    ]
+                },
+                {
+                    "id": "n1_post_post_post_post",
+                    "x": 4.480000019073486,
+                    "y": 2.7200000286102297,
+                    "teleporter": false,
+                    "teleportDelay": 0.0,
+                    "next": [
+                        "n1_post_post_post_post_post"
+                    ]
+                },
+                {
+                    "id": "n1_post_post_post_post_post",
+                    "x": 3.809999942779541,
+                    "y": -0.25,
+                    "teleporter": false,
+                    "teleportDelay": 0.0,
+                    "next": [
+                        "n1_post_post_post_post_post_post"
+                    ]
+                },
+                {
+                    "id": "n1_post_post_post_post_post_post",
+                    "x": 0.7599999904632568,
+                    "y": -4.920000076293945,
+                    "teleporter": false,
+                    "teleportDelay": 0.0,
+                    "next": []
+                }
+            ]
+        }
+    ],
+    "placementZones": [
+        {
+            "type": "lane",
+            "x": 0.0,
+            "y": 0.0,
+            "radius": 2.0,
+            "width": 0.25,
+            "points": [
+                {
+                    "x": -6.650000095367432,
+                    "y": 1.809999942779541,
+                    "width": 0.25
+                },
+                {
+                    "x": -4.440000057220459,
+                    "y": 2.1700000762939455,
+                    "width": 0.25
+                },
+                {
+                    "x": -2.619999885559082,
+                    "y": 1.659999966621399,
+                    "width": 0.25
+                },
+                {
+                    "x": -2.109999895095825,
+                    "y": 0.5699999928474426,
+                    "width": 0.25
+                },
+                {
+                    "x": -1.9500000476837159,
+                    "y": 0.019999999552965165,
+                    "width": 0.75
+                },
+                {
+                    "x": -3.6600000858306886,
+                    "y": -2.450000047683716,
+                    "width": 0.25
+                }
+            ]
+        },
+        {
+            "type": "lane",
+            "x": 0.0,
+            "y": 0.0,
+            "radius": 2.0,
+            "width": 0.25,
+            "points": [
+                {
+                    "x": -8.970000267028809,
+                    "y": 0.25999999046325686,
+                    "width": 0.25
+                },
+                {
+                    "x": -7.539999961853027,
+                    "y": -0.3700000047683716,
+                    "width": 0.25
+                },
+                {
+                    "x": -6.519999980926514,
+                    "y": -1.7000000476837159,
+                    "width": 0.25
+                },
+                {
+                    "x": -6.119999885559082,
+                    "y": -3.4600000381469728,
+                    "width": 0.25
+                }
+            ]
+        },
+        {
+            "type": "lane",
+            "x": 0.0,
+            "y": 0.0,
+            "radius": 2.0,
+            "width": 0.25,
+            "points": [
+                {
+                    "x": -9.989999771118164,
+                    "y": 3.0299999713897707,
+                    "width": 0.25
+                },
+                {
+                    "x": -8.210000038146973,
+                    "y": 4.0,
+                    "width": 0.25
+                },
+                {
+                    "x": -6.340000152587891,
+                    "y": 4.510000228881836,
+                    "width": 0.25
+                }
+            ]
+        },
+        {
+            "type": "lane",
+            "x": 0.0,
+            "y": 0.0,
+            "radius": 2.0,
+            "width": 0.25,
+            "points": [
+                {
+                    "x": -3.009999990463257,
+                    "y": -4.690000057220459,
+                    "width": 0.25
+                },
+                {
+                    "x": -0.4099999964237213,
+                    "y": -2.4600000381469728,
+                    "width": 0.25
+                },
+                {
+                    "x": 0.5199999809265137,
+                    "y": -0.6499999761581421,
+                    "width": 0.25
+                }
+            ]
+        },
+        {
+            "type": "lane",
+            "x": 0.0,
+            "y": 0.0,
+            "radius": 2.0,
+            "width": 0.25,
+            "points": [
+                {
+                    "x": 0.15000000596046449,
+                    "y": -2.630000114440918,
+                    "width": 0.25
+                },
+                {
+                    "x": 1.2000000476837159,
+                    "y": -0.8700000047683716,
+                    "width": 0.25
+                }
+            ]
+        },
+        {
+            "type": "lane",
+            "x": 0.0,
+            "y": 0.0,
+            "radius": 2.0,
+            "width": 0.25,
+            "points": [
+                {
+                    "x": 2.299999952316284,
+                    "y": -3.8499999046325685,
+                    "width": 0.25
+                },
+                {
+                    "x": 4.539999961853027,
+                    "y": -2.130000114440918,
+                    "width": 0.25
+                }
+            ]
+        },
+        {
+            "type": "lane",
+            "x": 0.0,
+            "y": 0.0,
+            "radius": 2.0,
+            "width": 0.25,
+            "points": [
+                {
+                    "x": 5.360000133514404,
+                    "y": -1.159999966621399,
+                    "width": 0.25
+                },
+                {
+                    "x": 5.730000019073486,
+                    "y": -0.6299999952316284,
+                    "width": 0.25
+                }
+            ]
+        },
+        {
+            "type": "lane",
+            "x": 0.0,
+            "y": 0.0,
+            "radius": 2.0,
+            "width": 0.25,
+            "points": [
+                {
+                    "x": 6.389999866485596,
+                    "y": 0.6899999976158142,
+                    "width": 0.25
+                },
+                {
+                    "x": 6.409999847412109,
+                    "y": 2.319999933242798,
+                    "width": 0.25
+                },
+                {
+                    "x": 6.010000228881836,
+                    "y": 3.680000066757202,
+                    "width": 0.25
+                },
+                {
+                    "x": 5.199999809265137,
+                    "y": 4.480000019073486,
+                    "width": 0.25
+                }
+            ]
+        },
+        {
+            "type": "lane",
+            "x": 0.0,
+            "y": 0.0,
+            "radius": 2.0,
+            "width": 0.25,
+            "points": [
+                {
+                    "x": 5.539999961853027,
+                    "y": 4.989999771118164,
+                    "width": 0.25
+                },
+                {
+                    "x": 6.940000057220459,
+                    "y": 3.630000114440918,
+                    "width": 0.25
+                },
+                {
+                    "x": 8.899999618530274,
+                    "y": 2.869999885559082,
+                    "width": 0.25
+                }
+            ]
+        },
+        {
+            "type": "lane",
+            "x": 0.0,
+            "y": 0.0,
+            "radius": 2.0,
+            "width": 0.25,
+            "points": [
+                {
+                    "x": 6.989999771118164,
+                    "y": 2.0399999618530275,
+                    "width": 0.25
+                },
+                {
+                    "x": 9.0600004196167,
+                    "y": 0.8199999928474426,
+                    "width": 0.25
+                }
+            ]
+        },
+        {
+            "type": "lane",
+            "x": 0.0,
+            "y": 0.0,
+            "radius": 2.0,
+            "width": 0.25,
+            "points": [
+                {
+                    "x": 8.59000015258789,
+                    "y": -0.8999999761581421,
+                    "width": 0.25
+                },
+                {
+                    "x": 9.170000076293946,
+                    "y": -1.0099999904632569,
+                    "width": 0.25
+                }
+            ]
+        },
+        {
+            "type": "lane",
+            "x": 0.0,
+            "y": 0.0,
+            "radius": 2.0,
+            "width": 0.25,
+            "points": [
+                {
+                    "x": 0.3799999952316284,
+                    "y": 3.059999942779541,
+                    "width": 0.25
+                },
+                {
+                    "x": 0.6000000238418579,
+                    "y": 2.440000057220459,
+                    "width": 0.25
+                }
+            ]
+        },
+        {
+            "type": "lane",
+            "x": 0.0,
+            "y": 0.0,
+            "radius": 2.0,
+            "width": 0.25,
+            "points": [
+                {
+                    "x": 1.2799999713897706,
+                    "y": 2.9200000762939455,
+                    "width": 0.25
+                },
+                {
+                    "x": 1.3200000524520875,
+                    "y": 2.3399999141693117,
+                    "width": 0.25
+                }
+            ]
+        }
+    ],
+    "waves": [
+        {
+            "groups": [
+                {
+                    "unitDefinitionId": "basic_enemy",
+                    "count": 5,
+                    "spawnInterval": 2.0,
+                    "startTime": 0.0,
+                    "spawnerIndex": 0,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "basic_enemy",
+                    "count": 5,
+                    "spawnInterval": 2.0,
+                    "startTime": 0.25,
+                    "spawnerIndex": 1,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "basic_enemy",
+                    "count": 5,
+                    "spawnInterval": 2.0,
+                    "startTime": 0.5,
+                    "spawnerIndex": 2,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "basic_enemy",
+                    "count": 5,
+                    "spawnInterval": 2.0,
+                    "startTime": 0.75,
+                    "spawnerIndex": 3,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "basic_enemy",
+                    "count": 5,
+                    "spawnInterval": 2.0,
+                    "startTime": 1.0,
+                    "spawnerIndex": 4,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                }
+            ]
+        },
+        {
+            "groups": [
+                {
+                    "unitDefinitionId": "basic_enemy",
+                    "count": 5,
+                    "spawnInterval": 2.0,
+                    "startTime": 0.0,
+                    "spawnerIndex": 0,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "basic_enemy",
+                    "count": 5,
+                    "spawnInterval": 2.0,
+                    "startTime": 0.25,
+                    "spawnerIndex": 1,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "basic_enemy",
+                    "count": 5,
+                    "spawnInterval": 2.0,
+                    "startTime": 0.5,
+                    "spawnerIndex": 2,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "basic_enemy",
+                    "count": 5,
+                    "spawnInterval": 2.0,
+                    "startTime": 0.75,
+                    "spawnerIndex": 3,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "basic_enemy",
+                    "count": 5,
+                    "spawnInterval": 2.0,
+                    "startTime": 1.0,
+                    "spawnerIndex": 4,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "fast_enemy",
+                    "count": 10,
+                    "spawnInterval": 0.5,
+                    "startTime": 8.0,
+                    "spawnerIndex": 0,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "fast_enemy",
+                    "count": 10,
+                    "spawnInterval": 0.5,
+                    "startTime": 8.25,
+                    "spawnerIndex": 1,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                }
+            ]
+        },
+        {
+            "groups": [
+                {
+                    "unitDefinitionId": "fast_enemy",
+                    "count": 8,
+                    "spawnInterval": 0.6000000238418579,
+                    "startTime": 0.0,
+                    "spawnerIndex": 0,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "fast_enemy",
+                    "count": 8,
+                    "spawnInterval": 0.6000000238418579,
+                    "startTime": 0.25,
+                    "spawnerIndex": 1,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "fast_enemy",
+                    "count": 8,
+                    "spawnInterval": 0.6000000238418579,
+                    "startTime": 0.5,
+                    "spawnerIndex": 2,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "fast_enemy",
+                    "count": 8,
+                    "spawnInterval": 0.6000000238418579,
+                    "startTime": 0.75,
+                    "spawnerIndex": 3,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "fast_enemy",
+                    "count": 8,
+                    "spawnInterval": 0.6000000238418579,
+                    "startTime": 1.0,
+                    "spawnerIndex": 4,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                }
+            ]
+        },
+        {
+            "groups": [
+                {
+                    "unitDefinitionId": "basic_enemy",
+                    "count": 8,
+                    "spawnInterval": 1.2000000476837159,
+                    "startTime": 0.0,
+                    "spawnerIndex": 0,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "basic_enemy",
+                    "count": 8,
+                    "spawnInterval": 1.2000000476837159,
+                    "startTime": 0.25,
+                    "spawnerIndex": 1,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "armored_enemy",
+                    "count": 4,
+                    "spawnInterval": 2.5,
+                    "startTime": 0.0,
+                    "spawnerIndex": 2,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "basic_enemy",
+                    "count": 8,
+                    "spawnInterval": 1.2000000476837159,
+                    "startTime": 0.5,
+                    "spawnerIndex": 3,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "basic_enemy",
+                    "count": 8,
+                    "spawnInterval": 1.2000000476837159,
+                    "startTime": 0.75,
+                    "spawnerIndex": 4,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                }
+            ]
+        },
+        {
+            "groups": [
+                {
+                    "unitDefinitionId": "fast_enemy",
+                    "count": 10,
+                    "spawnInterval": 0.5,
+                    "startTime": 2.0,
+                    "spawnerIndex": 0,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "fast_enemy",
+                    "count": 10,
+                    "spawnInterval": 0.5,
+                    "startTime": 2.25,
+                    "spawnerIndex": 1,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "basic_enemy",
+                    "count": 6,
+                    "spawnInterval": 1.5,
+                    "startTime": 0.0,
+                    "spawnerIndex": 2,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "shielded_enemy",
+                    "count": 4,
+                    "spawnInterval": 2.5,
+                    "startTime": 0.0,
+                    "spawnerIndex": 3,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "shielded_enemy",
+                    "count": 4,
+                    "spawnInterval": 2.5,
+                    "startTime": 0.25,
+                    "spawnerIndex": 4,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                }
+            ]
+        },
+        {
+            "groups": [
+                {
+                    "unitDefinitionId": "basic_enemy",
+                    "count": 8,
+                    "spawnInterval": 1.2000000476837159,
+                    "startTime": 1.0,
+                    "spawnerIndex": 0,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "basic_enemy",
+                    "count": 8,
+                    "spawnInterval": 1.2000000476837159,
+                    "startTime": 1.25,
+                    "spawnerIndex": 1,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "splitter_enemy",
+                    "count": 4,
+                    "spawnInterval": 3.0,
+                    "startTime": 0.0,
+                    "spawnerIndex": 2,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "shielded_enemy",
+                    "count": 3,
+                    "spawnInterval": 3.0,
+                    "startTime": 4.0,
+                    "spawnerIndex": 3,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "shielded_enemy",
+                    "count": 3,
+                    "spawnInterval": 3.0,
+                    "startTime": 4.25,
+                    "spawnerIndex": 4,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                }
+            ]
+        },
+        {
+            "groups": [
+                {
+                    "unitDefinitionId": "charger_enemy",
+                    "count": 5,
+                    "spawnInterval": 2.0,
+                    "startTime": 0.0,
+                    "spawnerIndex": 0,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "charger_enemy",
+                    "count": 5,
+                    "spawnInterval": 2.0,
+                    "startTime": 0.25,
+                    "spawnerIndex": 1,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "armored_enemy",
+                    "count": 5,
+                    "spawnInterval": 2.5,
+                    "startTime": 1.0,
+                    "spawnerIndex": 2,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "fast_enemy",
+                    "count": 8,
+                    "spawnInterval": 0.6000000238418579,
+                    "startTime": 3.0,
+                    "spawnerIndex": 3,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "fast_enemy",
+                    "count": 8,
+                    "spawnInterval": 0.6000000238418579,
+                    "startTime": 3.25,
+                    "spawnerIndex": 4,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                }
+            ]
+        },
+        {
+            "groups": [
+                {
+                    "unitDefinitionId": "shielded_enemy",
+                    "count": 4,
+                    "spawnInterval": 2.5,
+                    "startTime": 1.0,
+                    "spawnerIndex": 0,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "shielded_enemy",
+                    "count": 4,
+                    "spawnInterval": 2.5,
+                    "startTime": 1.25,
+                    "spawnerIndex": 1,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "phantom_enemy",
+                    "count": 5,
+                    "spawnInterval": 2.0,
+                    "startTime": 0.0,
+                    "spawnerIndex": 2,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "basic_enemy",
+                    "count": 10,
+                    "spawnInterval": 1.0,
+                    "startTime": 2.0,
+                    "spawnerIndex": 3,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "basic_enemy",
+                    "count": 10,
+                    "spawnInterval": 1.0,
+                    "startTime": 2.25,
+                    "spawnerIndex": 4,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                }
+            ]
+        },
+        {
+            "groups": [
+                {
+                    "unitDefinitionId": "fast_enemy",
+                    "count": 12,
+                    "spawnInterval": 0.5,
+                    "startTime": 0.0,
+                    "spawnerIndex": 0,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "fast_enemy",
+                    "count": 12,
+                    "spawnInterval": 0.5,
+                    "startTime": 0.25,
+                    "spawnerIndex": 1,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "fast_enemy",
+                    "count": 12,
+                    "spawnInterval": 0.5,
+                    "startTime": 0.5,
+                    "spawnerIndex": 2,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "armored_enemy",
+                    "count": 4,
+                    "spawnInterval": 2.0,
+                    "startTime": 6.0,
+                    "spawnerIndex": 2,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "fast_enemy",
+                    "count": 12,
+                    "spawnInterval": 0.5,
+                    "startTime": 0.75,
+                    "spawnerIndex": 3,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "fast_enemy",
+                    "count": 12,
+                    "spawnInterval": 0.5,
+                    "startTime": 1.0,
+                    "spawnerIndex": 4,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                }
+            ]
+        },
+        {
+            "groups": [
+                {
+                    "unitDefinitionId": "basic_enemy",
+                    "count": 10,
+                    "spawnInterval": 1.0,
+                    "startTime": 0.0,
+                    "spawnerIndex": 0,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "basic_enemy",
+                    "count": 10,
+                    "spawnInterval": 1.0,
+                    "startTime": 0.25,
+                    "spawnerIndex": 1,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "boss_enemy",
+                    "count": 2,
+                    "spawnInterval": 2.1500000953674318,
+                    "startTime": 2.0,
+                    "spawnerIndex": 2,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "shielded_enemy",
+                    "count": 4,
+                    "spawnInterval": 2.5,
+                    "startTime": 3.0,
+                    "spawnerIndex": 3,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "shielded_enemy",
+                    "count": 4,
+                    "spawnInterval": 2.5,
+                    "startTime": 3.25,
+                    "spawnerIndex": 4,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                }
+            ]
+        },
+        {
+            "groups": [
+                {
+                    "unitDefinitionId": "charger_enemy",
+                    "count": 6,
+                    "spawnInterval": 1.7999999523162842,
+                    "startTime": 2.0,
+                    "spawnerIndex": 0,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "charger_enemy",
+                    "count": 6,
+                    "spawnInterval": 1.7999999523162842,
+                    "startTime": 2.25,
+                    "spawnerIndex": 1,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "splitter_enemy",
+                    "count": 4,
+                    "spawnInterval": 3.0,
+                    "startTime": 0.0,
+                    "spawnerIndex": 2,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "armored_enemy",
+                    "count": 5,
+                    "spawnInterval": 2.200000047683716,
+                    "startTime": 0.0,
+                    "spawnerIndex": 3,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "cloaker_enemy",
+                    "count": 2,
+                    "spawnInterval": 5.0,
+                    "startTime": 1.0,
+                    "spawnerIndex": 4,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                }
+            ]
+        },
+        {
+            "groups": [
+                {
+                    "unitDefinitionId": "fast_enemy",
+                    "count": 12,
+                    "spawnInterval": 0.44999998807907107,
+                    "startTime": 0.0,
+                    "spawnerIndex": 0,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "fast_enemy",
+                    "count": 12,
+                    "spawnInterval": 0.44999998807907107,
+                    "startTime": 0.25,
+                    "spawnerIndex": 1,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "armored_enemy",
+                    "count": 5,
+                    "spawnInterval": 2.5,
+                    "startTime": 0.0,
+                    "spawnerIndex": 2,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "shielder_enemy",
+                    "count": 2,
+                    "spawnInterval": 6.0,
+                    "startTime": 1.0,
+                    "spawnerIndex": 2,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "basic_enemy",
+                    "count": 12,
+                    "spawnInterval": 0.8999999761581421,
+                    "startTime": 0.0,
+                    "spawnerIndex": 3,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "basic_enemy",
+                    "count": 12,
+                    "spawnInterval": 0.8999999761581421,
+                    "startTime": 0.25,
+                    "spawnerIndex": 4,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                }
+            ]
+        },
+        {
+            "groups": [
+                {
+                    "unitDefinitionId": "charger_enemy",
+                    "count": 8,
+                    "spawnInterval": 1.399999976158142,
+                    "startTime": 0.0,
+                    "spawnerIndex": 0,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "charger_enemy",
+                    "count": 8,
+                    "spawnInterval": 1.399999976158142,
+                    "startTime": 0.25,
+                    "spawnerIndex": 1,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "phantom_enemy",
+                    "count": 4,
+                    "spawnInterval": 2.5,
+                    "startTime": 1.0,
+                    "spawnerIndex": 2,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "charger_enemy",
+                    "count": 8,
+                    "spawnInterval": 1.399999976158142,
+                    "startTime": 2.0,
+                    "spawnerIndex": 3,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "charger_enemy",
+                    "count": 8,
+                    "spawnInterval": 1.399999976158142,
+                    "startTime": 2.25,
+                    "spawnerIndex": 4,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                }
+            ]
+        },
+        {
+            "groups": [
+                {
+                    "unitDefinitionId": "fast_enemy",
+                    "count": 14,
+                    "spawnInterval": 0.4000000059604645,
+                    "startTime": 0.0,
+                    "spawnerIndex": 0,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "fast_enemy",
+                    "count": 14,
+                    "spawnInterval": 0.4000000059604645,
+                    "startTime": 0.25,
+                    "spawnerIndex": 1,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "boss_enemy",
+                    "count": 2,
+                    "spawnInterval": 2.1500000953674318,
+                    "startTime": 0.0,
+                    "spawnerIndex": 2,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "phantom_enemy",
+                    "count": 4,
+                    "spawnInterval": 1.7999999523162842,
+                    "startTime": 5.0,
+                    "spawnerIndex": 2,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "shielded_enemy",
+                    "count": 5,
+                    "spawnInterval": 2.200000047683716,
+                    "startTime": 1.0,
+                    "spawnerIndex": 3,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "shielded_enemy",
+                    "count": 5,
+                    "spawnInterval": 2.200000047683716,
+                    "startTime": 1.25,
+                    "spawnerIndex": 4,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                }
+            ]
+        },
+        {
+            "groups": [
+                {
+                    "unitDefinitionId": "armored_enemy",
+                    "count": 6,
+                    "spawnInterval": 2.0,
+                    "startTime": 0.0,
+                    "spawnerIndex": 0,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "armored_enemy",
+                    "count": 6,
+                    "spawnInterval": 2.0,
+                    "startTime": 0.25,
+                    "spawnerIndex": 1,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "cloaker_enemy",
+                    "count": 4,
+                    "spawnInterval": 3.0,
+                    "startTime": 0.0,
+                    "spawnerIndex": 2,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "cloaker_enemy",
+                    "count": 2,
+                    "spawnInterval": 6.0,
+                    "startTime": 4.0,
+                    "spawnerIndex": 2,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "armored_enemy",
+                    "count": 6,
+                    "spawnInterval": 2.0,
+                    "startTime": 1.0,
+                    "spawnerIndex": 3,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "armored_enemy",
+                    "count": 6,
+                    "spawnInterval": 2.0,
+                    "startTime": 1.25,
+                    "spawnerIndex": 4,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                }
+            ]
+        },
+        {
+            "groups": [
+                {
+                    "unitDefinitionId": "splitter_enemy",
+                    "count": 6,
+                    "spawnInterval": 2.200000047683716,
+                    "startTime": 0.0,
+                    "spawnerIndex": 0,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "splitter_enemy",
+                    "count": 6,
+                    "spawnInterval": 2.200000047683716,
+                    "startTime": 0.25,
+                    "spawnerIndex": 1,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "boss_enemy",
+                    "count": 3,
+                    "spawnInterval": 2.1500000953674318,
+                    "startTime": 3.0,
+                    "spawnerIndex": 2,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "shielder_enemy",
+                    "count": 2,
+                    "spawnInterval": 6.0,
+                    "startTime": 2.0,
+                    "spawnerIndex": 2,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "splitter_enemy",
+                    "count": 6,
+                    "spawnInterval": 2.200000047683716,
+                    "startTime": 1.0,
+                    "spawnerIndex": 3,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "splitter_enemy",
+                    "count": 6,
+                    "spawnInterval": 2.200000047683716,
+                    "startTime": 1.25,
+                    "spawnerIndex": 4,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                }
+            ]
+        },
+        {
+            "groups": [
+                {
+                    "unitDefinitionId": "shielded_enemy",
+                    "count": 8,
+                    "spawnInterval": 1.7999999523162842,
+                    "startTime": 0.0,
+                    "spawnerIndex": 0,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "shielded_enemy",
+                    "count": 8,
+                    "spawnInterval": 1.7999999523162842,
+                    "startTime": 0.25,
+                    "spawnerIndex": 1,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "shielded_enemy",
+                    "count": 8,
+                    "spawnInterval": 1.7999999523162842,
+                    "startTime": 0.5,
+                    "spawnerIndex": 2,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "cloaker_enemy",
+                    "count": 2,
+                    "spawnInterval": 6.0,
+                    "startTime": 5.0,
+                    "spawnerIndex": 0,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "shielded_enemy",
+                    "count": 8,
+                    "spawnInterval": 1.7999999523162842,
+                    "startTime": 0.75,
+                    "spawnerIndex": 3,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "shielded_enemy",
+                    "count": 8,
+                    "spawnInterval": 1.7999999523162842,
+                    "startTime": 1.0,
+                    "spawnerIndex": 4,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "cloaker_enemy",
+                    "count": 2,
+                    "spawnInterval": 6.0,
+                    "startTime": 5.0,
+                    "spawnerIndex": 3,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                }
+            ]
+        },
+        {
+            "groups": [
+                {
+                    "unitDefinitionId": "cloaker_enemy",
+                    "count": 4,
+                    "spawnInterval": 2.5,
+                    "startTime": 0.0,
+                    "spawnerIndex": 0,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "cloaker_enemy",
+                    "count": 4,
+                    "spawnInterval": 2.5,
+                    "startTime": 0.25,
+                    "spawnerIndex": 1,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "boss_enemy",
+                    "count": 3,
+                    "spawnInterval": 2.1500000953674318,
+                    "startTime": 3.0,
+                    "spawnerIndex": 2,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "charger_enemy",
+                    "count": 8,
+                    "spawnInterval": 1.2000000476837159,
+                    "startTime": 2.0,
+                    "spawnerIndex": 3,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "charger_enemy",
+                    "count": 8,
+                    "spawnInterval": 1.2000000476837159,
+                    "startTime": 2.25,
+                    "spawnerIndex": 4,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                }
+            ]
+        },
+        {
+            "groups": [
+                {
+                    "unitDefinitionId": "fast_enemy",
+                    "count": 15,
+                    "spawnInterval": 0.4000000059604645,
+                    "startTime": 0.0,
+                    "spawnerIndex": 0,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "fast_enemy",
+                    "count": 15,
+                    "spawnInterval": 0.4000000059604645,
+                    "startTime": 0.25,
+                    "spawnerIndex": 1,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "boss_enemy",
+                    "count": 2,
+                    "spawnInterval": 2.1500000953674318,
+                    "startTime": 5.0,
+                    "spawnerIndex": 0,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "boss_enemy",
+                    "count": 2,
+                    "spawnInterval": 2.1500000953674318,
+                    "startTime": 5.25,
+                    "spawnerIndex": 1,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "phantom_enemy",
+                    "count": 5,
+                    "spawnInterval": 2.0,
+                    "startTime": 0.0,
+                    "spawnerIndex": 2,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "cloaker_enemy",
+                    "count": 2,
+                    "spawnInterval": 6.0,
+                    "startTime": 4.0,
+                    "spawnerIndex": 2,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "armored_enemy",
+                    "count": 6,
+                    "spawnInterval": 1.7999999523162842,
+                    "startTime": 0.0,
+                    "spawnerIndex": 3,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "armored_enemy",
+                    "count": 6,
+                    "spawnInterval": 1.7999999523162842,
+                    "startTime": 0.25,
+                    "spawnerIndex": 4,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                }
+            ]
+        },
+        {
+            "groups": [
+                {
+                    "unitDefinitionId": "cloaker_enemy",
+                    "count": 5,
+                    "spawnInterval": 2.4000000953674318,
+                    "startTime": 0.0,
+                    "spawnerIndex": 0,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "cloaker_enemy",
+                    "count": 5,
+                    "spawnInterval": 2.4000000953674318,
+                    "startTime": 0.25,
+                    "spawnerIndex": 1,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "boss_enemy",
+                    "count": 5,
+                    "spawnInterval": 2.1500000953674318,
+                    "startTime": 2.0,
+                    "spawnerIndex": 2,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "shielder_enemy",
+                    "count": 3,
+                    "spawnInterval": 8.0,
+                    "startTime": 4.0,
+                    "spawnerIndex": 2,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "cloaker_enemy",
+                    "count": 3,
+                    "spawnInterval": 7.0,
+                    "startTime": 3.0,
+                    "spawnerIndex": 3,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "boss_enemy",
+                    "count": 3,
+                    "spawnInterval": 2.1500000953674318,
+                    "startTime": 6.0,
+                    "spawnerIndex": 3,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "boss_enemy",
+                    "count": 3,
+                    "spawnInterval": 2.1500000953674318,
+                    "startTime": 6.25,
+                    "spawnerIndex": 4,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "charger_enemy",
+                    "count": 10,
+                    "spawnInterval": 1.2000000476837159,
+                    "startTime": 10.0,
+                    "spawnerIndex": 3,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "charger_enemy",
+                    "count": 10,
+                    "spawnInterval": 1.2000000476837159,
+                    "startTime": 10.25,
+                    "spawnerIndex": 4,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "fast_enemy",
+                    "count": 12,
+                    "spawnInterval": 0.5,
+                    "startTime": 15.0,
+                    "spawnerIndex": 0,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "fast_enemy",
+                    "count": 12,
+                    "spawnInterval": 0.5,
+                    "startTime": 15.25,
+                    "spawnerIndex": 1,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                }
+            ]
+        }
+    ]
+}

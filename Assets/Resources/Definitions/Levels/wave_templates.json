@@ -1,0 +1,19 @@
+{
+    "templates": [
+        {
+            "name": "BossRound",
+            "wave": {
+                "groups": [
+                    {
+                        "unitDefinitionId": "boss_enemy",
+                        "count": 5,
+                        "spawnInterval": 2.15,
+                        "startTime": 0.0,
+                        "spawnerIndex": 0,
+                        "dropConfig": { "mode": "chance", "fallbackChance": -1.0, "pattern": [], "repeat": true }
+                    }
+                ]
+            }
+        }
+    ]
+}

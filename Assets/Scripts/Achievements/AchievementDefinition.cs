@@ -40,6 +40,9 @@ public class AchievementDefinition
     public int    minStars;
     public int    count;
     public string balanceType;
+    /// <summary>MonoTypeVictory only: the run's final balance score of balanceType must
+    /// reach this. Keeps trivial wins (e.g. tutorial's 4-tower cap) from qualifying.</summary>
+    public float  minBalance;
 }
 
 [Serializable]

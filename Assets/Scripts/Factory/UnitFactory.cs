@@ -107,11 +107,16 @@ public class UnitFactory : MonoBehaviour
             var frames = Resources.LoadAll<Sprite>(def.animSheet);
             if (frames != null && frames.Length > 0)
             {
+                if (def.animReverse) System.Array.Reverse(frames);
                 sr.sprite = frames[0];
                 sr.color  = def.tintColor.a > 0f ? def.tintColor : Color.white;
                 Sprite[] deathFrames = null;
                 if (!string.IsNullOrEmpty(def.animDeathSheet))
+                {
                     deathFrames = Resources.LoadAll<Sprite>(def.animDeathSheet);
+                    if (def.animReverse && deathFrames != null && deathFrames.Length > 0)
+                        System.Array.Reverse(deathFrames);
+                }
                 var anim = go.AddComponent<SpriteAnimator>();
                 anim.Setup(frames, def.animFps, deathFrames, def.animDeathFps);
             }
@@ -149,7 +154,8 @@ public class UnitFactory : MonoBehaviour
         unit.arcanaDefense    = def.arcanaDefense;
         unit.bounty          = Mathf.RoundToInt(def.bounty * LevelSelection.BountyMult);
         unit.deathBlow       = def.deathBlow;
-        unit.rotateToMovement = def.rotateToMovement;
+        unit.rotateToMovement  = def.rotateToMovement;
+        unit.spriteAngleOffset = def.spriteAngleOffset;
         unit.isAlive         = true;
 
         // ── 5. Extra components ───────────────────────────────────

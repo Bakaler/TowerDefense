@@ -31,10 +31,13 @@ public class Turrent : MonoBehaviour
     /// <summary>Called when range changes at runtime (e.g. rangePerTier upgrades).</summary>
     public void SetWorldRange(float range) => _worldRange = range;
 
+    private TowerInfo _info;
+
     void Start()
     {
         _abilityManager = GetComponent<AbilityManager>();
         _rangeCollider  = GetComponent<CircleCollider2D>();
+        _info           = GetComponent<TowerInfo>();
         if (_rangeCollider != null)
             _worldRange = _rangeCollider.radius * Mathf.Max(0.01f, transform.localScale.x);
 
@@ -149,7 +152,8 @@ public class Turrent : MonoBehaviour
         GameObject fallback = null;
         float      fbVal    = bestVal;
 
-        float rangeSqr = _worldRange > 0f ? _worldRange * _worldRange : float.MaxValue;
+        float rangeSqr   = _worldRange > 0f ? _worldRange * _worldRange : float.MaxValue;
+        bool  isDetector = _info != null && _info.IsDetector;
 
         foreach (var go in enemiesInRange)
         {
@@ -157,6 +161,13 @@ public class Turrent : MonoBehaviour
             var unit = go.GetComponent<UnitParentClass>();
             if (unit == null || !unit.isAlive) continue;
             if (!IsOnScreen(go)) continue;
+
+            // Invisible units can only be targeted by towers with active detection
+            if (!isDetector)
+            {
+                var bh = go.GetComponent<BehaviorHandler>();
+                if (bh != null && bh.HasBehaviorType(BehaviorType.Invisible)) continue;
+            }
 
             // The trigger list includes collider-edge touches — require the enemy's
             // center inside the range so shots match the displayed circle.

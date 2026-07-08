@@ -14,6 +14,12 @@ public class PathNode : MonoBehaviour
     [Tooltip("Nodes this one leads to. Add multiple for branching paths.")]
     public List<PathNode> connections = new List<PathNode>();
 
+    [Tooltip("Units reaching this node fade out and reappear at the next node instead of walking.")]
+    public bool isTeleporter = false;
+
+    [Tooltip("Seconds a unit stays vanished (and untargetable) between fading out here and fading in at the next node.")]
+    public float teleportDelay = 0f;
+
     public bool IsTerminus => connections.Count == 0;
     public bool IsJunction => connections.Count > 1;
 
@@ -22,8 +28,9 @@ public class PathNode : MonoBehaviour
     // ── Gizmos ───────────────────────────────────────────────────────
     void OnDrawGizmos()
     {
-        Gizmos.color = IsTerminus ? Color.red
-                     : IsJunction ? Color.yellow
+        Gizmos.color = IsTerminus   ? Color.red
+                     : isTeleporter ? Color.magenta
+                     : IsJunction   ? Color.yellow
                      : Color.cyan;
         Gizmos.DrawSphere(transform.position, 0.18f);
 

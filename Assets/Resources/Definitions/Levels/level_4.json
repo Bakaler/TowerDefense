@@ -6,8 +6,8 @@
     "startTech": 50,
     "startTier": 2,
     "backgroundSprite": "Art/Maps/level_3",
-    "backgroundX": 0.019999999552965164,
-    "backgroundY": 1.059999942779541,
+    "backgroundX": 0.08,
+    "backgroundY": 1.06,
     "maxTowers": -1,
     "allowedTowers": [
         "basic_tower",
@@ -28,7 +28,8 @@
         "root_tower",
         "boomerang_tower",
         "bee_tower",
-        "shotgun_tower"
+        "shotgun_tower",
+        "fence_tower"
     ],
     "modifierColumns": [],
     "difficulties": [

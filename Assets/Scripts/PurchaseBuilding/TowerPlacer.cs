@@ -31,12 +31,22 @@ public class TowerPlacer : MonoBehaviour
     public float rotateSpeed = 120f;
 
     // ── State ─────────────────────────────────────────────────────────
-    private string        _selectedId;
-    private GameObject    _ghost;
-    private LineRenderer  _footprintCircle;
-    private float         _footprintRadius;
-    private float         _ghostRotation;
-    public bool           IsPlacing => !string.IsNullOrEmpty(_selectedId);
+    private string          _selectedId;
+    private TowerDefinition _selectedDef;
+    private GameObject      _ghost;
+    private LineRenderer    _footprintCircle;
+    private float           _footprintRadius;
+    private float           _ghostRotation;
+    public bool             IsPlacing => !string.IsNullOrEmpty(_selectedId);
+
+    // Pair placement ("pair" placementMode): first click plants post A,
+    // second click plants post B and builds the tower.
+    private const float MIN_PAIR_SPAN = 1f;
+    private bool         _hasPairFirst;
+    private Vector2      _pairFirst;
+    private GameObject   _pairMarker;
+    private LineRenderer _pairPreviewLine;
+    private bool IsPairMode => _selectedDef != null && _selectedDef.placementMode == "pair";
 
     // Tracks whether the free-first-basic-tower modifier has been consumed this level
     private bool _freeBasicTowerUsed;
@@ -57,9 +67,12 @@ public class TowerPlacer : MonoBehaviour
 
         Vector2 worldPos = GetMouseWorldPos();
 
-        // Rotate ghost with Q/E
-        if (Input.GetKey(KeyCode.Q)) _ghostRotation += rotateSpeed * Time.deltaTime;
-        if (Input.GetKey(KeyCode.E)) _ghostRotation -= rotateSpeed * Time.deltaTime;
+        // Rotate ghost with Q/E (pair towers orient via their two posts instead)
+        if (!IsPairMode)
+        {
+            if (Input.GetKey(KeyCode.Q)) _ghostRotation += rotateSpeed * Time.deltaTime;
+            if (Input.GetKey(KeyCode.E)) _ghostRotation -= rotateSpeed * Time.deltaTime;
+        }
 
         // Move + orient ghost
         if (_ghost != null)
@@ -69,24 +82,30 @@ public class TowerPlacer : MonoBehaviour
         }
 
         // Update footprint circle color: red = blocked, green = clear
+        bool blocked = IsSpotBlocked(worldPos, _footprintRadius);
+        if (IsPairMode && _hasPairFirst && !IsSpanValid(worldPos)) blocked = true;
         if (_footprintCircle != null)
         {
-            bool blocked = placementZones != null && !placementZones.Overlaps(worldPos, _footprintRadius);
-            if (!blocked)
-            {
-                var nearby = Physics2D.OverlapCircleAll(worldPos, _footprintRadius);
-                foreach (var col in nearby)
-                    if (!col.isTrigger && col.GetComponent<TowerInfo>() != null) { blocked = true; break; }
-            }
             Color fc = blocked ? new Color(1f, 0.15f, 0.15f, 0.7f) : new Color(0.15f, 1f, 0.15f, 0.7f);
             _footprintCircle.startColor = fc;
             _footprintCircle.endColor   = fc;
         }
 
+        // Pair preview line: post A → mouse, tinted by validity
+        if (_pairPreviewLine != null)
+        {
+            _pairPreviewLine.SetPosition(0, new Vector3(_pairFirst.x, _pairFirst.y, 0f));
+            _pairPreviewLine.SetPosition(1, new Vector3(worldPos.x, worldPos.y, 0f));
+            Color lc = blocked ? new Color(1f, 0.15f, 0.15f, 0.5f) : new Color(0.15f, 1f, 0.15f, 0.5f);
+            _pairPreviewLine.startColor = lc;
+            _pairPreviewLine.endColor   = lc;
+        }
+
         // Place on left-click (ignore clicks on UI)
         if (Input.GetMouseButtonDown(0) && !EventSystem.current.IsPointerOverGameObject())
         {
-            PlaceTower(worldPos);
+            if (IsPairMode) HandlePairClick(worldPos);
+            else            PlaceTower(worldPos);
             return;
         }
 
@@ -106,22 +125,27 @@ public class TowerPlacer : MonoBehaviour
         Cancel(); // clear any existing selection first
 
         if (TowerDefinitionLibrary.Instance == null ||
-            !TowerDefinitionLibrary.Instance.TryGet(definitionId, out _))
+            !TowerDefinitionLibrary.Instance.TryGet(definitionId, out var def))
         {
             Debug.LogWarning($"[TowerPlacer] Unknown tower id '{definitionId}'.");
             return;
         }
 
-        _selectedId = definitionId;
+        _selectedId  = definitionId;
+        _selectedDef = def;
         SpawnGhost(definitionId);
     }
 
     public void Cancel()
     {
         _selectedId      = null;
+        _selectedDef     = null;
         _footprintCircle = null;
         _ghostRotation   = 0f;
-        if (_ghost != null) { Destroy(_ghost); _ghost = null; }
+        _hasPairFirst    = false;
+        _pairPreviewLine = null;
+        if (_ghost      != null) { Destroy(_ghost);      _ghost      = null; }
+        if (_pairMarker != null) { Destroy(_pairMarker); _pairMarker = null; }
     }
 
     // ── Internal ──────────────────────────────────────────────────────
@@ -148,31 +172,15 @@ public class TowerPlacer : MonoBehaviour
 
         float checkRadius = def.placementRadius > 0f ? def.placementRadius : 0.4f;
 
-        // Zone check — must be within a painted placement zone (if asset assigned)
-        if (placementZones != null && !placementZones.Overlaps(worldPos, checkRadius))
+        // Zone + overlap check
+        if (IsSpotBlocked(worldPos, checkRadius))
         {
-            Debug.Log("[TowerPlacer] Can't place here — outside painted placement zones.");
+            Debug.Log("[TowerPlacer] Can't place here — outside placement zones or too close to another tower.");
             return;
         }
 
         // Tower count cap
-        var bm = BalanceManager.Instance;
-        if (bm != null && bm.TowerCount >= bm.MaxTowers)
-        {
-            Debug.Log($"[TowerPlacer] Tower cap reached ({bm.TowerCount}/{bm.MaxTowers}). Diversify your balance to expand.");
-            return;
-        }
-
-        // Overlap check — no other tower body within footprint
-        var nearby = Physics2D.OverlapCircleAll(worldPos, checkRadius);
-        foreach (var col in nearby)
-        {
-            if (!col.isTrigger && col.GetComponent<TowerInfo>() != null)
-            {
-                Debug.Log("[TowerPlacer] Can't place here — too close to another tower.");
-                return;
-            }
-        }
+        if (IsTowerCapReached()) return;
 
         // Build real tower
         var go = TowerFactory.Instance.Build(_selectedId, worldPos, _ghostRotation);
@@ -196,6 +204,140 @@ public class TowerPlacer : MonoBehaviour
 
         // Exit placement mode — one click, one tower
         Cancel();
+    }
+
+    // ── Pair placement ────────────────────────────────────────────────
+
+    void HandlePairClick(Vector2 worldPos)
+    {
+        if (_selectedDef == null) { Cancel(); return; }
+        float checkRadius = _selectedDef.placementRadius > 0f ? _selectedDef.placementRadius : 0.4f;
+
+        if (IsSpotBlocked(worldPos, checkRadius))
+        {
+            Debug.Log("[TowerPlacer] Can't place a post here — outside placement zones or too close to another tower.");
+            return;
+        }
+
+        // ── First click: plant post A ─────────────────────────────
+        if (!_hasPairFirst)
+        {
+            // Fail early on cost so the player doesn't line up a fence they can't afford
+            var rmEarly = ResourceManagerScript.Instance;
+            if (rmEarly != null && rmEarly.resourceOne < _selectedDef.resourceCost)
+            {
+                Debug.Log($"[TowerPlacer] Not enough resources. Need {_selectedDef.resourceCost}, have {rmEarly.resourceOne}.");
+                return;
+            }
+            if (IsTowerCapReached()) return;
+
+            _hasPairFirst = true;
+            _pairFirst    = worldPos;
+            SpawnPairMarker(worldPos);
+            CreatePairPreviewLine();
+            return;
+        }
+
+        // ── Second click: plant post B and build ──────────────────
+        if (!IsSpanValid(worldPos))
+        {
+            float span = Vector2.Distance(_pairFirst, worldPos);
+            Debug.Log($"[TowerPlacer] Posts must be between {MIN_PAIR_SPAN} and {_selectedDef.pairMaxSpan} apart (span {span:0.0}).");
+            return;
+        }
+
+        var rm = ResourceManagerScript.Instance;
+        if (rm != null && rm.resourceOne < _selectedDef.resourceCost)
+        {
+            Debug.Log($"[TowerPlacer] Not enough resources. Need {_selectedDef.resourceCost}, have {rm.resourceOne}.");
+            return;
+        }
+        if (IsTowerCapReached()) return;
+
+        var go = TowerFactory.Instance.Build(_selectedId, _pairFirst, 0f);
+        if (go == null) { Cancel(); return; }
+        LastPlacementFrame = Time.frameCount;
+
+        var fence = go.GetComponent<FenceLine>();
+        if (fence != null) fence.SetEndpoint(worldPos);
+
+        if (!string.IsNullOrEmpty(_selectedDef.placeSoundId))
+            AudioManager.Play(_selectedDef.placeSoundId);
+        else
+            AudioManager.PlayEvent("tower_place");
+
+        if (rm != null) rm.ChangeResourceOne(-_selectedDef.resourceCost);
+
+        ObjectiveTracker.NotifyBuild(_selectedId);
+        RunStats.NotifyTowerBuilt(_selectedDef.balanceType);
+
+        Cancel();
+    }
+
+    void SpawnPairMarker(Vector2 worldPos)
+    {
+        _pairMarker = new GameObject("[PairMarker]");
+        _pairMarker.transform.position   = worldPos;
+        _pairMarker.transform.localScale = _ghost != null ? _ghost.transform.localScale : Vector3.one;
+
+        var ghostSr = _ghost != null ? _ghost.GetComponent<SpriteRenderer>() : null;
+        if (ghostSr != null)
+        {
+            var sr              = _pairMarker.AddComponent<SpriteRenderer>();
+            sr.sprite           = ghostSr.sprite;
+            sr.color            = ghostSr.color;
+            sr.sortingLayerName = ghostSr.sortingLayerName;
+            sr.sortingOrder     = ghostSr.sortingOrder;
+        }
+    }
+
+    void CreatePairPreviewLine()
+    {
+        var go = new GameObject("[PairPreviewLine]");
+        go.transform.SetParent(_pairMarker != null ? _pairMarker.transform : null, true);
+
+        _pairPreviewLine                  = go.AddComponent<LineRenderer>();
+        _pairPreviewLine.positionCount    = 2;
+        _pairPreviewLine.useWorldSpace    = true;
+        _pairPreviewLine.startWidth       = 0.08f;
+        _pairPreviewLine.endWidth         = 0.08f;
+        _pairPreviewLine.sortingLayerName = "Units";
+        _pairPreviewLine.sortingOrder     = 21;
+        _pairPreviewLine.material         = new Material(Shader.Find("Sprites/Default"));
+    }
+
+    bool IsSpanValid(Vector2 candidateB)
+    {
+        float span = Vector2.Distance(_pairFirst, candidateB);
+        float max  = _selectedDef != null && _selectedDef.pairMaxSpan > 0f ? _selectedDef.pairMaxSpan : 4f;
+        return span >= MIN_PAIR_SPAN && span <= max;
+    }
+
+    // ── Shared validation ─────────────────────────────────────────────
+
+    /// <summary>Zone + tower-overlap check. GetComponentInParent so child body
+    /// colliders (e.g. a fence's post B) also block placement.</summary>
+    bool IsSpotBlocked(Vector2 worldPos, float radius)
+    {
+        if (placementZones != null && !placementZones.Overlaps(worldPos, radius))
+            return true;
+
+        var nearby = Physics2D.OverlapCircleAll(worldPos, radius);
+        foreach (var col in nearby)
+            if (!col.isTrigger && col.GetComponentInParent<TowerInfo>() != null)
+                return true;
+        return false;
+    }
+
+    bool IsTowerCapReached()
+    {
+        var bm = BalanceManager.Instance;
+        if (bm != null && bm.TowerCount >= bm.MaxTowers)
+        {
+            Debug.Log($"[TowerPlacer] Tower cap reached ({bm.TowerCount}/{bm.MaxTowers}). Diversify your balance to expand.");
+            return true;
+        }
+        return false;
     }
 
     void SpawnGhost(string definitionId)

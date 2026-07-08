@@ -25,6 +25,22 @@ public static class RunStats
         public int   difficulty;
         public float livesLost;
         public HashSet<string> balanceTypesUsed;
+
+        // Live BalanceManager scores at the moment of victory
+        public float balancePhysical;
+        public float balanceElemental;
+        public float balanceArcane;
+
+        public float BalanceOf(string balanceType)
+        {
+            switch (balanceType)
+            {
+                case "Physical":  return balancePhysical;
+                case "Elemental": return balanceElemental;
+                case "Arcane":    return balanceArcane;
+                default:          return 0f;
+            }
+        }
     }
 
     public static void ResetForLevel()
@@ -50,13 +66,20 @@ public static class RunStats
 
     // ── Consumption ───────────────────────────────────────────────────
 
-    public static Report BuildReport(int levelIndex, int difficulty) => new Report
+    public static Report BuildReport(int levelIndex, int difficulty)
     {
-        levelIndex       = levelIndex,
-        difficulty       = difficulty,
-        livesLost        = LivesLost,
-        balanceTypesUsed = new HashSet<string>(_balanceTypesUsed),
-    };
+        var bm = BalanceManager.Instance;
+        return new Report
+        {
+            levelIndex       = levelIndex,
+            difficulty       = difficulty,
+            livesLost        = LivesLost,
+            balanceTypesUsed = new HashSet<string>(_balanceTypesUsed),
+            balancePhysical  = bm != null ? bm.Physical  : 0f,
+            balanceElemental = bm != null ? bm.Elemental : 0f,
+            balanceArcane    = bm != null ? bm.Arcane    : 0f,
+        };
+    }
 
     /// <summary>
     /// Adds this run's counters to the active profile's lifetime stats and

@@ -10,8 +10,18 @@ public class LevelEditorWindow : EditorWindow
     const string ZonesName  = "Zones";
     const string SessionKey = "LevelEditorWindow_ActiveLevel";
 
+    // Every level background sits at this exact position; scale is auto-fitted to the camera.
+    const float  BgX        = 0.08f;
+    const float  BgY        = 1.06f;
+    const string MapsFolder = "Assets/Resources/Art/Maps";
+
     // Copy-from dropdown state
     int _copySourceIdx = 0;
+
+    // Background map picker state (Resources paths, e.g. "Art/Maps/level_2")
+    string[] _bgOptions  = System.Array.Empty<string>();
+    string[] _bgLabels   = System.Array.Empty<string>();
+    int      _bgSelected = -1;
 
     int     _activeLevel;
     Vector2 _scroll;
@@ -23,6 +33,24 @@ public class LevelEditorWindow : EditorWindow
     WaveCollection _waveData;
     string[]       _unitIds   = System.Array.Empty<string>();
     string[]       _towerIds  = System.Array.Empty<string>();
+
+    // ── Wave templates (shared across levels) ─────────────────────────
+    [System.Serializable]
+    class WaveTemplate
+    {
+        public string         name = "";
+        public WaveDefinition wave = new WaveDefinition();
+    }
+
+    [System.Serializable]
+    class WaveTemplateCollection
+    {
+        public List<WaveTemplate> templates = new List<WaveTemplate>();
+    }
+
+    WaveTemplateCollection _waveTemplates;
+    int    _tplIdx  = 0;
+    string _tplName = "";
 
     // Level settings (editable in the window, saved via button)
     string              _editName      = "";
@@ -186,10 +214,7 @@ public class LevelEditorWindow : EditorWindow
 
         // ── Background ────────────────────────────────────────────────
         GUILayout.Label("Background", EditorStyles.miniBoldLabel);
-        GUI.backgroundColor = new Color(1f, 0.85f, 0.4f);
-        if (GUILayout.Button("Save Background Position  →  JSON", GUILayout.Height(30)))
-            SaveBackgroundPosition(_activeLevel, root);
-        GUI.backgroundColor = Color.white;
+        DrawBackgroundPicker(root);
 
         GUILayout.Space(8);
 
@@ -244,6 +269,8 @@ public class LevelEditorWindow : EditorWindow
             WaveGraphWindow.OpenWith(_waveData, _unitIds);
         GUI.backgroundColor = Color.white;
         GUILayout.EndHorizontal();
+
+        DrawTemplateBar();
 
         GUILayout.Space(4);
         DrawWaveList();
@@ -494,6 +521,35 @@ public class LevelEditorWindow : EditorWindow
                     GUILayout.Label(
                         $"({nodeTr.position.x:F1}, {nodeTr.position.y:F1})",
                         EditorStyles.miniLabel, GUILayout.MinWidth(80));
+
+                    // Teleporter toggle — units fade out here and reappear at the next node
+                    if (!isTerm)
+                    {
+                        GUI.backgroundColor = pn.isTeleporter ? new Color(0.85f, 0.4f, 1f) : Color.white;
+                        bool tpNow = GUILayout.Toggle(pn.isTeleporter,
+                            new GUIContent("TP", "Teleporter: units fade out at this node and fade in at the next"),
+                            EditorStyles.miniButton, GUILayout.Width(28));
+                        GUI.backgroundColor = Color.white;
+                        if (tpNow != pn.isTeleporter)
+                        {
+                            Undo.RecordObject(pn, "Toggle Teleporter");
+                            pn.isTeleporter = tpNow;
+                            EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
+                        }
+
+                        // Delay the unit stays vanished between fade-out and fade-in
+                        if (pn.isTeleporter)
+                        {
+                            GUILayout.Label("delay", EditorStyles.miniLabel, GUILayout.Width(30));
+                            float newDelay = EditorGUILayout.FloatField(pn.teleportDelay, GUILayout.Width(34));
+                            if (!Mathf.Approximately(newDelay, pn.teleportDelay))
+                            {
+                                Undo.RecordObject(pn, "Change Teleport Delay");
+                                pn.teleportDelay = Mathf.Max(0f, newDelay);
+                                EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
+                            }
+                        }
+                    }
 
                     if (GUILayout.Button("Sel", EditorStyles.miniButton, GUILayout.Width(30)))
                     {
@@ -802,7 +858,10 @@ public class LevelEditorWindow : EditorWindow
                         Undo.RegisterCreatedObjectUndo(go, $"Create node {nd.id}");
                         go.transform.SetParent(pathGO.transform);
                         go.transform.position = new Vector3(nd.x, nd.y, 0f);
-                        nodeMap[nd.id] = go.AddComponent<PathNode>();
+                        var pnNew = go.AddComponent<PathNode>();
+                        pnNew.isTeleporter  = nd.teleporter;
+                        pnNew.teleportDelay = nd.teleportDelay;
+                        nodeMap[nd.id] = pnNew;
                     }
                     foreach (var nd in pathData.nodes)
                     {
@@ -858,6 +917,9 @@ public class LevelEditorWindow : EditorWindow
         _unitIds  = LoadUnitIds();
         _towerIds = LoadTowerIds();
 
+        // Background map dropdown
+        RefreshBgOptions(data.backgroundSprite);
+
         // Populate settings fields
         _editName      = data.displayName;
         _editGold      = data.startGold;
@@ -897,17 +959,95 @@ public class LevelEditorWindow : EditorWindow
         Debug.Log($"[LevelEditor] Loaded Level {levelNumber}.");
     }
 
-    // ── Save background ───────────────────────────────────────────────
+    // ── Background picker ─────────────────────────────────────────────
+    // Dropdown of all map sprites in Assets/Resources/Art/Maps. Picking one
+    // saves the sprite + the standard position (BgX, BgY) to JSON immediately —
+    // backgrounds are never positioned by hand.
 
-    void SaveBackgroundPosition(int levelNumber, GameObject root)
+    void DrawBackgroundPicker(GameObject root)
     {
-        var bgTr = root.transform.Find("[Background]");
-        if (bgTr == null) { EditorUtility.DisplayDialog("No Background", "No [Background] found.", "OK"); return; }
+        if (_bgOptions.Length == 0) RefreshBgOptions(CurrentBgPath());
+
+        GUILayout.BeginHorizontal();
+        if (_bgOptions.Length == 0)
+        {
+            EditorGUILayout.HelpBox($"No map images found in {MapsFolder}.", MessageType.Info);
+        }
+        else
+        {
+            int sel = EditorGUILayout.Popup(_bgSelected, _bgLabels, GUILayout.Height(20));
+            if (sel != _bgSelected && sel >= 0)
+            {
+                _bgSelected = sel;
+                ApplyBackground(_activeLevel, root, _bgOptions[sel]);
+            }
+        }
+        if (GUILayout.Button("↻", GUILayout.Width(26)))
+            RefreshBgOptions(CurrentBgPath());
+        GUILayout.EndHorizontal();
+    }
+
+    string CurrentBgPath()
+    {
+        var data = _activeLevel > 0 ? ReadJSON(_activeLevel) : null;
+        return data != null ? data.backgroundSprite : "";
+    }
+
+    void RefreshBgOptions(string currentPath)
+    {
+        var options = new List<string>();
+        foreach (var guid in AssetDatabase.FindAssets("t:Texture2D", new[] { MapsFolder }))
+        {
+            string assetPath = AssetDatabase.GUIDToAssetPath(guid);
+            // "Assets/Resources/Art/Maps/level_2.png" → "Art/Maps/level_2"
+            string resPath = assetPath.Substring("Assets/Resources/".Length);
+            resPath = resPath.Substring(0, resPath.LastIndexOf('.'));
+            options.Add(resPath);
+        }
+        options.Sort(System.StringComparer.OrdinalIgnoreCase);
+
+        _bgOptions  = options.ToArray();
+        _bgLabels   = new string[options.Count];
+        _bgSelected = -1;
+        for (int i = 0; i < options.Count; i++)
+        {
+            _bgLabels[i] = Path.GetFileName(options[i]);
+            if (string.Equals(options[i], currentPath, System.StringComparison.OrdinalIgnoreCase))
+                _bgSelected = i;
+        }
+    }
+
+    void ApplyBackground(int levelNumber, GameObject root, string resourcesPath)
+    {
         var data = ReadJSON(levelNumber) ?? MakeBlank(levelNumber);
-        data.backgroundX = Round(bgTr.position.x);
-        data.backgroundY = Round(bgTr.position.y);
+        data.backgroundSprite = resourcesPath;
+        data.backgroundX      = BgX;
+        data.backgroundY      = BgY;
         WriteJSON(levelNumber, data);
-        EditorUtility.DisplayDialog("Saved", $"Background saved  ({data.backgroundX}, {data.backgroundY})", "OK");
+
+        // Update (or create) the scene background so the editor matches the game
+        var bgTr = root.transform.Find("[Background]");
+        GameObject bgGO;
+        if (bgTr != null) bgGO = bgTr.gameObject;
+        else
+        {
+            bgGO = new GameObject("[Background]");
+            Undo.RegisterCreatedObjectUndo(bgGO, "Create Background");
+            bgGO.transform.SetParent(root.transform);
+        }
+
+        bgGO.transform.position = new Vector3(BgX, BgY, 0f);
+        var sr = bgGO.GetComponent<SpriteRenderer>();
+        if (sr == null) sr = bgGO.AddComponent<SpriteRenderer>();
+        sr.sortingOrder = -100;
+
+        var sp = LoadSpriteAnywhere(resourcesPath);
+        if (sp != null)
+        {
+            sr.sprite = sp;
+            ScaleBgToFillCamera(bgGO, sr);
+        }
+        else Debug.LogWarning($"[LevelEditor] Sprite not found: {resourcesPath}");
     }
 
     // ── Save routes ───────────────────────────────────────────────────
@@ -940,10 +1080,12 @@ public class LevelEditorWindow : EditorWindow
                         nextIds.Add(nid);
                 nodes.Add(new NodeData
                 {
-                    id   = nodeTr.name,
-                    x    = Round(nodeTr.position.x),
-                    y    = Round(nodeTr.position.y),
-                    next = nextIds.ToArray(),
+                    id            = nodeTr.name,
+                    x             = Round(nodeTr.position.x),
+                    y             = Round(nodeTr.position.y),
+                    teleporter    = pn.isTeleporter,
+                    teleportDelay = pn.teleportDelay,
+                    next          = nextIds.ToArray(),
                 });
             }
             paths.Add(new PathData { spawnerIndex = lep.spawnerIndex, nodes = nodes.ToArray() });
@@ -1101,9 +1243,18 @@ public class LevelEditorWindow : EditorWindow
         bool isRepaint = evt.type == EventType.Repaint;
 
         int  waveToDelete   = -1;
+        int  waveToCopy     = -1;
+        int  waveToSaveTpl  = -1;
+        int  waveToMergeTpl = -1;
         int  addGroupToWave = -1;
         (int wave, int grp) groupToDelete = (-1, -1);
+        (int wave, int grp) groupToCopy   = (-1, -1);
+        (int wave, int grp, int target) groupToMove = (-1, -1, -1);
         bool dataChanged = false;
+
+        // "W1", "W2", … labels for the per-group move-to-wave dropdown
+        var waveLabels = new string[_waveData.waves.Count];
+        for (int i = 0; i < waveLabels.Length; i++) waveLabels[i] = $"W{i + 1}";
 
         // Ensure top-Y list has enough entries
         while (_waveTopYs.Count < _waveData.waves.Count) _waveTopYs.Add(0f);
@@ -1161,6 +1312,18 @@ public class LevelEditorWindow : EditorWindow
             GUI.backgroundColor = new Color(0.7f, 0.9f, 1f);
             if (GUILayout.Button("+Group", EditorStyles.miniButton, GUILayout.Width(54)))
                 addGroupToWave = wi;
+            GUI.backgroundColor = new Color(0.75f, 0.55f, 1f);
+            if (GUILayout.Button(new GUIContent("⧉", "Duplicate this wave"), EditorStyles.miniButton, GUILayout.Width(22)))
+                waveToCopy = wi;
+            GUI.backgroundColor = new Color(1f, 0.85f, 0.4f);
+            if (GUILayout.Button(new GUIContent("★", "Save this wave as a template"), EditorStyles.miniButton, GUILayout.Width(22)))
+                waveToSaveTpl = wi;
+            if (_waveTemplates != null && _waveTemplates.templates.Count > 0)
+            {
+                GUI.backgroundColor = new Color(0.55f, 0.85f, 0.6f);
+                if (GUILayout.Button(new GUIContent("+T", "Paste the selected template's groups into this wave"), EditorStyles.miniButton, GUILayout.Width(26)))
+                    waveToMergeTpl = wi;
+            }
             GUI.backgroundColor = new Color(1f, 0.45f, 0.45f);
             if (GUILayout.Button("✕", EditorStyles.miniButton, GUILayout.Width(22)))
                 waveToDelete = wi;
@@ -1276,6 +1439,18 @@ public class LevelEditorWindow : EditorWindow
                         if (dmIdx < 0) dmIdx = 0;
                         int newDmIdx = EditorGUILayout.Popup(dmIdx, DropModes, GUILayout.Width(64));
                         if (newDmIdx != dmIdx) { g.dropConfig.mode = DropModes[newDmIdx]; dataChanged = true; }
+
+                        // Move to another wave (only useful with 2+ waves)
+                        if (_waveData.waves.Count > 1)
+                        {
+                            int newWave = EditorGUILayout.Popup(wi, waveLabels, GUILayout.Width(44));
+                            if (newWave != wi) groupToMove = (wi, gi, newWave);
+                        }
+
+                        GUI.backgroundColor = new Color(0.75f, 0.55f, 1f);
+                        if (GUILayout.Button(new GUIContent("⧉", "Duplicate this group"), EditorStyles.miniButton, GUILayout.Width(22)))
+                            groupToCopy = (wi, gi);
+                        GUI.backgroundColor = Color.white;
 
                         bool wasExp = _groupExpanded[key];
                         _groupExpanded[key] = GUILayout.Toggle(wasExp, "▾", EditorStyles.miniButton, GUILayout.Width(20));
@@ -1445,6 +1620,56 @@ public class LevelEditorWindow : EditorWindow
             }
         }
 
+        if (waveToCopy >= 0 && waveToCopy < _waveData.waves.Count)
+        {
+            _waveData.waves.Insert(waveToCopy + 1, DeepClone(_waveData.waves[waveToCopy]));
+            _waveFoldouts[waveToCopy + 1] = true;
+            dataChanged = true;
+            Repaint();
+        }
+
+        if (waveToSaveTpl >= 0)
+            SaveWaveAsTemplate(waveToSaveTpl);
+
+        if (waveToMergeTpl >= 0 && waveToMergeTpl < _waveData.waves.Count
+            && _waveTemplates != null
+            && _tplIdx >= 0 && _tplIdx < _waveTemplates.templates.Count)
+        {
+            var clone = DeepClone(_waveTemplates.templates[_tplIdx].wave);
+            _waveData.waves[waveToMergeTpl].groups.AddRange(clone.groups);
+            _waveFoldouts[waveToMergeTpl] = true;
+            dataChanged = true;
+            Repaint();
+        }
+
+        if (groupToCopy.wave >= 0 && groupToCopy.wave < _waveData.waves.Count)
+        {
+            var grps = _waveData.waves[groupToCopy.wave].groups;
+            if (groupToCopy.grp >= 0 && groupToCopy.grp < grps.Count)
+            {
+                grps.Insert(groupToCopy.grp + 1, DeepClone(grps[groupToCopy.grp]));
+                dataChanged = true;
+                Repaint();
+            }
+        }
+
+        if (groupToMove.wave >= 0 && groupToMove.wave < _waveData.waves.Count
+            && groupToMove.target >= 0 && groupToMove.target < _waveData.waves.Count
+            && groupToMove.target != groupToMove.wave)
+        {
+            var src = _waveData.waves[groupToMove.wave].groups;
+            if (groupToMove.grp >= 0 && groupToMove.grp < src.Count)
+            {
+                var moved = src[groupToMove.grp];
+                src.RemoveAt(groupToMove.grp);
+                _waveData.waves[groupToMove.target].groups.Add(moved);
+                _waveFoldouts[groupToMove.target] = true;
+                _groupExpanded.Remove((groupToMove.wave, groupToMove.grp));
+                dataChanged = true;
+                Repaint();
+            }
+        }
+
         if (addGroupToWave >= 0 && addGroupToWave < _waveData.waves.Count)
         {
             float nextStart = 0f;
@@ -1500,6 +1725,97 @@ public class LevelEditorWindow : EditorWindow
         _waveData.waves.Add(new WaveDefinition());
         _waveFoldouts[_waveData.waves.Count - 1] = true;
         Repaint();
+    }
+
+    /// <summary>Deep copy via JSON round-trip — safe for nested lists (groups, drop configs).</summary>
+    static T DeepClone<T>(T src) => JsonUtility.FromJson<T>(JsonUtility.ToJson(src));
+
+    // ── Wave templates ────────────────────────────────────────────────
+    // Reusable wave layouts shared across all levels. Save any wave as a
+    // template (★), then insert it as a new wave or paste its groups into
+    // an existing wave (+T) in any level.
+
+    static string WaveTemplatePath =>
+        Path.Combine(Application.dataPath, "Resources", "Definitions", "Levels", "wave_templates.json");
+
+    void LoadWaveTemplates()
+    {
+        if (_waveTemplates != null) return;
+        _waveTemplates = File.Exists(WaveTemplatePath)
+            ? JsonUtility.FromJson<WaveTemplateCollection>(File.ReadAllText(WaveTemplatePath))
+            : null;
+        if (_waveTemplates == null) _waveTemplates = new WaveTemplateCollection();
+    }
+
+    void SaveWaveTemplates()
+    {
+        File.WriteAllText(WaveTemplatePath, JsonUtility.ToJson(_waveTemplates, true));
+        AssetDatabase.Refresh();
+    }
+
+    void DrawTemplateBar()
+    {
+        LoadWaveTemplates();
+        var tpls = _waveTemplates.templates;
+
+        GUILayout.BeginHorizontal();
+        GUILayout.Label("Template", EditorStyles.miniLabel, GUILayout.Width(52));
+
+        if (tpls.Count == 0)
+        {
+            GUILayout.Label("none saved yet — ★ on a wave saves it", EditorStyles.miniLabel);
+        }
+        else
+        {
+            var names = new string[tpls.Count];
+            for (int i = 0; i < tpls.Count; i++)
+                names[i] = $"{tpls[i].name}  ({tpls[i].wave.groups.Count} grp)";
+            _tplIdx = Mathf.Clamp(_tplIdx, 0, tpls.Count - 1);
+            _tplIdx = EditorGUILayout.Popup(_tplIdx, names, GUILayout.MinWidth(150));
+
+            GUI.backgroundColor = new Color(0.7f, 0.9f, 1f);
+            if (GUILayout.Button("+ Insert as Wave", EditorStyles.miniButton, GUILayout.Width(104)))
+                InsertTemplateAsWave(_tplIdx);
+            GUI.backgroundColor = new Color(1f, 0.45f, 0.45f);
+            if (GUILayout.Button("✕", EditorStyles.miniButton, GUILayout.Width(22)) &&
+                EditorUtility.DisplayDialog("Delete Template", $"Delete template '{tpls[_tplIdx].name}'?", "Delete", "Cancel"))
+            {
+                tpls.RemoveAt(_tplIdx);
+                _tplIdx = Mathf.Clamp(_tplIdx, 0, Mathf.Max(0, tpls.Count - 1));
+                SaveWaveTemplates();
+            }
+            GUI.backgroundColor = Color.white;
+        }
+
+        GUILayout.FlexibleSpace();
+        GUILayout.Label("Name", EditorStyles.miniLabel, GUILayout.Width(36));
+        _tplName = EditorGUILayout.TextField(_tplName, GUILayout.Width(130));
+        GUILayout.EndHorizontal();
+
+        var hint = new GUIStyle(EditorStyles.miniLabel);
+        hint.normal.textColor = new Color(0.5f, 0.5f, 0.5f);
+        GUILayout.Label("★ saves a wave as a template (named from the Name field) · +T pastes the selected template's groups into that wave", hint);
+    }
+
+    void InsertTemplateAsWave(int tplIdx)
+    {
+        if (tplIdx < 0 || tplIdx >= _waveTemplates.templates.Count) return;
+        if (_waveData == null) _waveData = new WaveCollection();
+        _waveData.waves.Add(DeepClone(_waveTemplates.templates[tplIdx].wave));
+        _waveFoldouts[_waveData.waves.Count - 1] = true;
+        WaveGraphWindow.Refresh(_waveData, _unitIds);
+        Repaint();
+    }
+
+    void SaveWaveAsTemplate(int waveIdx)
+    {
+        if (_waveData == null || waveIdx < 0 || waveIdx >= _waveData.waves.Count) return;
+        string name = string.IsNullOrEmpty(_tplName.Trim()) ? $"L{_activeLevel} Wave {waveIdx + 1}" : _tplName.Trim();
+        _waveTemplates.templates.Add(new WaveTemplate { name = name, wave = DeepClone(_waveData.waves[waveIdx]) });
+        _tplIdx  = _waveTemplates.templates.Count - 1;
+        _tplName = "";
+        SaveWaveTemplates();
+        ShowNotification(new GUIContent($"Saved template '{name}'"), 1.2f);
     }
 
     void SaveWaves(int levelNumber)

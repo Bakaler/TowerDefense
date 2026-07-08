@@ -428,7 +428,16 @@ public class HUDInfoPanel : MonoBehaviour
             _tpFireRate.text = rateStr;
         }
 
-        if (_tpAura != null) _tpAura.text = "";
+        if (_tpAura != null)
+        {
+            // Detector badge — gold when active, dim hint when it unlocks at a later tier
+            if (info.detectorTier > 0)
+                _tpAura.text = info.IsDetector
+                    ? "<color=#FFD24D><b>◈ DETECTOR</b></color>"
+                    : $"<color=#8A7B4A>◈ Detector at Tier {info.detectorTier}</color>";
+            else
+                _tpAura.text = "";
+        }
         if (_tpKills != null) _tpKills.text = $"Kills  {info.KillCount}";
 
         if (_tpMoveZoneBtn != null)

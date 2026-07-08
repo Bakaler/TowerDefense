@@ -23,6 +23,12 @@ public class TowerInfo : MonoBehaviour
     /// <summary>True on the ghost preview — excluded from balance counts.</summary>
     public bool isGhost = false;
 
+    // ── Detection ─────────────────────────────────────────────────────
+    /// <summary>Tower tier at which this tower detects invisible units (0 = never).</summary>
+    public int detectorTier = 0;
+    /// <summary>True when this tower can currently target invisible units.</summary>
+    public bool IsDetector => detectorTier > 0 && Tier >= detectorTier;
+
     // ── Upgrade ───────────────────────────────────────────────────────
     public int   maxTier              = 1;
     public float upgradeStatMultiplier = 2.25f;

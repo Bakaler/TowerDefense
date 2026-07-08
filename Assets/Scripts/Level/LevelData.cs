@@ -158,6 +158,10 @@ public class NodeData
     public string   id   = "";
     public float    x    = 0f;
     public float    y    = 0f;
+    /// <summary>Units reaching this node fade out and reappear at the next node.</summary>
+    public bool     teleporter = false;
+    /// <summary>Seconds a unit stays vanished between fading out and fading back in.</summary>
+    public float    teleportDelay = 0f;
     public string[] next = Array.Empty<string>();
 }
 

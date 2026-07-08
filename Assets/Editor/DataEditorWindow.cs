@@ -7,13 +7,14 @@ using UnityEditor;
 using UnityEngine;
 
 /// <summary>
-/// Editor window for towers.json, abilities.json, effects.json, projectiles.json,
-/// units.json, and minions.json. Tab layout: list panel on left, detail form on right.
+/// Editor window for the game's data JSON: towers, abilities, effects, behaviors,
+/// projectiles, units, minions, sounds, and achievements.
+/// Tab layout: list panel on left, detail form on right.
 /// </summary>
-public class TowerAbilityEditorWindow : EditorWindow
+public class DataEditorWindow : EditorWindow
 {
     // ── Tabs ──────────────────────────────────────────────────────────────
-    enum Tab { Towers, Abilities, Effects, Projectiles, Units, Minions, Sounds }
+    enum Tab { Towers, Abilities, Effects, Behaviors, Projectiles, Units, Minions, Sounds, Achievements }
     Tab _tab;
 
     // ── Tower state ───────────────────────────────────────────────────────
@@ -28,6 +29,12 @@ public class TowerAbilityEditorWindow : EditorWindow
     // ── Effect state ──────────────────────────────────────────────────────
     readonly List<EffectDefinition> _effects = new();
     int _eIdx = -1;
+
+    // ── Behavior state ────────────────────────────────────────────────────
+    readonly List<BehaviorDefinition> _behaviors = new();
+    int _bIdx = -1;
+
+    static readonly string[] StackRuleOptions = { "refresh", "stack", "none" };
 
     // ── Projectile state ──────────────────────────────────────────────────
     readonly List<ProjectileDefinition> _projectiles = new();
@@ -45,6 +52,17 @@ public class TowerAbilityEditorWindow : EditorWindow
     readonly List<SoundDefinition>  _sounds      = new();
     readonly List<SoundEventEntry>  _soundEvents = new();
     int _sIdx = -1;
+
+    // ── Achievement state ─────────────────────────────────────────────────
+    readonly List<AchievementDefinition> _achievements = new();
+    int _achIdx = -1;
+
+    // Must match the condition switch in AchievementManager
+    static readonly string[] AchievementConditionOptions =
+    {
+        "LevelStars", "TotalStars", "TotalKills", "TowersBuilt",
+        "WavesCleared", "GoldEarned", "FlawlessVictory", "MonoTypeVictory"
+    };
 
     static readonly string[] BusOptions      = { "music", "combat", "ui", "ambient" };
     static readonly string[] WaveOptions     = { "none", "sine", "square", "triangle", "saw", "noise", "drone" };
@@ -69,10 +87,10 @@ public class TowerAbilityEditorWindow : EditorWindow
 
     // ── Open ──────────────────────────────────────────────────────────────
 
-    [MenuItem("TowerDefense/Tower & Ability Editor")]
+    [MenuItem("TowerDefense/Data Editor")]
     public static void Open()
     {
-        var w = GetWindow<TowerAbilityEditorWindow>("Tower & Ability Editor");
+        var w = GetWindow<DataEditorWindow>("Data Editor");
         w.minSize = new Vector2(750f, 400f);
         w.Show();
     }
@@ -110,7 +128,7 @@ public class TowerAbilityEditorWindow : EditorWindow
 
         _registriesLoaded = true;
         int validators = 0; foreach (var _ in TargetValidatorRegistry.Prefixes) validators++;
-        Debug.Log($"[TowerAbilityEditor] Registries loaded — {EffectRegistry.All.Count} effect type(s), " +
+        Debug.Log($"[DataEditor] Registries loaded — {EffectRegistry.All.Count} effect type(s), " +
                   $"{ComponentRegistry.All.Count} component key(s), {validators} validator prefix(es).");
     }
 
@@ -132,14 +150,33 @@ public class TowerAbilityEditorWindow : EditorWindow
     void LoadAll()
     {
         _spriteCache.Clear();
+        _texturePaths = null;   // rescan sprite-path dropdown options
         LoadTowers();
         LoadAbilities();
         LoadEffects();
         LoadProjectiles();
         LoadUnits();
         LoadMinions();
-        LoadBehaviorIds();
+        LoadBehaviors();
         LoadSounds();
+        LoadAchievements();
+    }
+
+    // ── Achievements ──────────────────────────────────────────────────────
+
+    void LoadAchievements()
+    {
+        _achievements.Clear(); _achIdx = -1;
+        string text = ReadFile("achievements");
+        if (text == null) return;
+        var col = JsonUtility.FromJson<AchievementDefinitionList>(text);
+        if (col?.achievements != null) _achievements.AddRange(col.achievements);
+    }
+
+    void SaveAchievements()
+    {
+        var col = new AchievementDefinitionList { achievements = _achievements.ToArray() };
+        WriteFile("achievements", JsonUtility.ToJson(col, true));
     }
 
     void LoadSounds()
@@ -165,23 +202,30 @@ public class TowerAbilityEditorWindow : EditorWindow
         return ids;
     }
 
-    // ── Behavior ids (read-only, for dropdowns) ───────────────────────────
-    readonly List<string> _behaviorIds = new();
+    // ── Behaviors ─────────────────────────────────────────────────────────
+    [Serializable] class BehaviorCollection { public BehaviorDefinition[] behaviors; }
 
-    [Serializable] class BehaviorIdScan { public BehaviorDefinition[] behaviors; }
-
-    void LoadBehaviorIds()
+    void LoadBehaviors()
     {
-        _behaviorIds.Clear();
+        _behaviors.Clear(); _bIdx = -1;
         string text = ReadFile("behaviors");
         if (text == null) return;
-        var col = JsonUtility.FromJson<BehaviorIdScan>(text);
-        if (col?.behaviors == null) return;
-        foreach (var b in col.behaviors)
-            if (!string.IsNullOrEmpty(b.id)) _behaviorIds.Add(b.id);
+        var col = JsonUtility.FromJson<BehaviorCollection>(text);
+        if (col?.behaviors != null) _behaviors.AddRange(col.behaviors);
     }
 
-    string[] BehaviorIds() => _behaviorIds.ToArray();
+    void SaveBehaviors()
+    {
+        var col = new BehaviorCollection { behaviors = _behaviors.ToArray() };
+        WriteFile("behaviors", JsonUtility.ToJson(col, true));
+    }
+
+    string[] BehaviorIds()
+    {
+        var ids = new string[_behaviors.Count];
+        for (int i = 0; i < _behaviors.Count; i++) ids[i] = _behaviors[i].id;
+        return ids;
+    }
 
     void LoadTowers()
     {
@@ -314,8 +358,10 @@ public class TowerAbilityEditorWindow : EditorWindow
         // scene start, so re-read — newly spawned units pick up the edit live.
         if (Application.isPlaying && name == "units")
             UnitDefinitionLibrary.Instance?.Reload();
+        if (Application.isPlaying && name == "behaviors")
+            BehaviorLibrary.Instance?.Reload();
 
-        Debug.Log($"[TowerAbilityEditor] Saved {name}.json");
+        Debug.Log($"[DataEditor] Saved {name}.json");
     }
 
     // ── OnGUI ─────────────────────────────────────────────────────────────
@@ -338,10 +384,12 @@ public class TowerAbilityEditorWindow : EditorWindow
         if (GUILayout.Toggle(_tab == Tab.Towers,      "Towers",      EditorStyles.toolbarButton, GUILayout.Width(70)))  _tab = Tab.Towers;
         if (GUILayout.Toggle(_tab == Tab.Abilities,   "Abilities",   EditorStyles.toolbarButton, GUILayout.Width(70)))  _tab = Tab.Abilities;
         if (GUILayout.Toggle(_tab == Tab.Effects,     "Effects",     EditorStyles.toolbarButton, GUILayout.Width(70)))  _tab = Tab.Effects;
+        if (GUILayout.Toggle(_tab == Tab.Behaviors,   "Behaviors",   EditorStyles.toolbarButton, GUILayout.Width(75)))  _tab = Tab.Behaviors;
         if (GUILayout.Toggle(_tab == Tab.Projectiles, "Projectiles", EditorStyles.toolbarButton, GUILayout.Width(80)))  _tab = Tab.Projectiles;
         if (GUILayout.Toggle(_tab == Tab.Units,       "Units",       EditorStyles.toolbarButton, GUILayout.Width(70)))  _tab = Tab.Units;
         if (GUILayout.Toggle(_tab == Tab.Minions,     "Minions",     EditorStyles.toolbarButton, GUILayout.Width(70)))  _tab = Tab.Minions;
         if (GUILayout.Toggle(_tab == Tab.Sounds,      "Sounds",      EditorStyles.toolbarButton, GUILayout.Width(70)))  _tab = Tab.Sounds;
+        if (GUILayout.Toggle(_tab == Tab.Achievements, "Achievements", EditorStyles.toolbarButton, GUILayout.Width(90))) _tab = Tab.Achievements;
 
         GUILayout.FlexibleSpace();
         if (GUILayout.Button("Reload", EditorStyles.toolbarButton, GUILayout.Width(60))) { EnsureRegistriesLoaded(); LoadAll(); }
@@ -361,10 +409,12 @@ public class TowerAbilityEditorWindow : EditorWindow
             case Tab.Towers:      DrawTowerList();      break;
             case Tab.Abilities:   DrawAbilityList();    break;
             case Tab.Effects:     DrawEffectList();     break;
+            case Tab.Behaviors:   DrawBehaviorList();   break;
             case Tab.Projectiles: DrawProjectileList(); break;
             case Tab.Units:       DrawUnitList();       break;
-            case Tab.Minions:     DrawMinionList();     break;
-            case Tab.Sounds:      DrawSoundList();      break;
+            case Tab.Minions:      DrawMinionList();      break;
+            case Tab.Sounds:       DrawSoundList();       break;
+            case Tab.Achievements: DrawAchievementList(); break;
         }
 
         EditorGUILayout.EndScrollView();
@@ -571,6 +621,99 @@ public class TowerAbilityEditorWindow : EditorWindow
         }
     }
 
+    // ── Achievement List & Detail ─────────────────────────────────────────
+
+    void DrawAchievementList()
+    {
+        int moveIdx = -1, moveDir = 0;
+        for (int i = 0; i < _achievements.Count; i++)
+        {
+            var a = _achievements[i];
+            string name  = string.IsNullOrEmpty(a.title) ? a.id : a.title;
+            string label = $"{name}\n<size=10><color=#aaa>{a.conditionType}{(a.hidden ? " · hidden" : "")}</color></size>";
+            int idx = i;
+            int m = ListItem(label, _achIdx == i, () => _achIdx = idx, RichListStyle());
+            if (m != 0) { moveIdx = i; moveDir = m; }
+        }
+        if (moveIdx >= 0 && MoveEntry(_achievements, moveIdx, moveDir, ref _achIdx)) SaveAchievements();
+        GUILayout.Space(4);
+        if (GUILayout.Button("+ Achievement"))
+        {
+            _achievements.Add(new AchievementDefinition { id = "new_achievement", title = "New Achievement", conditionType = "LevelStars", levelIndex = 1, minStars = 1 });
+            _achIdx = _achievements.Count - 1;
+        }
+        if (_achIdx >= 0 && _achIdx < _achievements.Count && GUILayout.Button("+ Copy Selected"))
+        {
+            var c = CloneDef(_achievements[_achIdx]);
+            c.id += "_copy"; c.title += " Copy";
+            _achievements.Add(c);
+            _achIdx = _achievements.Count - 1;
+        }
+    }
+
+    void DrawAchievementDetail()
+    {
+        if (_achIdx < 0 || _achIdx >= _achievements.Count)
+        {
+            EmptyMsg("Select an achievement from the list, or click + Achievement.");
+            return;
+        }
+        var a = _achievements[_achIdx];
+
+        DrawSpritePreview(ResolveAchievementPreview(a), Color.white);
+
+        Section("Identity");
+        a.id          = TF("ID",          a.id);
+        a.title       = TF("Title",       a.title);
+        a.description = TA("Description", a.description, 3);
+        a.hidden      = EF.Toggle("Hidden until earned", a.hidden);
+
+        Section("Icon");
+        a.iconPath  = TFSprite("Icon Path",  a.iconPath,  "Art/");
+        a.iconSheet = TFSprite("Icon Sheet", a.iconSheet, "Art/");
+        a.iconIndex = EF.IntField("Icon Index", a.iconIndex);
+
+        Section("Condition");
+        EditorGUILayout.HelpBox(
+            "Save-state (re-checked on progress): LevelStars, TotalStars, TotalKills, TowersBuilt, WavesCleared, GoldEarned.\n" +
+            "Run conditions (checked at victory): FlawlessVictory, MonoTypeVictory.", MessageType.None);
+        a.conditionType = Popup("Condition Type", a.conditionType, AchievementConditionOptions);
+
+        switch (a.conditionType)
+        {
+            case "LevelStars":
+                a.levelIndex = EF.IntField("Level Index (1-based)", a.levelIndex);
+                a.minStars   = EF.IntField("Min Stars",             a.minStars);
+                break;
+            case "TotalStars":
+                a.minStars   = EF.IntField("Min Total Stars", a.minStars);
+                break;
+            case "TotalKills":
+            case "TowersBuilt":
+            case "WavesCleared":
+            case "GoldEarned":
+                a.count      = EF.IntField("Count", a.count);
+                break;
+            case "MonoTypeVictory":
+                a.balanceType = Popup("Balance Type", a.balanceType, BalanceOptions);
+                a.minBalance  = EF.FloatField("Min Balance Score (0 = any)", a.minBalance);
+                break;
+            // FlawlessVictory needs no parameters
+        }
+
+        SaveDeleteBar(SaveAchievements, () => { _achievements.RemoveAt(_achIdx); _achIdx = Mathf.Clamp(_achIdx - 1, 0, _achievements.Count - 1); SaveAchievements(); });
+    }
+
+    Sprite ResolveAchievementPreview(AchievementDefinition a)
+    {
+        if (!string.IsNullOrEmpty(a.iconPath))
+        {
+            var sp = LoadSprite(a.iconPath);
+            if (sp != null) return sp;
+        }
+        return LoadSpriteFromSheet(a.iconSheet, a.iconIndex);
+    }
+
     void DrawSoundDetail()
     {
         if (_sIdx == -2) { DrawSoundEvents(); return; }
@@ -742,7 +885,7 @@ public class TowerAbilityEditorWindow : EditorWindow
     static bool PlayPreviewClip(AudioClip clip)
     {
         var util = FindAudioUtil();
-        if (util == null) { Debug.LogWarning("[TowerAbilityEditor] UnityEditor.AudioUtil not found — sound preview disabled."); return false; }
+        if (util == null) { Debug.LogWarning("[DataEditor] UnityEditor.AudioUtil not found — sound preview disabled."); return false; }
 
         const BindingFlags Flags = BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
         foreach (var name in new[] { "PlayPreviewClip", "PlayClip" })
@@ -752,7 +895,7 @@ public class TowerAbilityEditorWindow : EditorWindow
             m = util.GetMethod(name, Flags, null, new[] { typeof(AudioClip) }, null);
             if (m != null) { m.Invoke(null, new object[] { clip }); return true; }
         }
-        Debug.LogWarning("[TowerAbilityEditor] AudioUtil found but no known preview method — sound preview disabled.");
+        Debug.LogWarning("[DataEditor] AudioUtil found but no known preview method — sound preview disabled.");
         return false;
     }
 
@@ -780,10 +923,12 @@ public class TowerAbilityEditorWindow : EditorWindow
             case Tab.Towers:      DrawTowerDetail();      break;
             case Tab.Abilities:   DrawAbilityDetail();    break;
             case Tab.Effects:     DrawEffectDetail();     break;
+            case Tab.Behaviors:   DrawBehaviorDetail();   break;
             case Tab.Projectiles: DrawProjectileDetail(); break;
             case Tab.Units:       DrawUnitDetail();       break;
-            case Tab.Minions:     DrawMinionDetail();     break;
-            case Tab.Sounds:      DrawSoundDetail();      break;
+            case Tab.Minions:      DrawMinionDetail();      break;
+            case Tab.Sounds:       DrawSoundDetail();       break;
+            case Tab.Achievements: DrawAchievementDetail(); break;
         }
 
         EditorGUILayout.EndScrollView();
@@ -814,6 +959,7 @@ public class TowerAbilityEditorWindow : EditorWindow
         t.placementRadius = EF.FloatField("Placement Radius",  t.placementRadius);
         t.rotationSpeed   = EF.FloatField("Rotation Speed",    t.rotationSpeed);
         t.balanceType     = Popup("Balance Type", t.balanceType, BalanceOptions);
+        t.detectorTier    = EF.IntField(  "Detector Tier (0=never)", t.detectorTier);
 
         Section("Ability");
         t.fireAbilityId   = TFDropdown("Fire Ability ID", t.fireAbilityId, AbilityIds());
@@ -832,9 +978,9 @@ public class TowerAbilityEditorWindow : EditorWindow
         t.rangePerTier          = EF.FloatField("Extra Range / Tier",      t.rangePerTier);
 
         Section("Visuals");
-        t.spritePath       = TF("Sprite Path",       t.spritePath);
-        t.turretSpritePath = TF("Turret Sprite Path", t.turretSpritePath);
-        t.spriteSheet      = TF("Sprite Sheet",       t.spriteSheet);
+        t.spritePath       = TFSprite("Sprite Path",        t.spritePath,       "Art/Towers/");
+        t.turretSpritePath = TFSprite("Turret Sprite Path", t.turretSpritePath, "Art/Towers/");
+        t.spriteSheet      = TFSprite("Sprite Sheet",       t.spriteSheet,      "Art/Towers/");
         t.spriteIndex      = EF.IntField(  "Sprite Index", t.spriteIndex);
         t.scale            = EF.FloatField("Scale",        t.scale);
         t.animFps          = EF.FloatField("Anim FPS",     t.animFps);
@@ -1102,7 +1248,18 @@ public class TowerAbilityEditorWindow : EditorWindow
         if (n.Contains("behaviorid"))   return BehaviorIds();
         if (n.Contains("minionid"))     return MinionIds();
         if (n.Contains("soundid"))      return SoundIds();
+        if (n.Contains("unitid"))       return UnitIds();
+        if (n.Contains("spritepath") || n.Contains("spritesheet") ||
+            n.Contains("sheetpath")  || n.Contains("texturepath"))
+            return AllTexturePaths();
         return null;
+    }
+
+    string[] UnitIds()
+    {
+        var ids = new string[_units.Count];
+        for (int i = 0; i < _units.Count; i++) ids[i] = _units[i].id;
+        return ids;
     }
 
     void DrawStringList(string label, string fieldName, List<string> list)
@@ -1238,9 +1395,9 @@ public class TowerAbilityEditorWindow : EditorWindow
 
         Section("Visuals");
         p.scale        = EF.FloatField("Scale",         p.scale);
-        p.spritePath   = TF("Sprite Path (sheet = anim frames)", p.spritePath);
+        p.spritePath   = TFSprite("Sprite Path (sheet = anim frames)", p.spritePath);
         p.animFps      = EF.FloatField("Anim FPS (0 = static)",  p.animFps);
-        p.spriteSheet  = TF("Sprite Sheet",  p.spriteSheet);
+        p.spriteSheet  = TFSprite("Sprite Sheet",  p.spriteSheet);
         p.spriteIndex  = EF.IntField(  "Sprite Index",  p.spriteIndex);
         p.color        = EF.ColorField("Color",         p.color);
         p.sortingLayer = TF("Sorting Layer", p.sortingLayer);
@@ -1282,21 +1439,23 @@ public class TowerAbilityEditorWindow : EditorWindow
         u.layer          = EF.IntField(  "Layer (0=auto Enemy)",  u.layer);
 
         Section("Movement");
-        u.rotateToMovement = EF.Toggle("Rotate To Movement", u.rotateToMovement);
+        u.rotateToMovement  = EF.Toggle(    "Rotate To Movement", u.rotateToMovement);
+        u.spriteAngleOffset = EF.FloatField("Sprite Angle Offset (180 = art flipped)", u.spriteAngleOffset);
 
         Section("Visuals");
-        u.spritePath  = TF("Sprite Path",   u.spritePath);
-        u.spriteSheet = TF("Sprite Sheet",  u.spriteSheet);
+        u.spritePath  = TFSprite("Sprite Path",  u.spritePath,  "Art/Units/", "Art/Enemies/");
+        u.spriteSheet = TFSprite("Sprite Sheet", u.spriteSheet, "Art/Units/", "Art/Enemies/");
         u.spriteIndex = EF.IntField(  "Sprite Index", u.spriteIndex);
         u.scale       = EF.FloatField("Scale",        u.scale);
         u.tintColor   = EF.ColorField("Tint Color",   u.tintColor);
         u.debugColor  = EF.ColorField("Debug Color",  u.debugColor);
 
         Section("Animation");
-        u.animSheet      = TF("Walk Sheet",  u.animSheet);
+        u.animSheet      = TFSprite("Walk Sheet",  u.animSheet,      "Art/Units/", "Art/Enemies/");
         u.animFps        = EF.FloatField("Walk FPS",   u.animFps);
-        u.animDeathSheet = TF("Death Sheet", u.animDeathSheet);
+        u.animDeathSheet = TFSprite("Death Sheet", u.animDeathSheet, "Art/Units/", "Art/Enemies/");
         u.animDeathFps   = EF.FloatField("Death FPS",  u.animDeathFps);
+        u.animReverse    = EF.Toggle(    "Reverse Frames (sheet authored backwards)", u.animReverse);
 
         Section("Audio");
         u.deathSoundId = TFDropdown("Death Sound (empty = default)", u.deathSoundId, SoundIds());
@@ -1378,13 +1537,107 @@ public class TowerAbilityEditorWindow : EditorWindow
 
         Section("Visuals");
         m.scale        = EF.FloatField("Scale",         m.scale);
-        m.spritePath   = TF("Sprite Path (sheet ok)", m.spritePath);
+        m.spritePath   = TFSprite("Sprite Path (sheet ok)", m.spritePath);
         m.animFps      = EF.FloatField("Anim FPS",      m.animFps);
         m.tintColor    = EF.ColorField("Tint Color",    m.tintColor);
         m.sortingLayer = TF("Sorting Layer", m.sortingLayer);
         m.sortingOrder = EF.IntField(  "Sorting Order", m.sortingOrder);
 
         SaveDeleteBar(SaveMinions, () => { _minions.RemoveAt(_mIdx); _mIdx = Mathf.Clamp(_mIdx - 1, 0, _minions.Count - 1); SaveMinions(); });
+    }
+
+    // ── Behavior List & Detail ────────────────────────────────────────────
+
+    void DrawBehaviorList()
+    {
+        int moveIdx = -1, moveDir = 0;
+        for (int i = 0; i < _behaviors.Count; i++)
+        {
+            string label = string.IsNullOrEmpty(_behaviors[i].displayName) ? _behaviors[i].id : _behaviors[i].displayName;
+            int m = ListItem(label, _bIdx == i, () => _bIdx = i);
+            if (m != 0) { moveIdx = i; moveDir = m; }
+        }
+        if (moveIdx >= 0 && MoveEntry(_behaviors, moveIdx, moveDir, ref _bIdx)) SaveBehaviors();
+        GUILayout.Space(4);
+        if (GUILayout.Button("+ Behavior"))
+        {
+            _behaviors.Add(new BehaviorDefinition { id = "new_behavior", displayName = "New Behavior" });
+            _bIdx = _behaviors.Count - 1;
+        }
+    }
+
+    void DrawBehaviorDetail()
+    {
+        if (_bIdx < 0 || _bIdx >= _behaviors.Count)
+        {
+            EditorGUILayout.HelpBox("Select a behavior on the left, or press + Behavior.", MessageType.Info);
+            return;
+        }
+        var b = _behaviors[_bIdx];
+
+        Section("Identity");
+        b.id          = TF("ID",           b.id);
+        b.displayName = TF("Display Name", b.displayName);
+
+        Section("Type & Stacking");
+        b.behaviorType = (BehaviorType)EditorGUILayout.EnumPopup("Behavior Type", b.behaviorType);
+        b.duration     = EF.FloatField("Duration (s)", b.duration);
+        int sr = Array.IndexOf(StackRuleOptions, b.stackRule); if (sr < 0) sr = 0;
+        b.stackRule    = StackRuleOptions[EditorGUILayout.Popup("Stack Rule", sr, StackRuleOptions)];
+
+        Section("Stat Modifiers");
+        b.moveSpeedMultiplier    = EF.FloatField("Move Speed Multiplier",  b.moveSpeedMultiplier);
+        b.damageTakenMultiplier  = EF.FloatField("Damage Taken Multiplier (2 = +100%)", b.damageTakenMultiplier);
+        b.tintColor              = EF.ColorField("Unit Tint",              b.tintColor);
+
+        Section("Periodic Tick");
+        EditorGUILayout.HelpBox("Tick Interval 0 = no ticks. Tick Behavior applies another behavior every tick (e.g. cloak cycle → invisible).", MessageType.None);
+        b.tickInterval   = EF.FloatField("Tick Interval (s)", b.tickInterval);
+        b.tickDamage     = EF.FloatField("Tick Damage",       b.tickDamage);
+        b.tickDamageType = (int)(DamageType)EditorGUILayout.EnumPopup("Tick Damage Type", (DamageType)b.tickDamageType);
+        b.tickBehaviorId = TFDropdown("Tick Behavior ID", b.tickBehaviorId, BehaviorIds());
+
+        Section("Shield Bubble");
+        b.shieldHp     = EF.FloatField("Shield HP (0 = none)", b.shieldHp);
+        b.shieldRadius = EF.FloatField("Shield Radius",        b.shieldRadius);
+
+        Section("Immunities");
+        EditorGUILayout.HelpBox("BehaviorType names this behavior blocks while active (e.g. Slowed, Rooted).", MessageType.None);
+        var immunities = new List<string>(b.immunities ?? Array.Empty<string>());
+        int removeImm  = -1;
+        string[] typeNames = Enum.GetNames(typeof(BehaviorType));
+        for (int i = 0; i < immunities.Count; i++)
+        {
+            EditorGUILayout.BeginHorizontal();
+            immunities[i] = TextWithIdPopup(immunities[i], typeNames);
+            GUI.backgroundColor = new Color(1f, 0.4f, 0.4f);
+            if (GUILayout.Button("✕", GUILayout.Width(24))) removeImm = i;
+            GUI.backgroundColor = Color.white;
+            EditorGUILayout.EndHorizontal();
+        }
+        if (removeImm >= 0) immunities.RemoveAt(removeImm);
+        if (GUILayout.Button("+ Immunity")) immunities.Add("");
+        b.immunities = immunities.ToArray();
+
+        Section("On Death");
+        b.onDeathEffectId = TFDropdown("On-Death Effect ID", b.onDeathEffectId, EffectIds());
+
+        Section("Audio");
+        b.applySoundId = TFDropdown("Apply Sound ID", b.applySoundId, SoundIds());
+
+        Section("Impact VFX (plays once on apply)");
+        b.impactSheetPath  = TFSprite("Sheet Path",     b.impactSheetPath, "Art/VFX/", "Art/Effects/");
+        b.impactFrameCount = EF.IntField("Frame Count", b.impactFrameCount);
+        b.impactFps        = EF.FloatField("FPS",       b.impactFps);
+        b.impactScale      = EF.FloatField("Scale",     b.impactScale);
+
+        Section("Duration VFX (loops while active)");
+        b.durationSheetPath  = TFSprite("Sheet Path",     b.durationSheetPath, "Art/VFX/", "Art/Effects/");
+        b.durationFrameCount = EF.IntField("Frame Count", b.durationFrameCount);
+        b.durationFps        = EF.FloatField("FPS",       b.durationFps);
+        b.durationScale      = EF.FloatField("Scale",     b.durationScale);
+
+        SaveDeleteBar(SaveBehaviors, () => { _behaviors.RemoveAt(_bIdx); _bIdx = Mathf.Clamp(_bIdx - 1, 0, _behaviors.Count - 1); SaveBehaviors(); });
     }
 
     // ── Sprite Preview ────────────────────────────────────────────────────
@@ -1513,6 +1766,41 @@ public class TowerAbilityEditorWindow : EditorWindow
         return path.StartsWith("Resources/", StringComparison.OrdinalIgnoreCase)
             ? path.Substring("Resources/".Length) : path;
     }
+
+    // ── Texture path scan (dropdown options for sprite/sheet fields) ──────
+    // All Texture2D assets under Resources as Resources-relative paths.
+    // '/' nests the popup into folder submenus for free. Rescans on Reload.
+    static string[] _texturePaths;
+
+    static string[] AllTexturePaths()
+    {
+        if (_texturePaths != null) return _texturePaths;
+        var list = new List<string>();
+        foreach (var guid in AssetDatabase.FindAssets("t:Texture2D", new[] { "Assets/Resources" }))
+        {
+            var res = AssetPathToResourcesPath(AssetDatabase.GUIDToAssetPath(guid));
+            if (res != null) list.Add(res);
+        }
+        list.Sort(StringComparer.OrdinalIgnoreCase);
+        _texturePaths = list.ToArray();
+        return _texturePaths;
+    }
+
+    static string[] TexturePathsUnder(params string[] prefixes)
+    {
+        var all = AllTexturePaths();
+        if (prefixes == null || prefixes.Length == 0) return all;
+        var list = new List<string>();
+        foreach (var p in all)
+            foreach (var pre in prefixes)
+                if (p.StartsWith(pre, StringComparison.OrdinalIgnoreCase)) { list.Add(p); break; }
+        return list.ToArray();
+    }
+
+    /// <summary>Sprite/sheet path field: free text + a popup of textures found under
+    /// the given Resources folders (empty = every texture under Resources).</summary>
+    string TFSprite(string label, string val, params string[] prefixes) =>
+        TFDropdown(label, val, TexturePathsUnder(prefixes));
 
     Sprite LoadSprite(string path)
     {

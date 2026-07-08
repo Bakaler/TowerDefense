@@ -26,6 +26,13 @@ public class BehaviorLibrary : MonoBehaviour
     }
 
     public bool TryGet(string id, out BehaviorDefinition def) => _defs.TryGetValue(id, out def);
+
+    /// <summary>Re-reads behaviors.json. Lets play-mode tools pick up definitions saved by the editor.</summary>
+    public void Reload()
+    {
+        _defs.Clear();
+        Load();
+    }
 }
 
 [System.Serializable]

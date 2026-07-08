@@ -127,7 +127,8 @@ public class AchievementManager : MonoBehaviour
                 return !string.IsNullOrEmpty(def.balanceType)
                     && report.balanceTypesUsed.Count > 0
                     && report.balanceTypesUsed.Count == 1
-                    && report.balanceTypesUsed.Contains(def.balanceType);
+                    && report.balanceTypesUsed.Contains(def.balanceType)
+                    && report.BalanceOf(def.balanceType) >= def.minBalance;
             default:
                 return false;   // save-state conditions are handled by EvaluateAll
         }

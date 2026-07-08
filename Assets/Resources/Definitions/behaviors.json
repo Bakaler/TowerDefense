@@ -79,6 +79,46 @@
       "moveSpeedMultiplier": 1.0,
       "onDeathEffectId": "charger_rage_buff",
       "tintColor": { "r": 1.0, "g": 1.0, "b": 1.0, "a": 1.0 }
+    },
+    {
+      "id": "splitter_split",
+      "displayName": "Splits on Death",
+      "behaviorType": 0,
+      "duration": 999999,
+      "stackRule": "none",
+      "moveSpeedMultiplier": 1.0,
+      "onDeathEffectId": "splitter_spawn_minis",
+      "tintColor": { "r": 1.0, "g": 1.0, "b": 1.0, "a": 1.0 }
+    },
+    {
+      "id": "vulnerable",
+      "displayName": "Vulnerable",
+      "behaviorType": 5,
+      "duration": 2.0,
+      "stackRule": "refresh",
+      "moveSpeedMultiplier": 1.0,
+      "damageTakenMultiplier": 2.0,
+      "tintColor": { "r": 1.0, "g": 0.45, "b": 1.0, "a": 1.0 }
+    },
+    {
+      "id": "cloak_cycle",
+      "displayName": "Cloaking Device",
+      "behaviorType": 0,
+      "duration": 999999,
+      "stackRule": "none",
+      "moveSpeedMultiplier": 1.0,
+      "tickInterval": 8.0,
+      "tickBehaviorId": "invisible",
+      "tintColor": { "r": 1.0, "g": 1.0, "b": 1.0, "a": 1.0 }
+    },
+    {
+      "id": "invisible",
+      "displayName": "Invisible",
+      "behaviorType": 6,
+      "duration": 3.5,
+      "stackRule": "refresh",
+      "moveSpeedMultiplier": 1.0,
+      "tintColor": { "r": 0.7, "g": 0.85, "b": 1.0, "a": 0.25 }
     }
   ]
 }

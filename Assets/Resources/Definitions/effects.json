@@ -440,6 +440,54 @@
             "type": "set",
             "chance": 1.0,
             "data": {}
+        },
+        {
+            "id": "splitter_spawn_minis",
+            "displayName": "Splitter Spawn Minis",
+            "type": "create_units",
+            "chance": 1.0,
+            "data": {
+                "unitId": "splitter_mini",
+                "count": 4,
+                "spawnInterval": 0.15,
+                "spawnRadius": 0.3,
+                "inheritRoute": true,
+                "speedJitter": 0.1,
+                "waveHpScaling": true
+            }
+        },
+        {
+            "id": "fence_vulnerability",
+            "displayName": "Fence Vulnerability",
+            "type": "apply_behavior",
+            "chance": 1.0,
+            "data": {
+                "behaviorId": "vulnerable"
+            }
+        },
+        {
+            "id": "fence_damage",
+            "displayName": "Fence Damage",
+            "type": "damage",
+            "chance": 1.0,
+            "data": {
+                "damageBase": 120.0,
+                "minimumDamage": 1.0,
+                "maximumDamage": 1000000.0,
+                "damageType": 5,
+                "shieldBonus": 0.0,
+                "criticalChance": 0.0,
+                "criticalDamageMultiplier": 2.0
+            }
+        },
+        {
+            "id": "fence_zap",
+            "displayName": "Fence Zap",
+            "type": "set",
+            "chance": 1.0,
+            "data": {
+                "effectIds": ["fence_vulnerability", "fence_damage"]
+            }
         }
     ]
 }

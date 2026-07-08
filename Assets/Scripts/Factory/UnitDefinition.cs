@@ -78,6 +78,11 @@ public class UnitDefinition
     public string animDeathSheet;
     /// <summary>Frames per second for the death animation. Default 8.</summary>
     public float  animDeathFps = 8f;
+    /// <summary>Play the sheets in reverse frame order (for art authored backwards).</summary>
+    public bool   animReverse = false;
+    /// <summary>Extra degrees added when rotating toward movement (rotateToMovement).
+    /// Use 180 when the art was authored facing the opposite direction.</summary>
+    public float  spriteAngleOffset = 0f;
 
     // ── Audio ─────────────────────────────────────────────────────────
     /// <summary>Sound played on death (sounds.json id). Empty = the "enemy_death" event sound.</summary>

@@ -135,8 +135,8 @@ public static class HUDHelpers
     public static float BalanceRatio(int count)
     {
         if (count <= 0) return 0f;
-        if (count <= 4) return 1f;
-        float r = 4f / count;
+        if (count <= BalanceManager.FullCreditCount) return 1f;
+        float r = (float)BalanceManager.FullCreditCount / count;
         return r * r;
     }
 

@@ -28,6 +28,16 @@ public class SpriteAnimator : MonoBehaviour
 
     public void OffsetTime(float seconds) { _timer = seconds % (1f / (_walkFps > 0f ? _walkFps : 8f)); }
 
+    /// <summary>Starts the walk cycle at a random frame and timer phase so
+    /// groups spawned together (splitter minis) don't animate in unison.</summary>
+    public void RandomizeWalkPhase()
+    {
+        if (_walkFrames == null || _walkFrames.Length < 2) return;
+        _frame = Random.Range(0, _walkFrames.Length);
+        _timer = Random.Range(0f, 1f / _walkFps);
+        if (_sr != null) _sr.sprite = _walkFrames[_frame];
+    }
+
     public void PlayDeath()
     {
         if (_deathFrames == null || _deathFrames.Length == 0) { Destroy(gameObject); return; }
