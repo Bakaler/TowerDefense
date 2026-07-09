@@ -11,7 +11,7 @@ public class Effect_ApplyBehavior : Effect
 
     public string behaviorId = "";
 
-    public override void Execute(EffectContext context)
+    public override void Execute(EffectContext context) 
     {
         if (!PassesValidators(context)) return;
         if (context.Target == null) return;

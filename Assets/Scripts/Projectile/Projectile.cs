@@ -26,6 +26,18 @@ public class Projectile : MonoBehaviour
     public Vector2         direction;    // straight / orbit launch direction
     /// <summary>>0 replaces the impact effect's base damage (EffectContext.DamageOverride).</summary>
     public float           damageOverride;
+    /// <summary>Remaining hits before the projectile breaks. 0 = unlimited.
+    /// Set by ProjectileFactory from def.maxHits + per-tier bonus.</summary>
+    public int             maxHits;
+
+    /// <summary>All live projectiles — lets units (e.g. Disruptor) find and destroy them.</summary>
+    public static readonly HashSet<Projectile> Active = new();
+
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    static void ResetRegistry() => Active.Clear();
+
+    void OnEnable()  => Active.Add(this);
+    void OnDisable() => Active.Remove(this);
 
     // ── Internal ──────────────────────────────────────────────────────
     private bool    _done;
@@ -201,7 +213,16 @@ public class Projectile : MonoBehaviour
 
             _hitUnits.Add(unit);
             ApplyImpact(unit);
+            if (ConsumeHit()) { _done = true; Destroy(gameObject); return; }
         }
+    }
+
+    /// <summary>Spends one hit from the budget. Returns true when the projectile breaks.</summary>
+    bool ConsumeHit()
+    {
+        if (maxHits <= 0) return false;   // 0 = unlimited
+        maxHits--;
+        return maxHits <= 0;
     }
 
     void HitUnit(UnitParentClass unit)
@@ -218,7 +239,7 @@ public class Projectile : MonoBehaviour
 
         ApplyImpact(unit);
 
-        if (!def.pierce)
+        if (!def.pierce || ConsumeHit())
         {
             _done = true;
             Destroy(gameObject);

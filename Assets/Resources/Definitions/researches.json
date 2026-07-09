@@ -21,6 +21,18 @@
       "effectValue": 5,
       "abilityId": "",
       "effectId": "shotgun_shot"
+    },
+    {
+      "id": "boomerang_hits_1",
+      "towerId": "boomerang_tower",
+      "displayName": "Reinforced Boomerang",
+      "description": "+4 hits before the boomerang breaks",
+      "techCost": 30,
+      "effectType": "ProjectileHitsBonus",
+      "effectValue": 4,
+      "abilityId": "",
+      "effectId": "",
+      "projectileId": "boomerang"
     }
   ]
 }

@@ -66,6 +66,10 @@ public class LevelEditorWindow : EditorWindow
     List<List<ModifierDef>> _modColumns = new List<List<ModifierDef>>();
     bool _modifiersFoldout = false;
 
+    // Forced level-specific modifiers (LevelData.levelModifiers)
+    List<ModifierDef> _levelMods = new List<ModifierDef>();
+    bool _levelModsFoldout = false;
+
     // Objectives editor state
     List<ObjectiveDef> _objectives     = new List<ObjectiveDef>();
     bool _objectivesFoldout            = false;
@@ -374,7 +378,7 @@ public class LevelEditorWindow : EditorWindow
                     EditorGUI.indentLevel++;
                     m.displayName = EditorGUILayout.TextField("Name",        m.displayName);
                     m.description = EditorGUILayout.TextField("Description", m.description);
-                    m.effectType  = EditorGUILayout.TextField("Effect Type", m.effectType);
+                    m.effectType  = EffectTypeField("Effect Type", m.effectType);
                     m.value       = EditorGUILayout.FloatField("Value",      m.value);
                     m.id          = m.effectType.ToLower() + "_" + oi;
                     GUI.color = Color.red;
@@ -390,6 +394,36 @@ public class LevelEditorWindow : EditorWindow
             EditorGUI.indentLevel--;
         }
 
+        GUILayout.Space(6);
+        _levelModsFoldout = EditorGUILayout.Foldout(_levelModsFoldout,
+            $"Level Modifiers — always on ({_levelMods.Count})", true);
+        if (_levelModsFoldout)
+        {
+            EditorGUI.indentLevel++;
+            EditorGUILayout.HelpBox(
+                "Forced modifiers for this level: shown under the columns on the modifier " +
+                "screen, always selected, cannot be deselected (e.g. tutorial handouts).",
+                MessageType.None);
+
+            for (int i = 0; i < _levelMods.Count; i++)
+            {
+                var m = _levelMods[i];
+                m.id          = EditorGUILayout.TextField("ID",          m.id);
+                m.displayName = EditorGUILayout.TextField("Name",        m.displayName);
+                m.description = EditorGUILayout.TextField("Description", m.description);
+                m.effectType  = EffectTypeField("Effect Type", m.effectType);
+                m.value       = EditorGUILayout.FloatField("Value",      m.value);
+                GUI.color = Color.red;
+                if (GUILayout.Button("Remove Modifier", GUILayout.Width(120))) { _levelMods.RemoveAt(i); break; }
+                GUI.color = Color.white;
+                GUILayout.Space(4);
+            }
+
+            if (GUILayout.Button("+ Add Level Modifier", GUILayout.Width(150)))
+                _levelMods.Add(new ModifierDef { id = $"lvl{_activeLevel}_mod{_levelMods.Count}" });
+            EditorGUI.indentLevel--;
+        }
+
         EditorGUI.indentLevel--;
 
         GUILayout.Space(4);
@@ -397,6 +431,22 @@ public class LevelEditorWindow : EditorWindow
         if (GUILayout.Button("Save Settings  →  JSON", GUILayout.Height(30)))
             SaveSettings(_activeLevel);
         GUI.backgroundColor = Color.white;
+    }
+
+    /// <summary>Text field + dropdown of known modifier effect types (shared with the Data Editor).</summary>
+    static string EffectTypeField(string label, string value)
+    {
+        var options = DataEditorWindow.ModifierEffectTypes;
+        GUILayout.BeginHorizontal();
+        value = EditorGUILayout.TextField(label, value ?? "");
+        var opts = new string[options.Length + 1];
+        opts[0] = "—";
+        System.Array.Copy(options, 0, opts, 1, options.Length);
+        int idx = System.Array.IndexOf(options, value) + 1;   // 0 = "—" when not found
+        int sel = EditorGUILayout.Popup(idx, opts, GUILayout.Width(150));
+        if (sel != idx && sel > 0) value = opts[sel];
+        GUILayout.EndHorizontal();
+        return value;
     }
 
     void SaveSettings(int levelNumber)
@@ -414,6 +464,7 @@ public class LevelEditorWindow : EditorWindow
         data.modifierColumns = _modColumns.Count > 0
             ? _modColumns.ConvertAll(col => new ModifierColumn { options = col.ToArray() }).ToArray()
             : System.Array.Empty<ModifierColumn>();
+        data.levelModifiers = _levelMods.ToArray();
         data.objectives = _objectives.ToArray();
         // Write back disabled groups from editor sets into each difficulty
         for (int di = 0; di < _difficulties.Count; di++)
@@ -932,6 +983,7 @@ public class LevelEditorWindow : EditorWindow
         if (data.modifierColumns != null)
             foreach (var col in data.modifierColumns)
                 _modColumns.Add(new List<ModifierDef>(col.options ?? System.Array.Empty<ModifierDef>()));
+        _levelMods = new List<ModifierDef>(data.levelModifiers ?? System.Array.Empty<ModifierDef>());
 
         _objectives   = new List<ObjectiveDef>(data.objectives ?? System.Array.Empty<ObjectiveDef>());
 

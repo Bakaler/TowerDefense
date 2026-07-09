@@ -141,7 +141,7 @@ Each tower has a **balanceType**: Physical, Arcane, or Elemental.
 | Splitter Mini | 20 | — | 1.8 | 0 | 5 | Spawned by Splitter, no deathblow |
 | Phantom | 70 | — | 2.1 | 0 | 18 | Immune to slows and roots |
 | Charger | 90 | — | 1.6 | 0 | 20 | Nearby Charger death = permanent speed boost |
-| Priest | 55 | — | 1.3 | 0 | 22 | Cleanses Slowed/Rooted/Debuff from allies every 3 sec (`ally_aura`, radius 3.5) |
+| Priest | 55 | — | 1.3 | 0 | 22 | Cleanses Slowed/Rooted/Debuff from allies every 3 sec (`priest_cleanse` ability, radius 3.5) |
 | Shielder | 110 | 60 | 1.1 | 5/0/0 | 28 | Spawns with a 40 HP bubble (`shielded` behavior) that physically blocks non-piercing projectiles; no longer shields allies |
 
 Enemy shields and HP scale with the level's `EnemyHpMult` difficulty multiplier.
@@ -258,8 +258,9 @@ the ring.
 Behavior capabilities are field-activated: `shieldHp > 0` grants a bubble, `tickDamage > 0`
 ticks a DoT, `immunities: [...]` blocks CC types, `onDeathEffectId` fires an effect on death.
 Units gain behaviors at spawn via `startingBehaviors`, from towers via `apply_behavior`
-effects, or from allies via the generic `ally_aura` component (applyBehaviorId / cleanseTypes
-/ interval — powers both the Priest and the Shielder).
+effects, or from allied casters: units list ability ids in `abilities` (units.json), and
+`UnitAbilityCaster` casts them on cooldown through the same ability → effect chain towers
+use (Priest cleanse, Barrier Weaver small barriers, Disruptor projectile zap).
 
 ---
 

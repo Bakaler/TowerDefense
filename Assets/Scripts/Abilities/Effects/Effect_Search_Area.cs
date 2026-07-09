@@ -27,6 +27,11 @@ public class Effect_Search_Area : Effect
     // ── JSON-driven single area (populated by ApplyData) ─────────────
     private bool _searchFromTarget;
     private bool _excludePrimaryTarget = true;
+    /// <summary>Beam stops at the first unit carrying a barrier (ShieldBubble):
+    /// that unit and everything beyond it takes no damage, and the visual is clamped.</summary>
+    private bool  _blockedByBarriers;
+    /// <summary>Damage dealt to the barrier that blocks this effect.</summary>
+    private float _barrierAbsorb = 20f;
 
     public override void ApplyData(string dataJson, EffectLibrary library)
     {
@@ -37,6 +42,8 @@ public class Effect_Search_Area : Effect
 
         _searchFromTarget       = d.searchFromTarget;
         _excludePrimaryTarget   = d.excludePrimaryTarget;
+        _blockedByBarriers      = d.blockedByBarriers;
+        _barrierAbsorb          = d.barrierAbsorb;
         _visualSpritePath    = d.visualSpritePath;
         _visualSpriteSheet   = d.visualSpriteSheet;
         _visualSpriteIndex   = d.visualSpriteIndex;
@@ -97,12 +104,11 @@ public class Effect_Search_Area : Effect
             if (_excludePrimaryTarget && context.Target != null)
                 alreadyHit.Add(context.Target);
 
-            int targetsHit = 0;
+            // Collect valid candidates first so barrier-blocked beams can process nearest-first
+            var candidates = new List<(UnitParentClass unit, float distance)>();
 
             foreach (var hit in hits)
             {
-                if (area.maxTargets >= 0 && targetsHit >= area.maxTargets) break;
-
                 var candidate = hit.GetComponentInParent<UnitParentClass>();
                 if (candidate == null || alreadyHit.Contains(candidate)) continue;
                 if (searchFilters != null && !SearchFilterUtility.PassesFilters(context.Caster, candidate, searchFilters.Flags)) continue;
@@ -119,6 +125,32 @@ public class Effect_Search_Area : Effect
                 }
 
                 alreadyHit.Add(candidate);
+                candidates.Add((candidate, distance));
+            }
+
+            if (_blockedByBarriers)
+                candidates.Sort((a, b) => a.distance.CompareTo(b.distance));
+
+            int   targetsHit    = 0;
+            float blockedLength = -1f;   // <0 = beam ran its full length
+
+            foreach (var (candidate, distance) in candidates)
+            {
+                if (area.maxTargets >= 0 && targetsHit >= area.maxTargets) break;
+
+                if (_blockedByBarriers)
+                {
+                    var barrier = candidate.GetComponentInChildren<ShieldBubble>();
+                    if (barrier != null)
+                    {
+                        // Beam stops here: the barrier soaks the hit, its carrier and
+                        // everything further along the beam take no damage.
+                        barrier.AbsorbHit(_barrierAbsorb);
+                        blockedLength = distance;
+                        break;
+                    }
+                }
+
                 var jumpCtx = context.CloneForNewTarget(candidate);
                 // When searching from the hit unit, subsequent missiles should
                 // spawn from that unit's position, not the original tower.
@@ -128,8 +160,10 @@ public class Effect_Search_Area : Effect
                 targetsHit++;
             }
 
+            context.UnitsAffected += targetsHit;
+
             if (!string.IsNullOrEmpty(_visualSpritePath) || !string.IsNullOrEmpty(_visualSpriteSheet))
-                SpawnVisual(offsetOrigin, forward2D, finalRadius, area.horizontalArc);
+                SpawnVisual(offsetOrigin, forward2D, finalRadius, area.horizontalArc, blockedLength);
         }
     }
 
@@ -144,7 +178,7 @@ public class Effect_Search_Area : Effect
     private float    _visualAnimFps           = 0f;
     private float    _visualRotationOffset    = 0f;
 
-    void SpawnVisual(Vector2 origin, Vector2 forward, float radius, float arc)
+    void SpawnVisual(Vector2 origin, Vector2 forward, float radius, float arc, float clampLength = -1f)
     {
         Sprite[] allFrames = LoadVisualSheet();
         if (allFrames == null || allFrames.Length == 0)
@@ -170,6 +204,7 @@ public class Effect_Search_Area : Effect
             // Beam: bottom edge at tower origin, extends along forward direction.
             // Divide by natural size so localScale maps to exact world units.
             float length = _visualLength > 0f ? _visualLength : radius;
+            if (clampLength >= 0f) length = Mathf.Min(length, clampLength);
             float angle  = Mathf.Atan2(forward.y, forward.x) * Mathf.Rad2Deg - 90f + _visualRotationOffset;
             go.transform.position   = (Vector3)(origin + forward.normalized * length * 0.5f);
             go.transform.rotation   = Quaternion.Euler(0f, 0f, angle);
@@ -224,6 +259,8 @@ public class Effect_Search_Area : Effect
         public float  startingDepth     = 0f;
         public bool   searchFromTarget      = false;
         public bool   excludePrimaryTarget  = true;
+        public bool   blockedByBarriers     = false;
+        public float  barrierAbsorb         = 20f;
         public string visualSpritePath  = "";
         public string visualSpriteSheet = "";
         public int    visualSpriteIndex = -1;

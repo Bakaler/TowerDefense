@@ -29,6 +29,11 @@ public class FenceLine : MonoBehaviour, IFactoryInitializable
     public float  lineWidth       = 0.12f;
     public Color  lineColor       = new Color(1f, 0.85f, 0.3f, 0.85f);
 
+    /// <summary>Extra lean added to each post on top of facing its partner —
+    /// compensates for the art being drawn slightly off-axis. Shared with
+    /// TowerPlacer so the placement previews match the final orientation.</summary>
+    public const float PostAngleOffset = 5f;
+
     /// <summary>Extra query padding so units moving fast still get caught.</summary>
     const float PAD = 1.5f;
     /// <summary>Seconds the line stays brightened after zapping a unit.</summary>
@@ -84,6 +89,8 @@ public class FenceLine : MonoBehaviour, IFactoryInitializable
         _info      = GetComponent<TowerInfo>();
     }
 
+    private GameObject _postB;
+
     /// <summary>Called by TowerPlacer after the tower is built at post A.</summary>
     public void SetEndpoint(Vector2 worldB)
     {
@@ -91,36 +98,64 @@ public class FenceLine : MonoBehaviour, IFactoryInitializable
         _hasEndpoint = true;
         _charges     = MaxCharges;
 
+        // Each post's right side (+X) faces its partner: post A points at B,
+        // post B (child, local 180°) points back at A — the parent's angle offset
+        // carries into B's own frame with the same sense. Rotate before building
+        // post B so its local position is computed in the rotated frame.
+        Vector2 dir = worldB - (Vector2)transform.position;
+        float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
+        transform.rotation = Quaternion.Euler(0f, 0f, angle + PostAngleOffset);
+
         BuildPostB(worldB);
         BuildLine();
     }
 
     void BuildPostB(Vector2 worldB)
     {
-        var post = new GameObject("PostB");
-        post.transform.SetParent(transform, false);
-        post.transform.localPosition = transform.InverseTransformPoint(worldB);
+        _postB = new GameObject("PostB");
+        _postB.transform.SetParent(transform, false);
+        _postB.transform.localPosition = transform.InverseTransformPoint(worldB);
+        _postB.transform.localRotation = Quaternion.Euler(0f, 0f, 180f);   // right side faces post A
 
-        // Mirror the root's visual so both posts match
-        var rootSr = GetComponent<SpriteRenderer>();
-        if (rootSr != null)
-        {
-            var sr              = post.AddComponent<SpriteRenderer>();
-            sr.sprite           = rootSr.sprite;
-            sr.color            = rootSr.color;
-            sr.sortingLayerName = rootSr.sortingLayerName;
-            sr.sortingOrder     = rootSr.sortingOrder;
-        }
+        _postB.AddComponent<SpriteRenderer>();
+        SyncPostVisual();
 
         // Mirror the root's solid body collider so other towers can't be
         // placed on top of post B (TowerPlacer checks GetComponentInParent).
         foreach (var col in GetComponents<CircleCollider2D>())
         {
             if (col.isTrigger) continue;
-            var bodyCol       = post.AddComponent<CircleCollider2D>();
+            var bodyCol       = _postB.AddComponent<CircleCollider2D>();
             bodyCol.radius    = col.radius;
             bodyCol.isTrigger = false;
             break;
+        }
+    }
+
+    /// <summary>
+    /// Copies the root post's sprite and walk animation onto post B so both posts
+    /// look identical. Called on build and again by TowerInfo.RefreshSprite after
+    /// upgrades swap the tier art.
+    /// </summary>
+    public void SyncPostVisual()
+    {
+        if (_postB == null) return;
+
+        var rootSr = GetComponent<SpriteRenderer>();
+        var sr     = _postB.GetComponent<SpriteRenderer>();
+        if (rootSr != null && sr != null)
+        {
+            sr.sprite           = rootSr.sprite;
+            sr.color            = rootSr.color;
+            sr.sortingLayerName = rootSr.sortingLayerName;
+            sr.sortingOrder     = rootSr.sortingOrder;
+        }
+
+        var rootAnim = GetComponent<SpriteAnimator>();
+        if (rootAnim != null && rootAnim.WalkFrames != null && rootAnim.WalkFrames.Length > 1)
+        {
+            var anim = _postB.GetComponent<SpriteAnimator>() ?? _postB.AddComponent<SpriteAnimator>();
+            anim.Setup(rootAnim.WalkFrames, rootAnim.WalkFps);
         }
     }
 

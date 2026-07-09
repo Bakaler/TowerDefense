@@ -197,6 +197,10 @@ public class UnitFactory : MonoBehaviour
             }
         }
 
+        // ── 8. Abilities cast on cooldown (cleanses, barriers, zaps) ──
+        if (def.abilities != null && def.abilities.Length > 0)
+            go.AddComponent<UnitAbilityCaster>().Setup(def.abilities);
+
         return go;
     }
 

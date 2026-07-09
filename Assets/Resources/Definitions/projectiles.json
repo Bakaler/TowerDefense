@@ -313,7 +313,7 @@
         {
             "id": "boomerang",
             "displayName": "Boomerang",
-            "description": "Loops out to its target and back, re-hitting on the return leg. arcRadius caps the loop (reach = 2x arcRadius).",
+            "description": "Loops out to its target and back, re-hitting on the return leg. Breaks after its hit budget is spent (4 base, +2 per tower upgrade). arcRadius caps the loop (reach = 2x arcRadius).",
             "movement": "orbit",
             "speed": 6.0,
             "lifetime": 0.0,
@@ -323,6 +323,8 @@
             "spinSpeed": -1000.0,
             "hitRadius": 0.44999998807907107,
             "pierce": true,
+            "maxHits": 4,
+            "maxHitsPerTier": 2,
             "blockedByShields": false,
             "shieldAbsorb": 10.0,
             "drawImpactLine": false,

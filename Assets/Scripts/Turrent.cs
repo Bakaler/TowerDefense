@@ -54,7 +54,9 @@ public class Turrent : MonoBehaviour
         if (TowerDefinitionLibrary.Instance == null) return;
         if (!TowerDefinitionLibrary.Instance.TryGet(definitionId, out var def)) return;
 
-        _rotationSpeed = def.rotationSpeed;
+        // Pair towers (fence posts) are structurally oriented toward their partner
+        // post — they must never rotate toward enemies.
+        _rotationSpeed = def.placementMode == "pair" ? 0f : def.rotationSpeed;
 
         if (string.IsNullOrEmpty(def.fireAbilityId)) return;
         if (AbilityLibrary.Instance == null) return;

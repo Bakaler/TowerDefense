@@ -9,6 +9,7 @@ public enum BehaviorType
     Silenced  = 4,
     Debuff    = 5,   // generic catch-all for DoTs, etc.
     Invisible = 6,   // untargetable by towers without detection
+    Barrier   = 7,   // grants a projectile/ray-intercepting ShieldBubble (shieldHp > 0)
 }
 
 [System.Serializable]

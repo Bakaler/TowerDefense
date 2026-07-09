@@ -19,6 +19,7 @@ public class ModifierSelectManager : MonoBehaviour
 
     ModifierDef[]  _picks;
     ModifierColumn[] _columns;
+    ModifierDef[]  _levelMods;   // forced level-specific modifiers — always applied
     bool           _cheatUnlocked;
 
     // Type "STARS" to unlock all columns for this run
@@ -32,8 +33,13 @@ public class ModifierSelectManager : MonoBehaviour
             ? data.modifierColumns
             : LoadSharedColumns();
 
+        _levelMods = data?.levelModifiers ?? System.Array.Empty<ModifierDef>();
+
         if (cols == null || cols.Length == 0)
         {
+            // No choices to make — still hand out the forced level modifiers
+            ModifierSelection.Clear();
+            foreach (var mod in _levelMods) ModifierSelection.Add(mod);
             SceneManager.LoadScene(gameSceneName);
             return;
         }
@@ -196,6 +202,30 @@ public class ModifierSelectManager : MonoBehaviour
             }
         }
 
+        // Level modifiers — forced picks pinned under the columns, above Confirm.
+        // No Button component: always selected, cannot be deselected.
+        if (_levelMods != null && _levelMods.Length > 0)
+        {
+            AddText(MakeRect("LevelModHeader", canvasGO, 0, -308f, 700f, 26f),
+                "— LEVEL MODIFIER —", new Color(0.95f, 0.88f, 0.55f, 1f), 18, bold: true);
+
+            const float LM_W = 480f, LM_H = 72f, LM_GAP = 24f;
+            float lmTotalW = _levelMods.Length * LM_W + (_levelMods.Length - 1) * LM_GAP;
+            float lmStartX = -lmTotalW * 0.5f + LM_W * 0.5f;
+
+            for (int i = 0; i < _levelMods.Length; i++)
+            {
+                var mod    = _levelMods[i];
+                var cardGO = MakeRect($"LevelMod{i}", canvasGO, lmStartX + i * (LM_W + LM_GAP), -355f, LM_W, LM_H);
+                cardGO.AddComponent<Image>().color = COL_SELECTED;
+
+                AddText(MakeRect("Name", cardGO, 0, 14f, LM_W - 24f, 34f),
+                    $"★ {mod.displayName}", new Color(1f, 0.95f, 0.75f, 1f), 17, bold: true);
+                AddText(MakeRect("Desc", cardGO, 0, -16f, LM_W - 24f, 30f),
+                    mod.description, new Color(0.80f, 0.90f, 0.82f, 1f), 12, bold: false);
+            }
+        }
+
         // Confirm button
         var confirmGO  = MakeRect("ConfirmBtn", canvasGO, 0, -440f, 260f, 60f);
         var confirmImg = confirmGO.AddComponent<Image>();
@@ -249,6 +279,10 @@ public class ModifierSelectManager : MonoBehaviour
         ModifierSelection.Clear();
         foreach (var pick in _picks)
             if (pick != null) ModifierSelection.Add(pick);
+
+        // Forced level modifiers always ride along
+        if (_levelMods != null)
+            foreach (var mod in _levelMods) ModifierSelection.Add(mod);
 
         ScreenFader.LoadScene(gameSceneName);
     }

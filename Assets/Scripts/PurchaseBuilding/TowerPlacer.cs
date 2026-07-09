@@ -48,9 +48,10 @@ public class TowerPlacer : MonoBehaviour
     private LineRenderer _pairPreviewLine;
     private bool IsPairMode => _selectedDef != null && _selectedDef.placementMode == "pair";
 
-    // Tracks whether the free-first-basic-tower modifier has been consumed this level
+    // Tracks whether the free-first-tower modifiers have been consumed this level
     private bool _freeBasicTowerUsed;
-    public void ResetFreeBasicTower() => _freeBasicTowerUsed = false;
+    private bool _freeIncomeTowerUsed;
+    public void ResetFreeTowerGrants() => _freeBasicTowerUsed = _freeIncomeTowerUsed = false;
 
     // ── Lifecycle ─────────────────────────────────────────────────────
 
@@ -78,7 +79,23 @@ public class TowerPlacer : MonoBehaviour
         if (_ghost != null)
         {
             _ghost.transform.position = worldPos;
-            _ghost.transform.rotation = Quaternion.Euler(0f, 0f, _ghostRotation);
+
+            if (IsPairMode && _hasPairFirst)
+            {
+                // Preview the final fence orientation: marker (post A) and ghost
+                // (post B) turn their right sides toward each other, same lean
+                // FenceLine.SetEndpoint applies on placement.
+                Vector2 dir = worldPos - _pairFirst;
+                if (dir.sqrMagnitude > 0.0001f)
+                {
+                    float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
+                    _ghost.transform.rotation = Quaternion.Euler(0f, 0f, angle + 180f + FenceLine.PostAngleOffset);
+                    if (_pairMarker != null)
+                        _pairMarker.transform.rotation = Quaternion.Euler(0f, 0f, angle + FenceLine.PostAngleOffset);
+                }
+            }
+            else
+                _ghost.transform.rotation = Quaternion.Euler(0f, 0f, _ghostRotation);
         }
 
         // Update footprint circle color: red = blocked, green = clear
@@ -158,10 +175,12 @@ public class TowerPlacer : MonoBehaviour
             Cancel(); return;
         }
 
-        // Cost check (free first basic tower modifier bypasses the cost)
-        bool freeThisPlace = !_freeBasicTowerUsed
-            && _selectedId == "basic_tower"
-            && ModifierSelection.HasEffect("FreeFirstBasicTower");
+        // Cost check (free-first-tower modifiers bypass the cost)
+        bool freeThisPlace =
+            (!_freeBasicTowerUsed  && _selectedId == "basic_tower"
+                && ModifierSelection.HasEffect("FreeFirstBasicTower")) ||
+            (!_freeIncomeTowerUsed && _selectedId == "income_tower"
+                && ModifierSelection.HasEffect("FreeFirstIncomeTower"));
 
         var rm = ResourceManagerScript.Instance;
         if (!freeThisPlace && rm != null && rm.resourceOne < def.resourceCost)
@@ -195,7 +214,10 @@ public class TowerPlacer : MonoBehaviour
 
         // Deduct cost
         if (freeThisPlace)
-            _freeBasicTowerUsed = true;
+        {
+            if (_selectedId == "basic_tower") _freeBasicTowerUsed  = true;
+            else                              _freeIncomeTowerUsed = true;
+        }
         else if (rm != null)
             rm.ChangeResourceOne(-def.resourceCost);
 

@@ -14,7 +14,7 @@ using UnityEngine;
 public class DataEditorWindow : EditorWindow
 {
     // ── Tabs ──────────────────────────────────────────────────────────────
-    enum Tab { Towers, Abilities, Effects, Behaviors, Projectiles, Units, Minions, Sounds, Achievements }
+    enum Tab { Towers, Abilities, Effects, Behaviors, Projectiles, Units, Minions, Sounds, Achievements, Modifiers }
     Tab _tab;
 
     // ── Tower state ───────────────────────────────────────────────────────
@@ -57,6 +57,30 @@ public class DataEditorWindow : EditorWindow
     readonly List<AchievementDefinition> _achievements = new();
     int _achIdx = -1;
 
+    // ── Modifier state (shared Definitions/modifier_columns.json) ─────────
+    readonly List<ModifierColumn> _modColumns = new();
+    int _modCol = -1;   // selected column
+    int _modOpt = -1;   // selected option within the column
+
+    [Serializable]
+    class ModifierColumnsWrapper { public ModifierColumn[] modifierColumns; }
+
+    // Must match the effectType switch in LevelManager.ApplyModifiers and the
+    // runtime ModifierSelection lookups. Public so LevelEditorWindow shares the list.
+    public static readonly string[] ModifierEffectTypes =
+    {
+        "compound",
+        "StartingGold", "StartingLives", "StartingTech", "BonusTowerSlots",
+        "FullRefund", "TowerSpeedMult", "TowerRangeMult", "TowerDamageMult",
+        "PhysicalDamageMult", "ElementalDamageMult", "ArcaneSpdMult", "ElementalSpdMult",
+        "AuraRadiusMult", "AuraMult", "AuraSlowEnemies",
+        "BountyPerKill", "ForgiveFirstLeak", "LeakDamageReduction", "LastStand",
+        "BonusDrones", "BonusShotgunBullets", "BasicDoubleTap",
+        "GoldPerWave", "LivesDrainPerWave",
+        "BasicTowerDamageMult", "BasicTowerFireRateMult", "FreeFirstBasicTower",
+        "FreeFirstIncomeTower",
+    };
+
     // Must match the condition switch in AchievementManager
     static readonly string[] AchievementConditionOptions =
     {
@@ -70,6 +94,113 @@ public class DataEditorWindow : EditorWindow
 
     // ── Scroll positions ──────────────────────────────────────────────────
     Vector2 _listScroll, _detailScroll;
+
+    // ── List search & sort ────────────────────────────────────────────────
+    // Search matches the entry's serialized JSON, so every field is searchable.
+    // Sort works on any public string/float/int/bool field of the tab's def type.
+    string _search    = "";
+    string _sortField = "";   // empty = file order
+    bool   _sortDesc;
+    readonly Dictionary<Type, string[]> _sortFieldCache = new();
+
+    /// <summary>Reordering only makes sense on the unfiltered, file-ordered view.</summary>
+    bool ViewIsReorderable => string.IsNullOrEmpty(_search) && string.IsNullOrEmpty(_sortField);
+
+    Type TabDefType() => _tab switch
+    {
+        Tab.Towers       => typeof(TowerDefinition),
+        Tab.Abilities    => typeof(AbilityDefinition),
+        Tab.Effects      => typeof(EffectDefinition),
+        Tab.Behaviors    => typeof(BehaviorDefinition),
+        Tab.Projectiles  => typeof(ProjectileDefinition),
+        Tab.Units        => typeof(UnitDefinition),
+        Tab.Minions      => typeof(MinionDefinition),
+        Tab.Sounds       => typeof(SoundDefinition),
+        Tab.Achievements => typeof(AchievementDefinition),
+        Tab.Modifiers    => typeof(ModifierDef),
+        _                => null,
+    };
+
+    string[] SortFieldsFor(Type t)
+    {
+        if (t == null) return Array.Empty<string>();
+        if (_sortFieldCache.TryGetValue(t, out var cached)) return cached;
+
+        var names = new List<string>();
+        foreach (var f in t.GetFields(BindingFlags.Instance | BindingFlags.Public))
+            if (f.FieldType == typeof(string) || f.FieldType == typeof(float) ||
+                f.FieldType == typeof(int)    || f.FieldType == typeof(bool))
+                names.Add(f.Name);
+        names.Sort(StringComparer.Ordinal);
+
+        var arr = names.ToArray();
+        _sortFieldCache[t] = arr;
+        return arr;
+    }
+
+    static int CompareFieldValues(object a, object b)
+    {
+        if (a is string sa && b is string sb) return string.Compare(sa, sb, StringComparison.OrdinalIgnoreCase);
+        if (a is IComparable ca && b != null) return ca.CompareTo(b);
+        return 0;
+    }
+
+    /// <summary>Indices of list entries matching the search, ordered per the sort settings.</summary>
+    List<int> BuildView<T>(List<T> list)
+    {
+        var view = new List<int>(list.Count);
+        for (int i = 0; i < list.Count; i++)
+        {
+            if (!string.IsNullOrEmpty(_search))
+            {
+                string hay = JsonUtility.ToJson(list[i]);
+                if (hay.IndexOf(_search, StringComparison.OrdinalIgnoreCase) < 0) continue;
+            }
+            view.Add(i);
+        }
+
+        if (!string.IsNullOrEmpty(_sortField))
+        {
+            var fi = typeof(T).GetField(_sortField, BindingFlags.Instance | BindingFlags.Public);
+            if (fi != null)
+            {
+                view.Sort((a, b) =>
+                {
+                    int c = CompareFieldValues(fi.GetValue(list[a]), fi.GetValue(list[b]));
+                    return c != 0 ? c : a.CompareTo(b);   // stable: fall back to file order
+                });
+                if (_sortDesc) view.Reverse();
+            }
+        }
+        return view;
+    }
+
+    void DrawSearchSortBar()
+    {
+        EditorGUILayout.BeginHorizontal();
+        _search = EditorGUILayout.TextField(_search);
+        if (GUILayout.Button("×", GUILayout.Width(20)))
+        {
+            _search = "";
+            GUI.FocusControl(null);
+        }
+        EditorGUILayout.EndHorizontal();
+
+        var fields = SortFieldsFor(TabDefType());
+        var opts   = new string[fields.Length + 1];
+        opts[0]    = "Sort: file order";
+        for (int i = 0; i < fields.Length; i++) opts[i + 1] = "Sort: " + fields[i];
+
+        EditorGUILayout.BeginHorizontal();
+        int idx = Array.IndexOf(fields, _sortField) + 1;   // 0 = file order
+        int sel = EditorGUILayout.Popup(idx, opts);
+        if (sel != idx) _sortField = sel <= 0 ? "" : fields[sel - 1];
+        if (!string.IsNullOrEmpty(_sortField) &&
+            GUILayout.Button(_sortDesc ? "↓" : "↑", GUILayout.Width(22)))
+            _sortDesc = !_sortDesc;
+        EditorGUILayout.EndHorizontal();
+        GUILayout.Space(2);
+    }
 
     // ── Sprite cache ──────────────────────────────────────────────────────
     readonly Dictionary<string, Sprite> _spriteCache = new();
@@ -160,6 +291,24 @@ public class DataEditorWindow : EditorWindow
         LoadBehaviors();
         LoadSounds();
         LoadAchievements();
+        LoadModifiers();
+    }
+
+    // ── Modifiers ─────────────────────────────────────────────────────────
+
+    void LoadModifiers()
+    {
+        _modColumns.Clear(); _modCol = -1; _modOpt = -1;
+        string text = ReadFile("modifier_columns");
+        if (text == null) return;
+        var wrapper = JsonUtility.FromJson<ModifierColumnsWrapper>(text);
+        if (wrapper?.modifierColumns != null) _modColumns.AddRange(wrapper.modifierColumns);
+    }
+
+    void SaveModifiers()
+    {
+        var wrapper = new ModifierColumnsWrapper { modifierColumns = _modColumns.ToArray() };
+        WriteFile("modifier_columns", JsonUtility.ToJson(wrapper, true));
     }
 
     // ── Achievements ──────────────────────────────────────────────────────
@@ -390,6 +539,7 @@ public class DataEditorWindow : EditorWindow
         if (GUILayout.Toggle(_tab == Tab.Minions,     "Minions",     EditorStyles.toolbarButton, GUILayout.Width(70)))  _tab = Tab.Minions;
         if (GUILayout.Toggle(_tab == Tab.Sounds,      "Sounds",      EditorStyles.toolbarButton, GUILayout.Width(70)))  _tab = Tab.Sounds;
         if (GUILayout.Toggle(_tab == Tab.Achievements, "Achievements", EditorStyles.toolbarButton, GUILayout.Width(90))) _tab = Tab.Achievements;
+        if (GUILayout.Toggle(_tab == Tab.Modifiers,    "Modifiers",    EditorStyles.toolbarButton, GUILayout.Width(75))) _tab = Tab.Modifiers;
 
         GUILayout.FlexibleSpace();
         if (GUILayout.Button("Reload", EditorStyles.toolbarButton, GUILayout.Width(60))) { EnsureRegistriesLoaded(); LoadAll(); }
@@ -402,6 +552,7 @@ public class DataEditorWindow : EditorWindow
     void DrawList()
     {
         EditorGUILayout.BeginVertical(GUILayout.Width(ListW));
+        DrawSearchSortBar();
         _listScroll = EditorGUILayout.BeginScrollView(_listScroll);
 
         switch (_tab)
@@ -415,6 +566,7 @@ public class DataEditorWindow : EditorWindow
             case Tab.Minions:      DrawMinionList();      break;
             case Tab.Sounds:       DrawSoundList();       break;
             case Tab.Achievements: DrawAchievementList(); break;
+            case Tab.Modifiers:    DrawModifierList();    break;
         }
 
         EditorGUILayout.EndScrollView();
@@ -424,10 +576,11 @@ public class DataEditorWindow : EditorWindow
     void DrawTowerList()
     {
         int moveIdx = -1, moveDir = 0;
-        for (int i = 0; i < _towers.Count; i++)
+        foreach (int i in BuildView(_towers))
         {
             string label = string.IsNullOrEmpty(_towers[i].displayName) ? _towers[i].id : _towers[i].displayName;
-            int m = ListItem(label, _tIdx == i, () => _tIdx = i);
+            int idx = i;
+            int m = ListItem(label, _tIdx == i, () => _tIdx = idx, null, ViewIsReorderable);
             if (m != 0) { moveIdx = i; moveDir = m; }
         }
         if (moveIdx >= 0 && MoveEntry(_towers, moveIdx, moveDir, ref _tIdx)) SaveTowers();
@@ -449,10 +602,11 @@ public class DataEditorWindow : EditorWindow
     void DrawAbilityList()
     {
         int moveIdx = -1, moveDir = 0;
-        for (int i = 0; i < _abilities.Count; i++)
+        foreach (int i in BuildView(_abilities))
         {
             string label = string.IsNullOrEmpty(_abilities[i].displayName) ? _abilities[i].id : _abilities[i].displayName;
-            int m = ListItem(label, _aIdx == i, () => _aIdx = i);
+            int idx = i;
+            int m = ListItem(label, _aIdx == i, () => _aIdx = idx, null, ViewIsReorderable);
             if (m != 0) { moveIdx = i; moveDir = m; }
         }
         // The validators list is parallel to _abilities — move both together
@@ -482,13 +636,13 @@ public class DataEditorWindow : EditorWindow
     void DrawEffectList()
     {
         int moveIdx = -1, moveDir = 0;
-        for (int i = 0; i < _effects.Count; i++)
+        foreach (int i in BuildView(_effects))
         {
             var e = _effects[i];
             string name = string.IsNullOrEmpty(e.displayName) ? e.id : e.displayName;
             string label = $"{name}\n<size=10><color=#aaa>{e.type}</color></size>";
             int idx = i;
-            int m = ListItem(label, _eIdx == i, () => { _eIdx = idx; _effectRawMode = false; }, RichListStyle());
+            int m = ListItem(label, _eIdx == i, () => { _eIdx = idx; _effectRawMode = false; }, RichListStyle(), ViewIsReorderable);
             if (m != 0) { moveIdx = i; moveDir = m; }
         }
         if (moveIdx >= 0 && MoveEntry(_effects, moveIdx, moveDir, ref _eIdx)) SaveEffects();
@@ -510,13 +664,13 @@ public class DataEditorWindow : EditorWindow
     void DrawProjectileList()
     {
         int moveIdx = -1, moveDir = 0;
-        for (int i = 0; i < _projectiles.Count; i++)
+        foreach (int i in BuildView(_projectiles))
         {
             var p = _projectiles[i];
             string name = string.IsNullOrEmpty(p.displayName) ? p.id : p.displayName;
             string label = $"{name}\n<size=10><color=#aaa>{p.movement}</color></size>";
             int idx = i;
-            int m = ListItem(label, _pIdx == i, () => _pIdx = idx, RichListStyle());
+            int m = ListItem(label, _pIdx == i, () => _pIdx = idx, RichListStyle(), ViewIsReorderable);
             if (m != 0) { moveIdx = i; moveDir = m; }
         }
         if (moveIdx >= 0 && MoveEntry(_projectiles, moveIdx, moveDir, ref _pIdx)) SaveProjectiles();
@@ -538,10 +692,11 @@ public class DataEditorWindow : EditorWindow
     void DrawUnitList()
     {
         int moveIdx = -1, moveDir = 0;
-        for (int i = 0; i < _units.Count; i++)
+        foreach (int i in BuildView(_units))
         {
             string label = string.IsNullOrEmpty(_units[i].displayName) ? _units[i].id : _units[i].displayName;
-            int m = ListItem(label, _uIdx == i, () => _uIdx = i);
+            int idx = i;
+            int m = ListItem(label, _uIdx == i, () => _uIdx = idx, null, ViewIsReorderable);
             if (m != 0) { moveIdx = i; moveDir = m; }
         }
         if (moveIdx >= 0 && MoveEntry(_units, moveIdx, moveDir, ref _uIdx)) SaveUnits();
@@ -563,10 +718,11 @@ public class DataEditorWindow : EditorWindow
     void DrawMinionList()
     {
         int moveIdx = -1, moveDir = 0;
-        for (int i = 0; i < _minions.Count; i++)
+        foreach (int i in BuildView(_minions))
         {
             string label = string.IsNullOrEmpty(_minions[i].displayName) ? _minions[i].id : _minions[i].displayName;
-            int m = ListItem(label, _mIdx == i, () => _mIdx = i);
+            int idx = i;
+            int m = ListItem(label, _mIdx == i, () => _mIdx = idx, null, ViewIsReorderable);
             if (m != 0) { moveIdx = i; moveDir = m; }
         }
         if (moveIdx >= 0 && MoveEntry(_minions, moveIdx, moveDir, ref _mIdx)) SaveMinions();
@@ -595,14 +751,14 @@ public class DataEditorWindow : EditorWindow
         GUILayout.Space(4);
 
         int moveIdx = -1, moveDir = 0;
-        for (int i = 0; i < _sounds.Count; i++)
+        foreach (int i in BuildView(_sounds))
         {
             var s = _sounds[i];
             string name  = string.IsNullOrEmpty(s.displayName) ? s.id : s.displayName;
             string sub   = s.clips != null && s.clips.Length > 0 ? $"{s.clips.Length} clip(s)" : $"synth:{s.synthWave}";
             string label = $"{name}\n<size=10><color=#aaa>{s.bus} · {sub}</color></size>";
             int idx = i;
-            int m = ListItem(label, _sIdx == i, () => _sIdx = idx, RichListStyle());
+            int m = ListItem(label, _sIdx == i, () => _sIdx = idx, RichListStyle(), ViewIsReorderable);
             if (m != 0) { moveIdx = i; moveDir = m; }
         }
         if (moveIdx >= 0 && MoveEntry(_sounds, moveIdx, moveDir, ref _sIdx)) SaveSounds();
@@ -621,18 +777,166 @@ public class DataEditorWindow : EditorWindow
         }
     }
 
+    // ── Modifier List & Detail ────────────────────────────────────────────
+    // Edits the SHARED columns (Definitions/modifier_columns.json) shown when a
+    // level has no modifierColumns of its own. Per-level overrides live in the
+    // level JSONs.
+
+    void DrawModifierList()
+    {
+        for (int c = 0; c < _modColumns.Count; c++)
+        {
+            // Column header: reorder + delete
+            EditorGUILayout.BeginHorizontal();
+            GUILayout.Label($"Column {c + 1}", EditorStyles.boldLabel);
+            GUILayout.FlexibleSpace();
+            int colMove = 0;
+            if (GUILayout.Button("▲", GUILayout.Width(20))) colMove = -1;
+            if (GUILayout.Button("▼", GUILayout.Width(20))) colMove = +1;
+            GUI.backgroundColor = new Color(1f, 0.4f, 0.4f);
+            if (GUILayout.Button("✕", GUILayout.Width(20)) &&
+                EditorUtility.DisplayDialog("Delete Column",
+                    $"Delete column {c + 1} and its {(_modColumns[c].options?.Length ?? 0)} option(s)?", "Delete", "Cancel"))
+            {
+                _modColumns.RemoveAt(c);
+                if (_modCol == c) { _modCol = -1; _modOpt = -1; }
+                else if (_modCol > c) _modCol--;
+                SaveModifiers();
+                GUI.backgroundColor = Color.white;
+                EditorGUILayout.EndHorizontal();
+                return;   // list changed — redraw next frame
+            }
+            GUI.backgroundColor = Color.white;
+            EditorGUILayout.EndHorizontal();
+
+            if (colMove != 0)
+            {
+                int to = c + colMove;
+                if (to >= 0 && to < _modColumns.Count)
+                {
+                    (_modColumns[c], _modColumns[to]) = (_modColumns[to], _modColumns[c]);
+                    if (_modCol == c) _modCol = to;
+                    else if (_modCol == to) _modCol = c;
+                    SaveModifiers();
+                }
+                return;
+            }
+
+            // Options in this column
+            var opts = new List<ModifierDef>(_modColumns[c].options ?? Array.Empty<ModifierDef>());
+            int moveIdx = -1, moveDir = 0;
+            foreach (int i in BuildView(opts))
+            {
+                var o = opts[i];
+                string name = string.IsNullOrEmpty(o.displayName) ? o.id : o.displayName;
+                string sub  = o.subEffects != null && o.subEffects.Length > 0
+                    ? $"compound ({o.subEffects.Length})" : o.effectType;
+                string label = $"{name}\n<size=10><color=#aaa>{sub}</color></size>";
+                int cc = c, ii = i;
+                int m = ListItem(label, _modCol == c && _modOpt == i,
+                    () => { _modCol = cc; _modOpt = ii; }, RichListStyle(), ViewIsReorderable);
+                if (m != 0) { moveIdx = i; moveDir = m; }
+            }
+            if (moveIdx >= 0)
+            {
+                int sel = _modCol == c ? _modOpt : -1;
+                if (MoveEntry(opts, moveIdx, moveDir, ref sel))
+                {
+                    _modColumns[c].options = opts.ToArray();
+                    if (_modCol == c) _modOpt = sel;
+                    SaveModifiers();
+                }
+            }
+
+            if (GUILayout.Button("+ Option"))
+            {
+                opts.Add(new ModifierDef { id = $"c{c + 1}_new", displayName = "New Modifier" });
+                _modColumns[c].options = opts.ToArray();
+                _modCol = c;
+                _modOpt = opts.Count - 1;
+            }
+            GUILayout.Space(10);
+        }
+
+        if (GUILayout.Button("+ Column"))
+        {
+            _modColumns.Add(new ModifierColumn());
+            _modCol = _modColumns.Count - 1;
+            _modOpt = -1;
+        }
+    }
+
+    void DrawModifierDetail()
+    {
+        if (_modCol < 0 || _modCol >= _modColumns.Count ||
+            _modColumns[_modCol].options == null ||
+            _modOpt < 0 || _modOpt >= _modColumns[_modCol].options.Length)
+        {
+            EmptyMsg("Select a modifier option on the left, or press + Option / + Column.");
+            return;
+        }
+        var m = _modColumns[_modCol].options[_modOpt];
+
+        Section("Identity");
+        m.id          = TF("ID",           m.id);
+        m.displayName = TF("Display Name", m.displayName);
+        m.description = TA("Description",  m.description, 3);
+
+        Section("Effect");
+        EditorGUILayout.HelpBox(
+            "Single effect: pick an Effect Type and Value.\n" +
+            "Compound: set type 'compound' and add sub-effects — they apply instead of this modifier's own type/value.",
+            MessageType.None);
+        m.effectType = TFDropdown("Effect Type", m.effectType, ModifierEffectTypes);
+        m.value      = EF.FloatField("Value", m.value);
+
+        Section("Sub-Effects");
+        var subs = new List<SubEffectDef>(m.subEffects ?? Array.Empty<SubEffectDef>());
+        int removeSub = -1;
+        for (int i = 0; i < subs.Count; i++)
+        {
+            EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+            EditorGUILayout.BeginHorizontal();
+            GUILayout.Label($"Sub-Effect {i}", EditorStyles.boldLabel);
+            GUILayout.FlexibleSpace();
+            GUI.backgroundColor = new Color(1f, 0.4f, 0.4f);
+            if (GUILayout.Button("✕", GUILayout.Width(24))) removeSub = i;
+            GUI.backgroundColor = Color.white;
+            EditorGUILayout.EndHorizontal();
+
+            subs[i].id         = TF("ID", subs[i].id);
+            subs[i].effectType = TFDropdown("Effect Type", subs[i].effectType, ModifierEffectTypes);
+            subs[i].value      = EF.FloatField("Value", subs[i].value);
+            EditorGUILayout.EndVertical();
+        }
+        if (removeSub >= 0) subs.RemoveAt(removeSub);
+        if (GUILayout.Button("+ Sub-Effect"))
+            subs.Add(new SubEffectDef { id = $"{m.id}_sub{subs.Count}" });
+        m.subEffects = subs.ToArray();
+
+        SaveDeleteBar(SaveModifiers, () =>
+        {
+            var opts = new List<ModifierDef>(_modColumns[_modCol].options);
+            opts.RemoveAt(_modOpt);
+            _modColumns[_modCol].options = opts.ToArray();
+            _modOpt = Mathf.Clamp(_modOpt - 1, 0, opts.Count - 1);
+            if (opts.Count == 0) _modOpt = -1;
+            SaveModifiers();
+        });
+    }
+
     // ── Achievement List & Detail ─────────────────────────────────────────
 
     void DrawAchievementList()
     {
         int moveIdx = -1, moveDir = 0;
-        for (int i = 0; i < _achievements.Count; i++)
+        foreach (int i in BuildView(_achievements))
         {
             var a = _achievements[i];
             string name  = string.IsNullOrEmpty(a.title) ? a.id : a.title;
             string label = $"{name}\n<size=10><color=#aaa>{a.conditionType}{(a.hidden ? " · hidden" : "")}</color></size>";
             int idx = i;
-            int m = ListItem(label, _achIdx == i, () => _achIdx = idx, RichListStyle());
+            int m = ListItem(label, _achIdx == i, () => _achIdx = idx, RichListStyle(), ViewIsReorderable);
             if (m != 0) { moveIdx = i; moveDir = m; }
         }
         if (moveIdx >= 0 && MoveEntry(_achievements, moveIdx, moveDir, ref _achIdx)) SaveAchievements();
@@ -929,6 +1233,7 @@ public class DataEditorWindow : EditorWindow
             case Tab.Minions:      DrawMinionDetail();      break;
             case Tab.Sounds:       DrawSoundDetail();       break;
             case Tab.Achievements: DrawAchievementDetail(); break;
+            case Tab.Modifiers:    DrawModifierDetail();    break;
         }
 
         EditorGUILayout.EndScrollView();
@@ -1387,6 +1692,12 @@ public class DataEditorWindow : EditorWindow
         Section("Hit Behavior");
         p.hitRadius        = EF.FloatField("Hit Radius",         p.hitRadius);
         p.pierce           = EF.Toggle(    "Pierce",             p.pierce);
+        if (p.pierce || p.movement == "orbit")
+        {
+            p.maxHits        = EF.IntField("Max Hits (0 = ∞)",   p.maxHits);
+            if (p.maxHits > 0)
+                p.maxHitsPerTier = EF.IntField("Max Hits / Upgrade", p.maxHitsPerTier);
+        }
         p.blockedByShields = EF.Toggle(    "Blocked By Shields", p.blockedByShields);
         if (p.blockedByShields)
             p.shieldAbsorb = EF.FloatField("Shield Absorb Dmg",  p.shieldAbsorb);
@@ -1477,6 +1788,23 @@ public class DataEditorWindow : EditorWindow
         if (GUILayout.Button("+ Behavior")) behaviors.Add("");
         u.startingBehaviors = behaviors.ToArray();
 
+        Section("Abilities");
+        EditorGUILayout.HelpBox("Ability ids cast on cooldown (cleanses, barriers, zaps). Preferred over components.", MessageType.None);
+        var unitAbilities = new List<string>(u.abilities ?? Array.Empty<string>());
+        int removeAbility = -1;
+        for (int i = 0; i < unitAbilities.Count; i++)
+        {
+            EditorGUILayout.BeginHorizontal();
+            unitAbilities[i] = TextWithIdPopup(unitAbilities[i], AbilityIds());
+            GUI.backgroundColor = new Color(1f, 0.4f, 0.4f);
+            if (GUILayout.Button("✕", GUILayout.Width(24))) removeAbility = i;
+            GUI.backgroundColor = Color.white;
+            EditorGUILayout.EndHorizontal();
+        }
+        if (removeAbility >= 0) unitAbilities.RemoveAt(removeAbility);
+        if (GUILayout.Button("+ Ability")) unitAbilities.Add("");
+        u.abilities = unitAbilities.ToArray();
+
         Section("Components");
         if (u.components == null) u.components = Array.Empty<ComponentEntry>();
         var comps = new List<ComponentEntry>(u.components);
@@ -1551,10 +1879,11 @@ public class DataEditorWindow : EditorWindow
     void DrawBehaviorList()
     {
         int moveIdx = -1, moveDir = 0;
-        for (int i = 0; i < _behaviors.Count; i++)
+        foreach (int i in BuildView(_behaviors))
         {
             string label = string.IsNullOrEmpty(_behaviors[i].displayName) ? _behaviors[i].id : _behaviors[i].displayName;
-            int m = ListItem(label, _bIdx == i, () => _bIdx = i);
+            int idx = i;
+            int m = ListItem(label, _bIdx == i, () => _bIdx = idx, null, ViewIsReorderable);
             if (m != 0) { moveIdx = i; moveDir = m; }
         }
         if (moveIdx >= 0 && MoveEntry(_behaviors, moveIdx, moveDir, ref _bIdx)) SaveBehaviors();
@@ -1870,7 +2199,18 @@ public class DataEditorWindow : EditorWindow
         if (entry.key != prevKey && (string.IsNullOrEmpty(entry.data) || entry.data.Trim() == "{}"))
             entry.data = ComponentDataTemplate(entry.key);
 
-        entry.data = TA("Data (JSON)", string.IsNullOrEmpty(entry.data) ? "{}" : entry.data, 4);
+        entry.data = TAAuto("Data (JSON)", string.IsNullOrEmpty(entry.data) ? "{}" : entry.data);
+    }
+
+    /// <summary>Word-wrapped text area that grows with its content (min 4, max 40 lines).</summary>
+    string TAAuto(string label, string val)
+    {
+        val ??= "";
+        GUILayout.Label(label, EditorStyles.miniLabel);
+        int lines = 1;
+        foreach (char c in val) if (c == '\n') lines++;
+        var style = new GUIStyle(EditorStyles.textArea) { wordWrap = true };
+        return EditorGUILayout.TextArea(val, style, GUILayout.MinHeight(Mathf.Clamp(lines + 1, 4, 40) * 15f));
     }
 
     /// <summary>Default data JSON for a component key, reflected from its nested [Serializable] Data class.</summary>
@@ -1919,19 +2259,22 @@ public class DataEditorWindow : EditorWindow
     /// Selectable list row with ▲/▼ reorder buttons.
     /// Returns 0 (no move), -1 (move up), or +1 (move down).
     /// </summary>
-    int ListItem(string label, bool selected, Action onSelect, GUIStyle style = null)
+    int ListItem(string label, bool selected, Action onSelect, GUIStyle style = null, bool arrows = true)
     {
         int move = 0;
         EditorGUILayout.BeginHorizontal();
 
-        var arrowStyle = new GUIStyle(GUI.skin.button)
+        if (arrows)
         {
-            fontSize = 8,
-            padding  = new RectOffset(0, 0, 0, 0),
-            margin   = new RectOffset(1, 1, 4, 1),
-        };
-        if (GUILayout.Button("▲", arrowStyle, GUILayout.Width(16), GUILayout.Height(16))) move = -1;
-        if (GUILayout.Button("▼", arrowStyle, GUILayout.Width(16), GUILayout.Height(16))) move = +1;
+            var arrowStyle = new GUIStyle(GUI.skin.button)
+            {
+                fontSize = 8,
+                padding  = new RectOffset(0, 0, 0, 0),
+                margin   = new RectOffset(1, 1, 4, 1),
+            };
+            if (GUILayout.Button("▲", arrowStyle, GUILayout.Width(16), GUILayout.Height(16))) move = -1;
+            if (GUILayout.Button("▼", arrowStyle, GUILayout.Width(16), GUILayout.Height(16))) move = +1;
+        }
 
         GUI.backgroundColor = selected ? new Color(0.3f, 0.55f, 1f) : Color.white;
         var s = style ?? new GUIStyle(GUI.skin.button) { alignment = TextAnchor.MiddleLeft };

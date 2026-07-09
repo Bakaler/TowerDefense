@@ -62,12 +62,23 @@
     {
       "id": "shielded",
       "displayName": "Shielded",
-      "behaviorType": 0,
+      "behaviorType": 7,
       "duration": 999999,
       "stackRule": "refresh",
       "moveSpeedMultiplier": 1.0,
       "shieldHp": 40.0,
       "shieldRadius": 0.55,
+      "tintColor": { "r": 1.0, "g": 1.0, "b": 1.0, "a": 1.0 }
+    },
+    {
+      "id": "small_barrier",
+      "displayName": "Small Barrier",
+      "behaviorType": 7,
+      "duration": 999999,
+      "stackRule": "refresh",
+      "moveSpeedMultiplier": 1.0,
+      "shieldHp": 12.0,
+      "shieldRadius": 0.42,
       "tintColor": { "r": 1.0, "g": 1.0, "b": 1.0, "a": 1.0 }
     },
     {

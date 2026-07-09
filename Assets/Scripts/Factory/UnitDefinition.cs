@@ -100,6 +100,13 @@ public class UnitDefinition
     /// These are never timed out — they last the unit's lifetime.
     /// </summary>
     public string[] startingBehaviors = System.Array.Empty<string>();
+
+    /// <summary>
+    /// Ability ids (abilities.json) this unit casts on cooldown — support powers like
+    /// cleansing allies, weaving barriers, or zapping projectiles. Preferred over
+    /// bespoke components: the whole cast is data (ability → effect → behavior).
+    /// </summary>
+    public string[] abilities = System.Array.Empty<string>();
 }
 
 [Serializable]

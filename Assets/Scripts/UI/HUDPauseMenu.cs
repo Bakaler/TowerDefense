@@ -101,7 +101,17 @@ public class HUDPauseMenu : MonoBehaviour
             y -= ROW_H;
         }
 
-        var (quitBtn, _) = UIControlFactory.Button(box, "QuitBtn", 0f, y - 30f, 360f, 60f,
+        var (restartBtn, _) = UIControlFactory.Button(box, "RestartBtn", 0f, y - 30f, 360f, 60f,
+            new Color(0.18f, 0.46f, 0.88f, 1f), "RESTART LEVEL", 24);
+        restartBtn.onClick.AddListener(() =>
+        {
+            RunStats.FlushToProfile();                 // abandoned runs still count toward lifetime stats
+            GameHUD.Instance?.WaveBar?.ResetPause();   // timeScale 1, SFX unpaused
+            HideImmediate();
+            WaveManager.Restart();
+        });
+
+        var (quitBtn, _) = UIControlFactory.Button(box, "QuitBtn", 0f, y - 100f, 360f, 60f,
             new Color(0.28f, 0.12f, 0.12f, 1f), "QUIT TO MENU", 24);
         quitBtn.onClick.AddListener(() =>
         {

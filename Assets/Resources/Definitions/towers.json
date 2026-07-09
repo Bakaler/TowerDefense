@@ -62,12 +62,12 @@
             "displayDamage": 0.0,
             "displayCooldown": 0.0,
             "rotationSpeed": 0.0,
-            "animFps": 0.0,
-            "spritePath": "",
+            "animFps": 6.0,
+            "spritePath": "Art/Towers/fence_tower_T1",
             "turretSpritePath": "",
             "spriteSheet": "",
             "spriteIndex": -1,
-            "scale": 0.8999999761581421,
+            "scale": 1.2000000476837159,
             "debugColor": {
                 "r": 0.8500000238418579,
                 "g": 0.6200000047683716,
@@ -93,9 +93,9 @@
                         "maxCharges": 1,
                         "chargesPerTier": 1,
                         "rechargeSeconds": 12.0,
-                        "lineWidth": 0.12,
-                        "colorR": 1.0,
-                        "colorG": 0.55,
+                        "lineWidth": 0.05,
+                        "colorR": 0.45,
+                        "colorG": 0.8,
                         "colorB": 1.0,
                         "colorA": 0.85
                     }
@@ -361,7 +361,7 @@
         {
             "id": "boomerang_tower",
             "displayName": "Boomerang Tower",
-            "description": "Throws a boomerang that sweeps through all enemies in a wide arc and returns.",
+            "description": "Throws a boomerang that sweeps through all enemies in a wide arc and returns. Breaks after 4 hits; each upgrade adds +2 hits.",
             "range": 6.0,
             "placementRadius": 0.3499999940395355,
             "resourceCost": 5,
@@ -636,7 +636,7 @@
         {
             "id": "railgun_tower",
             "displayName": "Railgun Tower",
-            "description": "Charges up and fires a piercing beam across the entire map, hitting every enemy in its path.",
+            "description": "Charges up and fires a piercing beam across the entire map, hitting every enemy in its path. The beam stops at the first barrier it hits.",
             "range": 22.0,
             "placementRadius": 0.3499999940395355,
             "resourceCost": 9,

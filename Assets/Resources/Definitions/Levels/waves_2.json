@@ -56,6 +56,48 @@
                     }
                 }
             ]
+        },
+        {
+            "groups": [
+                {
+                    "unitDefinitionId": "basic_enemy",
+                    "count": 5,
+                    "spawnInterval": 3.0,
+                    "startTime": 0.0,
+                    "spawnerIndex": 0,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [
+                            1,
+                            0,
+                            1,
+                            0,
+                            1
+                        ],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "basic_enemy",
+                    "count": 5,
+                    "spawnInterval": 3.0,
+                    "startTime": 0.0,
+                    "spawnerIndex": 0,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [
+                            1,
+                            0,
+                            1,
+                            0,
+                            1
+                        ],
+                        "repeat": true
+                    }
+                }
+            ]
         }
     ]
 }

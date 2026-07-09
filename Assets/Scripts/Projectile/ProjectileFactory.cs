@@ -90,6 +90,7 @@ public static class ProjectileFactory
         proj.targetPoint     = args.targetPoint;
         proj.direction       = args.direction;
         proj.damageOverride  = args.damageOverride;
+        proj.maxHits         = ResolveMaxHits(def, args.originTower);
         proj.Launch();
 
         return proj;
@@ -104,6 +105,19 @@ public static class ProjectileFactory
     };
 
     static float Mult(float m) => m > 0f ? m : 1f;
+
+    /// <summary>Hit budget: def.maxHits (0 = unlimited) plus maxHitsPerTier per tower upgrade.</summary>
+    static int ResolveMaxHits(ProjectileDefinition def, GameObject originTower)
+    {
+        if (def.maxHits <= 0) return 0;
+        int hits = def.maxHits;
+        if (def.maxHitsPerTier > 0 && originTower != null)
+        {
+            var info = originTower.GetComponent<TowerInfo>();
+            if (info != null) hits += def.maxHitsPerTier * (info.Tier - 1);
+        }
+        return hits;
+    }
 
     /// <summary>
     /// Sprite resolution order: tiered tower art ({towerId}_missile_T{tier}) →

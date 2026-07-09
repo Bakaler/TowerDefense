@@ -72,7 +72,7 @@ public class LevelManager : MonoBehaviour
         WaveManager.Instance?.ResetForLevel(waves, spawners);
         BalanceManager.Instance?.SetLevelCap(cap);
         TowerShop.Instance?.Rebuild(towers);
-        TowerPlacer.Instance?.ResetFreeBasicTower();
+        TowerPlacer.Instance?.ResetFreeTowerGrants();
         ApplyModifiers();
         EnsureModifierBuffApplicator().ApplyAll();
         ObjectiveTracker.Load(objs);
@@ -162,6 +162,7 @@ public class LevelManager : MonoBehaviour
                 case "BasicTowerDamageMult":
                 case "BasicTowerFireRateMult":
                 case "FreeFirstBasicTower":
+                case "FreeFirstIncomeTower":
                     break;
                 default:
                     Debug.LogWarning($"[LevelManager] Unknown modifier effectType '{mod.effectType}'");

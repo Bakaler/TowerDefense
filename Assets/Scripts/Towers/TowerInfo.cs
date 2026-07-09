@@ -166,6 +166,9 @@ public class TowerInfo : MonoBehaviour
                 if (sp != null) tsr.sprite = sp;
             }
         }
+
+        // Fence towers mirror the root visual onto post B — keep it in sync
+        GetComponent<FenceLine>()?.SyncPostVisual();
     }
 
     public bool TryUpgrade(ResourceManagerScript rm)

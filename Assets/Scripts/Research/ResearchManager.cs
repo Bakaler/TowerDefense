@@ -71,6 +71,9 @@ public class ResearchManager : MonoBehaviour
             case "BulletCountBonus":
                 ApplyBulletCountBonus(def);
                 break;
+            case "ProjectileHitsBonus":
+                ApplyProjectileHitsBonus(def);
+                break;
             default:
                 Debug.LogWarning($"[ResearchManager] Unknown effectType '{def.effectType}'");
                 break;
@@ -99,5 +102,16 @@ public class ResearchManager : MonoBehaviour
         {
             Debug.LogWarning($"[ResearchManager] Effect '{def.effectId}' is not Effect_Launch.");
         }
+    }
+
+    static void ApplyProjectileHitsBonus(ResearchDefinition def)
+    {
+        if (!ProjectileLibrary.TryGet(def.projectileId, out var proj))
+        {
+            Debug.LogWarning($"[ResearchManager] Unknown projectileId '{def.projectileId}'.");
+            return;
+        }
+        proj.maxHits += Mathf.RoundToInt(def.effectValue);
+        Debug.Log($"[Research] ProjectileHitsBonus on '{def.projectileId}': maxHits → {proj.maxHits}");
     }
 }

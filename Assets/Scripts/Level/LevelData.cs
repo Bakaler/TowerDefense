@@ -136,6 +136,9 @@ public class LevelData
     public string[]          allowedTowers  = Array.Empty<string>();
     /// <summary>Modifier columns shown before the level starts. Empty = skip modifier screen.</summary>
     public ModifierColumn[]  modifierColumns = Array.Empty<ModifierColumn>();
+    /// <summary>Forced level-specific modifiers: shown beneath the columns on the modifier
+    /// screen, always selected, cannot be deselected (e.g. tutorial handouts).</summary>
+    public ModifierDef[]     levelModifiers  = Array.Empty<ModifierDef>();
     /// <summary>Difficulty tiers. Index 0=Easy, 1=Medium, 2=Hard.</summary>
     public DifficultyDef[]   difficulties    = Array.Empty<DifficultyDef>();
     /// <summary>In-level objectives shown to the player. Empty = no objective panel.</summary>

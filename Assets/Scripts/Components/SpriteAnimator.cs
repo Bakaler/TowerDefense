@@ -13,6 +13,10 @@ public class SpriteAnimator : MonoBehaviour
     private bool           _playingDeath;
     public bool            IsPlayingDeath => _playingDeath;
 
+    /// <summary>Current walk-cycle frames — lets mirrored visuals (fence post B) copy the animation.</summary>
+    public Sprite[] WalkFrames => _walkFrames;
+    public float    WalkFps    => _walkFps;
+
     public void Setup(Sprite[] walkFrames, float walkFps, Sprite[] deathFrames = null, float deathFps = 8f)
     {
         _walkFrames  = walkFrames;

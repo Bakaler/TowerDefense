@@ -42,6 +42,11 @@ public class ProjectileDefinition
     public float hitRadius = 0.15f;
     /// <summary>If true the projectile keeps flying after a hit and can hit further targets.</summary>
     public bool  pierce = false;
+    /// <summary>Total hits before the projectile breaks. 0 = unlimited. Only meaningful for
+    /// piercing/orbit projectiles (non-pierce projectiles already die on first hit).</summary>
+    public int   maxHits = 0;
+    /// <summary>Extra hits granted per tower upgrade (tier 1 = base maxHits).</summary>
+    public int   maxHitsPerTier = 0;
     /// <summary>If true, a ShieldBubble intercepts this projectile.</summary>
     public bool  blockedByShields = true;
     /// <summary>Damage dealt to an intercepting shield when blocked.</summary>

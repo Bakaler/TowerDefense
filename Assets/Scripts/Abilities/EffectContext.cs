@@ -24,6 +24,11 @@ public class EffectContext
     public float      DamageOverride;
     public DamageType? DamageTypeOverride;
 
+    // Incremented by effects that can report what they hit (search_area, cleanse,
+    // destroy_projectile). Casters use it to skip cooldown/VFX on casts that did nothing.
+    // Not copied by CloneForNewTarget — each context aggregates its own count.
+    public int UnitsAffected;
+
     public EffectContext CloneForNewTarget(UnitParentClass newTarget)
     {
         return new EffectContext

@@ -39,7 +39,8 @@
             "spriteAngleOffset": 0.0,
             "deathSoundId": "",
             "components": [],
-            "startingBehaviors": []
+            "startingBehaviors": [],
+            "abilities": []
         },
         {
             "id": "fast_enemy",
@@ -80,7 +81,8 @@
             "spriteAngleOffset": 0.0,
             "deathSoundId": "",
             "components": [],
-            "startingBehaviors": []
+            "startingBehaviors": [],
+            "abilities": []
         },
         {
             "id": "cloaker_enemy",
@@ -123,12 +125,13 @@
             "components": [],
             "startingBehaviors": [
                 "cloak_cycle"
-            ]
+            ],
+            "abilities": []
         },
         {
             "id": "armored_enemy",
             "displayName": "Armored Enemy",
-            "description": "Heavy armor shrugs off physical hits. Arcane and Piercing damage punch through.",
+            "description": "Heavy armor shrugs off physical hits. Arcane and Piercing damage punch through. They deal massive damage, 3 lives.",
             "life": 220.0,
             "shield": 10.0,
             "speed": 0.6000000238418579,
@@ -136,7 +139,7 @@
             "elementalDefense": 0,
             "arcanaDefense": 0,
             "bounty": 25,
-            "deathBlow": 1,
+            "deathBlow": 3,
             "rotateToMovement": false,
             "colliderRadius": 0.3499999940395355,
             "layer": 0,
@@ -164,12 +167,13 @@
             "spriteAngleOffset": 0.0,
             "deathSoundId": "",
             "components": [],
-            "startingBehaviors": []
+            "startingBehaviors": [],
+            "abilities": []
         },
         {
             "id": "shielded_enemy",
             "displayName": "Shielded Enemy",
-            "description": "Heavy Shield unit shrugs off physical hits",
+            "description": "Heavy Shield unit shrugs off physical hits. They deal massive damage, 3 lives.",
             "life": 10.0,
             "shield": 260.0,
             "speed": 0.6000000238418579,
@@ -177,7 +181,7 @@
             "elementalDefense": 0,
             "arcanaDefense": 0,
             "bounty": 0,
-            "deathBlow": 1,
+            "deathBlow": 3,
             "rotateToMovement": false,
             "colliderRadius": 0.3499999940395355,
             "layer": 0,
@@ -205,7 +209,8 @@
             "spriteAngleOffset": 0.0,
             "deathSoundId": "",
             "components": [],
-            "startingBehaviors": []
+            "startingBehaviors": [],
+            "abilities": []
         },
         {
             "id": "boss_enemy",
@@ -248,7 +253,8 @@
             "components": [],
             "startingBehaviors": [
                 "boss_immunity"
-            ]
+            ],
+            "abilities": []
         },
         {
             "id": "resilient_enemy",
@@ -297,7 +303,8 @@
                     }
                 }
             ],
-            "startingBehaviors": []
+            "startingBehaviors": [],
+            "abilities": []
         },
         {
             "id": "splitter_enemy",
@@ -340,7 +347,8 @@
             "components": [],
             "startingBehaviors": [
                 "splitter_split"
-            ]
+            ],
+            "abilities": []
         },
         {
             "id": "splitter_mini",
@@ -381,7 +389,8 @@
             "spriteAngleOffset": 0.0,
             "deathSoundId": "",
             "components": [],
-            "startingBehaviors": []
+            "startingBehaviors": [],
+            "abilities": []
         },
         {
             "id": "phantom_enemy",
@@ -424,7 +433,8 @@
             "components": [],
             "startingBehaviors": [
                 "phantom_immunity"
-            ]
+            ],
+            "abilities": []
         },
         {
             "id": "charger_enemy",
@@ -467,7 +477,8 @@
             "components": [],
             "startingBehaviors": [
                 "charger_death_rage"
-            ]
+            ],
+            "abilities": []
         },
         {
             "id": "priest_enemy",
@@ -507,27 +518,16 @@
             "animReverse": false,
             "spriteAngleOffset": 0.0,
             "deathSoundId": "",
-            "components": [
-                {
-                    "key": "ally_aura",
-                    "data": {
-                        "radius": 3.5,
-                        "interval": 3.0,
-                        "cleanseTypes": [
-                            "Slowed",
-                            "Rooted",
-                            "Debuff"
-                        ],
-                        "castPause": 0.35
-                    }
-                }
-            ],
-            "startingBehaviors": []
+            "components": [],
+            "startingBehaviors": [],
+            "abilities": [
+                "priest_cleanse"
+            ]
         },
         {
             "id": "shielder_enemy",
             "displayName": "Shielder",
-            "description": "Projects a bubble that blocks non-piercing projectiles, backed by a heavy shield pool.",
+            "description": "Projects a large barrier that blocks non-piercing projectiles and rays, backed by a heavy shield pool.",
             "life": 110.0,
             "shield": 60.0,
             "speed": 1.100000023841858,
@@ -565,6 +565,95 @@
             "components": [],
             "startingBehaviors": [
                 "shielded"
+            ],
+            "abilities": []
+        },
+        {
+            "id": "barrier_weaver_enemy",
+            "displayName": "Barrier Weaver",
+            "description": "Periodically weaves small barriers onto nearby allies that block non-piercing projectiles and rays.",
+            "life": 70.0,
+            "shield": 0.0,
+            "speed": 1.2000000476837159,
+            "physicalDefense": 0,
+            "elementalDefense": 0,
+            "arcanaDefense": 0,
+            "bounty": 26,
+            "deathBlow": 1,
+            "rotateToMovement": false,
+            "colliderRadius": 0.30000001192092898,
+            "layer": 0,
+            "spritePath": "",
+            "spriteSheet": "Art/Enemies/Enemies",
+            "spriteIndex": 3,
+            "scale": 3.0,
+            "debugColor": {
+                "r": 0.75,
+                "g": 0.4000000059604645,
+                "b": 1.0,
+                "a": 1.0
+            },
+            "tintColor": {
+                "r": 0.75,
+                "g": 0.4000000059604645,
+                "b": 1.0,
+                "a": 1.0
+            },
+            "animSheet": "",
+            "animFps": 8.0,
+            "animDeathSheet": "",
+            "animDeathFps": 8.0,
+            "animReverse": false,
+            "spriteAngleOffset": 0.0,
+            "deathSoundId": "",
+            "components": [],
+            "startingBehaviors": [],
+            "abilities": [
+                "weave_barriers"
+            ]
+        },
+        {
+            "id": "disruptor_enemy",
+            "displayName": "Disruptor",
+            "description": "Zaps an incoming projectile out of the air every 2 seconds.",
+            "life": 90.0,
+            "shield": 20.0,
+            "speed": 1.100000023841858,
+            "physicalDefense": 0,
+            "elementalDefense": 3,
+            "arcanaDefense": 3,
+            "bounty": 30,
+            "deathBlow": 1,
+            "rotateToMovement": false,
+            "colliderRadius": 0.3199999928474426,
+            "layer": 0,
+            "spritePath": "",
+            "spriteSheet": "Art/Enemies/Enemies",
+            "spriteIndex": 1,
+            "scale": 3.0,
+            "debugColor": {
+                "r": 0.20000000298023225,
+                "g": 0.949999988079071,
+                "b": 0.8999999761581421,
+                "a": 1.0
+            },
+            "tintColor": {
+                "r": 0.20000000298023225,
+                "g": 0.949999988079071,
+                "b": 0.8999999761581421,
+                "a": 1.0
+            },
+            "animSheet": "",
+            "animFps": 8.0,
+            "animDeathSheet": "",
+            "animDeathFps": 8.0,
+            "animReverse": false,
+            "spriteAngleOffset": 0.0,
+            "deathSoundId": "",
+            "components": [],
+            "startingBehaviors": [],
+            "abilities": [
+                "zap_projectile"
             ]
         }
     ]
