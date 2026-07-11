@@ -83,7 +83,24 @@ public class BehaviorHandler : MonoBehaviour
             case "none":
                 if (_active.Exists(b => b.Def.id == def.id)) return;
                 break;
-            // "stack": always add a new instance
+            case "stack":
+            {
+                if (def.maxStacks <= 0) break;   // unlimited
+                Instance oldest = null;
+                int count = 0;
+                foreach (var b in _active)
+                    if (b.Def.id == def.id)
+                    {
+                        count++;
+                        if (oldest == null || b.Remaining < oldest.Remaining) oldest = b;
+                    }
+                if (count >= def.maxStacks)
+                {
+                    if (oldest != null) oldest.Remaining = def.duration;
+                    return;
+                }
+                break;
+            }
         }
 
         var newInst = new Instance(def);
@@ -138,6 +155,42 @@ public class BehaviorHandler : MonoBehaviour
     }
 
     public bool HasBehavior(string behaviorId) => _active.Exists(b => b.Def.id == behaviorId);
+
+    /// <summary>Number of active instances of a behavior (for stackRule "stack" ramps).</summary>
+    public int GetStackCount(string behaviorId)
+    {
+        int n = 0;
+        foreach (var inst in _active)
+            if (inst.Def.id == behaviorId) n++;
+        return n;
+    }
+
+    /// <summary>One entry per distinct active behavior, with stack count (for status UI).</summary>
+    public struct ActiveStack
+    {
+        public BehaviorDefinition Def;
+        public int   Count;
+        public float Remaining;   // longest remaining duration among the stacks
+    }
+
+    /// <summary>Fills <paramref name="results"/> with the distinct active behaviors, in application order.</summary>
+    public void GetActiveStacks(List<ActiveStack> results)
+    {
+        results.Clear();
+        foreach (var inst in _active)
+        {
+            int idx = results.FindIndex(s => s.Def.id == inst.Def.id);
+            if (idx < 0)
+                results.Add(new ActiveStack { Def = inst.Def, Count = 1, Remaining = inst.Remaining });
+            else
+            {
+                var s = results[idx];
+                s.Count++;
+                s.Remaining = Mathf.Max(s.Remaining, inst.Remaining);
+                results[idx] = s;
+            }
+        }
+    }
 
     /// <summary>True if any active behavior grants immunity to the given type (e.g. boss_immunity).</summary>
     public bool IsImmuneTo(BehaviorType type)

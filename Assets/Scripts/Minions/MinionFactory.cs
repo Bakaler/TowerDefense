@@ -7,8 +7,6 @@ public struct MinionSpawnArgs
     public float range;
     /// <summary>Replaces def.attackCooldown when >0. Hosts stagger this per minion.</summary>
     public float cooldownOverride;
-    /// <summary>Replaces def.maxAwayTime when >0. Hosts stagger this so minions don't all leave at once.</summary>
-    public float maxAwayTimeOverride;
     /// <summary>Replaces def.restDuration when >0.</summary>
     public float restDurationOverride;
     /// <summary>Replaces the effect resolved from def.impactEffectId when set.</summary>
@@ -64,7 +62,6 @@ public static class MinionFactory
         minion.range          = args.range > 0f ? args.range : def.wanderRadius;
         minion.noticeRange    = minion.range;
         minion.attackCooldown = args.cooldownOverride     > 0f ? args.cooldownOverride     : def.attackCooldown;
-        minion.maxAwayTime    = args.maxAwayTimeOverride  > 0f ? args.maxAwayTimeOverride  : def.maxAwayTime;
         minion.restDuration   = args.restDurationOverride > 0f ? args.restDurationOverride : def.restDuration;
         minion.impactEffect   = args.impactEffect != null ? args.impactEffect : ResolveImpactEffect(def);
 

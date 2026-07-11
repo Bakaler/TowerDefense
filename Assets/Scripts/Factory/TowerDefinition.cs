@@ -35,6 +35,11 @@ public class TowerDefinition
     /// <summary>Tower cost in the per-level balance budget. T1=1, T2=2, T3=4.</summary>
     public int    balanceWeight = 1;
 
+    // ── Targeting ─────────────────────────────────────────────────────
+    /// <summary>TargetingMode name the tower starts with (e.g. "Closest").
+    /// Empty = Furthest. The player can still change it per-tower in the HUD.</summary>
+    public string defaultTargeting = "";
+
     // ── Ability ───────────────────────────────────────────────────────
     public string fireAbilityId;
 

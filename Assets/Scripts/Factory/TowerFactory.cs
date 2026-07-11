@@ -129,6 +129,9 @@ public class TowerFactory : MonoBehaviour
         // definitionId is the only thing the factory sets on Turrent.
         // Turrent.Start() resolves fireAbilityId → Ability_Effect from the libraries itself.
         turrent.definitionId = def.id;
+        if (!string.IsNullOrEmpty(def.defaultTargeting) &&
+            System.Enum.TryParse<TargetingMode>(def.defaultTargeting, true, out var defaultMode))
+            turrent.Targeting = defaultMode;
 
         // ── 5b. TowerInfo ─────────────────────────────────────────
         var info          = go.AddComponent<TowerInfo>();
@@ -139,6 +142,9 @@ public class TowerFactory : MonoBehaviour
         info.cooldown     = TowerStatResolver.Cooldown(def);
         info.damage       = TowerStatResolver.Damage(def);
         info.shieldBonus  = TowerStatResolver.ShieldBonus(def);
+        var dmgType       = TowerStatResolver.DamageTypeFor(def);
+        info.hasDamageType = dmgType.HasValue;
+        if (dmgType.HasValue) info.damageType = dmgType.Value;
         if (System.Enum.TryParse<BalanceType>(def.balanceType, true, out var bt))
             info.balanceType = bt;
         info.rangePerTier = def.rangePerTier;

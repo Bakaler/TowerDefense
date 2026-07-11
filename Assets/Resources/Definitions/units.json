@@ -40,7 +40,8 @@
             "deathSoundId": "",
             "components": [],
             "startingBehaviors": [],
-            "abilities": []
+            "abilities": [],
+            "tags": []
         },
         {
             "id": "fast_enemy",
@@ -82,7 +83,8 @@
             "deathSoundId": "",
             "components": [],
             "startingBehaviors": [],
-            "abilities": []
+            "abilities": [],
+            "tags": []
         },
         {
             "id": "cloaker_enemy",
@@ -126,7 +128,8 @@
             "startingBehaviors": [
                 "cloak_cycle"
             ],
-            "abilities": []
+            "abilities": [],
+            "tags": []
         },
         {
             "id": "armored_enemy",
@@ -168,7 +171,8 @@
             "deathSoundId": "",
             "components": [],
             "startingBehaviors": [],
-            "abilities": []
+            "abilities": [],
+            "tags": []
         },
         {
             "id": "shielded_enemy",
@@ -210,7 +214,8 @@
             "deathSoundId": "",
             "components": [],
             "startingBehaviors": [],
-            "abilities": []
+            "abilities": [],
+            "tags": []
         },
         {
             "id": "boss_enemy",
@@ -254,7 +259,10 @@
             "startingBehaviors": [
                 "boss_immunity"
             ],
-            "abilities": []
+            "abilities": [],
+            "tags": [
+                "boss"
+            ]
         },
         {
             "id": "resilient_enemy",
@@ -268,13 +276,13 @@
             "arcanaDefense": 0,
             "bounty": 20,
             "deathBlow": 1,
-            "rotateToMovement": false,
+            "rotateToMovement": true,
             "colliderRadius": 0.30000001192092898,
             "layer": 0,
             "spritePath": "",
-            "spriteSheet": "Art/Enemies/Enemies",
+            "spriteSheet": "",
             "spriteIndex": 0,
-            "scale": 3.0,
+            "scale": 1.75,
             "debugColor": {
                 "r": 0.20000000298023225,
                 "g": 0.800000011920929,
@@ -282,15 +290,15 @@
                 "a": 1.0
             },
             "tintColor": {
-                "r": 0.20000000298023225,
-                "g": 0.800000011920929,
+                "r": 1.0,
+                "g": 1.0,
                 "b": 1.0,
                 "a": 1.0
             },
-            "animSheet": "",
+            "animSheet": "Art/Units/enemy_6_unit",
             "animFps": 8.0,
             "animDeathSheet": "",
-            "animDeathFps": 8.0,
+            "animDeathFps": 6.0,
             "animReverse": false,
             "spriteAngleOffset": 0.0,
             "deathSoundId": "",
@@ -304,7 +312,8 @@
                 }
             ],
             "startingBehaviors": [],
-            "abilities": []
+            "abilities": [],
+            "tags": []
         },
         {
             "id": "splitter_enemy",
@@ -348,7 +357,8 @@
             "startingBehaviors": [
                 "splitter_split"
             ],
-            "abilities": []
+            "abilities": [],
+            "tags": []
         },
         {
             "id": "splitter_mini",
@@ -390,7 +400,8 @@
             "deathSoundId": "",
             "components": [],
             "startingBehaviors": [],
-            "abilities": []
+            "abilities": [],
+            "tags": []
         },
         {
             "id": "phantom_enemy",
@@ -434,7 +445,8 @@
             "startingBehaviors": [
                 "phantom_immunity"
             ],
-            "abilities": []
+            "abilities": [],
+            "tags": []
         },
         {
             "id": "charger_enemy",
@@ -478,7 +490,8 @@
             "startingBehaviors": [
                 "charger_death_rage"
             ],
-            "abilities": []
+            "abilities": [],
+            "tags": []
         },
         {
             "id": "priest_enemy",
@@ -522,6 +535,9 @@
             "startingBehaviors": [],
             "abilities": [
                 "priest_cleanse"
+            ],
+            "tags": [
+                "high_prio"
             ]
         },
         {
@@ -566,7 +582,10 @@
             "startingBehaviors": [
                 "shielded"
             ],
-            "abilities": []
+            "abilities": [],
+            "tags": [
+                "high_prio"
+            ]
         },
         {
             "id": "barrier_weaver_enemy",
@@ -610,6 +629,9 @@
             "startingBehaviors": [],
             "abilities": [
                 "weave_barriers"
+            ],
+            "tags": [
+                "high_prio"
             ]
         },
         {
@@ -654,7 +676,8 @@
             "startingBehaviors": [],
             "abilities": [
                 "zap_projectile"
-            ]
+            ],
+            "tags": []
         }
     ]
 }

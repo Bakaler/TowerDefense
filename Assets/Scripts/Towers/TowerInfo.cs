@@ -15,6 +15,10 @@ public class TowerInfo : MonoBehaviour
     public string      description  = "";
     public BalanceType balanceType  = BalanceType.Physical;
     public float       damage       = 0f;
+    /// <summary>Damage type of the resolved damage effect. Only meaningful when hasDamageType.</summary>
+    public DamageType  damageType   = DamageType.Physical;
+    /// <summary>False when no damage effect could be resolved (support towers).</summary>
+    public bool        hasDamageType = false;
     /// <summary>Extra damage vs stat-shields (from the damage effect's shieldBonus). May be negative.</summary>
     public float       shieldBonus  = 0f;
     public float       cooldown     = 0f;

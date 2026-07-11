@@ -38,14 +38,51 @@ public class HUDInfoPanel : MonoBehaviour
     Text    _tpSellBtnLabel;
     Button  _tpMoveZoneBtn;
     Text    _tpMoveZoneLabel;
-    Button[] _tpTargetBtns;
-    Image[]  _tpTargetImgs;
+    Text       _tpTargetLabel;     // dropdown button label (current mode)
+    GameObject _tpTargetPopup;     // option list, opens above the button
+    Image[]    _tpTargetItemImgs;
+    GameObject _tpTargetHdr;       // "TARGET" caption + button — hidden for research towers
+    GameObject _tpTargetDD;
+    Text       _tpPrioLabel;       // research fill-priority dropdown (same C3 slot)
+    GameObject _tpPrioHdr;
+    GameObject _tpPrioDD;
+    GameObject _tpPrioPopup;
+    Image[]    _tpPrioItemImgs;
     TowerInfo _selectedTower;
+
+    // Dropdown entries — order defines the list top-to-bottom
+    static readonly (TargetingMode mode, string label)[] TargetOptions =
+    {
+        (TargetingMode.Furthest,       "Furthest"),
+        (TargetingMode.Closest,        "Closest"),
+        (TargetingMode.LowestHP,       "Lowest HP"),
+        (TargetingMode.HighestHP,      "Highest HP"),
+        (TargetingMode.LeastShields,   "Least Shields"),
+        (TargetingMode.HighestShields, "Most Shields"),
+        (TargetingMode.HighPrio,       "High Prio"),
+        (TargetingMode.Boss,           "Boss"),
+        (TargetingMode.Invisible,      "Invisible"),
+    };
 
     // ── Enemy mode ─────────────────────────────────────────────────────
     Text _epName, _epHp, _epShield, _epSpeed, _epDeathBlow;
     Text _epArmor, _epResistance, _epFortitude, _epDescription;
     public UnitManager SelectedEnemy { get; private set; }
+
+    // ── Enemy behavior grid (status icons, left side of enemy body) ────
+    const int   BGRID_COLS = 3, BGRID_ROWS = 4;
+    const float BGRID_CELL = 50f, BGRID_GAP = 6f;
+    const float BGRID_W    = BGRID_COLS * BGRID_CELL + (BGRID_COLS - 1) * BGRID_GAP;
+    GameObject[] _ebSlots;
+    Image[]      _ebCircles;
+    Image[]      _ebIcons;
+    Text[]       _ebLetters;
+    Text[]       _ebCounts;
+    GameObject   _ebTooltip;
+    Text         _ebTooltipText;
+    int          _ebHover = -1;
+    readonly List<BehaviorHandler.ActiveStack> _ebStacks = new();
+    readonly Dictionary<string, Sprite> _behaviorIconCache = new();
 
     // ── Tier research mode ─────────────────────────────────────────────
     Button _resT2Btn, _resT3Btn, _resT4Btn, _resT5Btn;
@@ -180,29 +217,73 @@ public class HUDInfoPanel : MonoBehaviour
         var sc = _tpSellBtn.colors; sc.highlightedColor = new Color(0.75f,0.15f,0.15f); _tpSellBtn.colors = sc;
         _tpSellBtn.onClick.AddListener(OnSellClicked);
 
-        // C3: Targeting
+        // C3: Targeting dropdown
         float tgtBtnY = TPAD;
-        HUDHelpers.MakeText(
-            HUDHelpers.MakeRect("TargetLabel", _towerBody, C3, tgtBtnY + 30f + 5f, COL_W, 20f),
-            "TARGET", new Color(0.6f, 0.6f, 0.7f), 10, bold: true);
+        _tpTargetHdr = HUDHelpers.MakeRect("TargetLabel", _towerBody, C3, tgtBtnY + 30f + 5f, COL_W, 20f);
+        HUDHelpers.MakeText(_tpTargetHdr, "TARGET", new Color(0.6f, 0.6f, 0.7f), 10, bold: true);
 
-        string[] modes = { "Furthest", "Closest", "Lowest" };
-        float mBtnW = (COL_W - 8f) / 3f;
-        _tpTargetBtns = new Button[3];
-        _tpTargetImgs = new Image[3];
-        for (int i = 0; i < 3; i++)
+        var ddGO  = HUDHelpers.MakeRect("TargetDropdown", _towerBody, C3, tgtBtnY, COL_W, 30f);
+        _tpTargetDD = ddGO;
+        var ddImg = ddGO.AddComponent<Image>(); ddImg.color = new Color(0.18f, 0.18f, 0.28f, 1f);
+        var ddBtn = ddGO.AddComponent<Button>(); ddBtn.targetGraphic = ddImg;
+        _tpTargetLabel = HUDHelpers.MakeText(
+            HUDHelpers.MakeRect("L", ddGO, 0f, 0f, COL_W, 30f), "Furthest  ▾", Color.white, 10, bold: true);
+        _tpTargetLabel.alignment = TextAnchor.MiddleCenter;
+        ddBtn.onClick.AddListener(ToggleTargetPopup);
+
+        // Option list opens upward from the button. Built last in the body so it
+        // draws over the other columns (UGUI sibling order = draw order).
+        const float ITEM_H = 26f;
+        float popupH = TargetOptions.Length * ITEM_H;
+        _tpTargetPopup = HUDHelpers.MakeRect("TargetPopup", _towerBody, C3, tgtBtnY + 30f + 2f, COL_W, popupH);
+        _tpTargetPopup.AddComponent<Image>().color = new Color(0.10f, 0.10f, 0.16f, 0.98f);
+        _tpTargetItemImgs = new Image[TargetOptions.Length];
+        for (int i = 0; i < TargetOptions.Length; i++)
         {
-            float xOff = C3 + i * (mBtnW + 4f);
-            var bGO  = HUDHelpers.MakeRect($"Target_{modes[i]}", _towerBody, xOff, tgtBtnY, mBtnW, 30f);
-            var bImg = bGO.AddComponent<Image>(); bImg.color = new Color(0.18f, 0.18f, 0.28f, 1f);
-            var btn  = bGO.AddComponent<Button>(); btn.targetGraphic = bImg;
-            HUDHelpers.MakeText(HUDHelpers.MakeRect("L", bGO, 0f, 0f, mBtnW, 30f), modes[i], Color.white, 10, bold: true)
+            var (mode, label) = TargetOptions[i];
+            float iy  = popupH - (i + 1) * ITEM_H;
+            var  iGO  = HUDHelpers.MakeRect($"Opt_{mode}", _tpTargetPopup, 1f, iy + 1f, COL_W - 2f, ITEM_H - 2f);
+            var  iImg = iGO.AddComponent<Image>(); iImg.color = new Color(0.18f, 0.18f, 0.28f, 1f);
+            var  iBtn = iGO.AddComponent<Button>(); iBtn.targetGraphic = iImg;
+            HUDHelpers.MakeText(HUDHelpers.MakeRect("L", iGO, 0f, 0f, COL_W - 2f, ITEM_H - 2f), label, Color.white, 10, bold: true)
                 .alignment = TextAnchor.MiddleCenter;
-            int idx = i;
-            btn.onClick.AddListener(() => SetTargetingMode((TargetingMode)idx));
-            _tpTargetBtns[i] = btn;
-            _tpTargetImgs[i] = bImg;
+            var capMode = mode;
+            iBtn.onClick.AddListener(() => { SetTargetingMode(capMode); ClosePopups(); });
+            _tpTargetItemImgs[i] = iImg;
         }
+        _tpTargetPopup.SetActive(false);
+
+        // C3 (research towers): fill-priority dropdown in the same slot as targeting
+        _tpPrioHdr = HUDHelpers.MakeRect("PrioLabel", _towerBody, C3, tgtBtnY + 30f + 5f, COL_W, 20f);
+        HUDHelpers.MakeText(_tpPrioHdr, "FILL PRIORITY", new Color(0.6f, 0.6f, 0.7f), 10, bold: true);
+
+        _tpPrioDD = HUDHelpers.MakeRect("PrioDropdown", _towerBody, C3, tgtBtnY, COL_W, 30f);
+        var pdImg = _tpPrioDD.AddComponent<Image>(); pdImg.color = new Color(0.18f, 0.18f, 0.28f, 1f);
+        var pdBtn = _tpPrioDD.AddComponent<Button>(); pdBtn.targetGraphic = pdImg;
+        _tpPrioLabel = HUDHelpers.MakeText(
+            HUDHelpers.MakeRect("L", _tpPrioDD, 0f, 0f, COL_W, 30f), "Prio 1  ▾", Color.white, 10, bold: true);
+        _tpPrioLabel.alignment = TextAnchor.MiddleCenter;
+        pdBtn.onClick.AddListener(TogglePrioPopup);
+
+        float prioPopupH = ResearchTower.MaxPriority * ITEM_H;
+        _tpPrioPopup = HUDHelpers.MakeRect("PrioPopup", _towerBody, C3, tgtBtnY + 30f + 2f, COL_W, prioPopupH);
+        _tpPrioPopup.AddComponent<Image>().color = new Color(0.10f, 0.10f, 0.16f, 0.98f);
+        _tpPrioItemImgs = new Image[ResearchTower.MaxPriority];
+        for (int i = 0; i < ResearchTower.MaxPriority; i++)
+        {
+            int prio  = i + 1;
+            float iy  = prioPopupH - (i + 1) * ITEM_H;
+            var  iGO  = HUDHelpers.MakeRect($"Prio_{prio}", _tpPrioPopup, 1f, iy + 1f, COL_W - 2f, ITEM_H - 2f);
+            var  iImg = iGO.AddComponent<Image>(); iImg.color = new Color(0.18f, 0.18f, 0.28f, 1f);
+            var  iBtn = iGO.AddComponent<Button>(); iBtn.targetGraphic = iImg;
+            HUDHelpers.MakeText(HUDHelpers.MakeRect("L", iGO, 0f, 0f, COL_W - 2f, ITEM_H - 2f), $"Prio {prio}", Color.white, 10, bold: true)
+                .alignment = TextAnchor.MiddleCenter;
+            iBtn.onClick.AddListener(() => { SetResearchPriority(prio); ClosePopups(); });
+            _tpPrioItemImgs[i] = iImg;
+        }
+        _tpPrioPopup.SetActive(false);
+        _tpPrioHdr.SetActive(false);
+        _tpPrioDD.SetActive(false);
     }
 
     // ── Tower research sub-body ────────────────────────────────────────
@@ -233,29 +314,159 @@ public class HUDInfoPanel : MonoBehaviour
         rt.anchoredPosition = Vector2.zero;
         rt.sizeDelta = new Vector2(W, H);
 
-        // Enemy name goes in the header title; stats fill two columns
-        float colW = (W - PAD * 3f) * 0.5f;
+        // Left: 3×4 behavior status grid; stats fill two columns to its right
+        float bx   = PAD + BGRID_W + PAD;
+        float colW = (W - bx - PAD * 2f) * 0.5f;
         const float ROW = 26f;
         float y = H - HDR_H - 8f - ROW;
 
         _epName = null;   // shown in header title instead
 
-        _epHp         = HUDHelpers.MakeText(HUDHelpers.MakeRect("HP",     _enemyBody, PAD,              y, colW, ROW), "", Color.white, 14);
-        _epArmor      = HUDHelpers.MakeText(HUDHelpers.MakeRect("Armor",  _enemyBody, PAD + colW + PAD, y, colW, ROW), "", new Color(0.8f,0.8f,0.8f), 14); y -= ROW + 3f;
-        _epShield     = HUDHelpers.MakeText(HUDHelpers.MakeRect("Shield", _enemyBody, PAD,              y, colW, ROW), "", new Color(0.35f,0.75f,1f), 14);
-        _epResistance = HUDHelpers.MakeText(HUDHelpers.MakeRect("Res",    _enemyBody, PAD + colW + PAD, y, colW, ROW), "", new Color(0.4f,0.85f,1f), 14); y -= ROW + 3f;
-        _epSpeed      = HUDHelpers.MakeText(HUDHelpers.MakeRect("Spd",    _enemyBody, PAD,              y, colW, ROW), "", Color.white, 14);
-        _epFortitude  = HUDHelpers.MakeText(HUDHelpers.MakeRect("Fort",   _enemyBody, PAD + colW + PAD, y, colW, ROW), "", new Color(0.85f,0.6f,1f), 14); y -= ROW + 3f;
-        _epDeathBlow  = HUDHelpers.MakeText(HUDHelpers.MakeRect("DB",     _enemyBody, PAD,              y, colW, ROW), "", new Color(0.95f,0.4f,0.4f), 14); y -= ROW + 8f;
+        _epHp         = HUDHelpers.MakeText(HUDHelpers.MakeRect("HP",     _enemyBody, bx,             y, colW, ROW), "", Color.white, 14);
+        _epArmor      = HUDHelpers.MakeText(HUDHelpers.MakeRect("Armor",  _enemyBody, bx + colW + PAD, y, colW, ROW), "", new Color(0.8f,0.8f,0.8f), 14); y -= ROW + 3f;
+        _epShield     = HUDHelpers.MakeText(HUDHelpers.MakeRect("Shield", _enemyBody, bx,             y, colW, ROW), "", new Color(0.35f,0.75f,1f), 14);
+        _epResistance = HUDHelpers.MakeText(HUDHelpers.MakeRect("Res",    _enemyBody, bx + colW + PAD, y, colW, ROW), "", new Color(0.4f,0.85f,1f), 14); y -= ROW + 3f;
+        _epSpeed      = HUDHelpers.MakeText(HUDHelpers.MakeRect("Spd",    _enemyBody, bx,             y, colW, ROW), "", Color.white, 14);
+        _epFortitude  = HUDHelpers.MakeText(HUDHelpers.MakeRect("Fort",   _enemyBody, bx + colW + PAD, y, colW, ROW), "", new Color(0.85f,0.6f,1f), 14); y -= ROW + 3f;
+        _epDeathBlow  = HUDHelpers.MakeText(HUDHelpers.MakeRect("DB",     _enemyBody, bx,             y, colW, ROW), "", new Color(0.95f,0.4f,0.4f), 14); y -= ROW + 8f;
 
-        HUDHelpers.MakeRect("Div", _enemyBody, PAD, y + 4f, W - PAD * 2f, 1f)
+        HUDHelpers.MakeRect("Div", _enemyBody, bx, y + 4f, W - bx - PAD, 1f)
             .AddComponent<Image>().color = new Color(1f, 1f, 1f, 0.12f);
         _epDescription = HUDHelpers.MakeText(
-            HUDHelpers.MakeRect("Desc", _enemyBody, PAD, 6f, W - PAD * 2f, y - 4f),
+            HUDHelpers.MakeRect("Desc", _enemyBody, bx, 6f, W - bx - PAD, y - 4f),
             "", new Color(0.75f, 0.75f, 0.75f), 12);
         _epDescription.alignment         = TextAnchor.UpperLeft;
         _epDescription.horizontalOverflow = HorizontalWrapMode.Wrap;
         _epDescription.verticalOverflow   = VerticalWrapMode.Overflow;
+
+        BuildBehaviorGrid();
+    }
+
+    /// <summary>3×4 grid of status circles on the left of the enemy body. Each active
+    /// behavior gets a tinted circle (icon or first letter), a stack count, and a
+    /// hover tooltip with the behavior's description.</summary>
+    void BuildBehaviorGrid()
+    {
+        int n = BGRID_COLS * BGRID_ROWS;
+        _ebSlots   = new GameObject[n];
+        _ebCircles = new Image[n];
+        _ebIcons   = new Image[n];
+        _ebLetters = new Text[n];
+        _ebCounts  = new Text[n];
+
+        float topY  = H - HDR_H - 8f - BGRID_CELL;
+        var circle  = RuntimeSprites.Circle(32);
+
+        for (int i = 0; i < n; i++)
+        {
+            int   col = i % BGRID_COLS, row = i / BGRID_COLS;
+            float x   = PAD + col * (BGRID_CELL + BGRID_GAP);
+            float y   = topY - row * (BGRID_CELL + BGRID_GAP);
+
+            var slot = HUDHelpers.MakeRect($"Behavior_{i}", _enemyBody, x, y, BGRID_CELL, BGRID_CELL);
+            var circ = slot.AddComponent<Image>();
+            circ.sprite        = circle;
+            circ.raycastTarget = true;
+
+            var iconGO = HUDHelpers.MakeRect("Icon", slot, 5f, 5f, BGRID_CELL - 10f, BGRID_CELL - 10f);
+            var icon   = iconGO.AddComponent<Image>();
+            icon.raycastTarget = false;
+            icon.enabled       = false;
+
+            var letter = HUDHelpers.MakeText(
+                HUDHelpers.MakeRect("L", slot, 0f, 0f, BGRID_CELL, BGRID_CELL), "", new Color(0.05f, 0.05f, 0.10f), 20, bold: true);
+            letter.alignment     = TextAnchor.MiddleCenter;
+            letter.raycastTarget = false;
+
+            var count = HUDHelpers.MakeText(
+                HUDHelpers.MakeRect("N", slot, BGRID_CELL * 0.3f, -3f, BGRID_CELL * 0.7f, BGRID_CELL * 0.45f), "", new Color(1f, 0.95f, 0.55f), 14, bold: true);
+            count.alignment     = TextAnchor.LowerRight;
+            count.raycastTarget = false;
+
+            int slotIdx  = i;
+            var hover    = slot.AddComponent<HoverCallbacks>();
+            hover.onEnter = () => { _ebHover = slotIdx; RefreshBehaviorTooltip(); };
+            hover.onExit  = () => { if (_ebHover == slotIdx) { _ebHover = -1; _ebTooltip?.SetActive(false); } };
+
+            slot.SetActive(false);
+            _ebSlots[i] = slot; _ebCircles[i] = circ; _ebIcons[i] = icon;
+            _ebLetters[i] = letter; _ebCounts[i] = count;
+        }
+
+        // Tooltip — built last so it draws above everything else in the body
+        _ebTooltip = HUDHelpers.MakeRect("BehaviorTooltip", _enemyBody, PAD + BGRID_W + PAD, 6f, 420f, 84f);
+        _ebTooltip.AddComponent<Image>().color = new Color(0.05f, 0.05f, 0.09f, 0.97f);
+        _ebTooltipText = HUDHelpers.MakeText(
+            HUDHelpers.MakeRect("T", _ebTooltip, 10f, 5f, 400f, 74f), "", Color.white, 12);
+        _ebTooltipText.alignment          = TextAnchor.UpperLeft;
+        _ebTooltipText.horizontalOverflow = HorizontalWrapMode.Wrap;
+        _ebTooltipText.verticalOverflow   = VerticalWrapMode.Truncate;
+        _ebTooltip.SetActive(false);
+    }
+
+    void RefreshBehaviorGrid(UnitManager u)
+    {
+        if (_ebSlots == null) return;
+
+        var handler = u.GetComponent<BehaviorHandler>();
+        if (handler != null) handler.GetActiveStacks(_ebStacks);
+        else                 _ebStacks.Clear();
+
+        for (int i = 0; i < _ebSlots.Length; i++)
+        {
+            bool used = i < _ebStacks.Count;
+            _ebSlots[i].SetActive(used);
+            if (!used) continue;
+
+            var def = _ebStacks[i].Def;
+
+            Color c = def.tintColor == Color.white ? new Color(0.52f, 0.58f, 0.70f) : def.tintColor;
+            c.a = 1f;
+            _ebCircles[i].color = c;
+
+            var icon = LoadBehaviorIcon(def.iconPath);
+            _ebIcons[i].enabled = icon != null;
+            if (icon != null) _ebIcons[i].sprite = icon;
+
+            string name = string.IsNullOrEmpty(def.displayName) ? def.id : def.displayName;
+            _ebLetters[i].text = icon == null && name.Length > 0 ? name.Substring(0, 1).ToUpper() : "";
+
+            _ebCounts[i].text = _ebStacks[i].Count > 1 ? _ebStacks[i].Count.ToString() : "";
+        }
+
+        // Live-update (or hide) the tooltip while hovering as stacks change
+        if (_ebHover >= 0) RefreshBehaviorTooltip();
+    }
+
+    void RefreshBehaviorTooltip()
+    {
+        if (_ebTooltip == null) return;
+        if (_ebHover < 0 || _ebHover >= _ebStacks.Count) { _ebTooltip.SetActive(false); return; }
+
+        var s = _ebStacks[_ebHover];
+        string title  = string.IsNullOrEmpty(s.Def.displayName) ? s.Def.id : s.Def.displayName;
+        string stacks = s.Count > 1 ? $"  ×{s.Count}" : "";
+        string timing = s.Remaining < 99999f ? $"   <color=#8a8a99>{s.Remaining:0.0}s</color>" : "";
+        string desc   = string.IsNullOrEmpty(s.Def.description) ? "" : "\n" + s.Def.description;
+        _ebTooltipText.text = $"<b>{title}{stacks}</b>{timing}{desc}";
+
+        // Sit just right of the hovered slot, clamped inside the body
+        var slotRT = _ebSlots[_ebHover].GetComponent<RectTransform>();
+        var ttRT   = _ebTooltip.GetComponent<RectTransform>();
+        Vector2 pos = slotRT.anchoredPosition + new Vector2(BGRID_CELL + 8f, BGRID_CELL - 84f);
+        pos.y = Mathf.Clamp(pos.y, 6f, BODY_H - 84f - 6f);
+        ttRT.anchoredPosition = pos;
+
+        _ebTooltip.SetActive(true);
+    }
+
+    Sprite LoadBehaviorIcon(string path)
+    {
+        if (string.IsNullOrEmpty(path)) return null;
+        if (_behaviorIconCache.TryGetValue(path, out var sp)) return sp;
+        sp = Resources.Load<Sprite>(path);
+        _behaviorIconCache[path] = sp;   // cache misses too so we don't re-hit Resources
+        return sp;
     }
 
     // ── Tier research body ─────────────────────────────────────────────
@@ -315,6 +526,7 @@ public class HUDInfoPanel : MonoBehaviour
     void SetMode(Mode mode)
     {
         _mode = mode;
+        ClosePopups();
         _towerBody?.SetActive(mode == Mode.Tower);
         _towerResBody?.SetActive(mode == Mode.TowerResearch);
         _enemyBody?.SetActive(mode == Mode.Enemy);
@@ -364,6 +576,7 @@ public class HUDInfoPanel : MonoBehaviour
     public void Hide()
     {
         DeselectCurrentTower();
+        ClosePopups();
         SelectedEnemy = null;
         _mode = Mode.None;
         _towerBody?.SetActive(false);
@@ -396,6 +609,8 @@ public class HUDInfoPanel : MonoBehaviour
             string dmgStr = baseDmg > 0f ? $"Damage   {baseDmg:0.#}" : "Damage   —";
             if (baseDmg > 0f && info.AuraDamageMultiplier > 1.001f)
                 dmgStr += $"  <color=#4DFF73>(+{baseDmg * (info.AuraDamageMultiplier - 1f):0.#})</color>";
+            if (baseDmg > 0f && info.hasDamageType)
+                dmgStr += $"  {DamageTypeColors.Tag(info.damageType)}";
             _tpDamage.text = dmgStr;
         }
 
@@ -448,7 +663,15 @@ public class HUDInfoPanel : MonoBehaviour
                 _tpMoveZoneLabel.text = zone.IsRepositioning ? "CONFIRMING..." : "MOVE ZONE";
         }
 
-        RefreshTargetingButtons(info);
+        // Research towers show a fill-priority dropdown where targeting normally sits
+        bool isResearch = info.GetComponent<ResearchTower>() != null;
+        if (_tpTargetHdr != null) _tpTargetHdr.SetActive(!isResearch);
+        if (_tpTargetDD  != null) _tpTargetDD.SetActive(!isResearch);
+        if (_tpPrioHdr   != null) _tpPrioHdr.SetActive(isResearch);
+        if (_tpPrioDD    != null) _tpPrioDD.SetActive(isResearch);
+        if (isResearch) RefreshPrioButtons(info);
+        else            RefreshTargetingButtons(info);
+
         RefreshUpgradeButton(info);
 
         if (_tpSellBtnLabel != null) _tpSellBtnLabel.text = $"SELL  —  {info.SellRefund}g";
@@ -495,14 +718,37 @@ public class HUDInfoPanel : MonoBehaviour
 
     void RefreshTargetingButtons(TowerInfo info)
     {
-        if (_tpTargetImgs == null) return;
         var turrent = info.GetComponent<Turrent>();
         TargetingMode current = turrent != null ? turrent.Targeting : TargetingMode.Furthest;
+
+        if (_tpTargetLabel != null) _tpTargetLabel.text = TargetLabelFor(current) + "  ▾";
+
+        if (_tpTargetItemImgs == null) return;
         Color active   = new Color(0.25f, 0.50f, 0.80f, 1f);
         Color inactive = new Color(0.18f, 0.18f, 0.28f, 1f);
-        for (int i = 0; i < _tpTargetImgs.Length; i++)
-            if (_tpTargetImgs[i] != null)
-                _tpTargetImgs[i].color = (TargetingMode)i == current ? active : inactive;
+        for (int i = 0; i < _tpTargetItemImgs.Length; i++)
+            if (_tpTargetItemImgs[i] != null)
+                _tpTargetItemImgs[i].color = TargetOptions[i].mode == current ? active : inactive;
+    }
+
+    static string TargetLabelFor(TargetingMode mode)
+    {
+        foreach (var (m, label) in TargetOptions)
+            if (m == mode) return label;
+        return mode.ToString();
+    }
+
+    void ToggleTargetPopup()
+    {
+        if (_tpTargetPopup != null) _tpTargetPopup.SetActive(!_tpTargetPopup.activeSelf);
+    }
+
+    void ClosePopups()
+    {
+        _tpTargetPopup?.SetActive(false);
+        _tpPrioPopup?.SetActive(false);
+        _ebHover = -1;
+        _ebTooltip?.SetActive(false);
     }
 
     void SetTargetingMode(TargetingMode mode)
@@ -511,6 +757,33 @@ public class HUDInfoPanel : MonoBehaviour
         var t = _selectedTower.GetComponent<Turrent>();
         if (t != null) t.Targeting = mode;
         RefreshTargetingButtons(_selectedTower);
+    }
+
+    void RefreshPrioButtons(TowerInfo info)
+    {
+        var rt = info.GetComponent<ResearchTower>();
+        int current = rt != null ? rt.priority : 1;
+        if (_tpPrioLabel != null) _tpPrioLabel.text = $"Prio {current}  ▾";
+
+        if (_tpPrioItemImgs == null) return;
+        Color active   = new Color(0.25f, 0.50f, 0.80f, 1f);
+        Color inactive = new Color(0.18f, 0.18f, 0.28f, 1f);
+        for (int i = 0; i < _tpPrioItemImgs.Length; i++)
+            if (_tpPrioItemImgs[i] != null)
+                _tpPrioItemImgs[i].color = (i + 1) == current ? active : inactive;
+    }
+
+    void TogglePrioPopup()
+    {
+        if (_tpPrioPopup != null) _tpPrioPopup.SetActive(!_tpPrioPopup.activeSelf);
+    }
+
+    void SetResearchPriority(int prio)
+    {
+        if (_selectedTower == null) return;
+        var rt = _selectedTower.GetComponent<ResearchTower>();
+        if (rt != null) rt.priority = Mathf.Clamp(prio, 1, ResearchTower.MaxPriority);
+        RefreshPrioButtons(_selectedTower);
     }
 
     void OnMoveZoneClicked()
@@ -632,6 +905,8 @@ public class HUDInfoPanel : MonoBehaviour
         if (_epResistance != null) _epResistance.text = $"Resist    {u.elementalDefense}{ReductionPct(u, u.elementalDefense)}";
         if (_epFortitude  != null) _epFortitude.text  = $"Fortitude {u.arcanaDefense}{ReductionPct(u, u.arcanaDefense)}";
         if (_epDescription!= null) _epDescription.text = desc;
+
+        RefreshBehaviorGrid(u);
     }
 
     /// <summary>

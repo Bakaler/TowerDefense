@@ -1,10 +1,10 @@
 {
     "id": "level_3",
-    "displayName": "The Tree Line",
+    "displayName": "Scattered",
     "startGold": 15,
-    "startLives": 10,
-    "startTech": 5,
-    "startTier": 1,
+    "startLives": 15,
+    "startTech": 0,
+    "startTier": 2,
     "backgroundSprite": "Art/Maps/level_3",
     "backgroundX": 0.07999999821186066,
     "backgroundY": 1.059999942779541,
@@ -12,12 +12,13 @@
     "allowedTowers": [
         "basic_tower",
         "income_tower",
-        "research_tower",
-        "chain_tower",
+        "shotgun_tower",
         "slow_tower",
-        "sniper_tower"
+        "fence_tower",
+        "root_tower"
     ],
     "modifierColumns": [],
+    "levelModifiers": [],
     "difficulties": [
         {
             "label": "Easy",
@@ -68,115 +69,422 @@
     "objectives": [],
     "paths": [
         {
-            "spawnerIndex": 1,
-            "nodes": [
-                {
-                    "id": "n0",
-                    "x": -9.920000076293946,
-                    "y": 0.550000011920929,
-                    "teleporter": false,
-                    "teleportDelay": 0.0,
-                    "next": [
-                        "n1"
-                    ]
-                },
-                {
-                    "id": "n1",
-                    "x": -6.840000152587891,
-                    "y": 2.440000057220459,
-                    "teleporter": false,
-                    "teleportDelay": 0.0,
-                    "next": [
-                        "n2"
-                    ]
-                },
-                {
-                    "id": "n2",
-                    "x": -2.8299999237060549,
-                    "y": 4.300000190734863,
-                    "teleporter": false,
-                    "teleportDelay": 0.0,
-                    "next": [
-                        "n3"
-                    ]
-                },
-                {
-                    "id": "n3",
-                    "x": 0.8199999928474426,
-                    "y": 5.25,
-                    "teleporter": false,
-                    "teleportDelay": 0.0,
-                    "next": [
-                        "n4"
-                    ]
-                },
-                {
-                    "id": "n4",
-                    "x": 7.920000076293945,
-                    "y": 6.949999809265137,
-                    "teleporter": false,
-                    "teleportDelay": 0.0,
-                    "next": []
-                }
-            ]
-        },
-        {
             "spawnerIndex": 0,
             "nodes": [
                 {
                     "id": "n0",
-                    "x": -8.989999771118164,
-                    "y": -4.739999771118164,
+                    "x": -10.270000457763672,
+                    "y": 1.5299999713897706,
                     "teleporter": false,
                     "teleportDelay": 0.0,
                     "next": [
-                        "n1"
+                        "n0_post"
                     ]
                 },
                 {
-                    "id": "n1",
-                    "x": -5.739999771118164,
-                    "y": -2.3399999141693117,
+                    "id": "n0_post",
+                    "x": -9.899999618530274,
+                    "y": 1.2100000381469727,
                     "teleporter": false,
                     "teleportDelay": 0.0,
                     "next": [
-                        "n2"
+                        "n0_post_post"
                     ]
                 },
                 {
-                    "id": "n2",
-                    "x": -3.0299999713897707,
-                    "y": -1.3600000143051148,
+                    "id": "n0_post_post",
+                    "x": -9.760000228881836,
+                    "y": -0.3400000035762787,
                     "teleporter": false,
                     "teleportDelay": 0.0,
                     "next": [
-                        "n3"
+                        "n0_post_post_post"
                     ]
                 },
                 {
-                    "id": "n3",
-                    "x": 1.4500000476837159,
-                    "y": -1.0700000524520875,
+                    "id": "n0_post_post_post",
+                    "x": -9.289999961853028,
+                    "y": -0.5,
                     "teleporter": false,
                     "teleportDelay": 0.0,
                     "next": [
-                        "n4"
+                        "n0_post_post_post_post"
                     ]
                 },
                 {
-                    "id": "n4",
-                    "x": 5.349999904632568,
-                    "y": 0.05999999865889549,
+                    "id": "n0_post_post_post_post",
+                    "x": -9.399999618530274,
+                    "y": 1.2100000381469727,
                     "teleporter": false,
                     "teleportDelay": 0.0,
                     "next": [
-                        "n5"
+                        "n0_post_post_post_post_post"
                     ]
                 },
                 {
-                    "id": "n5",
-                    "x": 10.289999961853028,
-                    "y": 1.7699999809265137,
+                    "id": "n0_post_post_post_post_post",
+                    "x": -8.890000343322754,
+                    "y": 1.3300000429153443,
+                    "teleporter": false,
+                    "teleportDelay": 0.0,
+                    "next": [
+                        "n0_post_post_post_post_post_post"
+                    ]
+                },
+                {
+                    "id": "n0_post_post_post_post_post_post",
+                    "x": -8.529999732971192,
+                    "y": -0.09000000357627869,
+                    "teleporter": false,
+                    "teleportDelay": 0.0,
+                    "next": [
+                        "n0_post_post_post_post_post_post_post"
+                    ]
+                },
+                {
+                    "id": "n0_post_post_post_post_post_post_post",
+                    "x": -9.050000190734864,
+                    "y": -1.2799999713897706,
+                    "teleporter": false,
+                    "teleportDelay": 0.0,
+                    "next": [
+                        "n0_post_post_post_post_post_post_post_post"
+                    ]
+                },
+                {
+                    "id": "n0_post_post_post_post_post_post_post_post",
+                    "x": -8.880000114440918,
+                    "y": -1.840000033378601,
+                    "teleporter": false,
+                    "teleportDelay": 0.0,
+                    "next": [
+                        "n0_post_post_post_post_post_post_post_post_post"
+                    ]
+                },
+                {
+                    "id": "n0_post_post_post_post_post_post_post_post_post",
+                    "x": -8.369999885559082,
+                    "y": -1.5700000524520875,
+                    "teleporter": false,
+                    "teleportDelay": 0.0,
+                    "next": [
+                        "n0_post_post_post_post_post_post_post_post_post_post"
+                    ]
+                },
+                {
+                    "id": "n0_post_post_post_post_post_post_post_post_post_post",
+                    "x": -8.0,
+                    "y": 0.5199999809265137,
+                    "teleporter": false,
+                    "teleportDelay": 0.0,
+                    "next": [
+                        "n0_post_post_post_post_post_post_post_post_post_post_post"
+                    ]
+                },
+                {
+                    "id": "n0_post_post_post_post_post_post_post_post_post_post_post",
+                    "x": -8.520000457763672,
+                    "y": 1.6799999475479127,
+                    "teleporter": false,
+                    "teleportDelay": 0.0,
+                    "next": [
+                        "n0_post_post_post_post_post_post_post_post_post_post_post_post"
+                    ]
+                },
+                {
+                    "id": "n0_post_post_post_post_post_post_post_post_post_post_post_post",
+                    "x": -8.369999885559082,
+                    "y": 2.240000009536743,
+                    "teleporter": false,
+                    "teleportDelay": 0.0,
+                    "next": [
+                        "n0_post_post_post_post_post_post_post_post_post_post_post_post_post"
+                    ]
+                },
+                {
+                    "id": "n0_post_post_post_post_post_post_post_post_post_post_post_post_post",
+                    "x": -7.510000228881836,
+                    "y": 1.7400000095367432,
+                    "teleporter": false,
+                    "teleportDelay": 0.0,
+                    "next": [
+                        "n0_post_post_post_post_post_post_post_post_post_post_post_post_post_post"
+                    ]
+                },
+                {
+                    "id": "n0_post_post_post_post_post_post_post_post_post_post_post_post_post_post",
+                    "x": -7.46999979019165,
+                    "y": 0.49000000953674319,
+                    "teleporter": false,
+                    "teleportDelay": 0.0,
+                    "next": [
+                        "n0_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post"
+                    ]
+                },
+                {
+                    "id": "n0_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post",
+                    "x": -7.690000057220459,
+                    "y": -0.6399999856948853,
+                    "teleporter": false,
+                    "teleportDelay": 0.0,
+                    "next": [
+                        "n0_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post"
+                    ]
+                },
+                {
+                    "id": "n0_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post",
+                    "x": -7.289999961853027,
+                    "y": -0.9399999976158142,
+                    "teleporter": false,
+                    "teleportDelay": 0.0,
+                    "next": [
+                        "n0_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post"
+                    ]
+                },
+                {
+                    "id": "n0_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post",
+                    "x": -7.150000095367432,
+                    "y": -0.3799999952316284,
+                    "teleporter": false,
+                    "teleportDelay": 0.0,
+                    "next": [
+                        "n0_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post"
+                    ]
+                },
+                {
+                    "id": "n0_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post",
+                    "x": -7.340000152587891,
+                    "y": 0.9700000286102295,
+                    "teleporter": false,
+                    "teleportDelay": 0.0,
+                    "next": [
+                        "n0_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post"
+                    ]
+                },
+                {
+                    "id": "n0_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post",
+                    "x": -7.099999904632568,
+                    "y": 1.5,
+                    "teleporter": false,
+                    "teleportDelay": 0.0,
+                    "next": [
+                        "n0_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post"
+                    ]
+                },
+                {
+                    "id": "n0_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post",
+                    "x": -6.800000190734863,
+                    "y": 0.8500000238418579,
+                    "teleporter": false,
+                    "teleportDelay": 0.0,
+                    "next": [
+                        "n0_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post"
+                    ]
+                },
+                {
+                    "id": "n0_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post",
+                    "x": -6.650000095367432,
+                    "y": -0.07999999821186066,
+                    "teleporter": false,
+                    "teleportDelay": 0.0,
+                    "next": [
+                        "n0_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post"
+                    ]
+                },
+                {
+                    "id": "n0_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post",
+                    "x": -5.949999809265137,
+                    "y": -2.0199999809265138,
+                    "teleporter": false,
+                    "teleportDelay": 0.0,
+                    "next": [
+                        "n0_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post"
+                    ]
+                },
+                {
+                    "id": "n0_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post",
+                    "x": -4.0,
+                    "y": -2.9800000190734865,
+                    "teleporter": false,
+                    "teleportDelay": 0.0,
+                    "next": [
+                        "n0_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post"
+                    ]
+                },
+                {
+                    "id": "n0_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post",
+                    "x": -1.4500000476837159,
+                    "y": -2.509999990463257,
+                    "teleporter": false,
+                    "teleportDelay": 0.0,
+                    "next": [
+                        "n0_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post"
+                    ]
+                },
+                {
+                    "id": "n0_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post",
+                    "x": -0.7300000190734863,
+                    "y": -0.8199999928474426,
+                    "teleporter": false,
+                    "teleportDelay": 0.0,
+                    "next": [
+                        "n0_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post"
+                    ]
+                },
+                {
+                    "id": "n0_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post",
+                    "x": -0.9300000071525574,
+                    "y": 1.0299999713897706,
+                    "teleporter": true,
+                    "teleportDelay": 0.0,
+                    "next": [
+                        "n0_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post"
+                    ]
+                },
+                {
+                    "id": "n0_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post",
+                    "x": -1.5299999713897706,
+                    "y": 2.259999990463257,
+                    "teleporter": true,
+                    "teleportDelay": 0.0,
+                    "next": [
+                        "n0_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post"
+                    ]
+                },
+                {
+                    "id": "n0_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post",
+                    "x": -2.440000057220459,
+                    "y": 3.700000047683716,
+                    "teleporter": false,
+                    "teleportDelay": 0.0,
+                    "next": [
+                        "n0_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post"
+                    ]
+                },
+                {
+                    "id": "n0_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post",
+                    "x": -2.5799999237060549,
+                    "y": 4.360000133514404,
+                    "teleporter": false,
+                    "teleportDelay": 0.0,
+                    "next": [
+                        "n0_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post"
+                    ]
+                },
+                {
+                    "id": "n0_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post",
+                    "x": -1.3200000524520875,
+                    "y": 3.4000000953674318,
+                    "teleporter": false,
+                    "teleportDelay": 0.0,
+                    "next": [
+                        "n0_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post"
+                    ]
+                },
+                {
+                    "id": "n0_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post",
+                    "x": -1.899999976158142,
+                    "y": 5.369999885559082,
+                    "teleporter": false,
+                    "teleportDelay": 0.0,
+                    "next": [
+                        "n0_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post"
+                    ]
+                },
+                {
+                    "id": "n0_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post",
+                    "x": -1.1100000143051148,
+                    "y": 5.53000020980835,
+                    "teleporter": false,
+                    "teleportDelay": 0.0,
+                    "next": [
+                        "n0_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post"
+                    ]
+                },
+                {
+                    "id": "n0_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post",
+                    "x": 0.49000000953674319,
+                    "y": 2.9800000190734865,
+                    "teleporter": true,
+                    "teleportDelay": 0.0,
+                    "next": [
+                        "n0_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post"
+                    ]
+                },
+                {
+                    "id": "n0_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post",
+                    "x": 1.2100000381469727,
+                    "y": 1.9900000095367432,
+                    "teleporter": true,
+                    "teleportDelay": 0.0,
+                    "next": [
+                        "n0_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post"
+                    ]
+                },
+                {
+                    "id": "n0_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post",
+                    "x": 2.890000104904175,
+                    "y": -0.009999999776482582,
+                    "teleporter": false,
+                    "teleportDelay": 0.0,
+                    "next": [
+                        "n0_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post"
+                    ]
+                },
+                {
+                    "id": "n0_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post",
+                    "x": 4.420000076293945,
+                    "y": -0.8399999737739563,
+                    "teleporter": false,
+                    "teleportDelay": 0.0,
+                    "next": [
+                        "n0_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post"
+                    ]
+                },
+                {
+                    "id": "n0_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post",
+                    "x": 6.119999885559082,
+                    "y": -1.059999942779541,
+                    "teleporter": true,
+                    "teleportDelay": 0.0,
+                    "next": [
+                        "n0_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post"
+                    ]
+                },
+                {
+                    "id": "n0_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post",
+                    "x": 7.550000190734863,
+                    "y": -0.7900000214576721,
+                    "teleporter": true,
+                    "teleportDelay": 0.0,
+                    "next": [
+                        "n0_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post"
+                    ]
+                },
+                {
+                    "id": "n0_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post",
+                    "x": 8.420000076293946,
+                    "y": 0.5299999713897705,
+                    "teleporter": false,
+                    "teleportDelay": 0.0,
+                    "next": [
+                        "n0_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post"
+                    ]
+                },
+                {
+                    "id": "n0_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post",
+                    "x": 9.279999732971192,
+                    "y": 2.130000114440918,
+                    "teleporter": false,
+                    "teleportDelay": 0.0,
+                    "next": [
+                        "n0_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post"
+                    ]
+                },
+                {
+                    "id": "n0_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post_post",
+                    "x": 10.319999694824219,
+                    "y": 2.880000114440918,
                     "teleporter": false,
                     "teleportDelay": 0.0,
                     "next": []
@@ -184,12 +492,12 @@
             ]
         },
         {
-            "spawnerIndex": 2,
+            "spawnerIndex": 1,
             "nodes": [
                 {
                     "id": "n0",
-                    "x": -9.8100004196167,
-                    "y": 4.099999904632568,
+                    "x": -8.859999656677246,
+                    "y": -3.7899999618530275,
                     "teleporter": false,
                     "teleportDelay": 0.0,
                     "next": [
@@ -198,9 +506,9 @@
                 },
                 {
                     "id": "n1",
-                    "x": -6.480000019073486,
-                    "y": 5.130000114440918,
-                    "teleporter": false,
+                    "x": -6.75,
+                    "y": -1.850000023841858,
+                    "teleporter": true,
                     "teleportDelay": 0.0,
                     "next": [
                         "n2"
@@ -208,9 +516,9 @@
                 },
                 {
                     "id": "n2",
-                    "x": -1.0700000524520875,
-                    "y": 5.710000038146973,
-                    "teleporter": false,
+                    "x": -5.940000057220459,
+                    "y": -1.1699999570846558,
+                    "teleporter": true,
                     "teleportDelay": 0.0,
                     "next": [
                         "n3"
@@ -218,8 +526,8 @@
                 },
                 {
                     "id": "n3",
-                    "x": 0.6100000143051148,
-                    "y": 5.769999980926514,
+                    "x": -1.0499999523162842,
+                    "y": 1.6699999570846558,
                     "teleporter": false,
                     "teleportDelay": 0.0,
                     "next": [
@@ -228,8 +536,8 @@
                 },
                 {
                     "id": "n4",
-                    "x": 3.450000047683716,
-                    "y": 4.980000019073486,
+                    "x": 2.259999990463257,
+                    "y": 2.9200000762939455,
                     "teleporter": false,
                     "teleportDelay": 0.0,
                     "next": [
@@ -238,8 +546,8 @@
                 },
                 {
                     "id": "n5",
-                    "x": 7.039999961853027,
-                    "y": 5.349999904632568,
+                    "x": 5.789999961853027,
+                    "y": 3.4000000953674318,
                     "teleporter": false,
                     "teleportDelay": 0.0,
                     "next": [
@@ -248,8 +556,8 @@
                 },
                 {
                     "id": "n6",
-                    "x": 10.649999618530274,
-                    "y": 5.889999866485596,
+                    "x": 10.369999885559082,
+                    "y": 2.930000066757202,
                     "teleporter": false,
                     "teleportDelay": 0.0,
                     "next": []
@@ -266,28 +574,18 @@
             "width": 0.25,
             "points": [
                 {
-                    "x": -0.12999999523162843,
-                    "y": 0.28999999165534975,
+                    "x": -6.139999866485596,
+                    "y": 1.75,
                     "width": 0.25
                 },
                 {
-                    "x": 2.1500000953674318,
-                    "y": 0.20000000298023225,
+                    "x": -6.079999923706055,
+                    "y": 0.6600000262260437,
                     "width": 0.25
                 },
                 {
-                    "x": 5.900000095367432,
-                    "y": 1.1299999952316285,
-                    "width": 0.25
-                },
-                {
-                    "x": 8.479999542236329,
-                    "y": 2.1500000953674318,
-                    "width": 0.25
-                },
-                {
-                    "x": 9.979999542236329,
-                    "y": 2.9600000381469728,
+                    "x": -5.820000171661377,
+                    "y": -0.17000000178813935,
                     "width": 0.25
                 }
             ]
@@ -300,13 +598,13 @@
             "width": 0.25,
             "points": [
                 {
-                    "x": -6.28000020980835,
-                    "y": -0.07000000029802323,
+                    "x": -8.90999984741211,
+                    "y": -3.809999942779541,
                     "width": 0.25
                 },
                 {
-                    "x": -3.7899999618530275,
-                    "y": 1.0700000524520875,
+                    "x": -6.679999828338623,
+                    "y": -1.7699999809265137,
                     "width": 0.25
                 }
             ]
@@ -319,13 +617,72 @@
             "width": 0.25,
             "points": [
                 {
-                    "x": 1.4299999475479127,
-                    "y": 2.430000066757202,
+                    "x": -6.0,
+                    "y": -1.2000000476837159,
                     "width": 0.25
                 },
                 {
-                    "x": 3.450000047683716,
-                    "y": 2.7200000286102297,
+                    "x": -3.690000057220459,
+                    "y": 0.3199999928474426,
+                    "width": 0.25
+                },
+                {
+                    "x": -1.0399999618530274,
+                    "y": 1.690000057220459,
+                    "width": 0.5
+                },
+                {
+                    "x": 2.0999999046325685,
+                    "y": 2.8299999237060549,
+                    "width": 0.5
+                },
+                {
+                    "x": 5.739999771118164,
+                    "y": 3.390000104904175,
+                    "width": 0.5
+                },
+                {
+                    "x": 9.079999923706055,
+                    "y": 3.0,
+                    "width": 0.25
+                }
+            ]
+        },
+        {
+            "type": "lane",
+            "x": 0.0,
+            "y": 0.0,
+            "radius": 2.0,
+            "width": 0.5,
+            "points": [
+                {
+                    "x": 1.2699999809265137,
+                    "y": -4.639999866485596,
+                    "width": 0.5
+                },
+                {
+                    "x": 5.170000076293945,
+                    "y": -3.2899999618530275,
+                    "width": 0.5
+                },
+                {
+                    "x": 6.369999885559082,
+                    "y": -1.7000000476837159,
+                    "width": 0.5
+                },
+                {
+                    "x": 6.570000171661377,
+                    "y": -0.3100000023841858,
+                    "width": 0.3499999940395355
+                },
+                {
+                    "x": 6.28000020980835,
+                    "y": 1.0,
+                    "width": 0.25
+                },
+                {
+                    "x": 5.630000114440918,
+                    "y": 2.109999895095825,
                     "width": 0.25
                 }
             ]
@@ -338,195 +695,18 @@
             "width": 0.25,
             "points": [
                 {
-                    "x": -10.279999732971192,
-                    "y": -2.809999942779541,
+                    "x": -0.3400000035762787,
+                    "y": 5.510000228881836,
                     "width": 0.25
                 },
                 {
-                    "x": -8.050000190734864,
-                    "y": -1.399999976158142,
-                    "width": 0.25
-                }
-            ]
-        },
-        {
-            "type": "lane",
-            "x": 0.0,
-            "y": 0.0,
-            "radius": 2.0,
-            "width": 0.25,
-            "points": [
-                {
-                    "x": -7.53000020980835,
-                    "y": -1.7599999904632569,
+                    "x": 1.2799999713897706,
+                    "y": 5.329999923706055,
                     "width": 0.25
                 },
                 {
-                    "x": -5.610000133514404,
-                    "y": -1.090000033378601,
-                    "width": 0.25
-                },
-                {
-                    "x": -3.259999990463257,
-                    "y": -1.0,
-                    "width": 0.25
-                }
-            ]
-        },
-        {
-            "type": "lane",
-            "x": 0.0,
-            "y": 0.0,
-            "radius": 2.0,
-            "width": 0.25,
-            "points": [
-                {
-                    "x": -1.190000057220459,
-                    "y": -1.1100000143051148,
-                    "width": 0.25
-                },
-                {
-                    "x": 2.3399999141693117,
-                    "y": -1.8600000143051148,
-                    "width": 0.25
-                },
-                {
-                    "x": 4.460000038146973,
-                    "y": -1.7999999523162842,
-                    "width": 0.25
-                },
-                {
-                    "x": 5.75,
-                    "y": -1.4800000190734864,
-                    "width": 0.25
-                }
-            ]
-        },
-        {
-            "type": "lane",
-            "x": 0.0,
-            "y": 0.0,
-            "radius": 2.0,
-            "width": 0.25,
-            "points": [
-                {
-                    "x": 6.769999980926514,
-                    "y": -1.0099999904632569,
-                    "width": 0.25
-                },
-                {
-                    "x": 9.979999542236329,
-                    "y": 0.3700000047683716,
-                    "width": 0.25
-                }
-            ]
-        },
-        {
-            "type": "lane",
-            "x": 0.0,
-            "y": 0.0,
-            "radius": 2.0,
-            "width": 0.25,
-            "points": [
-                {
-                    "x": -4.800000190734863,
-                    "y": -4.360000133514404,
-                    "width": 0.25
-                },
-                {
-                    "x": -2.380000114440918,
-                    "y": -3.2100000381469728,
-                    "width": 0.25
-                },
-                {
-                    "x": 1.7000000476837159,
-                    "y": -2.559999942779541,
-                    "width": 0.25
-                }
-            ]
-        },
-        {
-            "type": "lane",
-            "x": 0.0,
-            "y": 0.0,
-            "radius": 2.0,
-            "width": 0.25,
-            "points": [
-                {
-                    "x": -3.859999895095825,
-                    "y": -4.519999980926514,
-                    "width": 0.25
-                },
-                {
-                    "x": -2.4600000381469728,
-                    "y": -3.940000057220459,
-                    "width": 0.25
-                }
-            ]
-        },
-        {
-            "type": "lane",
-            "x": 0.0,
-            "y": 0.0,
-            "radius": 2.0,
-            "width": 0.25,
-            "points": [
-                {
-                    "x": -0.23000000417232514,
-                    "y": -3.619999885559082,
-                    "width": 0.25
-                },
-                {
-                    "x": 5.409999847412109,
-                    "y": -2.7200000286102297,
-                    "width": 0.25
-                },
-                {
-                    "x": 8.729999542236329,
-                    "y": -1.4700000286102296,
-                    "width": 0.25
-                },
-                {
-                    "x": 10.050000190734864,
-                    "y": -0.6399999856948853,
-                    "width": 0.25
-                }
-            ]
-        },
-        {
-            "type": "lane",
-            "x": 0.0,
-            "y": 0.0,
-            "radius": 2.0,
-            "width": 0.25,
-            "points": [
-                {
-                    "x": 5.309999942779541,
-                    "y": -3.859999895095825,
-                    "width": 0.25
-                },
-                {
-                    "x": 10.100000381469727,
-                    "y": -2.2799999713897707,
-                    "width": 0.25
-                }
-            ]
-        },
-        {
-            "type": "lane",
-            "x": 0.0,
-            "y": 0.0,
-            "radius": 2.0,
-            "width": 0.25,
-            "points": [
-                {
-                    "x": 5.599999904632568,
-                    "y": -4.53000020980835,
-                    "width": 0.25
-                },
-                {
-                    "x": 7.900000095367432,
-                    "y": -3.8299999237060549,
+                    "x": 3.0299999713897707,
+                    "y": 4.21999979019165,
                     "width": 0.25
                 }
             ]
@@ -536,8 +716,271 @@
         {
             "groups": [
                 {
-                    "unitDefinitionId": "basic_enemy",
-                    "count": 13,
+                    "unitDefinitionId": "shielded_enemy",
+                    "count": 4,
+                    "spawnInterval": 2.0,
+                    "startTime": 0.0,
+                    "spawnerIndex": 0,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "fast_enemy",
+                    "count": 5,
+                    "spawnInterval": 2.0,
+                    "startTime": 2.0,
+                    "spawnerIndex": 0,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "fast_enemy",
+                    "count": 5,
+                    "spawnInterval": 2.0,
+                    "startTime": 2.25,
+                    "spawnerIndex": 0,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "fast_enemy",
+                    "count": 5,
+                    "spawnInterval": 2.0,
+                    "startTime": 2.5,
+                    "spawnerIndex": 0,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                }
+            ]
+        },
+        {
+            "groups": [
+                {
+                    "unitDefinitionId": "shielded_enemy",
+                    "count": 8,
+                    "spawnInterval": 1.75,
+                    "startTime": 0.0,
+                    "spawnerIndex": 0,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "fast_enemy",
+                    "count": 10,
+                    "spawnInterval": 1.75,
+                    "startTime": 2.0,
+                    "spawnerIndex": 0,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "fast_enemy",
+                    "count": 10,
+                    "spawnInterval": 1.75,
+                    "startTime": 2.25,
+                    "spawnerIndex": 0,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "fast_enemy",
+                    "count": 10,
+                    "spawnInterval": 1.75,
+                    "startTime": 2.5,
+                    "spawnerIndex": 0,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                }
+            ]
+        },
+        {
+            "groups": [
+                {
+                    "unitDefinitionId": "shielded_enemy",
+                    "count": 8,
+                    "spawnInterval": 1.5,
+                    "startTime": 0.0,
+                    "spawnerIndex": 0,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "fast_enemy",
+                    "count": 10,
+                    "spawnInterval": 1.5,
+                    "startTime": 2.0,
+                    "spawnerIndex": 0,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "fast_enemy",
+                    "count": 10,
+                    "spawnInterval": 1.5,
+                    "startTime": 2.25,
+                    "spawnerIndex": 0,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "fast_enemy",
+                    "count": 10,
+                    "spawnInterval": 1.5,
+                    "startTime": 2.5,
+                    "spawnerIndex": 0,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "shielder_enemy",
+                    "count": 4,
+                    "spawnInterval": 3.0,
+                    "startTime": 0.25,
+                    "spawnerIndex": 0,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                }
+            ]
+        },
+        {
+            "groups": [
+                {
+                    "unitDefinitionId": "shielded_enemy",
+                    "count": 12,
+                    "spawnInterval": 1.25,
+                    "startTime": 0.0,
+                    "spawnerIndex": 0,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "armored_enemy",
+                    "count": 12,
+                    "spawnInterval": 1.25,
+                    "startTime": 0.5,
+                    "spawnerIndex": 0,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "fast_enemy",
+                    "count": 11,
+                    "spawnInterval": 1.25,
+                    "startTime": 2.0,
+                    "spawnerIndex": 0,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "fast_enemy",
+                    "count": 11,
+                    "spawnInterval": 1.25,
+                    "startTime": 2.25,
+                    "spawnerIndex": 0,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "fast_enemy",
+                    "count": 11,
+                    "spawnInterval": 1.25,
+                    "startTime": 2.5,
+                    "spawnerIndex": 0,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "shielder_enemy",
+                    "count": 7,
+                    "spawnInterval": 2.5,
+                    "startTime": 0.25,
+                    "spawnerIndex": 0,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                }
+            ]
+        },
+        {
+            "groups": [
+                {
+                    "unitDefinitionId": "shielded_enemy",
+                    "count": 15,
                     "spawnInterval": 1.0,
                     "startTime": 0.0,
                     "spawnerIndex": 0,
@@ -549,48 +992,22 @@
                     }
                 },
                 {
-                    "unitDefinitionId": "fast_enemy",
-                    "count": 8,
-                    "spawnInterval": 1.5,
-                    "startTime": 1.0,
-                    "spawnerIndex": 0,
-                    "dropConfig": {
-                        "mode": "chance",
-                        "fallbackChance": -1.0,
-                        "pattern": [],
-                        "repeat": true
-                    }
-                },
-                {
-                    "unitDefinitionId": "fast_enemy",
-                    "count": 8,
-                    "spawnInterval": 1.5,
-                    "startTime": 1.25,
-                    "spawnerIndex": 0,
-                    "dropConfig": {
-                        "mode": "chance",
-                        "fallbackChance": -1.0,
-                        "pattern": [],
-                        "repeat": true
-                    }
-                },
-                {
-                    "unitDefinitionId": "fast_enemy",
-                    "count": 8,
-                    "spawnInterval": 1.5,
-                    "startTime": 1.5,
-                    "spawnerIndex": 0,
-                    "dropConfig": {
-                        "mode": "chance",
-                        "fallbackChance": -1.0,
-                        "pattern": [],
-                        "repeat": true
-                    }
-                },
-                {
                     "unitDefinitionId": "armored_enemy",
-                    "count": 6,
-                    "spawnInterval": 2.0,
+                    "count": 15,
+                    "spawnInterval": 1.0,
+                    "startTime": 0.5,
+                    "spawnerIndex": 0,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "fast_enemy",
+                    "count": 14,
+                    "spawnInterval": 1.0,
                     "startTime": 2.0,
                     "spawnerIndex": 0,
                     "dropConfig": {
@@ -599,16 +1016,12 @@
                         "pattern": [],
                         "repeat": true
                     }
-                }
-            ]
-        },
-        {
-            "groups": [
+                },
                 {
-                    "unitDefinitionId": "basic_enemy",
-                    "count": 10,
-                    "spawnInterval": 2.0,
-                    "startTime": 0.0,
+                    "unitDefinitionId": "fast_enemy",
+                    "count": 14,
+                    "spawnInterval": 1.0,
+                    "startTime": 2.25,
                     "spawnerIndex": 0,
                     "dropConfig": {
                         "mode": "chance",
@@ -618,8 +1031,21 @@
                     }
                 },
                 {
-                    "unitDefinitionId": "basic_enemy",
-                    "count": 10,
+                    "unitDefinitionId": "fast_enemy",
+                    "count": 14,
+                    "spawnInterval": 1.0,
+                    "startTime": 2.5,
+                    "spawnerIndex": 0,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "shielder_enemy",
+                    "count": 9,
                     "spawnInterval": 2.0,
                     "startTime": 0.25,
                     "spawnerIndex": 0,
@@ -631,131 +1057,10 @@
                     }
                 },
                 {
-                    "unitDefinitionId": "basic_enemy",
-                    "count": 5,
-                    "spawnInterval": 4.0,
-                    "startTime": 0.0,
-                    "spawnerIndex": 0,
-                    "dropConfig": {
-                        "mode": "chance",
-                        "fallbackChance": -1.0,
-                        "pattern": [],
-                        "repeat": true
-                    }
-                },
-                {
-                    "unitDefinitionId": "armored_enemy",
-                    "count": 2,
-                    "spawnInterval": 10.0,
-                    "startTime": 6.0,
-                    "spawnerIndex": 0,
-                    "dropConfig": {
-                        "mode": "chance",
-                        "fallbackChance": -1.0,
-                        "pattern": [],
-                        "repeat": true
-                    }
-                },
-                {
-                    "unitDefinitionId": "armored_enemy",
-                    "count": 5,
-                    "spawnInterval": 4.0,
-                    "startTime": 2.0,
-                    "spawnerIndex": 0,
-                    "dropConfig": {
-                        "mode": "chance",
-                        "fallbackChance": -1.0,
-                        "pattern": [],
-                        "repeat": true
-                    }
-                },
-                {
                     "unitDefinitionId": "fast_enemy",
-                    "count": 3,
-                    "spawnInterval": 5.0,
-                    "startTime": 1.0,
-                    "spawnerIndex": 1,
-                    "dropConfig": {
-                        "mode": "chance",
-                        "fallbackChance": -1.0,
-                        "pattern": [],
-                        "repeat": true
-                    }
-                },
-                {
-                    "unitDefinitionId": "fast_enemy",
-                    "count": 3,
-                    "spawnInterval": 5.0,
-                    "startTime": 1.25,
-                    "spawnerIndex": 1,
-                    "dropConfig": {
-                        "mode": "chance",
-                        "fallbackChance": -1.0,
-                        "pattern": [],
-                        "repeat": true
-                    }
-                },
-                {
-                    "unitDefinitionId": "fast_enemy",
-                    "count": 3,
-                    "spawnInterval": 5.0,
-                    "startTime": 1.5,
-                    "spawnerIndex": 1,
-                    "dropConfig": {
-                        "mode": "chance",
-                        "fallbackChance": -1.0,
-                        "pattern": [],
-                        "repeat": true
-                    }
-                }
-            ]
-        },
-        {
-            "groups": [
-                {
-                    "unitDefinitionId": "basic_enemy",
-                    "count": 30,
-                    "spawnInterval": 1.0,
-                    "startTime": 0.0,
-                    "spawnerIndex": 0,
-                    "dropConfig": {
-                        "mode": "chance",
-                        "fallbackChance": -1.0,
-                        "pattern": [],
-                        "repeat": true
-                    }
-                },
-                {
-                    "unitDefinitionId": "basic_enemy",
-                    "count": 15,
-                    "spawnInterval": 2.0,
-                    "startTime": 1.0,
-                    "spawnerIndex": 0,
-                    "dropConfig": {
-                        "mode": "chance",
-                        "fallbackChance": -1.0,
-                        "pattern": [],
-                        "repeat": true
-                    }
-                },
-                {
-                    "unitDefinitionId": "basic_enemy",
                     "count": 10,
-                    "spawnInterval": 3.0,
-                    "startTime": 0.0,
-                    "spawnerIndex": 0,
-                    "dropConfig": {
-                        "mode": "chance",
-                        "fallbackChance": -1.0,
-                        "pattern": [],
-                        "repeat": true
-                    }
-                },
-                {
-                    "unitDefinitionId": "armored_enemy",
-                    "count": 3,
-                    "spawnInterval": 10.0,
-                    "startTime": 5.0,
+                    "spawnInterval": 0.75,
+                    "startTime": 10.0,
                     "spawnerIndex": 1,
                     "dropConfig": {
                         "mode": "chance",

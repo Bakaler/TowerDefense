@@ -23,6 +23,9 @@ public class IncomeTower : MonoBehaviour, IFactoryInitializable
     // ── Full payout per tier when all orb slots are filled ───────────
     static readonly int[] FullPayout = { 0, 1, 3, 6, 10, 15 };  // index = tier
 
+    /// <summary>World-space click radius for collecting orbs (also read by CollectClickGuard).</summary>
+    public const float CollectRadius = 0.9f;
+
     // ── Orb slot layouts per tier (tier 1 = index 0) ─────────────────
     static readonly Vector2[][] TierSlots =
     {
@@ -136,7 +139,7 @@ public class IncomeTower : MonoBehaviour, IFactoryInitializable
         // Direct world-position check — bypasses Physics2D raycast so nearby
         // tower range colliders can't intercept the click
         Vector2 clickWorld = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        if (Vector2.Distance(clickWorld, (Vector2)transform.position) > 0.9f) return;
+        if (Vector2.Distance(clickWorld, (Vector2)transform.position) > CollectRadius) return;
 
         Collect();
     }

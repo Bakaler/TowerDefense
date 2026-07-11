@@ -7,10 +7,100 @@
                     {
                         "unitDefinitionId": "boss_enemy",
                         "count": 5,
-                        "spawnInterval": 2.15,
+                        "spawnInterval": 2.1500000953674318,
                         "startTime": 0.0,
                         "spawnerIndex": 0,
-                        "dropConfig": { "mode": "chance", "fallbackChance": -1.0, "pattern": [], "repeat": true }
+                        "dropConfig": {
+                            "mode": "chance",
+                            "fallbackChance": -1.0,
+                            "pattern": [],
+                            "repeat": true
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "name": "L3 Wave 5",
+            "wave": {
+                "groups": [
+                    {
+                        "unitDefinitionId": "shielded_enemy",
+                        "count": 15,
+                        "spawnInterval": 1.0,
+                        "startTime": 0.0,
+                        "spawnerIndex": 0,
+                        "dropConfig": {
+                            "mode": "chance",
+                            "fallbackChance": -1.0,
+                            "pattern": [],
+                            "repeat": true
+                        }
+                    },
+                    {
+                        "unitDefinitionId": "armored_enemy",
+                        "count": 15,
+                        "spawnInterval": 1.0,
+                        "startTime": 0.5,
+                        "spawnerIndex": 0,
+                        "dropConfig": {
+                            "mode": "chance",
+                            "fallbackChance": -1.0,
+                            "pattern": [],
+                            "repeat": true
+                        }
+                    },
+                    {
+                        "unitDefinitionId": "fast_enemy",
+                        "count": 14,
+                        "spawnInterval": 1.0,
+                        "startTime": 2.0,
+                        "spawnerIndex": 0,
+                        "dropConfig": {
+                            "mode": "chance",
+                            "fallbackChance": -1.0,
+                            "pattern": [],
+                            "repeat": true
+                        }
+                    },
+                    {
+                        "unitDefinitionId": "fast_enemy",
+                        "count": 14,
+                        "spawnInterval": 1.0,
+                        "startTime": 2.25,
+                        "spawnerIndex": 0,
+                        "dropConfig": {
+                            "mode": "chance",
+                            "fallbackChance": -1.0,
+                            "pattern": [],
+                            "repeat": true
+                        }
+                    },
+                    {
+                        "unitDefinitionId": "fast_enemy",
+                        "count": 4,
+                        "spawnInterval": 1.0,
+                        "startTime": 2.5,
+                        "spawnerIndex": 0,
+                        "dropConfig": {
+                            "mode": "chance",
+                            "fallbackChance": -1.0,
+                            "pattern": [],
+                            "repeat": true
+                        }
+                    },
+                    {
+                        "unitDefinitionId": "shielder_enemy",
+                        "count": 9,
+                        "spawnInterval": 2.0,
+                        "startTime": 0.25,
+                        "spawnerIndex": 0,
+                        "dropConfig": {
+                            "mode": "chance",
+                            "fallbackChance": -1.0,
+                            "pattern": [],
+                            "repeat": true
+                        }
                     }
                 ]
             }

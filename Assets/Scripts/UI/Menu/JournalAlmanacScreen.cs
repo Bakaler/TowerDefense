@@ -239,7 +239,10 @@ public class JournalAlmanacScreen : MenuScreen
         yield return $"Range     {def.range:0.#}";
 
         float dmg = TowerStatResolver.Damage(def);
-        yield return dmg > 0f ? $"Damage    {dmg:0.#}" : "Damage    —";
+        var   dt  = TowerStatResolver.DamageTypeFor(def);
+        yield return dmg > 0f
+            ? $"Damage    {dmg:0.#}" + (dt.HasValue ? $"  {DamageTypeColors.Tag(dt.Value)}" : "")
+            : "Damage    —";
 
         float cd = TowerStatResolver.Cooldown(def);
         yield return cd > 0f ? $"Fire Rate {1f / cd:0.##}/s" : "Fire Rate —";

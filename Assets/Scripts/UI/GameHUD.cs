@@ -179,9 +179,8 @@ public class GameHUD : MonoBehaviour
 
         Vector2 mouse = Camera.main.ScreenToWorldPoint(Input.mousePosition);
 
-        // Ignore clicks on collectible drops
-        foreach (var drop in FindObjectsByType<BountyDrop>(FindObjectsSortMode.None))
-            if (Vector2.Distance(mouse, drop.transform.position) <= drop.clickRadius) return;
+        // Ignore clicks that are grabbing a collectible (bounty/orbs/income tower)
+        if (CollectClickGuard.IsOverCollectible(mouse)) return;
 
         // Towers — pick closest within click radius
         TowerInfo best = null;

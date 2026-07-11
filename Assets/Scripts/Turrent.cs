@@ -1,7 +1,18 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum TargetingMode { Furthest, Closest, Lowest }
+public enum TargetingMode
+{
+    Furthest,        // most route progress (the leading unit)
+    Closest,         // nearest to this tower
+    LowestHP,
+    HighestHP,
+    LeastShields,    // no shields first, then lowest shield pool
+    HighestShields,
+    HighPrio,        // support units (tag "high_prio": shielders, priests, barrier weavers)
+    Boss,            // tag "boss"
+    Invisible,       // units that can go invisible (cloakers)
+}
 
 [RequireComponent(typeof(AbilityManager))]
 public class Turrent : MonoBehaviour
@@ -150,9 +161,11 @@ public class Turrent : MonoBehaviour
         bool hasValidators = validators != null && validators.Length > 0;
 
         GameObject best     = null;
-        float      bestVal  = Targeting == TargetingMode.Closest ? float.MaxValue : -1f;
+        float      bestVal  = float.MinValue;
+        float      bestProg = float.MinValue;
         GameObject fallback = null;
-        float      fbVal    = bestVal;
+        float      fbVal    = float.MinValue;
+        float      fbProg   = float.MinValue;
 
         float rangeSqr   = _worldRange > 0f ? _worldRange * _worldRange : float.MaxValue;
         bool  isDetector = _info != null && _info.IsDetector;
@@ -176,34 +189,47 @@ public class Turrent : MonoBehaviour
             if (Vector2.SqrMagnitude((Vector2)go.transform.position - (Vector2)transform.position) > rangeSqr)
                 continue;
 
-            float val = Score(go, unit);
+            float val  = Score(go, unit);
+            float prog = go.GetComponent<RouteFollower>()?.Progress ?? 0f;
 
             // Track unvalidated fallback
-            if (IsBetter(val, fbVal)) { fbVal = val; fallback = go; }
+            if (IsBetter(val, prog, fbVal, fbProg)) { fbVal = val; fbProg = prog; fallback = go; }
 
             if (hasValidators && !PassesTargetValidators(go, validators)) continue;
-            if (IsBetter(val, bestVal)) { bestVal = val; best = go; }
+            if (IsBetter(val, prog, bestVal, bestProg)) { bestVal = val; bestProg = prog; best = go; }
         }
 
         return best ?? fallback;
     }
 
+    /// <summary>
+    /// Higher score wins. Furthest returns 0 for everyone so the progress
+    /// tie-break decides; every other mode also falls back to progress on ties
+    /// ("ties go to whoever is leading").
+    /// </summary>
     float Score(GameObject go, UnitParentClass unit)
     {
         switch (Targeting)
         {
             case TargetingMode.Closest:
-                return Vector2.SqrMagnitude((Vector2)go.transform.position - (Vector2)transform.position);
-            case TargetingMode.Lowest:
-                return unit.lifeCurrent;
-            default: // Furthest
-                return go.GetComponent<RouteFollower>()?.Progress ?? 0f;
+                return -Vector2.SqrMagnitude((Vector2)go.transform.position - (Vector2)transform.position);
+            case TargetingMode.LowestHP:       return -unit.lifeCurrent;
+            case TargetingMode.HighestHP:      return  unit.lifeCurrent;
+            case TargetingMode.LeastShields:   return -unit.shieldCurrent;
+            case TargetingMode.HighestShields: return  unit.shieldCurrent;
+            case TargetingMode.HighPrio:       return (unit as UnitManager)?.HasTag("high_prio") == true ? 1f : 0f;
+            case TargetingMode.Boss:           return (unit as UnitManager)?.HasTag("boss")      == true ? 1f : 0f;
+            case TargetingMode.Invisible:      return (unit as UnitManager)?.canGoInvisible      == true ? 1f : 0f;
+            default:                           return 0f; // Furthest
         }
     }
 
-    bool IsBetter(float val, float current)
+    static bool IsBetter(float val, float prog, float bestVal, float bestProg)
     {
-        return Targeting == TargetingMode.Closest ? val < current : val > current;
+        const float EPS = 0.0001f;
+        if (val > bestVal + EPS) return true;
+        if (val < bestVal - EPS) return false;
+        return prog > bestProg;  // tie → leading unit
     }
 
     static bool IsOnScreen(GameObject go)

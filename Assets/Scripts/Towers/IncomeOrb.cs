@@ -39,6 +39,7 @@ public class IncomeOrb : MonoBehaviour
     IEnumerator PopRoutine()
     {
         var sr           = GetComponent<SpriteRenderer>();
+        Color baseColor    = sr != null ? sr.color : Color.white;
         Vector3 startScale = transform.localScale;
         Vector3 endScale   = startScale * popScale;
         float elapsed      = 0f;
@@ -49,7 +50,7 @@ public class IncomeOrb : MonoBehaviour
             float t  = elapsed / popDuration;
 
             transform.localScale = Vector3.Lerp(startScale, endScale, t);
-            if (sr != null) sr.color = new Color(1f, 1f, 1f, 1f - t);
+            if (sr != null) sr.color = new Color(baseColor.r, baseColor.g, baseColor.b, 1f - t);
 
             yield return null;
         }

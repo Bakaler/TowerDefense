@@ -209,6 +209,7 @@ public class DataEditorWindow : EditorWindow
     const float ListW = 200f;
 
     static readonly string[] BalanceOptions  = { "Physical", "Elemental", "Arcane" };
+    static readonly string[] TargetingOptions = Enum.GetNames(typeof(TargetingMode));
     static readonly string[] EffectTypeOptions =
     {
         "damage", "launch", "search_area", "set", "apply_behavior",
@@ -1265,6 +1266,7 @@ public class DataEditorWindow : EditorWindow
         t.rotationSpeed   = EF.FloatField("Rotation Speed",    t.rotationSpeed);
         t.balanceType     = Popup("Balance Type", t.balanceType, BalanceOptions);
         t.detectorTier    = EF.IntField(  "Detector Tier (0=never)", t.detectorTier);
+        t.defaultTargeting = Popup("Default Targeting", string.IsNullOrEmpty(t.defaultTargeting) ? "Furthest" : t.defaultTargeting, TargetingOptions);
 
         Section("Ability");
         t.fireAbilityId   = TFDropdown("Fire Ability ID", t.fireAbilityId, AbilityIds());
@@ -1805,6 +1807,23 @@ public class DataEditorWindow : EditorWindow
         if (GUILayout.Button("+ Ability")) unitAbilities.Add("");
         u.abilities = unitAbilities.ToArray();
 
+        Section("Tags");
+        EditorGUILayout.HelpBox("Targeting tags read by towers: \"high_prio\" (support units), \"boss\".", MessageType.None);
+        var unitTags = new List<string>(u.tags ?? Array.Empty<string>());
+        int removeTag = -1;
+        for (int i = 0; i < unitTags.Count; i++)
+        {
+            EditorGUILayout.BeginHorizontal();
+            unitTags[i] = EditorGUILayout.TextField(unitTags[i] ?? "");
+            GUI.backgroundColor = new Color(1f, 0.4f, 0.4f);
+            if (GUILayout.Button("✕", GUILayout.Width(24))) removeTag = i;
+            GUI.backgroundColor = Color.white;
+            EditorGUILayout.EndHorizontal();
+        }
+        if (removeTag >= 0) unitTags.RemoveAt(removeTag);
+        if (GUILayout.Button("+ Tag")) unitTags.Add("");
+        u.tags = unitTags.ToArray();
+
         Section("Components");
         if (u.components == null) u.components = Array.Empty<ComponentEntry>();
         var comps = new List<ComponentEntry>(u.components);
@@ -1849,13 +1868,12 @@ public class DataEditorWindow : EditorWindow
         m.description = TA("Description",  m.description, 2);
 
         Section("Brain");
-        EditorGUILayout.HelpBox("State machine: Wander → Engage → Return → Rest.", MessageType.None);
+        EditorGUILayout.HelpBox("State machine: Wander → Engage (locked on target until it dies) → Return → Rest.", MessageType.None);
         m.moveSpeed    = EF.FloatField("Wander Speed",       m.moveSpeed);
         m.engageSpeed  = EF.FloatField("Engage Speed",       m.engageSpeed);
         m.returnSpeed  = EF.FloatField("Return Speed",       m.returnSpeed);
         m.orbitDist    = EF.FloatField("Orbit Distance",     m.orbitDist);
         m.wanderRadius = EF.FloatField("Wander Radius",      m.wanderRadius);
-        m.maxAwayTime  = EF.FloatField("Max Away Time (s)",  m.maxAwayTime);
         m.restDuration = EF.FloatField("Rest Duration (s)",  m.restDuration);
 
         Section("Attack");
@@ -1907,12 +1925,16 @@ public class DataEditorWindow : EditorWindow
         Section("Identity");
         b.id          = TF("ID",           b.id);
         b.displayName = TF("Display Name", b.displayName);
+        b.description = TA("Description (shown in enemy panel tooltip)", b.description, 2);
+        b.iconPath    = TFSprite("Icon Path (empty = tinted circle)", b.iconPath);
 
         Section("Type & Stacking");
         b.behaviorType = (BehaviorType)EditorGUILayout.EnumPopup("Behavior Type", b.behaviorType);
         b.duration     = EF.FloatField("Duration (s)", b.duration);
         int sr = Array.IndexOf(StackRuleOptions, b.stackRule); if (sr < 0) sr = 0;
         b.stackRule    = StackRuleOptions[EditorGUILayout.Popup("Stack Rule", sr, StackRuleOptions)];
+        if (b.stackRule == "stack")
+            b.maxStacks = EF.IntField("Max Stacks (0 = unlimited)", b.maxStacks);
 
         Section("Stat Modifiers");
         b.moveSpeedMultiplier    = EF.FloatField("Move Speed Multiplier",  b.moveSpeedMultiplier);

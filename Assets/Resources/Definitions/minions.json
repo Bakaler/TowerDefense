@@ -3,20 +3,27 @@
         {
             "id": "bee",
             "displayName": "Bee Drone",
-            "description": "Worker bee that wanders the hive radius and stings nearby enemies.",
-            "moveSpeed": 2.8,
-            "engageSpeed": 4.2,
-            "returnSpeed": 5.5,
-            "orbitDist": 0.6,
-            "wanderRadius": 0.8,
-            "maxAwayTime": 6.0,
-            "restDuration": 1.0,
-            "attackCooldown": 0.8,
+            "description": "Worker bee that locks onto one enemy and stings until it dies, then returns to the hive to rest.",
+            "moveSpeed": 1.2000000476837159,
+            "engageSpeed": 5.0,
+            "returnSpeed": 7.0,
+            "orbitDist": 0.6000000238418579,
+            "wanderRadius": 1.2000000476837159,
+            "restDuration": 10.0,
+            "attackCooldown": 0.800000011920929,
             "projectileId": "bee_bullet",
             "impactEffectId": "drone_impact",
             "scale": 1.0,
             "spritePath": "Art/Towers/bee_T1",
-            "animFps": 12.0
+            "animFps": 12.0,
+            "tintColor": {
+                "r": 1.0,
+                "g": 1.0,
+                "b": 1.0,
+                "a": 1.0
+            },
+            "sortingLayer": "Towers",
+            "sortingOrder": 100
         }
     ]
 }

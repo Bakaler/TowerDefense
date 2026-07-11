@@ -107,6 +107,12 @@ public class UnitDefinition
     /// bespoke components: the whole cast is data (ability → effect → behavior).
     /// </summary>
     public string[] abilities = System.Array.Empty<string>();
+
+    /// <summary>
+    /// Free-form tags tower targeting modes key off — "high_prio" (shielders,
+    /// priests, barrier weavers) and "boss" are the ones currently read.
+    /// </summary>
+    public string[] tags = System.Array.Empty<string>();
 }
 
 [Serializable]

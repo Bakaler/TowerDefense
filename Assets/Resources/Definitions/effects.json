@@ -5,139 +5,84 @@
             "displayName": "Basic Impact",
             "type": "damage",
             "chance": 1.0,
-            "data": {
-        "damageBase": 18.0,
-        "minimumDamage": 1.0,
-        "maximumDamage": 1000000.0,
-        "damageType": 2,
-        "shieldBonus": -1.0,
-        "criticalChance": 0.0,
-        "criticalDamageMultiplier": 0.0
-      }
+            "data": { "damageBase": 18, "minimumDamage": 1, "maximumDamage": 1000000, "damageType": 2, "shieldBonus": -6, "criticalChance": 0, "criticalDamageMultiplier": 0, "bonusPerStackBehaviorId": "", "bonusPerStack": 0 }
         },
         {
             "id": "boomerang_impact",
             "displayName": "Boomerang Impact",
             "type": "damage",
             "chance": 1.0,
-            "data": {
-        "damageBase": 14.0,
-        "minimumDamage": 1.0,
-        "maximumDamage": 1000000.0,
-        "damageType": 3,
-        "criticalChance": 0.0,
-        "criticalDamageMultiplier": 2.0
-      }
+            "data": { "damageBase": 14, "minimumDamage": 1, "maximumDamage": 1000000, "damageType": 2, "shieldBonus": 0, "criticalChance": 0, "criticalDamageMultiplier": 2, "bonusPerStackBehaviorId": "", "bonusPerStack": 0 }
         },
         {
             "id": "boomerang_throw",
             "displayName": "Boomerang Throw",
             "type": "launch",
             "chance": 1.0,
-            "data": {
-        "projectileId": "boomerang",
-        "impactEffectId": "boomerang_impact"
-      }
+            "data": { "projectileId": "boomerang", "impactEffectId": "boomerang_impact", "count": 1, "spreadAngle": 0, "speedJitter": 0, "lifetimeJitter": 0, "scaleJitter": 0, "bonusCountKey": "" }
         },
         {
             "id": "basic_shot",
             "displayName": "Basic Shot",
             "type": "launch",
             "chance": 1.0,
-            "data": {
-        "projectileId": "basic_missile",
-        "impactEffectId": "basic_impact"
-      }
+            "data": { "projectileId": "basic_missile", "impactEffectId": "basic_impact", "count": 1, "spreadAngle": 0, "speedJitter": 0, "lifetimeJitter": 0, "scaleJitter": 0, "bonusCountKey": "" }
         },
         {
             "id": "chain_damage",
             "displayName": "Chain Damage",
             "type": "damage",
             "chance": 1.0,
-            "data": {
-        "damageBase": 14.0,
-        "minimumDamage": 1.0,
-        "maximumDamage": 1000000.0,
-        "damageType": 1,
-        "criticalChance": 0.0,
-        "criticalDamageMultiplier": 2.0
-      }
+            "data": { "damageBase": 14, "minimumDamage": 1, "maximumDamage": 1000000, "damageType": 1, "shieldBonus": 0, "criticalChance": 0, "criticalDamageMultiplier": 2, "bonusPerStackBehaviorId": "", "bonusPerStack": 0 }
         },
         {
             "id": "chain_shot",
             "displayName": "Chain Shot",
             "type": "launch",
             "chance": 1.0,
-            "data": {
-        "projectileId": "chain_bolt",
-        "impactEffectId": "chain_impact"
-      }
+            "data": { "projectileId": "chain_bolt", "impactEffectId": "chain_impact", "count": 1, "spreadAngle": 0, "speedJitter": 0, "lifetimeJitter": 0, "scaleJitter": 0, "bonusCountKey": "" }
         },
         {
             "id": "chain_impact",
             "displayName": "Chain Impact",
             "type": "set",
             "chance": 1.0,
-            "data": {
-        "effectIds": ["chain_damage", "chain_bounce_1_search"]
-      }
+            "data": { "effectIds": ["chain_damage", "chain_bounce_1_search"] }
         },
         {
             "id": "chain_bounce_1_search",
             "displayName": "Chain Bounce 1 Search",
             "type": "search_area",
             "chance": 1.0,
-            "data": {
-        "effectId": "chain_bounce_1_missile",
-        "radius": 4.0,
-        "maxTargets": 1,
-        "horizontalArc": 360.0,
-        "startingDepth": 0.0,
-        "searchFromTarget": true
-      }
+            "data": { "effectId": "chain_bounce_1_missile", "radius": 4, "maxTargets": 1, "horizontalArc": 360, "startingDepth": 0, "searchFromTarget": true, "excludePrimaryTarget": true, "blockedByBarriers": false, "barrierAbsorb": 20, "visualSpritePath": "", "visualSpriteSheet": "", "visualSpriteIndex": -1, "visualColor": {"r": 1, "g": 1, "b": 1, "a": 1}, "visualWidth": 0.18, "visualLength": 0, "visualFadeDuration": 0.3, "visualAnimFps": 0, "visualRotationOffset": 0 }
         },
         {
             "id": "chain_bounce_1_missile",
             "displayName": "Chain Bounce 1",
             "type": "launch",
             "chance": 1.0,
-            "data": {
-        "projectileId": "chain_bounce_1_bolt",
-        "impactEffectId": "chain_bounce_1_impact"
-      }
+            "data": { "projectileId": "chain_bounce_1_bolt", "impactEffectId": "chain_bounce_1_impact", "count": 1, "spreadAngle": 0, "speedJitter": 0, "lifetimeJitter": 0, "scaleJitter": 0, "bonusCountKey": "" }
         },
         {
             "id": "chain_bounce_1_impact",
             "displayName": "Chain Bounce 1 Impact",
             "type": "set",
             "chance": 1.0,
-            "data": {
-        "effectIds": ["chain_damage", "chain_bounce_2_search"]
-      }
+            "data": { "effectIds": ["chain_damage", "chain_bounce_2_search"] }
         },
         {
             "id": "chain_bounce_2_search",
             "displayName": "Chain Bounce 2 Search",
             "type": "search_area",
             "chance": 1.0,
-            "data": {
-        "effectId": "chain_bounce_2_missile",
-        "radius": 4.0,
-        "maxTargets": 1,
-        "horizontalArc": 360.0,
-        "startingDepth": 0.0,
-        "searchFromTarget": true
-      }
+            "data": { "effectId": "chain_bounce_2_missile", "radius": 4, "maxTargets": 1, "horizontalArc": 360, "startingDepth": 0, "searchFromTarget": true, "excludePrimaryTarget": true, "blockedByBarriers": false, "barrierAbsorb": 20, "visualSpritePath": "", "visualSpriteSheet": "", "visualSpriteIndex": -1, "visualColor": {"r": 1, "g": 1, "b": 1, "a": 1}, "visualWidth": 0.18, "visualLength": 0, "visualFadeDuration": 0.3, "visualAnimFps": 0, "visualRotationOffset": 0 }
         },
         {
             "id": "chain_bounce_2_missile",
             "displayName": "Chain Bounce 2",
             "type": "launch",
             "chance": 1.0,
-            "data": {
-        "projectileId": "chain_bounce_2_bolt",
-        "impactEffectId": "chain_damage"
-      }
+            "data": { "projectileId": "chain_bounce_2_bolt", "impactEffectId": "chain_damage", "count": 1, "spreadAngle": 0, "speedJitter": 0, "lifetimeJitter": 0, "scaleJitter": 0, "bonusCountKey": "" }
         },
         {
             "id": "apply_poison",
@@ -151,13 +96,7 @@
             "displayName": "Poison Splash",
             "type": "search_area",
             "chance": 1.0,
-            "data": {
-        "effectId": "apply_poison",
-        "radius": 2.2,
-        "maxTargets": -1,
-        "horizontalArc": 360.0,
-        "searchFromTarget": true
-      }
+            "data": { "effectId": "apply_poison", "radius": 2.2, "maxTargets": -1, "horizontalArc": 360, "startingDepth": 0, "searchFromTarget": true, "excludePrimaryTarget": true, "blockedByBarriers": false, "barrierAbsorb": 20, "visualSpritePath": "", "visualSpriteSheet": "", "visualSpriteIndex": -1, "visualColor": {"r": 1, "g": 1, "b": 1, "a": 1}, "visualWidth": 0.18, "visualLength": 0, "visualFadeDuration": 0.3, "visualAnimFps": 0, "visualRotationOffset": 0 }
         },
         {
             "id": "poison_impact",
@@ -171,10 +110,7 @@
             "displayName": "Poison Missile",
             "type": "launch",
             "chance": 1.0,
-            "data": {
-        "projectileId": "poison_bolt",
-        "impactEffectId": "poison_impact"
-      }
+            "data": { "projectileId": "poison_bolt", "impactEffectId": "poison_impact", "count": 1, "spreadAngle": 0, "speedJitter": 0, "lifetimeJitter": 0, "scaleJitter": 0, "bonusCountKey": "" }
         },
         {
             "id": "slow_impact",
@@ -188,14 +124,7 @@
             "displayName": "Slow Damage",
             "type": "damage",
             "chance": 1.0,
-            "data": {
-        "damageBase": 4.5,
-        "minimumDamage": 1.0,
-        "maximumDamage": 1000000.0,
-        "damageType": 1,
-        "criticalChance": 0.0,
-        "criticalDamageMultiplier": 2.0
-      }
+            "data": { "damageBase": 4.5, "minimumDamage": 1, "maximumDamage": 1000000, "damageType": 1, "shieldBonus": 4.5, "criticalChance": 0, "criticalDamageMultiplier": 2, "bonusPerStackBehaviorId": "", "bonusPerStack": 0 }
         },
         {
             "id": "slow_impact_set",
@@ -209,10 +138,7 @@
             "displayName": "Slow Missile",
             "type": "launch",
             "chance": 1.0,
-            "data": {
-        "projectileId": "slow_bolt",
-        "impactEffectId": "slow_impact_set"
-      }
+            "data": { "projectileId": "slow_bolt", "impactEffectId": "slow_impact_set", "count": 1, "spreadAngle": 0, "speedJitter": 0, "lifetimeJitter": 0, "scaleJitter": 0, "bonusCountKey": "" }
         },
         {
             "id": "root_impact",
@@ -226,7 +152,7 @@
             "displayName": "Root Damage",
             "type": "damage",
             "chance": 1.0,
-            "data": { "damageBase": 15.0, "damageType": 2 }
+            "data": { "damageBase": 15, "minimumDamage": 0, "maximumDamage": 524287, "damageType": 2, "shieldBonus": 0, "criticalChance": 0, "criticalDamageMultiplier": 2, "bonusPerStackBehaviorId": "", "bonusPerStack": 0 }
         },
         {
             "id": "root_hit",
@@ -240,299 +166,182 @@
             "displayName": "Root Missile",
             "type": "launch",
             "chance": 1.0,
-            "data": {
-        "projectileId": "root_bolt",
-        "impactEffectId": "root_impact"
-      }
+            "data": { "projectileId": "root_bolt", "impactEffectId": "root_impact", "count": 1, "spreadAngle": 0, "speedJitter": 0, "lifetimeJitter": 0, "scaleJitter": 0, "bonusCountKey": "" }
         },
         {
             "id": "shotgun_pellet_impact",
             "displayName": "Shotgun Pellet Impact",
             "type": "damage",
             "chance": 1.0,
-            "data": {
-        "damageBase": 8.0,
-        "minimumDamage": 1.0,
-        "maximumDamage": 1000000.0,
-        "damageType": 1,
-        "shieldBonus": 2.0,
-        "criticalChance": 0.0,
-        "criticalDamageMultiplier": 2.0
-      }
+            "data": { "damageBase": 8, "minimumDamage": 1, "maximumDamage": 1000000, "damageType": 1, "shieldBonus": 2, "criticalChance": 0, "criticalDamageMultiplier": 2, "bonusPerStackBehaviorId": "", "bonusPerStack": 0 }
         },
         {
             "id": "shotgun_shot",
             "displayName": "Shotgun Shot",
             "type": "launch",
             "chance": 1.0,
-            "data": {
-        "projectileId": "shotgun_pellet",
-        "impactEffectId": "shotgun_pellet_impact",
-        "count": 10,
-        "spreadAngle": 70.0,
-        "speedJitter": 0.4,
-        "lifetimeJitter": 0.5,
-        "scaleJitter": 0.35,
-        "bonusCountKey": "BonusShotgunBullets"
-      }
+            "data": { "projectileId": "shotgun_pellet", "impactEffectId": "shotgun_pellet_impact", "count": 10, "spreadAngle": 70, "speedJitter": 0.4, "lifetimeJitter": 0.5, "scaleJitter": 0.35, "bonusCountKey": "BonusShotgunBullets" }
         },
         {
             "id": "entropy_impact",
             "displayName": "Entropy Impact",
             "type": "damage",
             "chance": 1.0,
-            "data": {
-        "damageBase": 12.0,
-        "minimumDamage": 1.0,
-        "maximumDamage": 1000000.0,
-        "damageType": 1,
-        "criticalChance": 0.0,
-        "criticalDamageMultiplier": 2.0
-      }
+            "data": { "damageBase": 12, "minimumDamage": 1, "maximumDamage": 1000000, "damageType": 1, "shieldBonus": 0, "criticalChance": 0, "criticalDamageMultiplier": 2, "bonusPerStackBehaviorId": "", "bonusPerStack": 0 }
         },
         {
             "id": "entropy_shot",
             "displayName": "Entropy Shot",
             "type": "launch",
             "chance": 1.0,
-            "data": {
-        "projectileId": "entropy_bolt",
-        "impactEffectId": "entropy_impact"
-      }
+            "data": { "projectileId": "entropy_bolt", "impactEffectId": "entropy_impact", "count": 1, "spreadAngle": 0, "speedJitter": 0, "lifetimeJitter": 0, "scaleJitter": 0, "bonusCountKey": "" }
         },
         {
             "id": "railgun_damage",
             "displayName": "Railgun Damage",
             "type": "damage",
             "chance": 1.0,
-            "data": {
-                "damageBase": 90.0,
-                "damageType": 2,
-                "minimumDamage": 0.0,
-                "maximumDamage": 524287.0
-            }
+            "data": { "damageBase": 90, "minimumDamage": 0, "maximumDamage": 524287, "damageType": 2, "shieldBonus": 0, "criticalChance": 0, "criticalDamageMultiplier": 2, "bonusPerStackBehaviorId": "", "bonusPerStack": 0 }
         },
         {
             "id": "railgun_beam",
             "displayName": "Railgun Beam",
             "type": "search_area",
             "chance": 1.0,
-            "data": {
-                "effectId": "railgun_damage",
-                "radius": 22.0,
-                "maxTargets": -1,
-                "horizontalArc": 10.0,
-                "startingDepth": 0.0,
-                "excludePrimaryTarget": false,
-                "blockedByBarriers": true,
-                "barrierAbsorb": 45.0,
-                "visualSpriteSheet": "Art/Effects/railgun_beam",
-                "visualColor": { "r": 1.0, "g": 1.0, "b": 1.0, "a": 0.85 },
-                "visualWidth": 0.3,
-                "visualLength": 35.0,
-                "visualFadeDuration": 0.3,
-                "visualAnimFps": 12.0,
-                "visualRotationOffset": 0.0
-            }
+            "data": { "effectId": "railgun_damage", "radius": 22, "maxTargets": -1, "horizontalArc": 10, "startingDepth": 0, "searchFromTarget": false, "excludePrimaryTarget": false, "blockedByBarriers": true, "barrierAbsorb": 45, "visualSpritePath": "", "visualSpriteSheet": "Art/Effects/railgun_beam", "visualSpriteIndex": -1, "visualColor": {"r": 1, "g": 1, "b": 1, "a": 0.85}, "visualWidth": 0.3, "visualLength": 35, "visualFadeDuration": 0.3, "visualAnimFps": 12, "visualRotationOffset": 0 }
         },
         {
             "id": "charger_rage_buff",
             "displayName": "Charger Rage Buff",
             "type": "apply_permanent_speed_buff",
             "chance": 1.0,
-            "data": {
-        "speedBonus": 0.4,
-        "radius": 4.0,
-        "targetDefinitionId": "charger_enemy"
-      }
+            "data": { "speedBonus": 0.4, "radius": 4, "targetDefinitionId": "charger_enemy" }
         },
         {
             "id": "mortar_explosion",
             "displayName": "Mortar Explosion",
             "type": "search_area",
             "chance": 1.0,
-            "data": {
-        "radius": 1.2,
-        "maxTargets": 20,
-        "horizontalArc": 360.0,
-        "effectId": "mortar_impact_damage"
-      }
+            "data": { "effectId": "mortar_impact_damage", "radius": 1.2, "maxTargets": 20, "horizontalArc": 360, "startingDepth": 0, "searchFromTarget": false, "excludePrimaryTarget": true, "blockedByBarriers": false, "barrierAbsorb": 20, "visualSpritePath": "", "visualSpriteSheet": "", "visualSpriteIndex": -1, "visualColor": {"r": 1, "g": 1, "b": 1, "a": 1}, "visualWidth": 0.18, "visualLength": 0, "visualFadeDuration": 0.3, "visualAnimFps": 0, "visualRotationOffset": 0 }
         },
         {
             "id": "mortar_impact_damage",
             "displayName": "Mortar Damage",
             "type": "damage",
             "chance": 1.0,
-            "data": {
-        "damageBase": 25.0,
-        "damageType": 0,
-        "minimumDamage": 1.0,
-        "maximumDamage": 9999.0
-      }
+            "data": { "damageBase": 25, "minimumDamage": 1, "maximumDamage": 9999, "damageType": 0, "shieldBonus": 0, "criticalChance": 0, "criticalDamageMultiplier": 2, "bonusPerStackBehaviorId": "", "bonusPerStack": 0 }
         },
         {
             "id": "mortar_shell",
             "displayName": "Mortar Shell",
             "type": "launch",
             "chance": 1.0,
-            "data": {
-        "projectileId": "mortar_shell",
-        "impactEffectId": "mortar_explosion"
-      }
+            "data": { "projectileId": "mortar_shell", "impactEffectId": "mortar_explosion", "count": 1, "spreadAngle": 0, "speedJitter": 0, "lifetimeJitter": 0, "scaleJitter": 0, "bonusCountKey": "" }
         },
         {
             "id": "drain_life",
             "displayName": "Drain Life",
             "type": "drain_life",
             "chance": 1.0,
-            "data": {
-        "damage": 2.0,
-        "goldPerDrain": 1,
-        "techPerDrain": 0
-      }
+            "data": { "damage": 2, "goldPerDrain": 1, "techPerDrain": 0 }
         },
         {
             "id": "sniper_damage",
             "displayName": "Sniper Shot",
             "type": "damage",
             "chance": 1.0,
-            "data": {
-        "damageBase": 60.0,
-        "minimumDamage": 1.0,
-        "maximumDamage": 1000000.0,
-        "damageType": 3,
-        "shieldBonus": 0.0,
-        "criticalChance": 0.0,
-        "criticalDamageMultiplier": 2.0
-      }
+            "data": { "damageBase": 60, "minimumDamage": 1, "maximumDamage": 1000000, "damageType": 3, "shieldBonus": 0, "criticalChance": 0, "criticalDamageMultiplier": 2, "bonusPerStackBehaviorId": "", "bonusPerStack": 0 }
         },
         {
             "id": "beam_damage",
             "displayName": "Beam Damage",
             "type": "damage",
             "chance": 1.0,
-            "data": {
-        "damageBase": 0.0,
-        "minimumDamage": 0.0,
-        "maximumDamage": 1000000.0,
-        "damageType": 1,
-        "shieldBonus": 0.0,
-        "criticalChance": 0.0,
-        "criticalDamageMultiplier": 2.0
-      }
+            "data": { "damageBase": 0, "minimumDamage": 0, "maximumDamage": 1000000, "damageType": 1, "shieldBonus": 0, "criticalChance": 0, "criticalDamageMultiplier": 2, "bonusPerStackBehaviorId": "", "bonusPerStack": 0 }
+        },
+        {
+            "id": "drone_damage",
+            "displayName": "Drone Damage",
+            "type": "damage",
+            "chance": 1.0,
+            "data": { "damageBase": 12, "minimumDamage": 0, "maximumDamage": 1000000, "damageType": 4, "shieldBonus": 0, "criticalChance": 0, "criticalDamageMultiplier": 2, "bonusPerStackBehaviorId": "bee_frenzy", "bonusPerStack": 0.0025 }
+        },
+        {
+            "id": "apply_bee_frenzy",
+            "displayName": "Apply Bee Frenzy",
+            "type": "apply_behavior",
+            "chance": 1.0,
+            "data": { "behaviorId": "bee_frenzy" }
         },
         {
             "id": "drone_impact",
             "displayName": "Drone Impact",
-            "type": "damage",
+            "type": "set",
             "chance": 1.0,
-            "data": {
-        "damageBase": 0.0,
-        "minimumDamage": 0.0,
-        "maximumDamage": 1000000.0,
-        "damageType": 2,
-        "shieldBonus": 0.0,
-        "criticalChance": 0.0,
-        "criticalDamageMultiplier": 2.0
-      }
+            "data": { "effectIds": ["drone_damage", "apply_bee_frenzy"] }
         },
         {
             "id": "root_set",
             "displayName": "Root Set",
             "type": "set",
             "chance": 1.0,
-            "data": {}
+            "data": { "effectIds": [] }
         },
         {
             "id": "splitter_spawn_minis",
             "displayName": "Splitter Spawn Minis",
             "type": "create_units",
             "chance": 1.0,
-            "data": {
-                "unitId": "splitter_mini",
-                "count": 4,
-                "spawnInterval": 0.15,
-                "spawnRadius": 0.3,
-                "inheritRoute": true,
-                "speedJitter": 0.1,
-                "waveHpScaling": true
-            }
+            "data": { "unitId": "splitter_mini", "count": 4, "spawnInterval": 0.15, "spawnRadius": 0.3, "inheritRoute": true, "speedJitter": 0.1, "waveHpScaling": true }
         },
         {
             "id": "fence_vulnerability",
             "displayName": "Fence Vulnerability",
             "type": "apply_behavior",
             "chance": 1.0,
-            "data": {
-                "behaviorId": "vulnerable"
-            }
+            "data": { "behaviorId": "vulnerable" }
         },
         {
             "id": "fence_damage",
             "displayName": "Fence Damage",
             "type": "damage",
             "chance": 1.0,
-            "data": {
-                "damageBase": 120.0,
-                "minimumDamage": 1.0,
-                "maximumDamage": 1000000.0,
-                "damageType": 5,
-                "shieldBonus": 0.0,
-                "criticalChance": 0.0,
-                "criticalDamageMultiplier": 2.0
-            }
+            "data": { "damageBase": 120, "minimumDamage": 1, "maximumDamage": 1000000, "damageType": 5, "shieldBonus": 0, "criticalChance": 0, "criticalDamageMultiplier": 2, "bonusPerStackBehaviorId": "", "bonusPerStack": 0 }
         },
         {
             "id": "fence_zap",
             "displayName": "Fence Zap",
             "type": "set",
             "chance": 1.0,
-            "data": {
-                "effectIds": ["fence_vulnerability", "fence_damage"]
-            }
+            "data": { "effectIds": ["fence_vulnerability", "fence_damage"] }
         },
         {
             "id": "ally_cleanse",
             "displayName": "Ally Cleanse",
             "type": "cleanse",
             "chance": 1.0,
-            "data": {
-                "radius": 3.5,
-                "cleanseTypes": ["Slowed", "Rooted", "Debuff"]
-            }
+            "data": { "radius": 3.5, "cleanseTypes": ["Slowed", "Rooted", "Debuff"] }
         },
         {
             "id": "grant_small_barrier",
             "displayName": "Grant Small Barrier",
             "type": "apply_behavior",
             "chance": 1.0,
-            "data": {
-                "behaviorId": "small_barrier"
-            }
+            "data": { "behaviorId": "small_barrier" }
         },
         {
             "id": "cast_small_barriers",
             "displayName": "Cast Small Barriers",
             "type": "search_area",
             "chance": 1.0,
-            "data": {
-                "effectId": "grant_small_barrier",
-                "radius": 3.0,
-                "maxTargets": -1,
-                "horizontalArc": 360.0,
-                "startingDepth": 0.0,
-                "excludePrimaryTarget": false
-            }
+            "data": { "effectId": "grant_small_barrier", "radius": 3, "maxTargets": -1, "horizontalArc": 360, "startingDepth": 0, "searchFromTarget": false, "excludePrimaryTarget": false, "blockedByBarriers": false, "barrierAbsorb": 20, "visualSpritePath": "", "visualSpriteSheet": "", "visualSpriteIndex": -1, "visualColor": {"r": 1, "g": 1, "b": 1, "a": 1}, "visualWidth": 0.18, "visualLength": 0, "visualFadeDuration": 0.3, "visualAnimFps": 0, "visualRotationOffset": 0 }
         },
         {
             "id": "projectile_zap",
             "displayName": "Projectile Zap",
             "type": "destroy_projectile",
             "chance": 1.0,
-            "data": {
-                "radius": 4.0,
-                "count": 1
-            }
+            "data": { "radius": 4, "count": 1 }
         }
     ]
 }

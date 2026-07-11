@@ -3,9 +3,11 @@ using UnityEngine;
 /// <summary>
 /// Generic data-driven minion built by MinionFactory from a MinionDefinition (minions.json).
 /// State machine: Wander → Engage → Return → Rest.
-/// Minions can only be away from the hive for maxAwayTime seconds, then must fly
-/// back and rest for restDuration before re-deploying. Attacks fire a projectile
-/// (projectiles.json) through ProjectileFactory.
+/// A minion locks onto one target and stays on it until the target is dead
+/// (or despawns) — no leash, no forced return. Only then does it fly home and
+/// rest for restDuration before picking its next target, so single tough
+/// targets are its strength and the downtime between targets is the cost.
+/// Attacks fire a projectile (projectiles.json) through ProjectileFactory.
 /// </summary>
 public class Minion : MonoBehaviour
 {
@@ -15,7 +17,6 @@ public class Minion : MonoBehaviour
     public float       range;          // engage search radius (usually the tower's range)
     public float       noticeRange;    // wander-state aggro radius
     public float       attackCooldown;
-    public float       maxAwayTime;
     public float       restDuration;
     public Effect      impactEffect;
 
@@ -26,7 +27,6 @@ public class Minion : MonoBehaviour
     private UnitParentClass _target;
     private float           _cooldownTimer;
     private float           _orbitDir;
-    private float           _awayTimer;
     private float           _restTimer;
 
     Vector2 Home => host != null ? (Vector2)host.HomeTransform.position : (Vector2)transform.position;
@@ -59,9 +59,6 @@ public class Minion : MonoBehaviour
 
     void UpdateWander()
     {
-        _awayTimer += Time.deltaTime;
-        if (_awayTimer >= maxAwayTime) { GoReturn(); return; }
-
         var nearest = FindNearest(noticeRange);
         if (nearest != null) { _target = nearest; _state = State.Engage; return; }
 
@@ -86,15 +83,8 @@ public class Minion : MonoBehaviour
 
     void UpdateEngage()
     {
-        _awayTimer += Time.deltaTime;
-        if (_awayTimer >= maxAwayTime) { GoReturn(); return; }
-
-        if (_target == null || !_target.isAlive ||
-            Vector2.Distance(Home, _target.transform.position) > range)
-        {
-            _target = FindNearest(range);
-            if (_target == null) { _state = State.Wander; PickWanderGoal(); return; }
-        }
+        // Committed to this target: only its death (or despawn) sends us home.
+        if (_target == null || !_target.isAlive) { GoReturn(); return; }
 
         Vector2 toEnemy = (Vector2)_target.transform.position - (Vector2)transform.position;
         float   dist    = toEnemy.magnitude;
@@ -124,7 +114,6 @@ public class Minion : MonoBehaviour
         if (Vector2.Distance(transform.position, hive) < 0.1f)
         {
             transform.position = hive;
-            _awayTimer = 0f;
             _restTimer = restDuration;
             _state     = State.Rest;
         }
@@ -167,7 +156,6 @@ public class Minion : MonoBehaviour
             impactEffect    = impactEffect,
             casterTransform = transform,
             originTower     = host?.HostObject,
-            damageOverride  = host != null ? host.GetMinionDamage() : 0f,
         });
     }
 }

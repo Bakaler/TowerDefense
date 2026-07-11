@@ -17,10 +17,17 @@ public class BehaviorDefinition
 {
     public string       id            = "";
     public string       displayName   = "";
+    /// <summary>Player-facing text shown in the enemy panel's behavior tooltip.</summary>
+    public string       description   = "";
+    /// <summary>Optional Resources sprite path for the behavior icon. Empty = tinted circle + first letter.</summary>
+    public string       iconPath      = "";
     public float        duration      = 2f;
     public BehaviorType behaviorType  = BehaviorType.None;
     /// <summary>refresh | stack | none</summary>
     public string stackRule     = "refresh";
+    /// <summary>For stackRule "stack": max simultaneous instances (0 = unlimited).
+    /// At the cap, applying again refreshes the oldest stack instead of adding.</summary>
+    public int maxStacks = 0;
 
     // Stat modifiers
     public float moveSpeedMultiplier = 1f;

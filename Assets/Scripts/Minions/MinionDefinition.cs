@@ -20,8 +20,7 @@ public class MinionDefinition
     public float returnSpeed  = 5.5f;   // speed flying back to the hive
     public float orbitDist    = 0.6f;   // preferred distance while circling a target
     public float wanderRadius = 1.1f;   // wander goal radius around the hive
-    public float maxAwayTime  = 6f;     // seconds away from the hive before forced return
-    public float restDuration = 1f;     // seconds resting at the hive before redeploying
+    public float restDuration = 1f;     // seconds resting at the hive after a kill before redeploying
 
     // ── Attack ────────────────────────────────────────────────────────
     public float  attackCooldown = 0.8f;

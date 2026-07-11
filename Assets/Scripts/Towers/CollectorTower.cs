@@ -2,9 +2,10 @@ using System.Collections;
 using UnityEngine;
 
 /// <summary>
-/// Elemental support tower. Scans its range each tick for bounty drops and
-/// income towers with full orbs (4). Grabs one target at a time, draws a
-/// light-tether LineRenderer, then collects after a short reach delay.
+/// Elemental support tower. Scans its range each tick for bounty drops,
+/// income towers with full orbs (4), and fully-saturated research clusters.
+/// Grabs one target at a time, draws a light-tether LineRenderer, then
+/// collects after a short reach delay.
 /// </summary>
 public class CollectorTower : MonoBehaviour, IFactoryInitializable
 {
@@ -68,13 +69,15 @@ public class CollectorTower : MonoBehaviour, IFactoryInitializable
                 continue;
             }
 
-            // Priority 3: nearest research orb in range
-            var orb = FindNearestResearchOrb();
-            if (orb != null)
+            // Priority 3: research towers — only once every one in range holds
+            // an orb, and then highest payout first, so the collector never
+            // spoils the adjacency bonus by grabbing orbs early
+            var research = FindBestSaturatedResearchTower();
+            if (research != null)
             {
-                yield return StartCoroutine(GrabRoutine(orb.transform.position, () =>
+                yield return StartCoroutine(GrabRoutine(research.transform.position, () =>
                 {
-                    if (orb != null) orb.CollectByTower();
+                    if (research != null) research.Collect();
                 }));
             }
         }
@@ -117,16 +120,18 @@ public class CollectorTower : MonoBehaviour, IFactoryInitializable
         return best;
     }
 
-    ResearchOrb FindNearestResearchOrb()
+    ResearchTower FindBestSaturatedResearchTower()
     {
-        var orbs = FindObjectsByType<ResearchOrb>(FindObjectsSortMode.None);
-        ResearchOrb best = null;
-        float bestDist   = float.MaxValue;
-        foreach (var o in orbs)
+        var towers = FindObjectsByType<ResearchTower>(FindObjectsSortMode.None);
+        ResearchTower best = null;
+        int bestPayout     = 0;
+        foreach (var t in towers)
         {
-            float d = Vector2.Distance(transform.position, o.transform.position);
-            if (d <= range && d < bestDist)
-            { best = o; bestDist = d; }
+            if (Vector2.Distance(transform.position, t.transform.position) > range) continue;
+            if (!t.HasOrb) return null;   // wait until every research tower in range is full
+            int payout = t.CurrentPayout();
+            if (best == null || payout > bestPayout)
+            { best = t; bestPayout = payout; }
         }
         return best;
     }

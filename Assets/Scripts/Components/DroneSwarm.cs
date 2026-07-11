@@ -5,7 +5,8 @@ using UnityEngine;
 /// Generic component: spawns N minions (minions.json) that wander the tower radius
 /// and attack nearby enemies. The minion's look, brain, and projectile all come from
 /// its MinionDefinition; this component only supplies swarm-level tuning.
-/// JSON keys: minionId, droneCount, range, cooldown, damage, maxAwayTime, restDuration, effectId
+/// JSON keys: minionId, droneCount, range, cooldown, restDuration, effectId
+/// Damage lives on the impact effect (effects.json), not here.
 /// </summary>
 public class DroneSwarm : MonoBehaviour, IFactoryInitializable, IMinionHost
 {
@@ -16,8 +17,6 @@ public class DroneSwarm : MonoBehaviour, IFactoryInitializable, IMinionHost
     public int    droneCount   = 4;
     public float  range        = 5f;
     public float  cooldown     = 0.8f;
-    public float  damage       = 6f;
-    public float  maxAwayTime  = 6f;
     public float  restDuration = 1f;
 
     private readonly List<Minion> _minions = new();
@@ -31,8 +30,6 @@ public class DroneSwarm : MonoBehaviour, IFactoryInitializable, IMinionHost
         public int    droneCount   = 4;
         public float  range        = 5f;
         public float  cooldown     = 0.8f;
-        public float  damage       = 6f;
-        public float  maxAwayTime  = 6f;
         public float  restDuration = 1f;
         public string effectId     = "";
     }
@@ -46,8 +43,6 @@ public class DroneSwarm : MonoBehaviour, IFactoryInitializable, IMinionHost
         droneCount   = d.droneCount;
         range        = d.range;
         cooldown     = d.cooldown;
-        damage       = d.damage;
-        maxAwayTime  = d.maxAwayTime;
         restDuration = d.restDuration;
         _pendingEffectId = d.effectId;
         if (!string.IsNullOrEmpty(d.effectId) && EffectLibrary.Instance != null)
@@ -80,7 +75,6 @@ public class DroneSwarm : MonoBehaviour, IFactoryInitializable, IMinionHost
             {
                 range               = range,
                 cooldownOverride    = cooldown + i * 0.2f,       // stagger shots
-                maxAwayTimeOverride = maxAwayTime + i * 0.5f,    // stagger returns so not all leave at once
                 restDurationOverride = restDuration,
                 impactEffect        = _impactEffect,
                 animTimeOffset      = totalCount > 0 && def.animFps > 0f
@@ -96,7 +90,4 @@ public class DroneSwarm : MonoBehaviour, IFactoryInitializable, IMinionHost
 
     public Transform  HomeTransform => transform;
     public GameObject HostObject    => gameObject;
-
-    // Returns raw damage; scaling is applied by Effect_Damage via OriginTower
-    public float GetMinionDamage() => damage;
 }

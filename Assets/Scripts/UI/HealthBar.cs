@@ -13,14 +13,23 @@ public class HealthBar : MonoBehaviour
     private SpriteRenderer[] _segs;
     private int              _segCount;
     private SpriteRenderer   _shieldBar;
+    private SpriteRenderer   _shieldTrack;
     private Vector3          _worldOffset;
     private float            _barW = 0.42f;
+    private float            _alpha = ALPHA_HEALTHY;
 
     private const float SEG_H    = 0.055f;
     private const float SEG_GAP  = 0.012f;
     private const float Y_OFF    = 0.26f;
     private const float SHIELD_H = SEG_H;   // same height as HP row so it reads at game zoom
     private const float SHIELD_Y = SEG_H * 0.5f + SEG_GAP + SHIELD_H * 0.5f;
+
+    // Untouched units show a ghosted bar so the artwork isn't buried under
+    // solid green; any damage fades the bar up to full visibility.
+    // Set ALPHA_HEALTHY to 0 to hide full-HP bars entirely.
+    private const float ALPHA_HEALTHY = 0f;
+    private const float ALPHA_DAMAGED = 1f;
+    private const float FADE_SPEED    = 5f;   // alpha units per second
 
     private static readonly Color C_Empty  = new Color(0.12f, 0.12f, 0.12f, 0.75f);
     private static readonly Color C_Shield = new Color(0.25f, 0.85f, 1f, 1f);
@@ -87,11 +96,11 @@ public class HealthBar : MonoBehaviour
             track.transform.localPosition = new Vector3(0f, SHIELD_Y, -0.01f);
             track.transform.localScale    = new Vector3(_barW, SHIELD_H, 1f);
 
-            var tsr              = track.AddComponent<SpriteRenderer>();
-            tsr.sprite           = GetPixel();
-            tsr.color            = C_Empty;
-            tsr.sortingLayerName = "Units";
-            tsr.sortingOrder     = 30;
+            _shieldTrack                  = track.AddComponent<SpriteRenderer>();
+            _shieldTrack.sprite           = GetPixel();
+            _shieldTrack.color            = C_Empty;
+            _shieldTrack.sortingLayerName = "Units";
+            _shieldTrack.sortingOrder     = 30;
 
             var go = new GameObject("ShieldBar");
             go.transform.SetParent(transform, false);
@@ -117,20 +126,41 @@ public class HealthBar : MonoBehaviour
         float pct   = _unit.lifeMax > 0f ? Mathf.Clamp01(_unit.lifeCurrent / _unit.lifeMax) : 0f;
         float filled = pct * _segCount;
 
+        // Fade: ghosted while untouched, fully visible once anything is damaged
+        bool pristine = pct >= 0.999f &&
+                        (!_unit.hasShields || _unit.shieldMax <= 0f ||
+                         _unit.shieldCurrent >= _unit.shieldMax - 0.001f);
+        _alpha = Mathf.MoveTowards(_alpha, pristine ? ALPHA_HEALTHY : ALPHA_DAMAGED,
+                                   Time.deltaTime * FADE_SPEED);
+
         Color fillColor = pct > 0.5f
             ? Color.Lerp(Color.yellow, Color.green,  (pct - 0.5f) * 2f)
             : Color.Lerp(Color.red,    Color.yellow, pct * 2f);
 
         for (int i = 0; i < _segCount; i++)
-            _segs[i].color = i < Mathf.CeilToInt(filled) ? fillColor : C_Empty;
+        {
+            Color c = i < Mathf.CeilToInt(filled) ? fillColor : C_Empty;
+            c.a *= _alpha;
+            _segs[i].color = c;
+        }
 
         // Shield bar drains left-to-right; the dark track stays as the outline
         if (_shieldBar != null)
         {
             float spct = _unit.shieldMax > 0f ? Mathf.Clamp01(_unit.shieldCurrent / _unit.shieldMax) : 0f;
             _shieldBar.enabled = spct > 0f;
+            if (_shieldTrack != null)
+            {
+                Color tc = C_Empty;
+                tc.a *= _alpha;
+                _shieldTrack.color = tc;
+            }
             if (spct > 0f)
             {
+                Color sc = C_Shield;
+                sc.a *= _alpha;
+                _shieldBar.color = sc;
+
                 float w = _barW * spct;
                 _shieldBar.transform.localScale    = new Vector3(w, SHIELD_H, 1f);
                 _shieldBar.transform.localPosition = new Vector3(-_barW * 0.5f + w * 0.5f, SHIELD_Y, -0.02f);

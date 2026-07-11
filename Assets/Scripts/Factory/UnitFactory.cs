@@ -156,6 +156,8 @@ public class UnitFactory : MonoBehaviour
         unit.deathBlow       = def.deathBlow;
         unit.rotateToMovement  = def.rotateToMovement;
         unit.spriteAngleOffset = def.spriteAngleOffset;
+        unit.tags            = def.tags ?? System.Array.Empty<string>();
+        unit.canGoInvisible  = CanGoInvisible(def);
         unit.isAlive         = true;
 
         // ── 5. Extra components ───────────────────────────────────
@@ -205,6 +207,25 @@ public class UnitFactory : MonoBehaviour
     }
 
     // ── Helpers ───────────────────────────────────────────────────────
+
+    /// <summary>
+    /// True when any starting behavior can render the unit invisible — either the
+    /// behavior itself (Invisible type) or one it grants on tick (cloak cycles).
+    /// Feeds the "Invisible" tower targeting mode.
+    /// </summary>
+    public static bool CanGoInvisible(UnitDefinition def)
+    {
+        if (def.startingBehaviors == null || BehaviorLibrary.Instance == null) return false;
+        foreach (var bId in def.startingBehaviors)
+        {
+            if (!BehaviorLibrary.Instance.TryGet(bId, out var b)) continue;
+            if (b.behaviorType == BehaviorType.Invisible) return true;
+            if (!string.IsNullOrEmpty(b.tickBehaviorId)
+                && BehaviorLibrary.Instance.TryGet(b.tickBehaviorId, out var tickDef)
+                && tickDef.behaviorType == BehaviorType.Invisible) return true;
+        }
+        return false;
+    }
 
     /// <summary>Creates a small circle sprite used as a unit placeholder. Scale is factored into PPU so world size stays ~0.4 units regardless of def.scale.</summary>
     private static Sprite MakePlaceholderSprite(float scale)

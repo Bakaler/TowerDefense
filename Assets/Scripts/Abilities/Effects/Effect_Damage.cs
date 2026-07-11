@@ -21,6 +21,10 @@ public class Effect_Damage : Effect
     public float criticalChance = 0f;
     public float criticalDamageMultiplier = 2f;
 
+    [Tooltip("Ramp: damage is multiplied by 1 + (target's stacks of this behavior × bonusPerStack)")]
+    public string bonusPerStackBehaviorId = "";
+    public float  bonusPerStack = 0f;
+
     public override void Execute(EffectContext context)
     {
         if (!PassesValidators(context)) return;
@@ -50,6 +54,15 @@ public class Effect_Damage : Effect
 
         if (criticalChance > 0f && Random.Range(0f, 1f) <= criticalChance)
             damage *= criticalDamageMultiplier;
+
+        // Per-stack ramp (e.g. bee frenzy): each stack of the marker behavior
+        // on the target adds bonusPerStack to this effect's damage
+        if (bonusPerStack != 0f && !string.IsNullOrEmpty(bonusPerStackBehaviorId))
+        {
+            var bh = target.GetComponent<BehaviorHandler>();
+            if (bh != null)
+                damage *= 1f + bh.GetStackCount(bonusPerStackBehaviorId) * bonusPerStack;
+        }
 
         float finalDamage = Mathf.Clamp(damage, minimumDamage, maximumDamage);
         bool wasAlive = target.isAlive && target.lifeCurrent > 0f;

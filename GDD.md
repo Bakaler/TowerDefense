@@ -78,9 +78,13 @@ Each tower has a **balanceType**: Physical, Arcane, or Elemental.
 | T5   | 150 tech   | T4           |
 
 **Tower upgrade cost formula:** `resourceCost × (2^tier - 1)` cumulative  
-**Research Tower orb values:**
-- Catch mid-air = 2 tech
-- Let it arrive = 1 tech
+**Research Tower cluster mechanic:**
+- Each research tower holds max 1 tech orb; click the tower to collect
+- One global spawn timer: one orb per interval goes to one empty tower (so 3 towers take 3 intervals to all fill)
+- Fill order follows per-tower priority 1–4 (info-panel dropdown, 1 fills first); ties are picked at random
+- Collect payout scales with adjacent research towers (within 1.6 units) currently holding an orb: 0 → 1, 1 → 3, 2 → 7, 3 → 15 tech
+- Optimal play: cluster 3 towers, keep two loaded, harvest the third for 7 each refill; collecting a full triangle in best-first order pays 7+3+1 = 11
+- Collector Tower only auto-collects research when every research tower in its range is full (highest payout first)
 - Spawn interval reduced by Arcane balance (min 4 sec, base 12 sec)
 
 **Per-level overrides:** Levels can set `startTech` and `startTier` to begin with unlocked tiers.
@@ -98,7 +102,7 @@ Each tower has a **balanceType**: Physical, Arcane, or Elemental.
 | Shotgun Tower | Arcane | 5 | Cone spray, fast pellets |
 | Poison Tower | Elemental | 6 | DoT splash on impact |
 | Income Tower | Elemental | 5 | PvZ-style orbs (Fibonacci payout: 1/3/5/8 gold), orb slots scale with tier |
-| Research Tower | Arcane | 6 | Generates tech orbs, interval scales with Arcane balance |
+| Research Tower | Arcane | 6 | Holds 1 tech orb; adjacency bonus (1/3/7/15) for neighbors with orbs, global refill timer scales with Arcane balance |
 
 ### Tier 2
 
@@ -106,7 +110,7 @@ Each tower has a **balanceType**: Physical, Arcane, or Elemental.
 |-------|------|------|-------|
 | Chain Tower | Arcane | 6 | Chains to 4 enemies |
 | Boomerang Tower | Physical | 5 | Arc sweep, returns |
-| Bee Tower | Physical | 6 | 4 "bee" minions (minions.json), 6 dmg / 0.8 sec, forced hive return every 6 sec |
+| Bee Tower | Physical | 6 | 4 "bee" minions (minions.json), 6 poison dmg / 0.8 sec; each bee locks one target until it dies, then rests 3 sec at the hive — strong vs single targets, harsh downtime between kills; stings stack Bee Frenzy (+0.25% bee damage per stack, max 100, 8 sec/stack) |
 | Root Tower | Elemental | 7 | Roots 1 sec, won't retarget rooted |
 | Entropy Tower | Arcane | 8 | +4% dmg per kill stack, max 50 stacks (StackOnKill component) |
 | Speed Aura | Arcane | 7 | +30% attack speed to nearby towers (T1 only, no upgrades) |
@@ -375,7 +379,7 @@ rebuilt each round
 
 ### Low Priority / Nice to Have
 - [ ] **More research upgrades** — still only 2 defined (`basic_firerate_1`, `shotgun_bullets_1`); each tower should have 2-3 per tier
-- [ ] **Deferred datalization** — pickups/orbs (Income/Research/Shimmer) into a pickups.json, generic resource_generator component, vfx.json registry
+- [ ] **Deferred datalization** — pickups/orbs (Income/Research) into a pickups.json, generic resource_generator component, vfx.json registry
 - [ ] **Projectile pooling** — shotgun creates/destroys ~10 GameObjects per shot
 - [ ] **Behaviors editor tab** — behaviors.json is the last definitions file not editable in the window
 - [ ] **Enemy intro briefs** — warning when a new enemy type appears for the first time

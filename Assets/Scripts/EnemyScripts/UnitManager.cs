@@ -22,6 +22,20 @@ public class UnitManager : UnitParentClass
     // isDead compatibility shim — reads from UnitParentClass.isAlive
     public bool isDead => !isAlive;
 
+    // ── Targeting metadata (stamped from UnitDefinition by the factory) ──
+    /// <summary>Definition tags ("high_prio", "boss", …) read by tower targeting modes.</summary>
+    public string[] tags = System.Array.Empty<string>();
+    /// <summary>True when a starting behavior can render this unit invisible (cloakers).</summary>
+    public bool canGoInvisible;
+
+    public bool HasTag(string tag)
+    {
+        if (tags == null) return false;
+        for (int i = 0; i < tags.Length; i++)
+            if (tags[i] == tag) return true;
+        return false;
+    }
+
     // ── Hit flash ────────────────────────────────────────────────────
     private SpriteRenderer _sr;
     private Color          _baseColor = Color.white;
@@ -79,6 +93,8 @@ public class UnitManager : UnitParentClass
         arcanaDefense     = def.arcanaDefense;
         bounty            = def.bounty;
         deathBlow         = def.deathBlow;
+        tags              = def.tags ?? System.Array.Empty<string>();
+        canGoInvisible    = UnitFactory.CanGoInvisible(def);
     }
 
     // ── Damage override (triggers hit flash) ─────────────────────────
@@ -205,11 +221,18 @@ public class UnitManager : UnitParentClass
 
     void OnMouseDown()
     {
-        if (isAlive)
-        {
-            AudioManager.PlayEvent("select");
-            GameHUD.Instance?.SelectEnemy(this);
-        }
+        if (!isAlive) return;
+        if (UnityEngine.EventSystems.EventSystem.current != null &&
+            UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject()) return;
+        if (TowerPlacer.Instance != null && TowerPlacer.Instance.IsPlacing) return;
+
+        // A click that grabs gold/orbs must not also select the enemy under it
+        if (Camera.main != null &&
+            CollectClickGuard.IsOverCollectible(Camera.main.ScreenToWorldPoint(Input.mousePosition)))
+            return;
+
+        AudioManager.PlayEvent("select");
+        GameHUD.Instance?.SelectEnemy(this);
     }
 
     // ── Death ─────────────────────────────────────────────────────────

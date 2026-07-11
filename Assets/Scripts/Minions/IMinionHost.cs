@@ -2,7 +2,8 @@ using UnityEngine;
 
 /// <summary>
 /// Implemented by components that own minions (e.g. DroneSwarm).
-/// Gives minions their home position, kill-credit object, and live damage value.
+/// Gives minions their home position and kill-credit object. Damage comes
+/// from the impact effect (effects.json), scaled by the host tower's tier.
 /// </summary>
 public interface IMinionHost
 {
@@ -11,7 +12,4 @@ public interface IMinionHost
 
     /// <summary>Tower GameObject used for kill tracking, damage scaling, and tiered art.</summary>
     GameObject HostObject { get; }
-
-    /// <summary>Current damage per hit. Read per shot so runtime buffs apply. 0 = use effect base damage.</summary>
-    float GetMinionDamage();
 }

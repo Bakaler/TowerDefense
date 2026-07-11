@@ -346,9 +346,6 @@ public class LevelManager : MonoBehaviour
         foreach (var b in FindObjectsByType<BountyDrop>(FindObjectsSortMode.None))
             Destroy(b.gameObject);
 
-        foreach (var r in FindObjectsByType<ResearchOrb>(FindObjectsSortMode.None))
-            Destroy(r.gameObject);
-
         foreach (var o in FindObjectsByType<IncomeOrb>(FindObjectsSortMode.None))
             Destroy(o.gameObject);
 
