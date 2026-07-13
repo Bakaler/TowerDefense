@@ -132,6 +132,9 @@ public class TowerFactory : MonoBehaviour
         if (!string.IsNullOrEmpty(def.defaultTargeting) &&
             System.Enum.TryParse<TargetingMode>(def.defaultTargeting, true, out var defaultMode))
             turrent.Targeting = defaultMode;
+        if (!string.IsNullOrEmpty(def.defaultTargeting2) &&
+            System.Enum.TryParse<TargetingMode>(def.defaultTargeting2, true, out var defaultMode2))
+            turrent.TargetingSecondary = defaultMode2;
 
         // ── 5b. TowerInfo ─────────────────────────────────────────
         var info          = go.AddComponent<TowerInfo>();
@@ -147,6 +150,7 @@ public class TowerFactory : MonoBehaviour
         if (dmgType.HasValue) info.damageType = dmgType.Value;
         if (System.Enum.TryParse<BalanceType>(def.balanceType, true, out var bt))
             info.balanceType = bt;
+        info.balanceMultiplier = Mathf.Max(1, def.balanceWeight);
         info.rangePerTier = def.rangePerTier;
         info.SetBaseRange(def.range);
         info.maxTier               = def.maxTier > 0 ? def.maxTier : 1;

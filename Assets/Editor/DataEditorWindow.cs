@@ -208,7 +208,7 @@ public class DataEditorWindow : EditorWindow
     // ── Layout ────────────────────────────────────────────────────────────
     const float ListW = 200f;
 
-    static readonly string[] BalanceOptions  = { "Physical", "Elemental", "Arcane" };
+    static readonly string[] BalanceOptions  = { "Physical", "Elemental", "Arcane", "All" };
     static readonly string[] TargetingOptions = Enum.GetNames(typeof(TargetingMode));
     static readonly string[] EffectTypeOptions =
     {
@@ -229,9 +229,13 @@ public class DataEditorWindow : EditorWindow
 
     void OnEnable()
     {
+        titleContent = NeonTab.Title("Data Editor", NeonTab.Cyan);
+        EditorApplication.delayCall += () => NeonTab.ColorTitleBar("Data Editor", NeonTab.Cyan);
         EnsureRegistriesLoaded();
         LoadAll();
     }
+
+    void OnFocus() => NeonTab.ColorTitleBar("Data Editor", NeonTab.Cyan);
 
     void OnDisable()
     {
@@ -518,6 +522,7 @@ public class DataEditorWindow : EditorWindow
 
     void OnGUI()
     {
+        NeonTab.DrawStrip(NeonTab.Cyan);
         DrawToolbar();
 
         EditorGUILayout.BeginHorizontal();
@@ -1265,8 +1270,11 @@ public class DataEditorWindow : EditorWindow
         t.placementRadius = EF.FloatField("Placement Radius",  t.placementRadius);
         t.rotationSpeed   = EF.FloatField("Rotation Speed",    t.rotationSpeed);
         t.balanceType     = Popup("Balance Type", t.balanceType, BalanceOptions);
+        t.balanceWeight   = EF.IntField(  "Balance Weight",    t.balanceWeight);
+        t.unique          = EF.Toggle(    "Unique (only one)", t.unique);
         t.detectorTier    = EF.IntField(  "Detector Tier (0=never)", t.detectorTier);
-        t.defaultTargeting = Popup("Default Targeting", string.IsNullOrEmpty(t.defaultTargeting) ? "Furthest" : t.defaultTargeting, TargetingOptions);
+        t.defaultTargeting  = Popup("Targeting Prio 1", string.IsNullOrEmpty(t.defaultTargeting)  ? "Furthest" : t.defaultTargeting,  TargetingOptions);
+        t.defaultTargeting2 = Popup("Targeting Prio 2", string.IsNullOrEmpty(t.defaultTargeting2) ? "Furthest" : t.defaultTargeting2, TargetingOptions);
 
         Section("Ability");
         t.fireAbilityId   = TFDropdown("Fire Ability ID", t.fireAbilityId, AbilityIds());
@@ -1744,7 +1752,6 @@ public class DataEditorWindow : EditorWindow
         u.physicalDefense  = EF.IntField(  "Physical Defense",  u.physicalDefense);
         u.elementalDefense = EF.IntField(  "Elemental Defense", u.elementalDefense);
         u.arcanaDefense    = EF.IntField(  "Arcana Defense",    u.arcanaDefense);
-        u.bounty           = EF.IntField(  "Bounty (gold)",     u.bounty);
         u.deathBlow        = EF.IntField(  "Death Blow (lives)", u.deathBlow);
 
         Section("Physics");

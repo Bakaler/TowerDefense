@@ -9,7 +9,6 @@ public class UnitManager : UnitParentClass
     [Tooltip("Must match an id in Resources/Definitions/units.json")]
     public string definitionId;
 
-    public int bounty;
     public int deathBlow = 1;
 
     /// <summary>Rotate toward the movement direction (set from UnitDefinition.rotateToMovement).</summary>
@@ -91,7 +90,6 @@ public class UnitManager : UnitParentClass
         physicalDefense   = def.physicalDefense;
         elementalDefense  = def.elementalDefense;
         arcanaDefense     = def.arcanaDefense;
-        bounty            = def.bounty;
         deathBlow         = def.deathBlow;
         tags              = def.tags ?? System.Array.Empty<string>();
         canGoInvisible    = UnitFactory.CanGoInvisible(def);
@@ -163,12 +161,15 @@ public class UnitManager : UnitParentClass
         }
     }
 
+    /// <summary>Map-wide slow fraction owned by the (unique) global Aura Tower's slow research.</summary>
+    public static float GlobalAuraSlow = 0f;
+
     void Move()
     {
         if (_follower == null || !_follower.HasRoute)
             return;
 
-        float slowFrac  = Mathf.Clamp01(_auraSlowCount * ModifierSelection.GetFloat("AuraSlowEnemies"));
+        float slowFrac  = Mathf.Clamp01(_auraSlowCount * ModifierSelection.GetFloat("AuraSlowEnemies") + GlobalAuraSlow);
         float baseSpeed = (speedMax <= 0f) ? speedCurrent : Mathf.Max(0f, speedCurrent);
         float speed     = baseSpeed * (1f - slowFrac);
         _follower.SetSpeed(speed);

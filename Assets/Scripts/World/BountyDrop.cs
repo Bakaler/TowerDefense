@@ -2,20 +2,21 @@
 using UnityEngine.EventSystems;
 
 /// <summary>
-/// A clickable world pickup spawned on enemy kill.
-/// Uses the same orb art as IncomeTower. Player clicks to collect;
-/// CollectorTower can call Collect() directly.
+/// A world pickup spawned on enemy kill. Uses the same orb art as IncomeTower.
+/// Collected by simply hovering the mouse over it — no click needed (income
+/// and research orbs still require a click). CollectorTower can call Collect()
+/// directly.
 /// </summary>
 public class BountyDrop : MonoBehaviour
 {
     public int   goldValue   = 1;
-    public float clickRadius = 0.4f;   // world-space click radius
+    public float clickRadius = 0.4f;   // world-space hover-collect radius
 
     void Update()
     {
-        if (!Input.GetMouseButtonDown(0)) return;
+        // Hover behind an open UI panel shouldn't vacuum up drops
         if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject()) return;
-        if (TowerPlacer.Instance != null && TowerPlacer.Instance.IsPlacing) return;
+        if (Camera.main == null) return;
 
         Vector2 mouse = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         if (Vector2.Distance(mouse, transform.position) <= clickRadius)

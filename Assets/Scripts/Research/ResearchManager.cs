@@ -74,6 +74,12 @@ public class ResearchManager : MonoBehaviour
             case "ProjectileHitsBonus":
                 ApplyProjectileHitsBonus(def);
                 break;
+            // Aura researches are read live by TowerAura via OnResearchChanged —
+            // nothing to apply to shared libraries here.
+            case "AuraDamageBonus":
+            case "AuraSpeedBonus":
+            case "AuraSlowBonus":
+                break;
             default:
                 Debug.LogWarning($"[ResearchManager] Unknown effectType '{def.effectType}'");
                 break;

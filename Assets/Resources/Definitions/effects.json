@@ -152,7 +152,7 @@
             "displayName": "Root Damage",
             "type": "damage",
             "chance": 1.0,
-            "data": { "damageBase": 15, "minimumDamage": 0, "maximumDamage": 524287, "damageType": 2, "shieldBonus": 0, "criticalChance": 0, "criticalDamageMultiplier": 2, "bonusPerStackBehaviorId": "", "bonusPerStack": 0 }
+            "data": { "damageBase": 32, "minimumDamage": 0, "maximumDamage": 524287, "damageType": 0, "shieldBonus": 0, "criticalChance": 0, "criticalDamageMultiplier": 2, "bonusPerStackBehaviorId": "", "bonusPerStack": 0 }
         },
         {
             "id": "root_hit",

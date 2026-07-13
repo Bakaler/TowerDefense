@@ -23,7 +23,10 @@ public class Turrent : MonoBehaviour
     [Tooltip("Must match an id in Resources/Definitions/towers.json")]
     public string definitionId;
 
-    public TargetingMode Targeting { get; set; } = TargetingMode.Furthest;
+    public TargetingMode Targeting          { get; set; } = TargetingMode.Furthest;
+    /// <summary>Tie-breaker when candidates score equal on the primary mode
+    /// (e.g. primary Boss, secondary Furthest → leading boss, else leading unit).</summary>
+    public TargetingMode TargetingSecondary { get; set; } = TargetingMode.Furthest;
 
     [HideInInspector] public Ability_Effect fireAbility;
 
@@ -162,9 +165,11 @@ public class Turrent : MonoBehaviour
 
         GameObject best     = null;
         float      bestVal  = float.MinValue;
+        float      bestVal2 = float.MinValue;
         float      bestProg = float.MinValue;
         GameObject fallback = null;
         float      fbVal    = float.MinValue;
+        float      fbVal2   = float.MinValue;
         float      fbProg   = float.MinValue;
 
         float rangeSqr   = _worldRange > 0f ? _worldRange * _worldRange : float.MaxValue;
@@ -189,27 +194,30 @@ public class Turrent : MonoBehaviour
             if (Vector2.SqrMagnitude((Vector2)go.transform.position - (Vector2)transform.position) > rangeSqr)
                 continue;
 
-            float val  = Score(go, unit);
             float prog = go.GetComponent<RouteFollower>()?.Progress ?? 0f;
+            float val  = Score(go, unit, prog, Targeting);
+            float val2 = Score(go, unit, prog, TargetingSecondary);
 
             // Track unvalidated fallback
-            if (IsBetter(val, prog, fbVal, fbProg)) { fbVal = val; fbProg = prog; fallback = go; }
+            if (IsBetter(val, val2, prog, fbVal, fbVal2, fbProg))
+                { fbVal = val; fbVal2 = val2; fbProg = prog; fallback = go; }
 
             if (hasValidators && !PassesTargetValidators(go, validators)) continue;
-            if (IsBetter(val, prog, bestVal, bestProg)) { bestVal = val; bestProg = prog; best = go; }
+            if (IsBetter(val, val2, prog, bestVal, bestVal2, bestProg))
+                { bestVal = val; bestVal2 = val2; bestProg = prog; best = go; }
         }
 
         return best ?? fallback;
     }
 
     /// <summary>
-    /// Higher score wins. Furthest returns 0 for everyone so the progress
-    /// tie-break decides; every other mode also falls back to progress on ties
-    /// ("ties go to whoever is leading").
+    /// Higher score wins. Candidates are ranked by the primary mode's score,
+    /// then the secondary mode's, then route progress ("ties go to whoever
+    /// is leading" no matter what the player picked).
     /// </summary>
-    float Score(GameObject go, UnitParentClass unit)
+    float Score(GameObject go, UnitParentClass unit, float prog, TargetingMode mode)
     {
-        switch (Targeting)
+        switch (mode)
         {
             case TargetingMode.Closest:
                 return -Vector2.SqrMagnitude((Vector2)go.transform.position - (Vector2)transform.position);
@@ -220,16 +228,19 @@ public class Turrent : MonoBehaviour
             case TargetingMode.HighPrio:       return (unit as UnitManager)?.HasTag("high_prio") == true ? 1f : 0f;
             case TargetingMode.Boss:           return (unit as UnitManager)?.HasTag("boss")      == true ? 1f : 0f;
             case TargetingMode.Invisible:      return (unit as UnitManager)?.canGoInvisible      == true ? 1f : 0f;
-            default:                           return 0f; // Furthest
+            default:                           return prog; // Furthest
         }
     }
 
-    static bool IsBetter(float val, float prog, float bestVal, float bestProg)
+    static bool IsBetter(float val, float val2, float prog,
+                         float bestVal, float bestVal2, float bestProg)
     {
         const float EPS = 0.0001f;
         if (val > bestVal + EPS) return true;
         if (val < bestVal - EPS) return false;
-        return prog > bestProg;  // tie → leading unit
+        if (val2 > bestVal2 + EPS) return true;      // primary tie → secondary mode
+        if (val2 < bestVal2 - EPS) return false;
+        return prog > bestProg;                      // full tie → leading unit
     }
 
     static bool IsOnScreen(GameObject go)

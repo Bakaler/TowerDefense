@@ -91,6 +91,23 @@ public class SniperTurrent : MonoBehaviour, IFactoryInitializable
 
         if (best == null) return;
 
+        // Barriers block bullets — same interception ShieldBubble does for
+        // projectiles: the bubble soaks the shot and the round is spent.
+        var bubble = best.GetComponentInChildren<ShieldBubble>();
+        if (bubble != null)
+        {
+            float dmg = 0f;
+            var info  = GetComponent<TowerInfo>();
+            if (info != null) dmg = info.damage * info.EffectiveDamageMult;
+
+            bubble.AbsorbHit(dmg);
+            _abilityManager.GetInstance(_fireAbility)?.Trigger();   // shot is spent
+            if (!string.IsNullOrEmpty(_fireAbility.fireSoundId))
+                AudioManager.Play(_fireAbility.fireSoundId);
+            StartCoroutine(DrawBeam(transform.position, best.transform.position));
+            return;
+        }
+
         var target = best.GetComponent<UnitParentClass>();
         if (target == null) return;
 

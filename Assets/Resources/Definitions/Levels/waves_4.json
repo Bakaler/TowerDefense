@@ -705,6 +705,45 @@
                     }
                 },
                 {
+                    "unitDefinitionId": "resilient_enemy",
+                    "count": 5,
+                    "spawnInterval": 1.0,
+                    "startTime": 15.0,
+                    "spawnerIndex": 1,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "resilient_enemy",
+                    "count": 5,
+                    "spawnInterval": 1.0,
+                    "startTime": 30.0,
+                    "spawnerIndex": 1,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "resilient_enemy",
+                    "count": 5,
+                    "spawnInterval": 1.0,
+                    "startTime": 45.0,
+                    "spawnerIndex": 1,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
                     "unitDefinitionId": "boss_enemy",
                     "count": 5,
                     "spawnInterval": 2.1500000953674318,

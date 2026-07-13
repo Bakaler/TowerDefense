@@ -201,6 +201,9 @@ public class TowerPlacer : MonoBehaviour
         // Tower count cap
         if (IsTowerCapReached()) return;
 
+        // Unique towers: only one may exist at a time
+        if (UniqueAlreadyPlaced(def)) return;
+
         // Build real tower
         var go = TowerFactory.Instance.Build(_selectedId, worldPos, _ghostRotation);
         if (go == null) { Cancel(); return; }
@@ -252,6 +255,7 @@ public class TowerPlacer : MonoBehaviour
                 return;
             }
             if (IsTowerCapReached()) return;
+            if (UniqueAlreadyPlaced(_selectedDef)) return;
 
             _hasPairFirst = true;
             _pairFirst    = worldPos;
@@ -294,6 +298,19 @@ public class TowerPlacer : MonoBehaviour
         RunStats.NotifyTowerBuilt(_selectedDef.balanceType);
 
         Cancel();
+    }
+
+    /// <summary>True (and logs) when def.unique and a live copy already stands.</summary>
+    static bool UniqueAlreadyPlaced(TowerDefinition def)
+    {
+        if (def == null || !def.unique) return false;
+        foreach (var t in TowerInfo.All)
+        {
+            if (t == null || t.isGhost || t.definitionId != def.id) continue;
+            Debug.Log($"[TowerPlacer] Only one {def.displayName} can exist at a time.");
+            return true;
+        }
+        return false;
     }
 
     void SpawnPairMarker(Vector2 worldPos)

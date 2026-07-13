@@ -152,7 +152,6 @@ public class UnitFactory : MonoBehaviour
         unit.physicalDefense  = def.physicalDefense;
         unit.elementalDefense = def.elementalDefense;
         unit.arcanaDefense    = def.arcanaDefense;
-        unit.bounty          = Mathf.RoundToInt(def.bounty * LevelSelection.BountyMult);
         unit.deathBlow       = def.deathBlow;
         unit.rotateToMovement  = def.rotateToMovement;
         unit.spriteAngleOffset = def.spriteAngleOffset;

@@ -43,6 +43,7 @@ public class BalanceManager : MonoBehaviour
             { BalanceType.Elemental, 0 },
             { BalanceType.Arcane,    0 },
             { BalanceType.Physical,  0 },
+            { BalanceType.All,       0 },
         };
 
         // Registry only contains non-ghost towers
@@ -70,6 +71,10 @@ public class BalanceManager : MonoBehaviour
                 case BalanceType.Elemental: e += ratio; break;
                 case BalanceType.Arcane:    a += ratio; break;
                 case BalanceType.Physical:  p += ratio; break;
+                case BalanceType.All:
+                    // Counts toward every type, contribution split evenly
+                    e += ratio / 3f; a += ratio / 3f; p += ratio / 3f;
+                    break;
             }
         }
 

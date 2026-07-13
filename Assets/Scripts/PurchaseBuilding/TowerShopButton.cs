@@ -38,6 +38,7 @@ public class TowerShopButton : MonoBehaviour
             case "Physical":  return new Color(0.85f, 0.15f, 0.15f, 1f);
             case "Arcane":    return new Color(0.25f, 0.45f, 1.00f, 1f);
             case "Elemental": return new Color(0.55f, 0.30f, 0.08f, 1f);
+            case "All":       return new Color(1.00f, 0.85f, 0.40f, 1f);
             default:          return new Color(0.50f, 0.50f, 0.50f, 1f);
         }
     }

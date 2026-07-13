@@ -102,12 +102,20 @@ public class LevelEditorWindow : EditorWindow
     [MenuItem("TowerDefense/Level Editor")]
     public static void Open() => GetWindow<LevelEditorWindow>("Level Editor");
 
-    void OnEnable() => _activeLevel = SessionState.GetInt(SessionKey, 0);
+    void OnEnable()
+    {
+        titleContent = NeonTab.Title("Level Editor", NeonTab.Magenta);
+        EditorApplication.delayCall += () => NeonTab.ColorTitleBar("Level Editor", NeonTab.Magenta);
+        _activeLevel = SessionState.GetInt(SessionKey, 0);
+    }
+
+    void OnFocus() => NeonTab.ColorTitleBar("Level Editor", NeonTab.Magenta);
 
     // ── GUI ───────────────────────────────────────────────────────────
 
     void OnGUI()
     {
+        NeonTab.DrawStrip(NeonTab.Magenta);
         GUILayout.Label("Level Editor", EditorStyles.boldLabel);
         GUILayout.Space(6);
 

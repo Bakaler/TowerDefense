@@ -63,12 +63,10 @@ public class UnitParentClass : MonoBehaviour
     public float funding = 0;
     public float development = 0;
 
-    // Defense
+    // Defense — Piercing/Poison/Pure damage bypasses these entirely
     public int physicalDefense = 0;
     public int elementalDefense = 0;
     public int arcanaDefense = 0;
-    public int poisonDefense = 0;
-    public int pureDefense = 0;
 
     protected virtual void Update()
     {
@@ -111,10 +109,10 @@ public class UnitParentClass : MonoBehaviour
                 return damageAmount * Mathf.Pow(damageReductionBaseModifier, elementalDefense);
             case DamageType.Physical:
                 return damageAmount * Mathf.Pow(damageReductionBaseModifier, physicalDefense);
+            // Piercing, Poison, and Pure ignore defenses entirely — only
+            // behaviors that modify damage taken directly can reduce them.
             case DamageType.Piercing:
-                return damageAmount * Mathf.Pow(damageReductionBaseModifier, physicalDefense / 2);
             case DamageType.Poison:
-                return damageAmount * Mathf.Pow(damageReductionBaseModifier, poisonDefense);
             case DamageType.Pure:
                 return damageAmount;
             default:

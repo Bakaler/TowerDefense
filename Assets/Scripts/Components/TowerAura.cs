@@ -3,8 +3,14 @@ using UnityEngine;
 
 /// <summary>
 /// Generic aura component: buffs attack speed and/or damage of all towers within range.
-/// JSON keys: range, damageMultiplier, attackSpeedMultiplier, auraColorR/G/B
+/// JSON keys: range, damageMultiplier, attackSpeedMultiplier, auraColorR/G/B,
+/// global (true = affects every tower on the map, no ring visual).
 /// Bonus scales with this tower's StatMultiplier when upgraded.
+///
+/// Purchased researches for this tower's definitionId extend the aura live:
+///   AuraDamageBonus — adds effectValue to the damage bonus
+///   AuraSpeedBonus  — adds effectValue to the attack-speed bonus
+///   AuraSlowBonus   — global enemy slow fraction (requires global aura)
 /// </summary>
 public class TowerAura : MonoBehaviour, IFactoryInitializable
 {
@@ -14,6 +20,7 @@ public class TowerAura : MonoBehaviour, IFactoryInitializable
     public float range                 = 5f;
     public float damageMultiplier      = 1f;
     public float attackSpeedMultiplier = 1f;
+    public bool  global                = false;
     public Color auraColor             = new Color(0.3f, 0.8f, 1f, 0.45f);
 
     private TowerInfo        _info;
@@ -22,12 +29,18 @@ public class TowerAura : MonoBehaviour, IFactoryInitializable
     private readonly HashSet<TowerInfo>   _inRange     = new();
     private readonly HashSet<UnitManager> _slowedUnits = new();
 
+    // Live research bonuses (recomputed when a research is purchased)
+    private float _resDamageBonus;
+    private float _resSpeedBonus;
+    private float _resSlow;
+
     [System.Serializable]
     class Data
     {
         public float range                 = 5f;
         public float damageMultiplier      = 1f;
         public float attackSpeedMultiplier = 1f;
+        public bool  global                = false;
         public float auraColorR = 0.3f, auraColorG = 0.8f, auraColorB = 1f;
     }
 
@@ -39,6 +52,7 @@ public class TowerAura : MonoBehaviour, IFactoryInitializable
         range                 = d.range;
         damageMultiplier      = d.damageMultiplier;
         attackSpeedMultiplier = d.attackSpeedMultiplier;
+        global                = d.global;
         auraColor             = new Color(d.auraColorR, d.auraColorG, d.auraColorB, 0.45f);
     }
 
@@ -46,7 +60,8 @@ public class TowerAura : MonoBehaviour, IFactoryInitializable
 
     void Start()
     {
-        BuildAuraRing();
+        if (!global) BuildAuraRing();
+        RefreshResearchBonuses();
         Pulse();
     }
 
@@ -56,9 +71,31 @@ public class TowerAura : MonoBehaviour, IFactoryInitializable
         if (_timer >= PULSE) { _timer = 0f; Pulse(); }
     }
 
-    void OnDestroy() { ClearAura(); ClearSlow(); }
-    void OnDisable() { ClearAura(); ClearSlow(); }
-    void OnEnable()  { foreach (var t in _inRange) if (t) ApplyTo(t); }
+    void OnDestroy() { ClearAura(); ClearSlow(); if (global) UnitManager.GlobalAuraSlow = 0f; ResearchManager.OnResearchChanged -= RefreshResearchBonuses; }
+    void OnDisable() { ClearAura(); ClearSlow(); if (global) UnitManager.GlobalAuraSlow = 0f; ResearchManager.OnResearchChanged -= RefreshResearchBonuses; }
+    void OnEnable()
+    {
+        ResearchManager.OnResearchChanged += RefreshResearchBonuses;
+        foreach (var t in _inRange) if (t) ApplyTo(t);
+    }
+
+    void RefreshResearchBonuses()
+    {
+        _resDamageBonus = _resSpeedBonus = _resSlow = 0f;
+        var rm = ResearchManager.Instance;
+        if (rm == null || _info == null) return;
+
+        foreach (var r in rm.GetForTower(_info.definitionId))
+        {
+            if (!rm.IsPurchased(r.id)) continue;
+            switch (r.effectType)
+            {
+                case "AuraDamageBonus": _resDamageBonus += r.effectValue; break;
+                case "AuraSpeedBonus":  _resSpeedBonus  += r.effectValue; break;
+                case "AuraSlowBonus":   _resSlow        += r.effectValue; break;
+            }
+        }
+    }
 
     void Pulse()
     {
@@ -66,24 +103,35 @@ public class TowerAura : MonoBehaviour, IFactoryInitializable
         float auraMult  = 1f + ModifierSelection.GetFloat("AuraMult");
         float effRange  = range * (1f + ModifierSelection.GetFloat("AuraRadiusMult"));
 
-        float effectiveDmg = 1f + (damageMultiplier      - 1f) * statMult * auraMult;
-        float effectiveSpd = 1f + (attackSpeedMultiplier - 1f) * statMult * auraMult;
+        float effectiveDmg = 1f + ((damageMultiplier      - 1f) + _resDamageBonus) * statMult * auraMult;
+        float effectiveSpd = 1f + ((attackSpeedMultiplier - 1f) + _resSpeedBonus)  * statMult * auraMult;
 
-        var hits    = Physics2D.OverlapCircleAll(transform.position, effRange);
         var nowTowers = new HashSet<TowerInfo>();
         var nowUnits  = new HashSet<UnitManager>();
 
         float slowAmount = ModifierSelection.GetFloat("AuraSlowEnemies");
 
-        foreach (var col in hits)
+        if (global)
         {
-            var t = col.GetComponent<TowerInfo>();
-            if (t != null && t != _info && !t.isGhost) { nowTowers.Add(t); continue; }
+            foreach (var t in TowerInfo.All)
+                if (t != null && t != _info) nowTowers.Add(t);
 
-            if (slowAmount > 0f)
+            // Research-driven global enemy slow (single aura tower owns this)
+            UnitManager.GlobalAuraSlow = Mathf.Clamp01(_resSlow * statMult * auraMult);
+        }
+        else
+        {
+            var hits = Physics2D.OverlapCircleAll(transform.position, effRange);
+            foreach (var col in hits)
             {
-                var u = col.GetComponent<UnitManager>();
-                if (u != null && u.isAlive) nowUnits.Add(u);
+                var t = col.GetComponent<TowerInfo>();
+                if (t != null && t != _info && !t.isGhost) { nowTowers.Add(t); continue; }
+
+                if (slowAmount > 0f)
+                {
+                    var u = col.GetComponent<UnitManager>();
+                    if (u != null && u.isAlive) nowUnits.Add(u);
+                }
             }
         }
 

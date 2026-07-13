@@ -1,10 +1,10 @@
 {
     "id": "level_4",
-    "displayName": "Frontier",
-    "startGold": 20,
+    "displayName": "Frontier (Bonus Round)",
+    "startGold": 100,
     "startLives": 1000,
-    "startTech": 10,
-    "startTier": 1,
+    "startTech": 0,
+    "startTier": 4,
     "backgroundSprite": "Art/Maps/Level_4",
     "backgroundX": 0.07999999821186066,
     "backgroundY": 1.059999942779541,
@@ -14,13 +14,15 @@
         "income_tower",
         "research_tower",
         "slow_tower",
-        "speed_aura_tower",
+        "aura_tower",
         "boomerang_tower",
-        "damage_aura_tower",
         "root_tower",
         "bee_tower",
         "shotgun_tower",
-        "fence_tower"
+        "fence_tower",
+        "chain_tower",
+        "collector_tower",
+        "railgun_tower"
     ],
     "modifierColumns": [],
     "levelModifiers": [],
@@ -859,7 +861,220 @@
             ]
         }
     ],
-    "placementZones": [],
+    "placementZones": [
+        {
+            "type": "lane",
+            "x": 0.0,
+            "y": 0.0,
+            "radius": 2.0,
+            "width": 0.25,
+            "points": [
+                {
+                    "x": -6.949999809265137,
+                    "y": -2.740000009536743,
+                    "width": 0.25
+                },
+                {
+                    "x": -5.849999904632568,
+                    "y": -1.590000033378601,
+                    "width": 0.25
+                },
+                {
+                    "x": -4.730000019073486,
+                    "y": -0.8700000047683716,
+                    "width": 0.25
+                },
+                {
+                    "x": -3.4000000953674318,
+                    "y": -0.7400000095367432,
+                    "width": 0.25
+                }
+            ]
+        },
+        {
+            "type": "lane",
+            "x": 0.0,
+            "y": 0.0,
+            "radius": 2.0,
+            "width": 0.25,
+            "points": [
+                {
+                    "x": -6.559999942779541,
+                    "y": -4.28000020980835,
+                    "width": 0.25
+                },
+                {
+                    "x": -4.170000076293945,
+                    "y": -3.8499999046325685,
+                    "width": 0.25
+                },
+                {
+                    "x": -1.3700000047683716,
+                    "y": -2.8299999237060549,
+                    "width": 0.25
+                },
+                {
+                    "x": 0.03999999910593033,
+                    "y": -1.899999976158142,
+                    "width": 0.3499999940395355
+                },
+                {
+                    "x": 1.1699999570846558,
+                    "y": -0.9200000166893005,
+                    "width": 0.3499999940395355
+                },
+                {
+                    "x": 2.559999942779541,
+                    "y": -0.029999999329447748,
+                    "width": 0.3499999940395355
+                },
+                {
+                    "x": 3.9800000190734865,
+                    "y": 0.10999999940395355,
+                    "width": 0.3499999940395355
+                }
+            ]
+        },
+        {
+            "type": "lane",
+            "x": 0.0,
+            "y": 0.0,
+            "radius": 2.0,
+            "width": 0.25,
+            "points": [
+                {
+                    "x": -9.210000038146973,
+                    "y": 2.319999933242798,
+                    "width": 0.25
+                },
+                {
+                    "x": -4.429999828338623,
+                    "y": 3.299999952316284,
+                    "width": 0.25
+                }
+            ]
+        },
+        {
+            "type": "lane",
+            "x": 0.0,
+            "y": 0.0,
+            "radius": 2.0,
+            "width": 0.25,
+            "points": [
+                {
+                    "x": 3.049999952316284,
+                    "y": 5.28000020980835,
+                    "width": 0.25
+                },
+                {
+                    "x": 4.559999942779541,
+                    "y": 5.78000020980835,
+                    "width": 0.25
+                },
+                {
+                    "x": 5.610000133514404,
+                    "y": 5.789999961853027,
+                    "width": 0.25
+                },
+                {
+                    "x": 6.650000095367432,
+                    "y": 4.71999979019165,
+                    "width": 0.25
+                }
+            ]
+        },
+        {
+            "type": "lane",
+            "x": 0.0,
+            "y": 0.0,
+            "radius": 2.0,
+            "width": 0.25,
+            "points": [
+                {
+                    "x": 1.590000033378601,
+                    "y": -1.3600000143051148,
+                    "width": 0.25
+                },
+                {
+                    "x": 4.400000095367432,
+                    "y": -3.4600000381469728,
+                    "width": 0.44999998807907107
+                }
+            ]
+        },
+        {
+            "type": "lane",
+            "x": 0.0,
+            "y": 0.0,
+            "radius": 2.0,
+            "width": 0.25,
+            "points": [
+                {
+                    "x": 5.130000114440918,
+                    "y": -3.6700000762939455,
+                    "width": 0.25
+                },
+                {
+                    "x": 6.320000171661377,
+                    "y": -3.5,
+                    "width": 0.44999998807907107
+                },
+                {
+                    "x": 6.96999979019165,
+                    "y": -3.0399999618530275,
+                    "width": 0.44999998807907107
+                },
+                {
+                    "x": 7.590000152587891,
+                    "y": -2.359999895095825,
+                    "width": 0.44999998807907107
+                }
+            ]
+        },
+        {
+            "type": "lane",
+            "x": 0.0,
+            "y": 0.0,
+            "radius": 2.0,
+            "width": 0.25,
+            "points": [
+                {
+                    "x": -9.970000267028809,
+                    "y": 4.150000095367432,
+                    "width": 0.25
+                },
+                {
+                    "x": -8.84000015258789,
+                    "y": 5.099999904632568,
+                    "width": 0.25
+                },
+                {
+                    "x": -7.300000190734863,
+                    "y": 5.989999771118164,
+                    "width": 0.25
+                }
+            ]
+        },
+        {
+            "type": "lane",
+            "x": 0.0,
+            "y": 0.0,
+            "radius": 2.0,
+            "width": 0.25,
+            "points": [
+                {
+                    "x": -2.1600000858306886,
+                    "y": 2.359999895095825,
+                    "width": 0.25
+                },
+                {
+                    "x": -1.5,
+                    "y": 1.840000033378601,
+                    "width": 0.25
+                }
+            ]
+        }
+    ],
     "waves": [
         {
             "groups": [
@@ -1557,6 +1772,45 @@
                     "count": 4,
                     "spawnInterval": 0.5,
                     "startTime": 49.5,
+                    "spawnerIndex": 1,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "resilient_enemy",
+                    "count": 5,
+                    "spawnInterval": 1.0,
+                    "startTime": 15.0,
+                    "spawnerIndex": 1,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "resilient_enemy",
+                    "count": 5,
+                    "spawnInterval": 1.0,
+                    "startTime": 30.0,
+                    "spawnerIndex": 1,
+                    "dropConfig": {
+                        "mode": "chance",
+                        "fallbackChance": -1.0,
+                        "pattern": [],
+                        "repeat": true
+                    }
+                },
+                {
+                    "unitDefinitionId": "resilient_enemy",
+                    "count": 5,
+                    "spawnInterval": 1.0,
+                    "startTime": 45.0,
                     "spawnerIndex": 1,
                     "dropConfig": {
                         "mode": "chance",

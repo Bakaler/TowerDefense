@@ -60,7 +60,9 @@ public static class RunStats
     public static void NotifyTowerBuilt(string balanceType)
     {
         TowersBuilt++;
-        if (!string.IsNullOrEmpty(balanceType)) _balanceTypesUsed.Add(balanceType);
+        // "All" counts as every type, so it can never violate a mono-type run
+        if (!string.IsNullOrEmpty(balanceType) && balanceType != "All")
+            _balanceTypesUsed.Add(balanceType);
     }
     public static void TickPlaytime(float unscaledDelta) => Playtime += unscaledDelta;
 

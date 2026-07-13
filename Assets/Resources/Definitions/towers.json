@@ -47,7 +47,7 @@
         {
             "id": "fence_tower",
             "displayName": "Fence Posts",
-            "description": "Places two posts joined by an energy fence holding a charge. An enemy crossing the line spends the charge, taking heavy damage and becoming vulnerable (+100% damage taken) for 2s. Charges regenerate over time; upgrades add more.",
+            "description": "Places two posts joined by an energy fence holding a charge. An enemy crossing the line spends the charge, taking {effect:fence_damage.damageBase} damage and becoming vulnerable ({behavior:vulnerable.damageTakenMultiplier|addpct} damage taken) for {behavior:vulnerable.duration}s. Charges regenerate over time; upgrades add more.",
             "range": 0.0,
             "placementRadius": 0.3499999940395355,
             "resourceCost": 4,
@@ -215,7 +215,7 @@
         {
             "id": "chain_tower",
             "displayName": "Chain Tower",
-            "description": "Fires chain lightning that arcs between up to 4 enemies.",
+            "description": "Fires chain lightning that arcs between up to 3 enemies.",
             "range": 5.0,
             "placementRadius": 0.3499999940395355,
             "resourceCost": 6,
@@ -408,7 +408,7 @@
         {
             "id": "root_tower",
             "displayName": "Root Tower",
-            "description": "Fires a projectile that roots enemies in place for 1 second. Will not target already-rooted units. Detects invisible units once upgraded to Tier 2.",
+            "description": "Fires a projectile that roots enemies in place for {behavior:rooted.duration} seconds. Will not target already-rooted units. Detects invisible units once upgraded to Tier 2.",
             "range": 4.5,
             "placementRadius": 0.3499999940395355,
             "resourceCost": 7,
@@ -504,7 +504,7 @@
         {
             "id": "poison_tower",
             "displayName": "Poison Tower",
-            "description": "Fires a poison glob that splashes on impact, applying a damage-over-time to all nearby enemies.",
+            "description": "Fires a poison glob that splashes on impact, applying {behavior:poisoned.tickDamage} poison damage every {behavior:poisoned.tickInterval}s for {behavior:poisoned.duration}s to all nearby enemies.",
             "range": 3.0,
             "placementRadius": 0.3499999940395355,
             "resourceCost": 6,
@@ -601,7 +601,7 @@
         {
             "id": "slow_tower",
             "displayName": "Slow Tower",
-            "description": "Fires chilling projectiles that reduce enemy movement speed by 60% for 2 seconds. Detects invisible units.",
+            "description": "Fires chilling projectiles that reduce enemy movement speed by {behavior:slowed.moveSpeedMultiplier|invpct} for {behavior:slowed.duration} seconds. Detects invisible units.",
             "range": 3.5,
             "placementRadius": 0.44999998807907107,
             "resourceCost": 3,
@@ -687,73 +687,18 @@
             "components": []
         },
         {
-            "id": "speed_aura_tower",
-            "displayName": "Speed Aura",
-            "description": "Radiates an aura that increases nearby towers' attack speed by 30%. Upgrades strengthen the aura.",
+            "id": "aura_tower",
+            "displayName": "Aura Tower",
+            "description": "A singular monument that radiates a map-wide aura, boosting the damage and attack speed of every tower. Only one may exist. Research unlocks stronger and additional auras. Counts toward all three balances.",
             "range": 0.0,
-            "placementRadius": 0.3499999940395355,
-            "resourceCost": 7,
+            "placementRadius": 0.44999998807907107,
+            "resourceCost": 10,
             "placementMode": "",
             "pairMaxSpan": 4.0,
+            "unique": true,
             "detectorTier": 0,
-            "balanceType": "Arcane",
-            "balanceWeight": 1,
-            "defaultTargeting": "",
-            "fireAbilityId": "",
-            "placeSoundId": "",
-            "sellSoundId": "",
-            "upgradeSoundId": "",
-            "displayDamage": 0.0,
-            "displayCooldown": 0.0,
-            "rotationSpeed": 0.0,
-            "animFps": 0.0,
-            "spritePath": "",
-            "turretSpritePath": "",
-            "spriteSheet": "Art/Towers/TowerSet1",
-            "spriteIndex": 0,
-            "scale": 1.5,
-            "debugColor": {
-                "r": 0.30000001192092898,
-                "g": 0.800000011920929,
-                "b": 1.0,
-                "a": 1.0
-            },
-            "tintColor": {
-                "r": 0.30000001192092898,
-                "g": 0.800000011920929,
-                "b": 1.0,
-                "a": 1.0
-            },
-            "maxTier": 5,
-            "upgradeStatMultiplier": 2.25,
-            "towerTier": 2,
-            "rangePerTier": 0.0,
-            "components": [
-                {
-                    "key": "tower_aura",
-                    "data": {
-                        "range": 5.0,
-                        "damageMultiplier": 1.0,
-                        "attackSpeedMultiplier": 1.3,
-                        "auraColorR": 0.3,
-                        "auraColorG": 0.8,
-                        "auraColorB": 1.0
-                    }
-                }
-            ]
-        },
-        {
-            "id": "damage_aura_tower",
-            "displayName": "Damage Aura",
-            "description": "Radiates an aura that increases nearby towers' damage by 30%. Upgrades strengthen the aura.",
-            "range": 0.0,
-            "placementRadius": 0.3499999940395355,
-            "resourceCost": 7,
-            "placementMode": "",
-            "pairMaxSpan": 4.0,
-            "detectorTier": 0,
-            "balanceType": "Physical",
-            "balanceWeight": 1,
+            "balanceType": "All",
+            "balanceWeight": 15,
             "defaultTargeting": "",
             "fireAbilityId": "",
             "placeSoundId": "",
@@ -770,17 +715,17 @@
             "scale": 1.5,
             "debugColor": {
                 "r": 1.0,
-                "g": 0.4000000059604645,
-                "b": 0.20000000298023225,
+                "g": 0.8500000238418579,
+                "b": 0.4000000059604645,
                 "a": 1.0
             },
             "tintColor": {
                 "r": 1.0,
-                "g": 0.4000000059604645,
-                "b": 0.20000000298023225,
+                "g": 0.8500000238418579,
+                "b": 0.4000000059604645,
                 "a": 1.0
             },
-            "maxTier": 5,
+            "maxTier": 3,
             "upgradeStatMultiplier": 2.25,
             "towerTier": 2,
             "rangePerTier": 0.0,
@@ -788,12 +733,13 @@
                 {
                     "key": "tower_aura",
                     "data": {
-                        "range": 5.0,
-                        "damageMultiplier": 1.3,
-                        "attackSpeedMultiplier": 1.0,
+                        "global": true,
+                        "range": 0.0,
+                        "damageMultiplier": 1.1,
+                        "attackSpeedMultiplier": 1.1,
                         "auraColorR": 1.0,
-                        "auraColorG": 0.4,
-                        "auraColorB": 0.2
+                        "auraColorG": 0.85,
+                        "auraColorB": 0.4
                     }
                 }
             ]
@@ -904,7 +850,7 @@
         {
             "id": "sniper_tower",
             "displayName": "Sniper",
-            "description": "Unlimited range. Fires a hitscan shot at the furthest enemy inside its repositionable firing box. Press Move Zone in the panel to reposition the box.",
+            "description": "Fires a hitscan shot at the furthest enemy inside its repositionable firing box. Press Move Zone in the panel to reposition the box. Bullets are soaked by enemy barriers.",
             "range": 999.0,
             "placementRadius": 0.44999998807907107,
             "resourceCost": 8,

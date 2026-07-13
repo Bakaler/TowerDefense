@@ -222,6 +222,9 @@ public class HUDStatsPanel : MonoBehaviour
                 case BalanceType.Elemental: eCum += c; break;
                 case BalanceType.Arcane:    aCum += c; break;
                 case BalanceType.Physical:  pCum += c; break;
+                case BalanceType.All:
+                    eCum += c / 3f; aCum += c / 3f; pCum += c / 3f;
+                    break;
             }
         }
         if (_hdrElem != null) _hdrElem.text = $"E  {eCum:0.00}";

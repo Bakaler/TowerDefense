@@ -38,11 +38,16 @@ public class HUDInfoPanel : MonoBehaviour
     Text    _tpSellBtnLabel;
     Button  _tpMoveZoneBtn;
     Text    _tpMoveZoneLabel;
-    Text       _tpTargetLabel;     // dropdown button label (current mode)
+    Text       _tpTargetLabel;     // primary targeting dropdown label (current mode)
     GameObject _tpTargetPopup;     // option list, opens above the button
     Image[]    _tpTargetItemImgs;
-    GameObject _tpTargetHdr;       // "TARGET" caption + button — hidden for research towers
+    GameObject _tpTargetHdr;       // "TARGET 1" caption + button — hidden for research towers
     GameObject _tpTargetDD;
+    Text       _tpTarget2Label;    // secondary targeting (tie-breaker) dropdown
+    GameObject _tpTarget2Popup;
+    Image[]    _tpTarget2ItemImgs;
+    GameObject _tpTarget2Hdr;
+    GameObject _tpTarget2DD;
     Text       _tpPrioLabel;       // research fill-priority dropdown (same C3 slot)
     GameObject _tpPrioHdr;
     GameObject _tpPrioDD;
@@ -217,41 +222,18 @@ public class HUDInfoPanel : MonoBehaviour
         var sc = _tpSellBtn.colors; sc.highlightedColor = new Color(0.75f,0.15f,0.15f); _tpSellBtn.colors = sc;
         _tpSellBtn.onClick.AddListener(OnSellClicked);
 
-        // C3: Targeting dropdown
+        // C3: two stacked targeting dropdowns — primary on top, secondary
+        // (tie-breaker) below. Each opens its option list upward.
         float tgtBtnY = TPAD;
-        _tpTargetHdr = HUDHelpers.MakeRect("TargetLabel", _towerBody, C3, tgtBtnY + 30f + 5f, COL_W, 20f);
-        HUDHelpers.MakeText(_tpTargetHdr, "TARGET", new Color(0.6f, 0.6f, 0.7f), 10, bold: true);
-
-        var ddGO  = HUDHelpers.MakeRect("TargetDropdown", _towerBody, C3, tgtBtnY, COL_W, 30f);
-        _tpTargetDD = ddGO;
-        var ddImg = ddGO.AddComponent<Image>(); ddImg.color = new Color(0.18f, 0.18f, 0.28f, 1f);
-        var ddBtn = ddGO.AddComponent<Button>(); ddBtn.targetGraphic = ddImg;
-        _tpTargetLabel = HUDHelpers.MakeText(
-            HUDHelpers.MakeRect("L", ddGO, 0f, 0f, COL_W, 30f), "Furthest  ▾", Color.white, 10, bold: true);
-        _tpTargetLabel.alignment = TextAnchor.MiddleCenter;
-        ddBtn.onClick.AddListener(ToggleTargetPopup);
-
-        // Option list opens upward from the button. Built last in the body so it
-        // draws over the other columns (UGUI sibling order = draw order).
         const float ITEM_H = 26f;
-        float popupH = TargetOptions.Length * ITEM_H;
-        _tpTargetPopup = HUDHelpers.MakeRect("TargetPopup", _towerBody, C3, tgtBtnY + 30f + 2f, COL_W, popupH);
-        _tpTargetPopup.AddComponent<Image>().color = new Color(0.10f, 0.10f, 0.16f, 0.98f);
-        _tpTargetItemImgs = new Image[TargetOptions.Length];
-        for (int i = 0; i < TargetOptions.Length; i++)
-        {
-            var (mode, label) = TargetOptions[i];
-            float iy  = popupH - (i + 1) * ITEM_H;
-            var  iGO  = HUDHelpers.MakeRect($"Opt_{mode}", _tpTargetPopup, 1f, iy + 1f, COL_W - 2f, ITEM_H - 2f);
-            var  iImg = iGO.AddComponent<Image>(); iImg.color = new Color(0.18f, 0.18f, 0.28f, 1f);
-            var  iBtn = iGO.AddComponent<Button>(); iBtn.targetGraphic = iImg;
-            HUDHelpers.MakeText(HUDHelpers.MakeRect("L", iGO, 0f, 0f, COL_W - 2f, ITEM_H - 2f), label, Color.white, 10, bold: true)
-                .alignment = TextAnchor.MiddleCenter;
-            var capMode = mode;
-            iBtn.onClick.AddListener(() => { SetTargetingMode(capMode); ClosePopups(); });
-            _tpTargetItemImgs[i] = iImg;
-        }
-        _tpTargetPopup.SetActive(false);
+        float tgt1Y = tgtBtnY + 30f + 2f + 18f + 4f;   // primary sits above the secondary stack
+
+        BuildTargetDropdown("TARGET 1", tgt1Y, SetTargetingMode,
+            out _tpTargetHdr, out _tpTargetDD, out _tpTargetLabel,
+            out _tpTargetPopup, out _tpTargetItemImgs);
+        BuildTargetDropdown("TARGET 2", tgtBtnY, SetTargetingModeSecondary,
+            out _tpTarget2Hdr, out _tpTarget2DD, out _tpTarget2Label,
+            out _tpTarget2Popup, out _tpTarget2ItemImgs);
 
         // C3 (research towers): fill-priority dropdown in the same slot as targeting
         _tpPrioHdr = HUDHelpers.MakeRect("PrioLabel", _towerBody, C3, tgtBtnY + 30f + 5f, COL_W, 20f);
@@ -447,7 +429,7 @@ public class HUDInfoPanel : MonoBehaviour
         string title  = string.IsNullOrEmpty(s.Def.displayName) ? s.Def.id : s.Def.displayName;
         string stacks = s.Count > 1 ? $"  ×{s.Count}" : "";
         string timing = s.Remaining < 99999f ? $"   <color=#8a8a99>{s.Remaining:0.0}s</color>" : "";
-        string desc   = string.IsNullOrEmpty(s.Def.description) ? "" : "\n" + s.Def.description;
+        string desc   = string.IsNullOrEmpty(s.Def.description) ? "" : "\n" + DescriptionTags.Resolve(s.Def.description);
         _ebTooltipText.text = $"<b>{title}{stacks}</b>{timing}{desc}";
 
         // Sit just right of the hovered slot, clamped inside the body
@@ -665,8 +647,10 @@ public class HUDInfoPanel : MonoBehaviour
 
         // Research towers show a fill-priority dropdown where targeting normally sits
         bool isResearch = info.GetComponent<ResearchTower>() != null;
-        if (_tpTargetHdr != null) _tpTargetHdr.SetActive(!isResearch);
-        if (_tpTargetDD  != null) _tpTargetDD.SetActive(!isResearch);
+        if (_tpTargetHdr  != null) _tpTargetHdr.SetActive(!isResearch);
+        if (_tpTargetDD   != null) _tpTargetDD.SetActive(!isResearch);
+        if (_tpTarget2Hdr != null) _tpTarget2Hdr.SetActive(!isResearch);
+        if (_tpTarget2DD  != null) _tpTarget2DD.SetActive(!isResearch);
         if (_tpPrioHdr   != null) _tpPrioHdr.SetActive(isResearch);
         if (_tpPrioDD    != null) _tpPrioDD.SetActive(isResearch);
         if (isResearch) RefreshPrioButtons(info);
@@ -716,19 +700,73 @@ public class HUDInfoPanel : MonoBehaviour
         _tpBalanceDist.text = $"{info.balanceMultiplier:0.#}  ({Mathf.RoundToInt(ratio * 100f)}%)";
     }
 
+    /// <summary>Builds one targeting dropdown (caption, button, upward option list) in C3.</summary>
+    void BuildTargetDropdown(string caption, float ddY, System.Action<TargetingMode> onPick,
+                             out GameObject hdr, out GameObject dd, out Text lbl,
+                             out GameObject popup, out Image[] itemImgs)
+    {
+        const float ITEM_H = 26f;
+
+        hdr = HUDHelpers.MakeRect(caption + "_Hdr", _towerBody, C3, ddY + 30f + 2f, COL_W, 18f);
+        HUDHelpers.MakeText(hdr, caption, new Color(0.6f, 0.6f, 0.7f), 10, bold: true);
+
+        dd = HUDHelpers.MakeRect(caption + "_DD", _towerBody, C3, ddY, COL_W, 30f);
+        var ddImg = dd.AddComponent<Image>(); ddImg.color = new Color(0.18f, 0.18f, 0.28f, 1f);
+        var ddBtn = dd.AddComponent<Button>(); ddBtn.targetGraphic = ddImg;
+        lbl = HUDHelpers.MakeText(
+            HUDHelpers.MakeRect("L", dd, 0f, 0f, COL_W, 30f), "Furthest  ▾", Color.white, 10, bold: true);
+        lbl.alignment = TextAnchor.MiddleCenter;
+
+        // Option list opens upward from the button; drawn over other columns
+        // (UGUI sibling order = draw order).
+        float popupH = TargetOptions.Length * ITEM_H;
+        popup = HUDHelpers.MakeRect(caption + "_Popup", _towerBody, C3, ddY + 30f + 2f, COL_W, popupH);
+        popup.AddComponent<Image>().color = new Color(0.10f, 0.10f, 0.16f, 0.98f);
+        itemImgs = new Image[TargetOptions.Length];
+        for (int i = 0; i < TargetOptions.Length; i++)
+        {
+            var (mode, label) = TargetOptions[i];
+            float iy  = popupH - (i + 1) * ITEM_H;
+            var  iGO  = HUDHelpers.MakeRect($"Opt_{mode}", popup, 1f, iy + 1f, COL_W - 2f, ITEM_H - 2f);
+            var  iImg = iGO.AddComponent<Image>(); iImg.color = new Color(0.18f, 0.18f, 0.28f, 1f);
+            var  iBtn = iGO.AddComponent<Button>(); iBtn.targetGraphic = iImg;
+            HUDHelpers.MakeText(HUDHelpers.MakeRect("L", iGO, 0f, 0f, COL_W - 2f, ITEM_H - 2f), label, Color.white, 10, bold: true)
+                .alignment = TextAnchor.MiddleCenter;
+            var capMode = mode;
+            iBtn.onClick.AddListener(() => { onPick(capMode); ClosePopups(); });
+            itemImgs[i] = iImg;
+        }
+        popup.SetActive(false);
+
+        // Toggling one dropdown closes everything else first
+        var capPopup = popup;
+        ddBtn.onClick.AddListener(() =>
+        {
+            bool wasOpen = capPopup.activeSelf;
+            ClosePopups();
+            capPopup.SetActive(!wasOpen);
+        });
+    }
+
     void RefreshTargetingButtons(TowerInfo info)
     {
         var turrent = info.GetComponent<Turrent>();
-        TargetingMode current = turrent != null ? turrent.Targeting : TargetingMode.Furthest;
+        TargetingMode current  = turrent != null ? turrent.Targeting          : TargetingMode.Furthest;
+        TargetingMode current2 = turrent != null ? turrent.TargetingSecondary : TargetingMode.Furthest;
 
-        if (_tpTargetLabel != null) _tpTargetLabel.text = TargetLabelFor(current) + "  ▾";
+        if (_tpTargetLabel  != null) _tpTargetLabel.text  = TargetLabelFor(current)  + "  ▾";
+        if (_tpTarget2Label != null) _tpTarget2Label.text = TargetLabelFor(current2) + "  ▾";
 
-        if (_tpTargetItemImgs == null) return;
         Color active   = new Color(0.25f, 0.50f, 0.80f, 1f);
         Color inactive = new Color(0.18f, 0.18f, 0.28f, 1f);
-        for (int i = 0; i < _tpTargetItemImgs.Length; i++)
-            if (_tpTargetItemImgs[i] != null)
-                _tpTargetItemImgs[i].color = TargetOptions[i].mode == current ? active : inactive;
+        if (_tpTargetItemImgs != null)
+            for (int i = 0; i < _tpTargetItemImgs.Length; i++)
+                if (_tpTargetItemImgs[i] != null)
+                    _tpTargetItemImgs[i].color = TargetOptions[i].mode == current ? active : inactive;
+        if (_tpTarget2ItemImgs != null)
+            for (int i = 0; i < _tpTarget2ItemImgs.Length; i++)
+                if (_tpTarget2ItemImgs[i] != null)
+                    _tpTarget2ItemImgs[i].color = TargetOptions[i].mode == current2 ? active : inactive;
     }
 
     static string TargetLabelFor(TargetingMode mode)
@@ -738,14 +776,10 @@ public class HUDInfoPanel : MonoBehaviour
         return mode.ToString();
     }
 
-    void ToggleTargetPopup()
-    {
-        if (_tpTargetPopup != null) _tpTargetPopup.SetActive(!_tpTargetPopup.activeSelf);
-    }
-
     void ClosePopups()
     {
         _tpTargetPopup?.SetActive(false);
+        _tpTarget2Popup?.SetActive(false);
         _tpPrioPopup?.SetActive(false);
         _ebHover = -1;
         _ebTooltip?.SetActive(false);
@@ -756,6 +790,14 @@ public class HUDInfoPanel : MonoBehaviour
         if (_selectedTower == null) return;
         var t = _selectedTower.GetComponent<Turrent>();
         if (t != null) t.Targeting = mode;
+        RefreshTargetingButtons(_selectedTower);
+    }
+
+    void SetTargetingModeSecondary(TargetingMode mode)
+    {
+        if (_selectedTower == null) return;
+        var t = _selectedTower.GetComponent<Turrent>();
+        if (t != null) t.TargetingSecondary = mode;
         RefreshTargetingButtons(_selectedTower);
     }
 
@@ -869,7 +911,7 @@ public class HUDInfoPanel : MonoBehaviour
 
             string label = purchased
                 ? $"{def.displayName}\n(Purchased)"
-                : $"{def.displayName}\n{def.description}   [{def.techCost} Tech]";
+                : $"{def.displayName}\n{DescriptionTags.Resolve(def.description)}   [{def.techCost} Tech]";
             var lbl = HUDHelpers.MakeText(HUDHelpers.MakeRect("L", bGO, 6f, 0f, BTNW - 8f, BTNH), label, Color.white, 13);
             lbl.alignment = TextAnchor.MiddleLeft; lbl.lineSpacing = 1.1f;
 
@@ -893,7 +935,7 @@ public class HUDInfoPanel : MonoBehaviour
             UnitDefinitionLibrary.Instance.TryGet(u.definitionId, out var def))
         {
             if (!string.IsNullOrEmpty(def.displayName)) name = def.displayName;
-            desc = def.description ?? "";
+            desc = DescriptionTags.Resolve(def.description ?? "");
         }
 
         if (_headerTitle  != null) _headerTitle.text = name.ToUpper();

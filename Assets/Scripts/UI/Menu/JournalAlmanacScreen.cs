@@ -154,7 +154,7 @@ public class JournalAlmanacScreen : MenuScreen
                 onClick: () => ShowDetail(
                     captured.displayName ?? captured.id,
                     TowerBaseSprite(captured), TowerTurretSprite(captured), captured.tintColor,
-                    string.Join("\n", TowerStats(captured)), captured.description));
+                    string.Join("\n", TowerStats(captured)), DescriptionTags.Resolve(captured.description)));
         }
     }
 
@@ -171,7 +171,7 @@ public class JournalAlmanacScreen : MenuScreen
                 onClick: () => ShowDetail(
                     captured.displayName ?? captured.id,
                     UnitSprite(captured), null, captured.tintColor,
-                    string.Join("\n", EnemyStats(captured)), captured.description));
+                    string.Join("\n", EnemyStats(captured)), DescriptionTags.Resolve(captured.description)));
         }
     }
 
@@ -260,7 +260,6 @@ public class JournalAlmanacScreen : MenuScreen
         if (def.physicalDefense  != 0) yield return $"Armor     {def.physicalDefense}";
         if (def.elementalDefense != 0) yield return $"Resist    {def.elementalDefense}";
         if (def.arcanaDefense    != 0) yield return $"Fortitude {def.arcanaDefense}";
-        yield return $"Bounty    {def.bounty}g";
         yield return $"End dmg   {def.deathBlow}";
     }
 

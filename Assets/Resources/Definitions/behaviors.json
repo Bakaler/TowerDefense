@@ -36,7 +36,7 @@
         {
             "id": "slowed",
             "displayName": "Slowed",
-            "description": "Movement speed reduced to 40%.",
+            "description": "Movement speed reduced to {behavior:slowed.moveSpeedMultiplier|pct}.",
             "duration": 6.5,
             "behaviorType": 1,
             "stackRule": "refresh",
@@ -69,7 +69,7 @@
         {
             "id": "poisoned",
             "displayName": "Poisoned",
-            "description": "Takes 4 poison damage every 0.75 sec.",
+            "description": "Takes {behavior:poisoned.tickDamage} poison damage every {behavior:poisoned.tickInterval} sec.",
             "duration": 4.0,
             "behaviorType": 0,
             "stackRule": "refresh",
@@ -175,7 +175,7 @@
         {
             "id": "shielded",
             "displayName": "Shielded",
-            "description": "Protected by an energy bubble that absorbs 40 damage.",
+            "description": "Protected by an energy bubble that absorbs {behavior:shielded.shieldHp} damage.",
             "duration": 999999.0,
             "behaviorType": 7,
             "stackRule": "refresh",
@@ -208,7 +208,7 @@
         {
             "id": "small_barrier",
             "displayName": "Small Barrier",
-            "description": "A small barrier that absorbs 12 damage.",
+            "description": "A small barrier that absorbs {behavior:small_barrier.shieldHp} damage.",
             "duration": 999999.0,
             "behaviorType": 7,
             "stackRule": "refresh",
@@ -341,7 +341,7 @@
         {
             "id": "vulnerable",
             "displayName": "Vulnerable",
-            "description": "Takes double damage from all sources.",
+            "description": "Takes {behavior:vulnerable.damageTakenMultiplier|addpct} damage from all sources.",
             "duration": 2.0,
             "behaviorType": 5,
             "stackRule": "refresh",

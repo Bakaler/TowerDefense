@@ -23,7 +23,6 @@ public class UnitDefinition
     public int   physicalDefense   = 0;
     public int   elementalDefense  = 0;
     public int   arcanaDefense     = 0;
-    public int   bounty            = 10;
     public int   deathBlow         = 1;
 
     // ── Movement ──────────────────────────────────────────────────────

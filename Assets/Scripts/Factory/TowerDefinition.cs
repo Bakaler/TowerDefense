@@ -24,6 +24,8 @@ public class TowerDefinition
     public string placementMode = "";
     /// <summary>Max world-space distance between the two posts when placementMode is "pair".</summary>
     public float pairMaxSpan = 4f;
+    /// <summary>Only one instance of this tower may exist at a time (e.g. Aura Tower).</summary>
+    public bool unique = false;
 
     // ── Detection ─────────────────────────────────────────────────────
     /// <summary>Tower tier at which this tower can target invisible units.
@@ -36,9 +38,12 @@ public class TowerDefinition
     public int    balanceWeight = 1;
 
     // ── Targeting ─────────────────────────────────────────────────────
-    /// <summary>TargetingMode name the tower starts with (e.g. "Closest").
+    /// <summary>Primary TargetingMode name the tower starts with (e.g. "Boss").
     /// Empty = Furthest. The player can still change it per-tower in the HUD.</summary>
     public string defaultTargeting = "";
+    /// <summary>Secondary TargetingMode — tie-breaker when candidates score equal
+    /// on the primary (e.g. Boss first, Furthest second). Empty = Furthest.</summary>
+    public string defaultTargeting2 = "";
 
     // ── Ability ───────────────────────────────────────────────────────
     public string fireAbilityId;

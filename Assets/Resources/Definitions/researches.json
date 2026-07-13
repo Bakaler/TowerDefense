@@ -33,6 +33,72 @@
       "abilityId": "",
       "effectId": "",
       "projectileId": "boomerang"
+    },
+    {
+      "id": "aura_damage_1",
+      "towerId": "aura_tower",
+      "displayName": "Wrath Aura",
+      "description": "+15% tower damage, map-wide",
+      "techCost": 40,
+      "effectType": "AuraDamageBonus",
+      "effectValue": 0.15,
+      "abilityId": "",
+      "effectId": ""
+    },
+    {
+      "id": "aura_speed_1",
+      "towerId": "aura_tower",
+      "displayName": "Haste Aura",
+      "description": "+15% tower attack speed, map-wide",
+      "techCost": 40,
+      "effectType": "AuraSpeedBonus",
+      "effectValue": 0.15,
+      "abilityId": "",
+      "effectId": ""
+    },
+    {
+      "id": "aura_slow_1",
+      "towerId": "aura_tower",
+      "displayName": "Oppression Aura",
+      "description": "Enemies move 10% slower, map-wide",
+      "techCost": 60,
+      "effectType": "AuraSlowBonus",
+      "effectValue": 0.1,
+      "abilityId": "",
+      "effectId": ""
+    },
+    {
+      "id": "aura_damage_2",
+      "towerId": "aura_tower",
+      "displayName": "Wrath Aura II",
+      "description": "+20% more tower damage, map-wide",
+      "techCost": 90,
+      "effectType": "AuraDamageBonus",
+      "effectValue": 0.2,
+      "abilityId": "",
+      "effectId": ""
+    },
+    {
+      "id": "aura_speed_2",
+      "towerId": "aura_tower",
+      "displayName": "Haste Aura II",
+      "description": "+20% more tower attack speed, map-wide",
+      "techCost": 90,
+      "effectType": "AuraSpeedBonus",
+      "effectValue": 0.2,
+      "abilityId": "",
+      "effectId": ""
+    },
+    {
+      "id": "aura_slow_2",
+      "towerId": "aura_tower",
+      "displayName": "Oppression Aura II",
+      "description": "Enemies move a further 10% slower, map-wide",
+      "techCost": 120,
+      "effectType": "AuraSlowBonus",
+      "effectValue": 0.1,
+      "abilityId": "",
+      "effectId": ""
     }
   ]
 }
