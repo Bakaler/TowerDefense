@@ -102,16 +102,22 @@ public class Effect_CreateUnits : Effect
             int wave = WaveManager.Instance != null ? WaveManager.Instance.CurrentWave : 1;
             if (wave > 1)
             {
-                float healthMult = Mathf.Pow(1.08f, wave - 1);
+                float growth     = WaveManager.Instance != null ? WaveManager.Instance.WaveHealthGrowth : 1.08f;
+                float healthMult = Mathf.Pow(growth, wave - 1);
                 unit.lifeMax    *= healthMult;
                 unit.lifeCurrent = unit.lifeMax;
+                if (unit.hasShields)
+                {
+                    unit.shieldMax    *= healthMult;
+                    unit.shieldCurrent = unit.shieldMax;
+                }
             }
         }
 
         if (speedJitter > 0f)
         {
-            unit.speedMax    *= Random.Range(1f - speedJitter, 1f + speedJitter);
-            unit.speedCurrent = unit.speedMax;
+            unit.speedMax *= Random.Range(1f - speedJitter, 1f + speedJitter);
+            unit.RefreshSpeed();
         }
         go.GetComponent<SpriteAnimator>()?.RandomizeWalkPhase();
 

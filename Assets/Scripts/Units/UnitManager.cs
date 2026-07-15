@@ -18,9 +18,6 @@ public class UnitManager : UnitParentClass
     const float RotateSpeed = 540f;   // deg/sec toward the travel direction
     private bool _hasFacing;          // false until the first facing snap after spawn
 
-    // isDead compatibility shim — reads from UnitParentClass.isAlive
-    public bool isDead => !isAlive;
-
     // ── Targeting metadata (stamped from UnitDefinition by the factory) ──
     /// <summary>Definition tags ("high_prio", "boss", …) read by tower targeting modes.</summary>
     public string[] tags = System.Array.Empty<string>();
@@ -49,8 +46,29 @@ public class UnitManager : UnitParentClass
     public void AddAuraSlow()    { _auraSlowCount++; }
     public void RemoveAuraSlow() { _auraSlowCount = Mathf.Max(0, _auraSlowCount - 1); }
 
+    // ── Speed pipeline ────────────────────────────────────────────────
+    // speedCurrent is derived — never write it directly. Behaviors own one
+    // multiplier (slows/hastes), external overrides (cast freezes, cleanse
+    // bursts) own the other, so neither silently stomps the other's changes.
+    private float _behaviorSpeedMult = 1f;
+    private float _externalSpeedMult = 1f;
+
+    /// <summary>Set by BehaviorHandler.Recalculate — product of active behavior speed multipliers.</summary>
+    public void SetBehaviorSpeedMult(float mult) { _behaviorSpeedMult = mult; RefreshSpeed(); }
+    /// <summary>Set by non-behavior overrides (cast pause, cleanse burst). 1 = none.</summary>
+    public void SetExternalSpeedMult(float mult) { _externalSpeedMult = mult; RefreshSpeed(); }
+    /// <summary>Recomputes speedCurrent — call after changing speedMax.</summary>
+    public void RefreshSpeed() => speedCurrent = Mathf.Max(0f, speedMax * _behaviorSpeedMult * _externalSpeedMult);
+
+    // ── Cached components ─────────────────────────────────────────────
+    private BehaviorHandler _behaviors;
+    /// <summary>Cached BehaviorHandler — added lazily by effects, never removed once added.</summary>
+    public BehaviorHandler Behaviors => _behaviors != null ? _behaviors : (_behaviors = GetComponent<BehaviorHandler>());
+
     // ── Route ─────────────────────────────────────────────────────────
     private RouteFollower _follower;
+    /// <summary>Cached RouteFollower (may be null until a route is assigned).</summary>
+    public RouteFollower Follower => _follower;
 
     // ── Lifecycle ─────────────────────────────────────────────────────
 
@@ -64,8 +82,8 @@ public class UnitManager : UnitParentClass
 
         isAlive      = true;
         lifeCurrent  = lifeMax;
-        speedCurrent = speedMax;
-        decayTimer   = 24;
+        RefreshSpeed();
+        decayTimer   = 0.4f;   // seconds a corpse lingers when no death anim plays
 
         _follower  = GetComponent<RouteFollower>();
         _sr        = GetComponent<SpriteRenderer>();
@@ -74,17 +92,12 @@ public class UnitManager : UnitParentClass
         HealthBar.Attach(gameObject);
     }
 
-    public string displayName;
-    public string description;
-
     public void ApplyDefinition(string id)
     {
         if (UnitDefinitionLibrary.Instance == null) return;
         if (!UnitDefinitionLibrary.Instance.TryGet(id, out var def)) return;
 
         definitionId      = def.id;
-        displayName       = def.displayName;
-        description       = def.description;
         lifeMax           = def.life;
         speedMax          = def.speed;
         physicalDefense   = def.physicalDefense;
@@ -100,7 +113,7 @@ public class UnitManager : UnitParentClass
     public override void TakeDamage(float damageAmount, float shieldBonus, float minimum, float maximum, DamageType type)
     {
         // Vulnerability behaviors amplify all incoming damage
-        var handler = GetComponent<BehaviorHandler>();
+        var handler = Behaviors;
         if (handler != null && handler.DamageTakenMult != 1f)
             damageAmount *= handler.DamageTakenMult;
 
@@ -124,7 +137,7 @@ public class UnitManager : UnitParentClass
         }
         _sr.color = _baseColor;
         // Restore any behavior tint (e.g. invisibility transparency) the flash overwrote
-        GetComponent<BehaviorHandler>()?.Refresh();
+        Behaviors?.Refresh();
     }
 
 
@@ -147,7 +160,7 @@ public class UnitManager : UnitParentClass
         {
             Move();
 
-            if (lifeCurrent < 0)
+            if (lifeCurrent <= 0)
                 Die(killedByDamage: true);
         }
         else
@@ -155,7 +168,7 @@ public class UnitManager : UnitParentClass
             // Let SpriteAnimator handle destruction if a death animation is playing
             if (GetComponent<SpriteAnimator>()?.IsPlayingDeath == true) return;
             if (decayTimer > 0)
-                decayTimer -= 1;
+                decayTimer -= Time.deltaTime;
             else
                 Destroy(gameObject);
         }
@@ -264,7 +277,7 @@ public class UnitManager : UnitParentClass
         if (killedByDamage)
             ObjectiveTracker.NotifyKill(definitionId);
 
-        GetComponent<BehaviorHandler>()?.TriggerDeathEffects(gameObject);
+        Behaviors?.TriggerDeathEffects(gameObject);
 
         var hb = GetComponentInChildren<HealthBar>();
         if (hb != null) hb.gameObject.SetActive(false);

@@ -10,7 +10,7 @@ using UnityEngine;
 ///   2. Physics: Rigidbody2D (kinematic static) + CircleCollider2D trigger (range detector)
 ///   3. SpriteRenderer — sprite from Resources via def.spritePath
 ///   4. AbilityManager
-///   5. Turrent — range + fireAbility set from definition
+///   5. Turret — range + fireAbility set from definition
 ///   6. Resolve + add extra components via ComponentRegistry
 ///   7. Second pass: Initialize(dataJson) on all IFactoryInitializable components
 /// </summary>
@@ -68,7 +68,7 @@ public class TowerFactory : MonoBehaviour
         // sizes match the definition values regardless of tower scale.
         float towerScale   = def.scale > 0f ? def.scale : 1f;
 
-        // Range detection trigger — seeded from def.range; Turrent.Start() may refine it
+        // Range detection trigger — seeded from def.range; Turret.Start() may refine it
         // if the tower has a fireAbility with its own range value.
         var rangeCol       = go.AddComponent<CircleCollider2D>();
         rangeCol.radius    = (def.range > 0f ? def.range : 1f) / towerScale;
@@ -124,17 +124,17 @@ public class TowerFactory : MonoBehaviour
         var abilityManager = go.AddComponent<AbilityManager>();
         go.AddComponent<TowerAnimator>();
 
-        // ── 5. Turrent ────────────────────────────────────────────
-        var turrent = go.AddComponent<Turrent>();
-        // definitionId is the only thing the factory sets on Turrent.
-        // Turrent.Start() resolves fireAbilityId → Ability_Effect from the libraries itself.
-        turrent.definitionId = def.id;
+        // ── 5. Turret ────────────────────────────────────────────
+        var turret = go.AddComponent<Turret>();
+        // definitionId is the only thing the factory sets on Turret.
+        // Turret.Start() resolves fireAbilityId → Ability_Effect from the libraries itself.
+        turret.definitionId = def.id;
         if (!string.IsNullOrEmpty(def.defaultTargeting) &&
             System.Enum.TryParse<TargetingMode>(def.defaultTargeting, true, out var defaultMode))
-            turrent.Targeting = defaultMode;
+            turret.Targeting = defaultMode;
         if (!string.IsNullOrEmpty(def.defaultTargeting2) &&
             System.Enum.TryParse<TargetingMode>(def.defaultTargeting2, true, out var defaultMode2))
-            turrent.TargetingSecondary = defaultMode2;
+            turret.TargetingSecondary = defaultMode2;
 
         // ── 5b. TowerInfo ─────────────────────────────────────────
         var info          = go.AddComponent<TowerInfo>();
@@ -159,7 +159,7 @@ public class TowerFactory : MonoBehaviour
         info.detectorTier          = def.detectorTier;
 
         // ── 5c. Range circle ──────────────────────────────────────────
-        // Use def.range as the initial radius. Turrent.Start() calls SetupRangeCircle
+        // Use def.range as the initial radius. Turret.Start() calls SetupRangeCircle
         // again with ability.range once the ability resolves, refining it to the exact value.
         if (def.range > 0f)
             info.SetupRangeCircle(def.range);

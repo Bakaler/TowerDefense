@@ -46,7 +46,7 @@ public class ChainLightningVisual : MonoBehaviour
         _lr.sortingOrder     = 20;
 
         // Material — Unity's built-in sprite/default works; bright cyan tint
-        _lr.material = new Material(Shader.Find("Sprites/Default"));
+        _lr.sharedMaterial = RuntimeMaterials.SpriteDefault;
         _lr.startColor = new Color(0.6f, 0.9f, 1f, 1f);
         _lr.endColor   = new Color(0.3f, 0.6f, 1f, 1f);
 

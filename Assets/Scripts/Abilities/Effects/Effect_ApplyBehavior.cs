@@ -27,7 +27,8 @@ public class Effect_ApplyBehavior : Effect
         var handler = context.Target.GetComponent<BehaviorHandler>()
                    ?? context.Target.gameObject.AddComponent<BehaviorHandler>();
 
-        handler.Apply(def);
+        // Origin tower rides along so DoT tick kills credit the right tower
+        handler.Apply(def, context.OriginTower);
     }
 
     static void SpawnImpactVFX(BehaviorDefinition def, Vector3 position, Transform caster)

@@ -611,8 +611,8 @@ public class HUDInfoPanel : MonoBehaviour
 
         if (_tpFireRate != null)
         {
-            var turrent   = info.GetComponent<Turrent>();
-            float baseCd  = turrent?.fireAbility?.cost?.cooldownDuration ?? (info.cooldown > 0f ? info.cooldown : 0f);
+            var turret   = info.GetComponent<Turret>();
+            float baseCd  = turret?.fireAbility?.cost?.cooldownDuration ?? (info.cooldown > 0f ? info.cooldown : 0f);
             float speedMult = info.AuraSpeedMultiplier;
             var buffHandler = info.GetComponent<TowerBuffHandler>();
             if (buffHandler != null) speedMult *= 1f + buffHandler.FireRateMult;
@@ -750,9 +750,9 @@ public class HUDInfoPanel : MonoBehaviour
 
     void RefreshTargetingButtons(TowerInfo info)
     {
-        var turrent = info.GetComponent<Turrent>();
-        TargetingMode current  = turrent != null ? turrent.Targeting          : TargetingMode.Furthest;
-        TargetingMode current2 = turrent != null ? turrent.TargetingSecondary : TargetingMode.Furthest;
+        var turret = info.GetComponent<Turret>();
+        TargetingMode current  = turret != null ? turret.Targeting          : TargetingMode.Furthest;
+        TargetingMode current2 = turret != null ? turret.TargetingSecondary : TargetingMode.Furthest;
 
         if (_tpTargetLabel  != null) _tpTargetLabel.text  = TargetLabelFor(current)  + "  ▾";
         if (_tpTarget2Label != null) _tpTarget2Label.text = TargetLabelFor(current2) + "  ▾";
@@ -788,7 +788,7 @@ public class HUDInfoPanel : MonoBehaviour
     void SetTargetingMode(TargetingMode mode)
     {
         if (_selectedTower == null) return;
-        var t = _selectedTower.GetComponent<Turrent>();
+        var t = _selectedTower.GetComponent<Turret>();
         if (t != null) t.Targeting = mode;
         RefreshTargetingButtons(_selectedTower);
     }
@@ -796,7 +796,7 @@ public class HUDInfoPanel : MonoBehaviour
     void SetTargetingModeSecondary(TargetingMode mode)
     {
         if (_selectedTower == null) return;
-        var t = _selectedTower.GetComponent<Turrent>();
+        var t = _selectedTower.GetComponent<Turret>();
         if (t != null) t.TargetingSecondary = mode;
         RefreshTargetingButtons(_selectedTower);
     }

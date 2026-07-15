@@ -84,16 +84,14 @@ public class UnitAbilityCaster : MonoBehaviour
     IEnumerator CastPause(float duration)
     {
         _casting = true;
-        if (_unit != null) _unit.speedCurrent = 0f;
+        if (_unit != null) _unit.SetExternalSpeedMult(0f);
         if (_sr != null) _sr.color = Color.white;
 
         yield return new WaitForSeconds(duration);
 
         _casting = false;
         if (_sr != null) _sr.color = _baseColor;
-        // Restore speed through the behavior system so active slows still apply
-        var bh = GetComponent<BehaviorHandler>();
-        if (bh != null) bh.Refresh();
-        else if (_unit != null) _unit.speedCurrent = _unit.speedMax;
+        // Behavior slows persist through the pause — only the external freeze lifts
+        if (_unit != null) _unit.SetExternalSpeedMult(1f);
     }
 }

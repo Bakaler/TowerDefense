@@ -66,9 +66,16 @@ public class UnitSpawner : MonoBehaviour
         var upc = unitGO.GetComponent<UnitParentClass>();
         if (upc != null && waveNumber > 1)
         {
-            float healthMult = Mathf.Pow(1.08f, waveNumber - 1);
+            float growth     = WaveManager.Instance != null ? WaveManager.Instance.WaveHealthGrowth : 1.08f;
+            float healthMult = Mathf.Pow(growth, waveNumber - 1);
             upc.lifeMax     *= healthMult;
             upc.lifeCurrent  = upc.lifeMax;
+            if (upc.hasShields)
+            {
+                // Shields compound with waves the same way life does
+                upc.shieldMax    *= healthMult;
+                upc.shieldCurrent = upc.shieldMax;
+            }
         }
 
         var unit = unitGO.GetComponent<UnitManager>();

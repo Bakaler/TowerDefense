@@ -2,7 +2,7 @@ using UnityEngine;
 
 /// <summary>
 /// Shows the shotgun arc when the tower is selected.
-/// The turret auto-tracks enemies via Turrent like any other tower.
+/// The turret auto-tracks enemies via Turret like any other tower.
 /// </summary>
 public class ShotgunOrienter : MonoBehaviour, IFactoryInitializable
 {
@@ -19,11 +19,11 @@ public class ShotgunOrienter : MonoBehaviour, IFactoryInitializable
 
     void Start()
     {
-        var turrent = GetComponent<Turrent>();
-        if (turrent != null && turrent.fireAbility != null)
-            _arcDegrees = turrent.fireAbility.fireArc;
+        var turret = GetComponent<Turret>();
+        if (turret != null && turret.fireAbility != null)
+            _arcDegrees = turret.fireAbility.fireArc;
 
-        var t = GetComponent<Turrent>();
+        var t = GetComponent<Turret>();
         _turretPart = (t != null && t.RotatingPart != null) ? t.RotatingPart : transform;
 
         BuildArcLine();
@@ -35,7 +35,7 @@ public class ShotgunOrienter : MonoBehaviour, IFactoryInitializable
     {
         if (_turretPart == null)
         {
-            var t = GetComponent<Turrent>();
+            var t = GetComponent<Turret>();
             _turretPart = (t != null && t.RotatingPart != null) ? t.RotatingPart : transform;
         }
 
@@ -64,7 +64,7 @@ public class ShotgunOrienter : MonoBehaviour, IFactoryInitializable
         _arcLine.numCapVertices   = 2;
         _arcLine.sortingLayerName = "Default";
         _arcLine.sortingOrder     = 8;
-        _arcLine.material         = new Material(Shader.Find("Sprites/Default"));
+        _arcLine.sharedMaterial         = RuntimeMaterials.SpriteDefault;
     }
 
     void RefreshArc()

@@ -50,7 +50,7 @@ public class SiphonComponent : MonoBehaviour, IFactoryInitializable
         _beam.useWorldSpace  = true;
         _beam.sortingLayerName = "Units";
         _beam.sortingOrder   = 8;
-        _beam.material       = new Material(Shader.Find("Sprites/Default"));
+        _beam.sharedMaterial       = RuntimeMaterials.SpriteDefault;
         _beam.startColor     = new Color(0.4f, 1f, 0.55f, 0.9f);
         _beam.endColor       = new Color(0.4f, 1f, 0.55f, 0f);
         _beam.enabled        = false;
@@ -86,7 +86,7 @@ public class SiphonComponent : MonoBehaviour, IFactoryInitializable
 
     UnitParentClass FindNearest()
     {
-        var hits = Physics2D.OverlapCircleAll(transform.position, range, LayerMask.GetMask("Enemy"));
+        var hits = Physics2D.OverlapCircleAll(transform.position, range, GameLayers.EnemyMask);
         UnitParentClass best  = null;
         float           bestD = float.MaxValue;
         foreach (var col in hits)

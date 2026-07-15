@@ -70,6 +70,8 @@ public class LevelManager : MonoBehaviour
         TechManager.Instance?.ResetAll(tech, tier);
         ResearchManager.Instance?.ResetAll();
         WaveManager.Instance?.ResetForLevel(waves, spawners);
+        if (WaveManager.Instance != null)
+            WaveManager.Instance.WaveHealthGrowth = data.waveHealthGrowth;
         BalanceManager.Instance?.SetLevelCap(cap);
         TowerShop.Instance?.Rebuild(towers);
         TowerPlacer.Instance?.ResetFreeTowerGrants();

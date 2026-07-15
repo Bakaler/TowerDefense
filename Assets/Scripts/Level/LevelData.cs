@@ -127,6 +127,8 @@ public class LevelData
     public int       startLives     = 20;
     public int       startTech      = 0;
     public int       startTier      = 1;
+    /// <summary>Per-wave enemy HP compounding: life and shields ×= growth^(wave-1).</summary>
+    public float     waveHealthGrowth = 1.08f;
     public string    backgroundSprite = "";   // Resources path, e.g. "Art/Backgrounds/bg_1"
     public float     backgroundX      = 0f;
     public float     backgroundY      = 0f;

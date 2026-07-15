@@ -35,7 +35,7 @@ public class ShieldBubble : MonoBehaviour
         lr.useWorldSpace     = false;
         lr.sortingLayerName  = "Units";
         lr.sortingOrder      = 25;
-        lr.material          = new Material(Shader.Find("Sprites/Default"));
+        lr.sharedMaterial          = RuntimeMaterials.SpriteDefault;
         lr.startColor        = new Color(0.3f, 0.7f, 1f, 0.85f);
         lr.endColor          = new Color(0.3f, 0.7f, 1f, 0.85f);
         for (int i = 0; i < 36; i++)

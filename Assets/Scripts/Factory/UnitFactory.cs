@@ -148,7 +148,7 @@ public class UnitFactory : MonoBehaviour
         }
         float spd            = def.speed * LevelSelection.EnemySpeedMult;
         unit.speedMax        = spd;
-        unit.speedCurrent    = spd;
+        unit.RefreshSpeed();
         unit.physicalDefense  = def.physicalDefense;
         unit.elementalDefense = def.elementalDefense;
         unit.arcanaDefense    = def.arcanaDefense;

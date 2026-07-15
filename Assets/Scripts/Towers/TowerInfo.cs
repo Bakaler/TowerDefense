@@ -52,6 +52,9 @@ public class TowerInfo : MonoBehaviour
     /// <summary>True when the FullRefund modifier is active (set as a buff at level load).</summary>
     public bool FullRefundActive => _buffHandler != null && _buffHandler.HasBuff("mod_full_refund");
 
+    /// <summary>True when the double-tap modifier buff is on this tower (fires a second delayed shot).</summary>
+    public bool DoubleTapActive => _buffHandler != null && _buffHandler.HasBuff("mod_double_tap");
+
     // ── Aura buffs ────────────────────────────────────────────────────
     private Dictionary<object, (float dmg, float spd)> _auraBuffs;
     public float AuraDamageMultiplier { get; private set; } = 1f;
@@ -187,6 +190,7 @@ public class TowerInfo : MonoBehaviour
         StatMultiplier    = Mathf.Pow(upgradeStatMultiplier, Tier - 1);
         ObjectiveTracker.NotifyUpgrade(definitionId);
         balanceMultiplier *= 2f;   // each tier doubles this tower's balance contribution
+        BalanceManager.MarkDirty();
         RefreshSprite();
         TowerUpgradeFade.Play(this, Tier - 1);   // new tier fades in over the old visuals
 
@@ -196,7 +200,7 @@ public class TowerInfo : MonoBehaviour
             float newRange = _baseRange + rangePerTier * (Tier - 1);
             var col = GetComponent<CircleCollider2D>();
             if (col != null) col.radius = newRange / Mathf.Max(0.01f, transform.localScale.x);
-            GetComponent<Turrent>()?.SetWorldRange(newRange);
+            GetComponent<Turret>()?.SetWorldRange(newRange);
             SetupRangeCircle(newRange);
         }
 
@@ -237,7 +241,7 @@ public class TowerInfo : MonoBehaviour
             _rangeCircle.useWorldSpace    = false;
             _rangeCircle.sortingLayerName = "Units";
             _rangeCircle.sortingOrder     = 20;
-            _rangeCircle.material         = new Material(Shader.Find("Sprites/Default"));
+            _rangeCircle.sharedMaterial         = RuntimeMaterials.SpriteDefault;
             _rangeCircle.startColor       = new Color(0.2f, 1f, 0.35f, 0.65f);
             _rangeCircle.endColor         = new Color(0.2f, 1f, 0.35f, 0.65f);
             _rangeCircle.gameObject.SetActive(false);
@@ -267,13 +271,13 @@ public class TowerInfo : MonoBehaviour
     void OnEnable()
     {
         OnTowerClicked += HandleTowerClicked;
-        if (!isGhost) All.Add(this);
+        if (!isGhost) { All.Add(this); BalanceManager.MarkDirty(); }
     }
 
     void OnDisable()
     {
         OnTowerClicked -= HandleTowerClicked;
-        All.Remove(this);
+        if (All.Remove(this)) BalanceManager.MarkDirty();
     }
 
     void HandleTowerClicked(TowerInfo clicked)

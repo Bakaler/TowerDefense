@@ -134,7 +134,7 @@ public class PlacementZoneVisualizer : MonoBehaviour
     Material GetMat()
     {
         if (_mat == null)
-            _mat = new Material(Shader.Find("Sprites/Default"));
+            _mat = RuntimeMaterials.SpriteDefault;
         return _mat;
     }
 }

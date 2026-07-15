@@ -3,7 +3,7 @@ using UnityEngine;
 
 /// <summary>
 /// Plays a sprite-sheet animation on the tower's own SpriteRenderer when it attacks,
-/// then restores the original sprite. Add to tower prefabs alongside Turrent.
+/// then restores the original sprite. Add to tower prefabs alongside Turret.
 /// </summary>
 [RequireComponent(typeof(SpriteRenderer))]
 public class TowerAnimator : MonoBehaviour

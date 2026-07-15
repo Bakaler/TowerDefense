@@ -162,8 +162,8 @@ public class CollectorTower : MonoBehaviour, IFactoryInitializable
         _line.sortingLayerName = "Units";
         _line.sortingOrder   = 8;
 
-        var mat = new Material(Shader.Find("Sprites/Default"));
-        _line.material = mat;
+        var mat = RuntimeMaterials.SpriteDefault;
+        _line.sharedMaterial = mat;
         _line.startColor = new Color(0.5f, 0.9f, 1f, 0.9f);
         _line.endColor   = new Color(1f,   1f,  1f, 0.3f);
         _line.enabled    = false;

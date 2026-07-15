@@ -70,14 +70,6 @@ public class Effect_Damage : Effect
         target.TakeDamage(finalDamage, shieldBonus * towerMult, minimumDamage, maximumDamage, type);
         bool killedIt = wasAlive && (target.lifeCurrent <= 0f || !target.isAlive);
         if (killedIt)
-        {
-            if (context.OriginTower != null)
-                context.OriginTower.GetComponent<TowerInfo>()?.RegisterKill();
-            BountyDrop.TrySpawn(target.transform.position, target.GetComponent<UnitManager>());
-
-            float bonusBounty = ModifierSelection.GetFloat("BountyPerKill");
-            if (bonusBounty >= 1f)
-                ResourceManagerScript.Instance?.ChangeResourceOne((int)bonusBounty);
-        }
+            KillRewards.Award(target, context.OriginTower);
     }
 }

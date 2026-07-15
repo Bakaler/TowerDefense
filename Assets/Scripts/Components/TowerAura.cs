@@ -121,13 +121,19 @@ public class TowerAura : MonoBehaviour, IFactoryInitializable
         }
         else
         {
-            var hits = Physics2D.OverlapCircleAll(transform.position, effRange);
-            foreach (var col in hits)
-            {
-                var t = col.GetComponent<TowerInfo>();
-                if (t != null && t != _info && !t.isGhost) { nowTowers.Add(t); continue; }
+            // Towers: distance check against the registry — cheaper than physics, and
+            // measured to the tower's center rather than its (huge) range trigger.
+            float rangeSqr = effRange * effRange;
+            Vector2 self   = transform.position;
+            foreach (var t in TowerInfo.All)
+                if (t != null && t != _info && !t.isGhost
+                    && ((Vector2)t.transform.position - self).sqrMagnitude <= rangeSqr)
+                    nowTowers.Add(t);
 
-                if (slowAmount > 0f)
+            if (slowAmount > 0f)
+            {
+                var hits = Physics2D.OverlapCircleAll(transform.position, effRange, GameLayers.EnemyMask);
+                foreach (var col in hits)
                 {
                     var u = col.GetComponent<UnitManager>();
                     if (u != null && u.isAlive) nowUnits.Add(u);
@@ -195,7 +201,7 @@ public class TowerAura : MonoBehaviour, IFactoryInitializable
         lr.useWorldSpace    = false;
         lr.sortingLayerName = "Units";
         lr.sortingOrder     = 18;
-        lr.material         = new Material(Shader.Find("Sprites/Default"));
+        lr.sharedMaterial         = RuntimeMaterials.SpriteDefault;
         lr.startColor       = auraColor;
         lr.endColor         = auraColor;
 

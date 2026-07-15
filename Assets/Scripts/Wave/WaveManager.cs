@@ -27,6 +27,9 @@ public class WaveManager : MonoBehaviour
     // ── Per-wave modifier flags ───────────────────────────────────────
     public static bool ForgiveNextLeak { get; set; }
 
+    /// <summary>Per-wave enemy HP compounding (life and shields), from LevelData.waveHealthGrowth.</summary>
+    public float WaveHealthGrowth { get; set; } = 1.08f;
+
     // ── Private ───────────────────────────────────────────────────────
     private List<WaveDefinition>  _waveDefs    = new();
     private List<UnitSpawner>     _spawners    = new();
@@ -105,11 +108,15 @@ public class WaveManager : MonoBehaviour
             var g = groups[gi];
             if (elapsed >= g.startTime)
             {
-                var spawner = FindSpawner(g.spawnerIndex);
-                if (spawner != null)
+                // spawnerIndex < 0 runs the group on every spawner;
+                // otherwise the first spawner matching pathIndex takes it.
+                foreach (var s in _spawners)
                 {
+                    if (s == null) continue;
+                    if (g.spawnerIndex >= 0 && s.pathIndex != g.spawnerIndex) continue;
                     _activeSpawnGroups++;
-                    StartCoroutine(SpawnGroupTracked(spawner, g, CurrentWave));
+                    StartCoroutine(SpawnGroupTracked(s, g, CurrentWave));
+                    if (g.spawnerIndex >= 0) break;
                 }
                 gi++;
             }
@@ -126,14 +133,6 @@ public class WaveManager : MonoBehaviour
     {
         yield return StartCoroutine(spawner.SpawnGroup(entry, waveNumber));
         _activeSpawnGroups--;
-    }
-
-    UnitSpawner FindSpawner(int spawnerIndex)
-    {
-        foreach (var s in _spawners)
-            if (s != null && (spawnerIndex < 0 || s.pathIndex == spawnerIndex))
-                return s;
-        return null;
     }
 
     void CheckWaveClear()

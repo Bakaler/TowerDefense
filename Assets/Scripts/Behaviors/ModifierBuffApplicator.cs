@@ -53,6 +53,9 @@ public class ModifierBuffApplicator : MonoBehaviour
         if (basicSpdMult > 0f && tower.definitionId == "basic_tower")
             ApplyBuff(tower, "mod_basic_spd", "+Basic Spd", fireRateMult: basicSpdMult);
 
+        if (ModifierSelection.HasEffect("BasicDoubleTap") && tower.definitionId == "basic_tower")
+            ApplyBuff(tower, "mod_double_tap", "Double Tap");
+
         // ── Full refund ───────────────────────────────────────────────
         if (ModifierSelection.HasEffect("FullRefund"))
             ApplyBuff(tower, "mod_full_refund", "Full Refund");

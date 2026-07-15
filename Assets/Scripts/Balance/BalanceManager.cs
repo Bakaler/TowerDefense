@@ -18,8 +18,16 @@ public class BalanceManager : MonoBehaviour
 
     private int _levelCap   = -1;
     private int _bonusSlots = 0;
-    public void SetLevelCap(int cap) { _levelCap = cap; _bonusSlots = 0; }
-    public void AddBonusSlots(int n) => _bonusSlots += n;
+    public void SetLevelCap(int cap) { _levelCap = cap; _bonusSlots = 0; MarkDirty(); }
+    public void AddBonusSlots(int n) { _bonusSlots += n; MarkDirty(); }
+
+    // Recalculate() is a no-op until something changes the tower set — TowerInfo
+    // marks dirty on enable/disable/upgrade, so the per-frame call in GameHUD is free.
+    static bool _dirty = true;
+    public static void MarkDirty() => _dirty = true;
+
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    static void ResetStatics() => _dirty = true;
 
     public static readonly int[] Thresholds = { 12, 36, 80 };
 
@@ -34,6 +42,9 @@ public class BalanceManager : MonoBehaviour
 
     public void Recalculate()
     {
+        if (!_dirty) return;
+        _dirty = false;
+
         var towers = TowerInfo.All;
 
         // Count how many of each tower ID exist, grouped by balance type

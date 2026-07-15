@@ -342,7 +342,7 @@ public class TowerPlacer : MonoBehaviour
         _pairPreviewLine.endWidth         = 0.08f;
         _pairPreviewLine.sortingLayerName = "Units";
         _pairPreviewLine.sortingOrder     = 21;
-        _pairPreviewLine.material         = new Material(Shader.Find("Sprites/Default"));
+        _pairPreviewLine.sharedMaterial         = RuntimeMaterials.SpriteDefault;
     }
 
     bool IsSpanValid(Vector2 candidateB)
@@ -443,7 +443,7 @@ public class TowerPlacer : MonoBehaviour
         lr.useWorldSpace     = false;
         lr.sortingLayerName  = "Units";
         lr.sortingOrder      = 21;
-        lr.material          = new Material(Shader.Find("Sprites/Default"));
+        lr.sharedMaterial          = RuntimeMaterials.SpriteDefault;
 
         for (int i = 0; i < SEGMENTS; i++)
         {
@@ -472,8 +472,8 @@ public class TowerPlacer : MonoBehaviour
         lr.sortingLayerName  = "Units";
         lr.sortingOrder      = 20;
 
-        var mat       = new Material(Shader.Find("Sprites/Default"));
-        lr.material   = mat;
+        var mat       = RuntimeMaterials.SpriteDefault;
+        lr.sharedMaterial = mat;
         lr.startColor = new Color(1f, 1f, 1f, 0.35f);
         lr.endColor   = new Color(1f, 1f, 1f, 0.35f);
 

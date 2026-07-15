@@ -88,12 +88,11 @@ public class AbilityManager : MonoBehaviour
 
         if (ability.effect != null)
         {
-            Debug.Log($"[AbilityManager] Firing effect '{ability.effect.name}' on '{context.Target?.name}'");
             EffectExecutor.ExecuteEffect(ability.effect, context);
 
-            // BasicDoubleTap: fire a second shot 0.15s later on basic_tower
-            if (_towerInfo != null && _towerInfo.definitionId == "basic_tower"
-                && ModifierSelection.HasEffect("BasicDoubleTap"))
+            // Double-tap buff (mod_double_tap, applied by ModifierBuffApplicator):
+            // fire a second shot 0.15s later
+            if (_towerInfo != null && _towerInfo.DoubleTapActive)
                 StartCoroutine(DelayedFire(ability.effect, context, 0.15f));
         }
         else

@@ -214,7 +214,7 @@ public class PathVisualizer : MonoBehaviour
     Material GetLineMaterial()
     {
         if (_lineMat == null)
-            _lineMat = new Material(Shader.Find("Sprites/Default"));
+            _lineMat = RuntimeMaterials.SpriteDefault;
         return _lineMat;
     }
 

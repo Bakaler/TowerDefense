@@ -22,7 +22,7 @@ public class ContinuousBeam : MonoBehaviour, IFactoryInitializable
     private UnitParentClass _locked;
     private LineRenderer    _beam;
     private TowerInfo       _info;
-    private Turrent         _turrent;
+    private Turret         _turret;
     private Effect          _damageEffect;
     private string          _pendingEffectId;
 
@@ -60,7 +60,7 @@ public class ContinuousBeam : MonoBehaviour, IFactoryInitializable
     void Awake()
     {
         _info    = GetComponent<TowerInfo>();
-        _turrent = GetComponent<Turrent>();
+        _turret = GetComponent<Turret>();
         BuildBeam();
     }
 
@@ -80,14 +80,14 @@ public class ContinuousBeam : MonoBehaviour, IFactoryInitializable
         _beam.useWorldSpace = true;
         _beam.sortingLayerName = "Units";
         _beam.sortingOrder  = 25;
-        _beam.material      = new Material(Shader.Find("Sprites/Default"));
+        _beam.sharedMaterial      = RuntimeMaterials.SpriteDefault;
         _beam.enabled       = false;
     }
 
     void Update()
     {
-        UnitParentClass target = _turrent != null && _turrent.target != null
-            ? _turrent.target.GetComponent<UnitParentClass>() : null;
+        UnitParentClass target = _turret != null && _turret.target != null
+            ? _turret.target.GetComponent<UnitParentClass>() : null;
 
         if (target == null || !target.isAlive) { BreakLock(); return; }
 

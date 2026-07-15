@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class UnitParentClass : MonoBehaviour
@@ -7,61 +5,21 @@ public class UnitParentClass : MonoBehaviour
     // Game Logic
     public float damageReductionBaseModifier = 0.995f;
     public bool isAlive = false;
-    public int decayTimer = 50;
+    /// <summary>Seconds a corpse lingers before the GameObject is destroyed.</summary>
+    public float decayTimer = 0.8f;
 
     // Life
     public float lifeMax = 0;
     public float lifeCurrent = 0;
-    public float lifeRegen = 0;
-    public float lifeRegenMulitplier = 1;
-    public float lifeRegenDelay = 0;
 
     // Shield
     public bool hasShields = false;
     public float shieldMax = 0;
     public float shieldCurrent = 0;
-    public float shieldRegen = 0;
-    public float shieldRegenMulitplier = 1;
-    public float shieldRegenDelay = 0;
-
-    // Energy
-    public float energyMax = 0;
-    public float energyCurrent = 0;
-    public float energyRegen = 0;
-    public float energyRegenMulitplier = 1;
-    public float energyRegenDelay = 0;
-    public float energyArmor = 0;
 
     // Movement
     public float speedMax = 0;
-    public float speedMin = 0;
     public float speedCurrent = 0;
-    public float speedCurrentMulitplier = 1;
-
-    // Abilities
-    public List<AbilityParentClass> abilities = new List<AbilityParentClass>();
-    public List<int> commandCard = new List<int>();
-
-    // Cost
-    public int resourceOne = 0;
-    public int resourceTwo = 0;
-    public int resourceThree = 0;
-
-    // Effects
-    public EffectParentClass birthEffect;
-    public EffectParentClass deathEffect;
-
-    // Information
-    public string unitName = "";
-    public string unitDescription = "";
-
-    // Footprint
-    public List<int> footprint = new List<int>();
-
-    // Win Condition Attributes
-    public float research = 0;
-    public float funding = 0;
-    public float development = 0;
 
     // Defense — Piercing/Poison/Pure damage bypasses these entirely
     public int physicalDefense = 0;
@@ -87,10 +45,12 @@ public class UnitParentClass : MonoBehaviour
             }
             else
             {
-                // Shield breaks — the unspent fraction of the hit carries into life at normal damage
-                float usedFraction = shieldDamage > 0f ? shieldCurrent / shieldDamage : 1f;
+                // Shield breaks — only the base damage beyond the shield's remaining
+                // HP carries into life. shieldBonus speeds up the break but never
+                // adds (or removes) life damage.
+                float carry = Mathf.Max(0f, damageTaken - shieldCurrent);
                 shieldCurrent = 0;
-                lifeCurrent  -= damageTaken * (1f - usedFraction);
+                lifeCurrent  -= carry;
             }
         }
         else
@@ -130,7 +90,7 @@ public class UnitParentClass : MonoBehaviour
         else
         {
             if (decayTimer > 0)
-                decayTimer -= 1;
+                decayTimer -= Time.deltaTime;
             else
                 Destroy(gameObject);
         }

@@ -15,6 +15,8 @@ public class BehaviorHandler : MonoBehaviour
         public float              TickTimer;
         public GameObject         DurationVFX;
         public ShieldBubble       Shield;
+        /// <summary>Tower whose effect applied this behavior — credited for DoT tick kills.</summary>
+        public GameObject         SourceTower;
 
         public Instance(BehaviorDefinition def)
         {
@@ -67,7 +69,7 @@ public class BehaviorHandler : MonoBehaviour
 
     // ── Public API ────────────────────────────────────────────────────
 
-    public void Apply(BehaviorDefinition def)
+    public void Apply(BehaviorDefinition def, GameObject sourceTower = null)
     {
         // Any active behavior granting immunity to the incoming type blocks it
         if (IsImmuneTo(def.behaviorType)) return;
@@ -77,7 +79,13 @@ public class BehaviorHandler : MonoBehaviour
             case "refresh":
             {
                 var ex = _active.Find(b => b.Def.id == def.id);
-                if (ex != null) { ex.Remaining = def.duration; AttachShield(ex); return; }
+                if (ex != null)
+                {
+                    ex.Remaining = def.duration;
+                    if (sourceTower != null) ex.SourceTower = sourceTower;
+                    AttachShield(ex);
+                    return;
+                }
                 break;
             }
             case "none":
@@ -96,7 +104,11 @@ public class BehaviorHandler : MonoBehaviour
                     }
                 if (count >= def.maxStacks)
                 {
-                    if (oldest != null) oldest.Remaining = def.duration;
+                    if (oldest != null)
+                    {
+                        oldest.Remaining = def.duration;
+                        if (sourceTower != null) oldest.SourceTower = sourceTower;
+                    }
                     return;
                 }
                 break;
@@ -104,6 +116,7 @@ public class BehaviorHandler : MonoBehaviour
         }
 
         var newInst = new Instance(def);
+        newInst.SourceTower = sourceTower;
         float impactDuration = def.impactFrameCount > 0 && def.impactFps > 0f
             ? def.impactFrameCount / def.impactFps : 0f;
         if (impactDuration > 0f)
@@ -261,11 +274,15 @@ public class BehaviorHandler : MonoBehaviour
         if (!string.IsNullOrEmpty(inst.Def.tickBehaviorId)
             && BehaviorLibrary.Instance != null
             && BehaviorLibrary.Instance.TryGet(inst.Def.tickBehaviorId, out var tickDef))
-            Apply(tickDef);
+            Apply(tickDef, inst.SourceTower);
 
         if (inst.Def.tickDamage <= 0f) return;
         var dmgType = (DamageType)inst.Def.tickDamageType;
+        bool wasAlive = _unit.isAlive && _unit.lifeCurrent > 0f;
         _unit.TakeDamage(inst.Def.tickDamage, 0f, 0f, inst.Def.tickDamage * 10f, dmgType);
+        // DoT kills pay out like direct-hit kills (bounty, tower kill count, stats)
+        if (wasAlive && _unit.lifeCurrent <= 0f)
+            KillRewards.Award(_unit, inst.SourceTower);
     }
 
     // ── VFX ───────────────────────────────────────────────────────────
@@ -320,7 +337,7 @@ public class BehaviorHandler : MonoBehaviour
         DamageTakenMult = dmgTaken;
 
         if (_unit != null)
-            _unit.speedCurrent = _unit.speedMax * speedMult;
+            _unit.SetBehaviorSpeedMult(speedMult);
 
         if (_sr != null)
             _sr.color = _active.Count > 0 ? tint : _baseColor;

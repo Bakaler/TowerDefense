@@ -98,7 +98,7 @@ public class Effect_Search_Area : Effect
             Vector2 offsetOrigin = origin2D + forward2D.normalized * area.castOffset;
             float   finalRadius  = area.radius + area.radiusBonus;
 
-            Collider2D[] hits      = Physics2D.OverlapCircleAll(offsetOrigin, finalRadius);
+            Collider2D[] hits      = Physics2D.OverlapCircleAll(offsetOrigin, finalRadius, GameLayers.EnemyMask);
             var          alreadyHit = new HashSet<UnitParentClass>();
 
             if (_excludePrimaryTarget && context.Target != null)

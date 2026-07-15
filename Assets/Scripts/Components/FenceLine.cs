@@ -171,7 +171,7 @@ public class FenceLine : MonoBehaviour, IFactoryInitializable
         _line.endWidth         = lineWidth;
         _line.sortingLayerName = "Units";
         _line.sortingOrder     = 15;
-        _line.material         = new Material(Shader.Find("Sprites/Default"));
+        _line.sharedMaterial         = RuntimeMaterials.SpriteDefault;
         _line.startColor       = lineColor;
         _line.endColor         = lineColor;
         _line.SetPosition(0, transform.position);

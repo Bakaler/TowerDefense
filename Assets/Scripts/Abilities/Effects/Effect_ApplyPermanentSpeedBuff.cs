@@ -26,7 +26,7 @@ public class Effect_ApplyPermanentSpeedBuff : Effect
         if (!PassesValidators(context)) return;
 
         Vector2 origin = context.AimOrigin2D ?? (context.CasterTransform != null ? (Vector2)context.CasterTransform.position : Vector2.zero);
-        var hits = Physics2D.OverlapCircleAll(origin, radius, LayerMask.GetMask("Enemy"));
+        var hits = Physics2D.OverlapCircleAll(origin, radius, GameLayers.EnemyMask);
 
         foreach (var col in hits)
         {
@@ -34,8 +34,8 @@ public class Effect_ApplyPermanentSpeedBuff : Effect
             if (unit == null || !unit.isAlive) continue;
             if (!string.IsNullOrEmpty(targetDefinitionId) && unit.definitionId != targetDefinitionId) continue;
 
-            unit.speedMax     += speedBonus;
-            unit.speedCurrent += speedBonus;
+            unit.speedMax += speedBonus;
+            unit.RefreshSpeed();   // re-derive speedCurrent with active multipliers intact
         }
     }
 }

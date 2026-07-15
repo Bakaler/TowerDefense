@@ -39,7 +39,7 @@ public class OnFirstHitCleanse : MonoBehaviour, IFactoryInitializable
     IEnumerator CleanseAndBurst()
     {
         // Cleanse all CC types — unit can still cast regardless of behavior state
-        var behaviorHandler = _unit.GetComponent<BehaviorHandler>();
+        var behaviorHandler = _unit.Behaviors;
         if (behaviorHandler != null)
         {
             behaviorHandler.RemoveByType(BehaviorType.Rooted);
@@ -47,15 +47,12 @@ public class OnFirstHitCleanse : MonoBehaviour, IFactoryInitializable
             behaviorHandler.RemoveByType(BehaviorType.Stunned);
             behaviorHandler.RemoveByType(BehaviorType.Silenced);
         }
-        _unit.speedCurrent = _unit.speedMax * speedMultiplier;
+        _unit.SetExternalSpeedMult(speedMultiplier);
 
         yield return new WaitForSeconds(duration);
 
-        // Let BehaviorHandler reapply any active slows; fall back to speedMax if none
+        // Burst ends — behavior slows applied meanwhile stay in effect on their own
         if (_unit != null && _unit.isAlive)
-        {
-            if (behaviorHandler != null) behaviorHandler.Refresh();
-            else _unit.speedCurrent = _unit.speedMax;
-        }
+            _unit.SetExternalSpeedMult(1f);
     }
 }

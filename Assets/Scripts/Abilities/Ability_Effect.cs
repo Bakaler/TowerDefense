@@ -8,7 +8,7 @@ public class Ability_Effect : Ability
     /// <summary>ID of the Effect to execute. Resolved from EffectLibrary at load time.</summary>
     public string effectId = "";
 
-    /// <summary>Detection radius in world units. Turrent sizes its trigger collider to this.</summary>
+    /// <summary>Detection radius in world units. Turret sizes its trigger collider to this.</summary>
     public float range = 5f;
 
     /// <summary>Total fire cone in degrees. 360 = omnidirectional (no arc restriction).</summary>

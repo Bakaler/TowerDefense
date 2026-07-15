@@ -15,10 +15,10 @@ public enum TargetingMode
 }
 
 [RequireComponent(typeof(AbilityManager))]
-public class Turrent : MonoBehaviour
+public class Turret : MonoBehaviour
 {
+    /// <summary>Current target (read by ContinuousBeam, ShotgunOrienter, HUD).</summary>
     public GameObject target;
-    public List<GameObject> enemiesInRange = new List<GameObject>();
 
     [Tooltip("Must match an id in Resources/Definitions/towers.json")]
     public string definitionId;
@@ -29,6 +29,10 @@ public class Turrent : MonoBehaviour
     public TargetingMode TargetingSecondary { get; set; } = TargetingMode.Furthest;
 
     [HideInInspector] public Ability_Effect fireAbility;
+
+    // Enemies inside the range trigger — stored as components so the per-frame
+    // scoring loop never calls GetComponent.
+    private readonly List<UnitManager> _inRange = new();
 
     private AbilityManager   _abilityManager;
     private CircleCollider2D _rangeCollider;
@@ -96,10 +100,11 @@ public class Turrent : MonoBehaviour
 
         float arc = fireAbility != null ? fireAbility.fireArc : 360f;
 
-        target = GetLeadEnemy();
-        if (target == null) return;
+        var unit = GetLeadUnit();
+        target   = unit != null ? unit.gameObject : null;
+        if (unit == null) return;
 
-        Vector2 dir = ((Vector2)target.transform.position - (Vector2)transform.position).normalized;
+        Vector2 dir = ((Vector2)unit.transform.position - (Vector2)transform.position).normalized;
 
         if (_rotationSpeed > 0f)
         {
@@ -110,27 +115,24 @@ public class Turrent : MonoBehaviour
         }
 
         if (Vector2.Angle(_rotatingPart.up, dir) <= arc * 0.5f)
-            TryFire();
+            TryFire(unit);
     }
 
-    void TryFire()
+    void TryFire(UnitManager targetUnit)
     {
-        if (fireAbility == null) return;
-
-        var targetUnit = target.GetComponent<UnitParentClass>();
-        if (targetUnit == null) return;
+        if (fireAbility == null || targetUnit == null) return;
 
         var context = new EffectContext
         {
             Caster          = null,
             CasterTransform = transform,
             Target          = targetUnit,
-            TargetPoint     = target.transform.position,   // captured at fire time — mortar uses this
+            TargetPoint     = targetUnit.transform.position,   // captured at fire time — mortar uses this
             AimOrigin2D     = (Vector2)transform.position,
             OriginAbility   = fireAbility,
             OriginTower     = gameObject,
             CustomData      = new Dictionary<string, object>(),
-            AimDirection2D  = ((Vector2)(target.transform.position - transform.position)).normalized,
+            AimDirection2D  = ((Vector2)(targetUnit.transform.position - transform.position)).normalized,
         };
 
         _abilityManager.TryExecuteAbility(fireAbility, context);
@@ -138,76 +140,77 @@ public class Turrent : MonoBehaviour
 
     void CleanUpDead()
     {
-        for (int i = enemiesInRange.Count - 1; i >= 0; i--)
+        for (int i = _inRange.Count - 1; i >= 0; i--)
         {
-            var go = enemiesInRange[i];
-            if (go == null || !go.GetComponent<UnitParentClass>()?.isAlive == true)
-                enemiesInRange.RemoveAt(i);
+            var unit = _inRange[i];
+            if (unit == null || !unit.isAlive)
+                _inRange.RemoveAt(i);
         }
     }
 
     void OnTriggerEnter2D(Collider2D other)
     {
-        if (other.GetComponent<UnitParentClass>() != null)
-            enemiesInRange.Add(other.gameObject);
+        var unit = other.GetComponent<UnitManager>();
+        if (unit != null && !_inRange.Contains(unit))
+            _inRange.Add(unit);
     }
 
     void OnTriggerExit2D(Collider2D other)
     {
         if (other.gameObject == target) target = null;
-        enemiesInRange.Remove(other.gameObject);
+        var unit = other.GetComponent<UnitManager>();
+        if (unit != null) _inRange.Remove(unit);
     }
 
-    GameObject GetLeadEnemy()
+    UnitManager GetLeadUnit()
     {
         var validators    = fireAbility?.targetValidators;
         bool hasValidators = validators != null && validators.Length > 0;
 
-        GameObject best     = null;
-        float      bestVal  = float.MinValue;
-        float      bestVal2 = float.MinValue;
-        float      bestProg = float.MinValue;
-        GameObject fallback = null;
-        float      fbVal    = float.MinValue;
-        float      fbVal2   = float.MinValue;
-        float      fbProg   = float.MinValue;
+        UnitManager best     = null;
+        float       bestVal  = float.MinValue;
+        float       bestVal2 = float.MinValue;
+        float       bestProg = float.MinValue;
+        UnitManager fallback = null;
+        float       fbVal    = float.MinValue;
+        float       fbVal2   = float.MinValue;
+        float       fbProg   = float.MinValue;
 
         float rangeSqr   = _worldRange > 0f ? _worldRange * _worldRange : float.MaxValue;
         bool  isDetector = _info != null && _info.IsDetector;
+        var   cam        = Camera.main;   // hoisted — not per candidate
 
-        foreach (var go in enemiesInRange)
+        foreach (var unit in _inRange)
         {
-            if (go == null) continue;
-            var unit = go.GetComponent<UnitParentClass>();
             if (unit == null || !unit.isAlive) continue;
-            if (!IsOnScreen(go)) continue;
+            if (!IsOnScreen(cam, unit.transform.position)) continue;
 
             // Invisible units can only be targeted by towers with active detection
             if (!isDetector)
             {
-                var bh = go.GetComponent<BehaviorHandler>();
+                var bh = unit.Behaviors;
                 if (bh != null && bh.HasBehaviorType(BehaviorType.Invisible)) continue;
             }
 
             // The trigger list includes collider-edge touches — require the enemy's
             // center inside the range so shots match the displayed circle.
-            if (Vector2.SqrMagnitude((Vector2)go.transform.position - (Vector2)transform.position) > rangeSqr)
+            if (Vector2.SqrMagnitude((Vector2)unit.transform.position - (Vector2)transform.position) > rangeSqr)
                 continue;
 
-            float prog = go.GetComponent<RouteFollower>()?.Progress ?? 0f;
-            float val  = Score(go, unit, prog, Targeting);
-            float val2 = Score(go, unit, prog, TargetingSecondary);
+            float prog = unit.Follower != null ? unit.Follower.Progress : 0f;
+            float val  = Score(unit, prog, Targeting);
+            float val2 = Score(unit, prog, TargetingSecondary);
 
             // Track unvalidated fallback
             if (IsBetter(val, val2, prog, fbVal, fbVal2, fbProg))
-                { fbVal = val; fbVal2 = val2; fbProg = prog; fallback = go; }
+                { fbVal = val; fbVal2 = val2; fbProg = prog; fallback = unit; }
 
-            if (hasValidators && !PassesTargetValidators(go, validators)) continue;
+            if (hasValidators && !PassesTargetValidators(unit.gameObject, validators)) continue;
             if (IsBetter(val, val2, prog, bestVal, bestVal2, bestProg))
-                { bestVal = val; bestVal2 = val2; bestProg = prog; best = go; }
+                { bestVal = val; bestVal2 = val2; bestProg = prog; best = unit; }
         }
 
-        return best ?? fallback;
+        return best != null ? best : fallback;
     }
 
     /// <summary>
@@ -215,19 +218,19 @@ public class Turrent : MonoBehaviour
     /// then the secondary mode's, then route progress ("ties go to whoever
     /// is leading" no matter what the player picked).
     /// </summary>
-    float Score(GameObject go, UnitParentClass unit, float prog, TargetingMode mode)
+    float Score(UnitManager unit, float prog, TargetingMode mode)
     {
         switch (mode)
         {
             case TargetingMode.Closest:
-                return -Vector2.SqrMagnitude((Vector2)go.transform.position - (Vector2)transform.position);
+                return -Vector2.SqrMagnitude((Vector2)unit.transform.position - (Vector2)transform.position);
             case TargetingMode.LowestHP:       return -unit.lifeCurrent;
             case TargetingMode.HighestHP:      return  unit.lifeCurrent;
             case TargetingMode.LeastShields:   return -unit.shieldCurrent;
             case TargetingMode.HighestShields: return  unit.shieldCurrent;
-            case TargetingMode.HighPrio:       return (unit as UnitManager)?.HasTag("high_prio") == true ? 1f : 0f;
-            case TargetingMode.Boss:           return (unit as UnitManager)?.HasTag("boss")      == true ? 1f : 0f;
-            case TargetingMode.Invisible:      return (unit as UnitManager)?.canGoInvisible      == true ? 1f : 0f;
+            case TargetingMode.HighPrio:       return unit.HasTag("high_prio") ? 1f : 0f;
+            case TargetingMode.Boss:           return unit.HasTag("boss")      ? 1f : 0f;
+            case TargetingMode.Invisible:      return unit.canGoInvisible      ? 1f : 0f;
             default:                           return prog; // Furthest
         }
     }
@@ -243,10 +246,10 @@ public class Turrent : MonoBehaviour
         return prog > bestProg;                      // full tie → leading unit
     }
 
-    static bool IsOnScreen(GameObject go)
+    static bool IsOnScreen(Camera cam, Vector3 worldPos)
     {
-        if (Camera.main == null) return true;
-        var vp = Camera.main.WorldToViewportPoint(go.transform.position);
+        if (cam == null) return true;
+        var vp = cam.WorldToViewportPoint(worldPos);
         return vp.x >= 0f && vp.x <= 1f && vp.y >= 0f && vp.y <= 1f && vp.z > 0f;
     }
 

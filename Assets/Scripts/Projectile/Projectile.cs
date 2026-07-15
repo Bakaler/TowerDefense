@@ -204,7 +204,7 @@ public class Projectile : MonoBehaviour
     {
         if (impactEffect == null) return;
 
-        Collider2D[] overlaps = Physics2D.OverlapCircleAll(transform.position, def.hitRadius);
+        Collider2D[] overlaps = Physics2D.OverlapCircleAll(transform.position, def.hitRadius, GameLayers.EnemyMask);
         foreach (var col in overlaps)
         {
             var unit = col.GetComponent<UnitParentClass>();

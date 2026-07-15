@@ -5,11 +5,11 @@ using UnityEngine;
 /// <summary>
 /// Fires a hitscan shot at the enemy furthest along the path that is currently
 /// inside the SniperZone rectangle. Uses the tower's fireAbilityId for damage and cooldown.
-/// Disables Turrent's own Update so the ability isn't double-fired.
+/// Disables Turret's own Update so the ability isn't double-fired.
 ///
-/// Registered as "sniper_turrent" in ComponentRegistry so TowerFactory can attach it.
+/// Registered as "sniper_turret" in ComponentRegistry so TowerFactory can attach it.
 /// </summary>
-public class SniperTurrent : MonoBehaviour, IFactoryInitializable
+public class SniperTurret : MonoBehaviour, IFactoryInitializable
 {
     private SniperZone     _zone;
     private AbilityManager _abilityManager;
@@ -32,19 +32,19 @@ public class SniperTurrent : MonoBehaviour, IFactoryInitializable
     }
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-    static void Register() => ComponentRegistry.Register("sniper_turrent", typeof(SniperTurrent));
+    static void Register() => ComponentRegistry.Register("sniper_turret", typeof(SniperTurret));
 
     void Start()
     {
         _zone           = GetComponent<SniperZone>();
         _abilityManager = GetComponent<AbilityManager>();
 
-        // Resolve ability from tower definition; disable Turrent's own Update loop
-        var turrent = GetComponent<Turrent>();
-        if (turrent != null)
+        // Resolve ability from tower definition; disable Turret's own Update loop
+        var turret = GetComponent<Turret>();
+        if (turret != null)
         {
-            string defId = turrent.definitionId;
-            turrent.enabled = false;
+            string defId = turret.definitionId;
+            turret.enabled = false;
 
             if (!string.IsNullOrEmpty(defId)
                 && TowerDefinitionLibrary.Instance != null
@@ -84,7 +84,7 @@ public class SniperTurrent : MonoBehaviour, IFactoryInitializable
             if (!unit.isAlive) continue;
             if (!_zone.Contains(unit.transform.position)) continue;
 
-            var   follower = unit.GetComponent<RouteFollower>();
+            var   follower = unit.Follower;
             float prog     = follower != null ? follower.Progress : 0f;
             if (prog > bestProgress) { bestProgress = prog; best = unit; }
         }
@@ -139,7 +139,7 @@ public class SniperTurrent : MonoBehaviour, IFactoryInitializable
         lr.numCapVertices   = 2;
         lr.sortingLayerName = "Default";
         lr.sortingOrder     = 9;
-        lr.material         = new Material(Shader.Find("Sprites/Default"));
+        lr.sharedMaterial   = RuntimeMaterials.SpriteDefault;
         lr.startColor       = new Color(0.9f, 0.95f, 1f, 0.9f);
         lr.endColor         = new Color(0.5f, 0.7f, 1f, 0f);
         lr.SetPosition(0, from);

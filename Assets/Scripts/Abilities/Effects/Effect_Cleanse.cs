@@ -26,7 +26,7 @@ public class Effect_Cleanse : Effect
         else if (context.CasterTransform != null)      origin = context.CasterTransform.position;
         else return;
 
-        foreach (var col in Physics2D.OverlapCircleAll(origin, radius))
+        foreach (var col in Physics2D.OverlapCircleAll(origin, radius, GameLayers.EnemyMask))
         {
             var unit = col.GetComponentInParent<UnitParentClass>();
             if (unit == null || !unit.isAlive) continue;

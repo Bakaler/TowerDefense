@@ -5,7 +5,7 @@ using UnityEngine.EventSystems;
 /// <summary>
 /// The sniper's repositionable firing oval.
 /// While IsRepositioning: zone follows mouse, scroll wheel rotates it, left-click commits.
-/// SniperTurrent skips firing while IsRepositioning is true.
+/// SniperTurret skips firing while IsRepositioning is true.
 /// </summary>
 public class SniperZone : MonoBehaviour, IFactoryInitializable
 {
@@ -163,7 +163,7 @@ public class SniperZone : MonoBehaviour, IFactoryInitializable
         _outline.numCapVertices   = 2;
         _outline.sortingLayerName = "Default";
         _outline.sortingOrder     = 8;
-        _outline.material         = new Material(Shader.Find("Sprites/Default"));
+        _outline.sharedMaterial         = RuntimeMaterials.SpriteDefault;
         SetOutlineColor();
     }
 

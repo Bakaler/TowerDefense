@@ -28,12 +28,16 @@ public class Minion : MonoBehaviour
     private float           _cooldownTimer;
     private float           _orbitDir;
     private float           _restTimer;
+    private float           _noiseSeed;    // decorrelates each minion's swarm drift
+    private float           _flipTimer;    // occasional orbit-direction reversal
 
     Vector2 Home => host != null ? (Vector2)host.HomeTransform.position : (Vector2)transform.position;
 
     void Awake()
     {
-        _orbitDir = Random.value > 0.5f ? 1f : -1f;
+        _orbitDir  = Random.value > 0.5f ? 1f : -1f;
+        _noiseSeed = Random.Range(0f, 1000f);
+        _flipTimer = Random.Range(2f, 5f);
     }
 
     void Start()
@@ -86,14 +90,36 @@ public class Minion : MonoBehaviour
         // Committed to this target: only its death (or despawn) sends us home.
         if (_target == null || !_target.isAlive) { GoReturn(); return; }
 
+        // Swarm feel instead of a clean orbit: each minion's preferred distance
+        // breathes, its heading wobbles, and its speed varies — all on smooth
+        // per-minion Perlin noise so the cloud stays on target without syncing up.
+        float t           = Time.time;
+        float desiredDist = def.orbitDist * Mathf.Lerp(0.5f, 1.6f, Mathf.PerlinNoise(_noiseSeed, t * 0.8f));
+        float wobble      = (Mathf.PerlinNoise(_noiseSeed + 57.3f, t * 1.3f) - 0.5f) * 140f * Mathf.Deg2Rad;
+        float speedMult   = Mathf.Lerp(0.75f, 1.25f, Mathf.PerlinNoise(_noiseSeed + 113f, t * 1.7f));
+
+        // Now and then a bee reverses its circling direction
+        _flipTimer -= Time.deltaTime;
+        if (_flipTimer <= 0f)
+        {
+            _orbitDir  = -_orbitDir;
+            _flipTimer = Random.Range(2f, 5f);
+        }
+
         Vector2 toEnemy = (Vector2)_target.transform.position - (Vector2)transform.position;
         float   dist    = toEnemy.magnitude;
         Vector2 tangent = new Vector2(-toEnemy.y, toEnemy.x).normalized * _orbitDir;
-        Vector2 move    = dist > def.orbitDist + 0.1f
-            ? (toEnemy.normalized * 0.7f + tangent * 0.5f).normalized
-            : tangent;
 
-        transform.position = (Vector2)transform.position + move * def.engageSpeed * Time.deltaTime;
+        Vector2 move;
+        if      (dist > desiredDist + 0.1f) move = (toEnemy.normalized * 0.7f + tangent * 0.5f).normalized;
+        else if (dist < desiredDist - 0.1f) move = (-toEnemy.normalized * 0.5f + tangent * 0.7f).normalized;
+        else                                move = tangent;
+
+        // Rotate the heading by the wobble angle
+        float cs = Mathf.Cos(wobble), sn = Mathf.Sin(wobble);
+        move = new Vector2(move.x * cs - move.y * sn, move.x * sn + move.y * cs);
+
+        transform.position = (Vector2)transform.position + move * def.engageSpeed * speedMult * Time.deltaTime;
 
         if (_cooldownTimer <= 0f) { Fire(_target); _cooldownTimer = attackCooldown; }
     }
@@ -135,7 +161,7 @@ public class Minion : MonoBehaviour
 
     UnitParentClass FindNearest(float searchRange)
     {
-        var hits = Physics2D.OverlapCircleAll(Home, searchRange);
+        var hits = Physics2D.OverlapCircleAll(Home, searchRange, GameLayers.EnemyMask);
         UnitParentClass best = null; float bestDist = float.MaxValue;
         foreach (var h in hits)
         {
